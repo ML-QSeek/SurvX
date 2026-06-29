@@ -1,4 +1,3 @@
-markdown
 # SurvX
 
 > *From constraints, cognition grows.*
