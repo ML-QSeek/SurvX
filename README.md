@@ -153,7 +153,7 @@ text
 
 ## 当前状态
 
-早期开发阶段，详细设计见 (docs/design.md)。
+早期开发阶段，详细设计见 [docs/design.md](docs/design.md)。
 
 ---
 
