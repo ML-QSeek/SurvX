@@ -173,12 +173,12 @@ SurvX 暂时不适合你，如果你：
 
 ## 许可证
 
-本项目根目录及大部分子目录（`/core`、`/examples`、`/tools`、`/tests` 等）采用 **MIT 许可证**，详见根目录的 [LICENSE](./LICENSE) 文件。
+本项目根目录及大部分子目录（`/core`、`/examples`、`/tools`、`/tests` 等）采用 **MIT 许可证**，详见根目录的 [LICENSE](LICENSE) 文件。
 
 **特别说明：**
 
 - **`/applications` 目录**：该目录下的所有项目采用 **GNU Affero 通用公共许可证 v3.0 (AGPL-3.0)**。
-  - 详见 [`/applications/LICENSE`](./applications/LICENSE) 文件。
+  - 详见 [`applications/LICENSE`](applications/LICENSE) 文件。
   - 这些是基于本框架开发的生产级正式应用，独立维护。
 
 - **其他目录**（`/core`、`/examples`、`/tools`、`/tests` 等）：均遵循根目录 MIT 协议，除非另有单独声明。
