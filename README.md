@@ -41,8 +41,6 @@ F 是唯一的主体（Matter），数据变动是唯一的动力（Energy）。
 数据、数据库，都是 Energy 的沉积形态。
 Field₁ --变动--> Energy₁ --驱动--> Field₂ --变动--> Energy₂ --驱动--> ...
 
-text
-
 ---
 
 ## Field 五层与 Ego 七层
