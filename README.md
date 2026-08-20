@@ -4,7 +4,7 @@
 
 SurvX 是一种面向 AI 底座的编程范式，探索未来开发形态和智能系统的组织方式。
 
-同时它的一个探索方向是 XGI——Xenogenic General Intelligence，一种不预设起源与形态的智能。
+同时它的一个探索方向是 XGI——Xenogenic General Intelligence，一种不预设起源与形态的、可通过自演化实现长期存续的智能。（XGI的含义和AGI类似，只是由于目前AGI多用来指定类人智能，所以用Xenogenic强化一下AGI概念中被弱化的部分）
 
 ---
 
