@@ -1,141 +1,114 @@
-# SurvX 技术设计文档大纲
+# SurvX Technical Design Document Outline
 
-本文档为 **README 范式架构** 的底层工程实现补充，仅包含落地细节、源码规则、工程结构、工具说明、存储实现，不重复复述顶层范式概念。
+This document serves as the low-level engineering implementation supplement to the **README paradigm architecture**. It covers only implementation details, source code rules, engineering structure, tool descriptions, and storage implementation — it does not reiterate top-level paradigm concepts.
 
-适配阶段：理念验证原型（非生产）
-
----
-
-## 一、项目整体定位与边界说明
-
-- 范式层（README）：纯抽象模型、架构规则、实体定义、工作流
-
-- 工程层（本文档）：落地实现、代码组织、工具结构、存储方案、运行机制
-
-- 明确：范式不绑定任何技术栈、存储、引擎实现，本项目为**参考原型实现**
+Adaptation phase: concept validation prototype (non-production)
 
 ---
 
-## 二、仓库工程结构说明（核心补充）
+## 1. Project Positioning and Boundary Definition
 
-此处放置你之前的完整目录树 \+ 每目录职责说明
-
-- **core/** 核心架构实现（引擎、实体内核、约束调度）
-
-- **core/engine**执行引擎实现细节
-
-- **core/studio** 管理工具底层支撑
-
-- **core/forge** 人工介入、审核、流程范式落地实现
-
-- **matter/** Matter 实体定义、解析、校验模块
-
-- **energy/** 数据沉积、时序记录、参数快照管理
-
-- **extensions/** 外部组件接入适配层
-
-- **applications/** 基于框架构建的正式应用（AGPL）
-
-- **examples/** 演示案例、最小 Demo
-
-- **tools/**开发辅助工具链
-
-- **tests/**单元/实体/流程测试
-
-- **dist/** 打包产物
-
-关键说明：**仓库结构 ≠ 用户开发应用结构**，本架构产出应用拥有独立目录规范。
+- **Paradigm layer (README)**: pure abstract models, architecture rules, entity definitions, workflows
+- **Engineering layer (this document)**: implementation, code organization, tool structure, storage solutions, runtime mechanisms
+- Clarification: the paradigm is not bound to any technology stack, storage, or engine implementation. This project is a **reference prototype implementation**.
 
 ---
 
-## 三、开发者工具体系补充（Engine / Forge / Studio）
+## 2. Repository Engineering Structure (Core Supplement)
 
-README 仅讲概念，此处讲工程定位与职责
+Place your complete directory tree + per-directory responsibility descriptions here.
 
-- **Engine**：系统运行时核心调度 F，包含 Field 引擎、Ego 引擎双调度逻辑
+- **core/** — Core architecture implementation (engine, entity kernel, constraint scheduling)
+  - **core/engine** — Execution engine implementation details
+  - **core/studio** — Underlying support for management tools
+  - **core/forge** — Human intervention, review, and workflow paradigm implementation
+- **matter/** — Matter entity definition, parsing, and validation module
+- **energy/** — Data deposition, temporal recording, parameter snapshot management
+- **extensions/** — External component integration adapter layer
+- **applications/** — Formal applications built on the framework (AGPL)
+- **examples/** — Demonstration cases, minimal demos
+- **tools/** — Development auxiliary toolchain
+- **tests/** — Unit / entity / workflow tests
+- **dist/** — Build artifacts
 
-- **Forge**：人工介入流程范式、可执行审核框架、流程约束中间层
-
-- **Studio**：实体可视化管理、Matter/Energy 查看、契约管理工具
-
----
-
-## 四、存储层工程实现（SQLite 方案）
-
-README 只提形态，此处写死落地实现（自用约束）
-
-- 原型持久化方案：SQLite 单机文件数据库
-
-- 参数/约束：KV 快照存储模型
-
-- 经历/时序数据：时序记录表结构
-
-- 可替换性说明：范式不绑定 SQLite，仅原型采用
+Key note: **repository structure ≠ user application development structure**. Applications produced by this architecture have their own independent directory conventions.
 
 ---
 
-## 五、核心模块技术实现细节
+## 3. Developer Tool System Supplement (Engine / Forge / Studio)
 
-### 5\.1 Matter 实体解析与校验机制
+The README covers concepts only; this section covers engineering positioning and responsibilities.
 
-### 5\.2 Energy 变动触发与驱动链路实现
-
-### 5\.3 双引擎调度逻辑（Field / Ego）
-
-### 5\.4 六维输入输出契约校验实现
-
-### 5\.5 外部 F 组件接入适配规范
-
-### 5\.6 AI 结构生成与约束校验流水线
+- **Engine**: the system runtime core scheduler F, containing dual scheduling logic for the Field engine and Ego engine
+- **Forge**: human-intervention workflow paradigm, executable review framework, workflow constraint middleware layer
+- **Studio**: entity visualization management, Matter/Energy inspection, contract management tools
 
 ---
 
-## 六、两种工作流工程落地规则
+## 4. Storage Layer Engineering Implementation (SQLite Approach)
 
-- 演变式工作流：迭代状态更新、约束可行域计算、多版本候选管理
+The README only mentions the form; this section locks in the concrete implementation (self-imposed constraint).
 
-- 补全式工作流：契约驱动补齐、链路连通性校验、结构自动装配
-
----
-
-## 七、开发规范与架构约束（自用强约束）
-
-**这是你最需要的：防止后续开发跑偏的强制规则**
-
-- 所有能力必须抽象为 F 单元，禁止裸写业务流程
-
-- 所有状态必须归属 Matter，禁止游离全局变量
-
-- 所有行为必须由 Energy 变动驱动，禁止主动轮询逻辑
-
-- AI 只能改结构，不能改执行流、不能绕过约束层
-
-- Ego 演化必须基于 Goal 驱动，禁止硬编码演化逻辑
+- Prototype persistence solution: SQLite single-file database
+- Parameters/constraints: KV snapshot storage model
+- Experience/temporal data: temporal record table structure
+- Replaceability note: the paradigm is not bound to SQLite; it is only used for the prototype
 
 ---
 
-## 八、当前原型能力清单 \& 未实现能力
+## 5. Core Module Technical Implementation Details
 
-- 已实现：基础 F/Matter/Energy 模型、驱动链路、契约校验
+### 5.1 Matter Entity Parsing and Validation Mechanism
 
-- 部分实现：Field 引擎、外部组件接入
+### 5.2 Energy Change Trigger and Drive Chain Implementation
 
-- 待实现：完整 Ego 引擎、自我演化、Studio 可视化、Forge 审核流程
+### 5.3 Dual-Engine Scheduling Logic (Field / Ego)
 
----
+### 5.4 Six-Dimensional Input/Output Contract Validation Implementation
 
-## 九、版本状态与开发说明
+### 5.5 External F Component Integration Adapter Specification
 
-- 当前状态：理念验证原型，非生产可用
-
-- API 状态：不稳定、持续重构
-
-- 迭代原则：优先保证范式自洽，再补功能
+### 5.6 AI Structure Generation and Constraint Validation Pipeline
 
 ---
 
-## 十、许可证（工程细化说明）
+## 6. Two Workflow Engineering Implementation Rules
 
-细化 MIT / AGPL\-3\.0 分工、目录约束、衍生作品规则
+- **Evolutionary workflow**: iterative state updates, constraint feasible-domain computation, multi-version candidate management
+- **Completion workflow**: contract-driven completion, chain connectivity validation, automatic structure assembly
 
-> （注：部分内容可能由 AI 生成）
+---
+
+## 7. Development Conventions and Architecture Constraints (Self-Imposed Hard Constraints)
+
+**This is what you need most: mandatory rules to prevent future development from drifting off course.**
+
+- All capabilities must be abstracted as F units; bare business logic is prohibited
+- All state must belong to Matter; stray global variables are prohibited
+- All behavior must be driven by Energy changes; active polling logic is prohibited
+- AI may only modify structure; it may not modify execution flow or bypass the constraint layer
+- Ego evolution must be Goal-driven; hardcoded evolution logic is prohibited
+
+---
+
+## 8. Current Prototype Capability List & Unimplemented Capabilities
+
+- **Implemented**: basic F/Matter/Energy model, drive chain, contract validation
+- **Partially implemented**: Field engine, external component integration
+- **To be implemented**: complete Ego engine, self-evolution, Studio visualization, Forge review workflow
+
+---
+
+## 9. Version Status and Development Notes
+
+- Current status: concept validation prototype, not production-ready
+- API status: unstable, under continuous refactoring
+- Iteration principle: prioritize paradigm self-consistency first, then add features
+
+---
+
+## 10. License (Engineering Refinement)
+
+Refine the MIT / AGPL-3.0 division of labor, directory constraints, and derivative work rules.
+
+> (Note: some content may be AI-generated)

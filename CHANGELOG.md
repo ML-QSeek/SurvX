@@ -3,21 +3,23 @@
 ## [0.1.0] - 2026-08-20
 
 ### Added
-- 项目进入版本化阶段，从本次提交开始正式记录变更
-- 基于前期开发成果，整合并发布首个可运行版本
-- 包含核心基础功能（此处替换为你的实际功能）
+
+- Project enters versioned phase; changes are officially recorded starting from this commit
+- Integrated and released the first runnable version based on prior development work
+- Includes core foundational features (replace with your actual features here)
 
 ### Notes
-- 当前版本为早期预览版，功能尚在完善中
-- 欢迎反馈问题与建议 🙌
 
+- This version is an early preview; features are still under active refinement
+- Feedback and suggestions are welcome 🙌
 
-## [前期开发] - 2026-08-20 之前
+## [Pre-release Development] - Before 2026-08-20
 
-> 此阶段为项目启动与基础功能探索期，主要完成了技术选型、核心模块搭建和基础功能验证，为后续版本迭代奠定基础。
+> This phase was the project startup and foundational feature exploration period. It primarily completed technology selection, core module scaffolding, and basic feature validation, laying the groundwork for subsequent version iteration.
 
-### 主要成果
-- 完成项目初始化与技术栈选型
-- 搭建基础工程架构与目录结构
-- 完成核心模块的初步开发与验证
-- 实现基础功能链路打通
+### Key Achievements
+
+- Completed project initialization and technology stack selection
+- Established the basic engineering architecture and directory structure
+- Completed initial development and validation of core modules
+- Achieved end-to-end connectivity of the basic feature pipeline

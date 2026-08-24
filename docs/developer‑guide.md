@@ -1,135 +1,112 @@
-# SurvX 开发者指南（Developer Guide）
+# SurvX Developer Guide
 
-注：本文档采用 SurvX 统一分析与设计范式，详见 docs/paradigm\-as\-solution\-framework\.md
+Note: This document adopts the SurvX unified analysis and design paradigm. See docs/paradigm-as-solution-framework.md for details.
 
-本文档面向**源码阅读者、二次开发者、模块贡献者**。用于指导外部贡献者看懂项目结构、遵循架构范式、正确开发新模块。
+This document is intended for **source code readers, secondary developers, and module contributors**. It guides external contributors in understanding the project structure, following the architectural paradigm, and correctly developing new modules.
 
-## 一、项目核心设计原则（开发红线）
+## 1. Core Design Principles (Development Red Lines)
 
-所有代码、模块、逻辑扩展，必须遵守四条底层原则：
+All code, modules, and logic extensions must comply with four underlying principles:
 
-1. **范式统一**：所有模块要么是 Field 静态实体，要么是轻量化 Ego 演化实体，不允许存在脱离七层/五层模型的自定义结构。
+1. **Paradigm uniformity**: All modules are either Field static entities or lightweight Ego evolutionary entities. Custom structures that deviate from the seven-layer/five-layer model are not permitted.
+2. **Static-dynamic separation**: Runtime dynamic logic (Energy, iteration, deviation validation) is strictly separated from static structure code (structure, capability, dependencies).
+3. **Convergence and solidification**: All iterative optimizations must ultimately be solidified into stable structures. Infinite expansion of temporary logic is prohibited.
+4. **Unidirectional stability**: The main branch must always be usable, compilable, and runnable. Merging of destructive, incomplete code is prohibited.
 
-2. **动静分离**：运行动态逻辑（Energy、迭代、偏差校验）与静态结构代码（结构、能力、依赖）严格分离。
+## 2. Core Architectural Understanding (Required for Development)
 
-3. **可收敛可固化**：所有迭代优化最终必须可沉淀为稳定结构，禁止无限膨胀临时逻辑。
+The entire SurvX architecture consists of only three systems. All code falls within these three entity types:
 
-4. **单向稳定**：主分支永远可用、可编译、可运行，禁止破坏性未完成代码合入。
+### 1. Field Five-Layer Static Entity (Solidified Module)
 
-## 二、架构核心认知（开发必备）
+Used for stable, goal-free, reusable, and standardizable underlying components/tools/basic capabilities.
 
-SurvX 整套架构只由三套体系构成，所有代码都逃不出这三类实体：
+Fixed structure: S Structure → C Capability → R Dependency → O Constraint → F Feature
 
-### 1\. Field 五层静态实体（固化模块）
+Development characteristic: stable once written, rarely undergoes structural changes, only parameter fine-tuning.
 
-用于稳定、无自主目标、可复用、可标准化的底层组件/工具/基础能力。
+### 2. Ego Seven-Layer Evolutionary Entity (Business/Core Module)
 
-固定结构：S 结构 → C 能力 → R 依赖 → O 约束 → F 特征
+Used for core modules requiring **goal decomposition, iterative optimization, self-correction, and decision deduction**.
 
-开发特征：写完即稳定、极少结构性改动、只做参数微调。
+Adds two layers on top of Field: G Goal system, L Cognitive deviation approximation system.
 
-### 2\. Ego 七层演化实体（业务/核心模块）
+Development characteristic: iterable, refactorable, capable of self-correction based on Energy data.
 
-用于需要**目标拆解、迭代优化、自我修正、决策推演**的核心模块。
+### 3. Energy Dynamic Runtime System
 
-在 Field 基础上增加两层：G 目标体系、L 认知偏差逼近体系。
+Carries all dynamic data, runtime states, temporal records, and constraint thresholds across the entire system.
 
-开发特征：可迭代、可重构、可根据 Energy 数据自我修正。
+All Ego iterations and Field state changes are driven by real Energy data.
 
-### 3\. Energy 动态运行体系
+## 3. Source Code Directory Development Conventions
 
-承载全系统所有动态数据、运行状态、时序记录、约束阈值。
+Subsequent new code must strictly follow the layering philosophy below:
 
-所有 Ego 迭代、Field 状态变更，全部依赖 Energy 真实数据驱动。
+- **/core/field**: All static five-layer entity modules
+- **/core/ego**: All iterable seven-layer core modules
+- **/core/energy**: Dynamic data, state, records, runtime rules
+- **/service**: Business assembly, upper-layer services
+- **/utils**: Pure utility classes (all lightweight Field entities)
+- **/docs**: Formal architecture/paradigm/development documentation
 
-## 三、源码目录开发规范
+## 4. Standard New Module Development Process (Mandatory)
 
-后续新增代码严格遵循以下分层思想：
+Any new module must complete this process. Directly writing code and piling up logic is not allowed.
 
-- **/core/field**：所有静态五层实体模块
+### 1. Determine Attribute First: Field or Ego
 
-- **/core/ego**：所有可迭代七层核心模块
+- No goal, no iteration needed, pure capability output → **Field**
+- Has a goal, requires iterative optimization, needs to adapt to environmental deviations → **Ego**
 
-- **/core/energy**：动态数据、状态、记录、运行时规则
+### 2. Documentation Before Code
 
-- **/service**：业务组装、上层服务
+Small tools may be simplified; core modules must produce a module specification document first:
 
-- **/utils**：纯工具类（全部为 Field 轻量化实体）
+- Field: describe structure and constraints clearly according to the S/C/R/O/F five layers
+- Ego: describe goals and iteration logic clearly according to the G/S/C/R/O/F/L seven layers
 
-- **/docs**：正式架构/范式/开发文档
+### 3. Code Implementation and Solidification
 
-## 四、新增模块标准开发流程（强制）
+After the document has converged, proceed with coding implementation, ensuring that **code and paradigm document are fully isomorphic**.
 
-任何新增模块，必须走完这套流程，不允许直接写代码堆逻辑。
+### 4. Self-Test and Convergence
 
-### 1\. 先定属性：判断是 Field 还是 Ego
+Ensure the module's capability is closed-loop, dependencies are clear, constraints are effective, and there are no destructive compatibility issues.
 
-- 无目标、无需迭代、纯能力输出 → **Field**
+## 5. Module Development Paradigm Constraints (Key Red Lines)
 
-- 有目标、需要迭代优化、需要适配环境偏差 → **Ego**
+### Field Module Development Constraints
 
-### 2\. 先文档后代码
+- Prohibited from autonomously adding iteration logic
+- State changes are uniformly driven by Energy or upper-layer scheduling
+- Structure is stable; frequent structural refactoring is not permitted
 
-小型工具可简化；核心模块必须先产出模块说明文档：
+### Ego Module Development Constraints
 
-- Field：按 S/C/R/O/F 五层写清结构与约束
+- Must have a clear G goal; aimless iteration is prohibited
+- All optimizations must be based on real Energy deviations; hardcoded empirical logic is prohibited
+- Local optimizations must be arbitrable and converged by the top-level Ego
 
-- Ego：按 G/S/C/R/O/F/L 七层写清目标与迭代逻辑
+## 6. Branch and Merge Conventions
 
-### 3\. 代码落地固化
+- **main branch is permanently stable**; direct code push is prohibited
+- All features, fixes, and refactoring must be developed on newly created temporary branches
+- Must pass self-testing before merging
+- Changes involving architecture, paradigm, or top-level structure must first be discussed and confirmed via Issue
 
-文档收敛完毕后，再进行编码实现，保证**代码与范式文档完全同构**。
+## 7. Documentation Development Conventions
 
-### 4\. 自测收敛
+- All formal module documentation is placed in /docs
+- All documents must carry a paradigm declaration comment at the top
+- Personal essays, drafts, and thought fragments are not committed to the repository
+- Document descriptions must strictly align with code structure
 
-保证模块能力闭环、依赖清晰、约束有效、无破坏性兼容问题。
+## 8. Developer Core Understanding Summary
 
-## 五、模块开发范式约束（关键红线）
+1. Code always serves the **paradigm structure**, not writing logic at will.
+2. Static modules go through Field, dynamic iteration goes through Ego, all runtime goes through Energy.
+3. Design first, then documentation, then code — this is the only development order in this project.
+4. The ultimate goal of all contributions: **make the system more structured, more convergent, more iterable, and more maintainable**.
 
-### Field 模块开发约束
-
-- 禁止自主新增迭代逻辑
-
-- 状态变更统一由 Energy 驱动或上层调度
-
-- 结构稳定，不允许频繁结构性重构
-
-### Ego 模块开发约束
-
-- 必须具备明确 G 目标，不能无目的迭代
-
-- 所有优化必须基于 Energy 真实偏差，禁止硬编码经验逻辑
-
-- 局部优化必须可被顶层 Ego 仲裁收敛
-
-## 六、分支与合入规范
-
-- **main 分支永久稳定**，禁止直接推送代码
-
-- 所有功能、修复、重构全部新建临时分支开发
-
-- 合入前必须自测通过
-
-- 涉及架构、范式、顶层结构改动，必须先 Issue 讨论确认
-
-## 七、文档开发规范
-
-- 所有正式模块文档放入 /docs
-
-- 所有文档头部必须携带范式声明注释
-
-- 个人随笔、草稿、思考碎片不入库
-
-- 文档描述必须与代码结构严格对齐
-
-## 八、开发者核心认知总结
-
-1\. 代码永远服务于**范式结构**，不是随心所欲写逻辑。
-
-2\. 静态模块走 Field，动态迭代走 Ego，所有运行时走 Energy。
-
-3\. 先设计、后文档、最后代码，是本项目唯一开发顺序。
-
-4\. 所有贡献最终目的：**让系统更结构化、更收敛、更可迭代、更可维护**。
-
-> （注：部分内容可能由 AI 生成）
+> (Note: some content may be AI-generated)

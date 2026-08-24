@@ -1,88 +1,105 @@
 # Contributing to SurvX
 
-感谢你愿意为本项目贡献！🎉
-本文档约定本仓库的 Issue、PR、代码与文档贡献规范。
+Thank you for contributing to this project! 🎉
 
-## 前置阅读
-在提交任何贡献前，请务必阅读：
-- [README.md](./README.md) 项目核心概念与定位
-- [范式设计文档](./docs/paradigm-as-solution-framework.md) 本项目统一设计、拆解、文档规范
+This document defines the conventions for Issues, PRs, code, and documentation contributions in this repository.
 
-所有代码、模块、文档变更，**必须符合 SurvX 范式体系**。
+## Prerequisites
 
-## 贡献类型
-你可以通过以下方式参与项目：
-1. Bug 修复（代码、逻辑、文案错误）
-2. 功能迭代、模块扩展
-3. 文档完善、补全示例、优化描述
-4. 代码重构、性能优化、结构规范化
-5. Issue 讨论、需求建议、问题反馈
+Before submitting any contribution, please read:
 
-## Issue 规范（提问 / 提需求 / 报 Bug）
-1. 请先搜索历史 Issue，避免重复提交
-2. Bug 反馈需要包含：现象、复现步骤、预期结果、运行环境
-3. 功能建议请说明：使用场景、解决的问题、设计思路
-4. **重大结构性改动，请先开 Issue 讨论，确认后再开发**
+- [README.md](./README.md) — Core concepts and positioning of the project
+- [Paradigm Design Document](./docs/paradigm-as-solution-framework.md) — Unified design, decomposition, and documentation conventions for this project
 
-## PR 流程（代码 / 文档合并）
-1. Fork 本仓库
-2. 基于 `main` 分支新建功能分支
-3. 局部开发、自测完成后提交 PR
-4. PR 描述需清晰说明：本次改动解决了什么问题、对应哪个 Issue
-5. 等待维护者审核、修改、合并
+All code, module, and documentation changes **must conform to the SurvX paradigm system**.
 
-### PR 硬性约束
-1. **所有新增模块必须符合 SurvX 范式**
-   - 业务/固化模块：遵循 Field 五层结构
-   - 可迭代/复杂设计：遵循 Ego 七层设计流程
-2. 文档修改必须对齐仓库统一范式
-3. 保证代码可运行、无破坏性变更
-4. 重大架构变更，未提前讨论的 PR **不予合并**
+## Contribution Types
 
-## 文档贡献规范
-1. 正式项目文档统一存放于 `/docs`
-2. 所有正式文档必须头部标注范式声明：
-~~~
-注：本文档采用 SurvX 统一分析与设计范式，详见 docs/paradigm-as-solution-framework.md
-~~~
-3. 随笔、草稿、个人思考**不提交本仓库**
+You can participate in the project in the following ways:
 
-## 分支规范
-- `main`：稳定主干分支，始终保持可运行、可发布
-- 功能开发全部使用临时分支，禁止直接 push 到 main
+1. Bug fixes (code, logic, copy errors)
+2. Feature iteration, module extension
+3. Documentation improvement, example completion, description optimization
+4. Code refactoring, performance optimization, structural standardization
+5. Issue discussion, requirement suggestions, problem feedback
 
-## Commit 提交规范
+## Issue Conventions (Questions / Feature Requests / Bug Reports)
 
-采用语义化 commit 格式，格式：
-~~~
+1. Search existing Issues first to avoid duplicates
+2. Bug reports must include: symptom, reproduction steps, expected result, runtime environment
+3. Feature suggestions should explain: use case, problem solved, design approach
+4. **For major structural changes, open an Issue for discussion first and confirm before development**
+
+## PR Workflow (Code / Documentation Merging)
+
+1. Fork this repository
+2. Create a feature branch based on `main`
+3. Submit a PR after local development and self-testing are complete
+4. The PR description must clearly state: what problem this change solves, which Issue it corresponds to
+5. Wait for maintainer review, revisions, and merge
+
+### PR Hard Constraints
+
+1. **All new modules must conform to the SurvX paradigm**
+   - Business/fixed modules: follow the Field five-layer structure
+   - Iterative/complex designs: follow the Ego seven-layer design process
+2. Documentation changes must align with the repository's unified paradigm
+3. Ensure code is runnable and contains no breaking changes
+4. PRs for major architectural changes without prior discussion **will not be merged**
+
+## Documentation Contribution Conventions
+
+1. Formal project documentation is stored uniformly in `/docs`
+2. All formal documents must include a paradigm declaration at the top:
+
+```
+Note: This document adopts the SurvX unified analysis and design paradigm. See docs/paradigm-as-solution-framework.md for details.
+```
+
+3. Essays, drafts, and personal reflections **are not committed to this repository**
+
+## Branch Conventions
+
+- `main`: stable trunk branch, always kept runnable and releasable
+- All feature development uses temporary branches; direct push to `main` is prohibited
+
+## Commit Conventions
+
+Semantic commit format is used:
+
+```
 <type>(<scope>): <subject>
-~~~
+```
 
-### type 类型
-- `feat`: 新增功能、模块
-- `fix`: bug 修复
-- `docs`: 文档修改
-- `refactor`: 代码重构，不改变外部行为
-- `perf`: 性能优化
-- `test`: 测试相关
-- `chore`: 构建、配置、依赖等杂项
+### type
 
-- `scope`（可选）：模块名，如 `ego`、`field`、`docs`
-- `subject`：简短描述，句尾不加句号
+- `feat`: new feature, module
+- `fix`: bug fix
+- `docs`: documentation change
+- `refactor`: code refactoring, no external behavior change
+- `perf`: performance optimization
+- `test`: test-related
+- `chore`: build, config, dependencies, and other miscellaneous items
+- `scope` (optional): module name, e.g. `ego`, `field`, `docs`
+- `subject`: brief description, no trailing period
 
-### 示例
+### Examples
+
 - `feat(ego): add goal decomposition workflow`
 - `fix(field): correct relation resolve logic`
 - `docs: update contributing.md`
 
-> 原则：一次 commit 尽量只做一类改动；重大变更可增加正文描述设计思路。
-> 本项目不强制工具校验，人为遵守即可。
+> Principle: each commit should ideally make only one type of change; major changes may include a body describing the design rationale.
+> This project does not enforce tool-based validation — compliance is on an honor system.
 
-## 行为准则
-- 保持讨论友好、理性、专注技术与设计
-- 尊重项目原有架构与范式设计
-- 所有贡献以**服务项目长期稳定性与统一性**为优先
+## Code of Conduct
 
-## 最后
-本项目遵循**极简、收敛、结构化、可迭代**的设计理念。
-所有贡献，都旨在让整套范式更严谨、更通用、更落地。
+- Keep discussions friendly, rational, and focused on technology and design
+- Respect the project's existing architecture and paradigm design
+- All contributions prioritize **serving the project's long-term stability and uniformity**
+
+## Closing
+
+This project follows the design philosophy of **minimalism, convergence, structure, and iterability**.
+
+All contributions aim to make the entire paradigm more rigorous, more universal, and more practical.
