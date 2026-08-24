@@ -1,180 +1,216 @@
 # SurvX
-> 本仓库为 SurvX 范式对应的参考架构与原型代码实现。
-## 当前状态：理念验证原型，而非开箱即用的框架，不具备生产能力。
-详细设计见 [docs/design.md](docs/design.md)。
 
-SurvX 是一套用于构建智能系统的范式，既可适配各类AI底座，也可脱离AI独立使用。本项目旨在长期探索未来开发形态与智能系统的组织方式，不预设明确的开发进度规划。
-它的一个前沿探索方向为 XGI——Xenogenic General Intelligence，一种不预设起源与形态、能够依靠自演化实现长期存续的智能。
-（XGI 概念与 AGI 相近，当下 AGI 通常偏向指代类人智能，因此使用 Xenogenic 来做概念上的区分）
+> 📖 Read this in [简体中文](./README_zh.md)
+
+> This repository contains the reference architecture and prototype code implementation for the SurvX paradigm.
+## Current Status: Concept-verification prototype, not an out-of-the-box framework, not production-ready.
+See [docs/design.md](docs/design.md) for detailed design.
+
+SurvX is a paradigm for building intelligent systems, adaptable to various AI backends and usable independently of AI. This project aims for long-term exploration of future development forms and the organization of intelligent systems, with no predefined development schedule.
+
+One of its frontier exploration directions is XGI — Xenogenic General Intelligence: an intelligence that presupposes no origin or form, capable of achieving long-term persistence through self-evolution.
+
+(The XGI concept is close to AGI; currently AGI typically tends to refer to human-like intelligence, hence Xenogenic is used to make a conceptual distinction.)
 
 ---
 
-## 核心思想
-> 注：本部分开篇引入函数式编程思想，作为理解本范式的优先视角；范式本身不强制限定实现方式。
+## Core Idea
+> Note: This section opens with functional programming ideas as the preferred lens for understanding this paradigm; the paradigm itself does not mandate an implementation approach.
 
-本范式以函数式编程思想作为理解视角。
-理念上一切都是数据，并且都以数据的方式存续和管理。在此前提下，为便于结构设计，范式定义了一个基本单位与两个主要角色。
+This paradigm uses functional programming ideas as its lens for understanding.
 
-基本单位是 **F**：不具备复杂内部结构、仅承载单一特征的功能块。形式上为空白容器，可以承载程序、算法、模型、特定参数，也可封装外部程序、第三方应用作为能力单元。在本范式内，程序、算法、模型以及被封装的外部组件等处于同一层级，被同等对待，由同一套规则组织运作。
+Conceptually, everything is data, and everything persists and is managed as data. Under this premise, to facilitate structural design, the paradigm defines one basic unit and two primary roles.
 
-两个主要角色是 **Matter** 和 **Energy**。
-- **Matter**：是具备多类特征、内部拥有相对复杂结构与协作机制的实体，可包含 F，也可包含其他 Matter。
-- **Energy**：代表数据的变动，用于驱动 Matter 运行；表现为 Matter 之外的序列数据、参数等，以数据形式进行表征。
+The basic unit is **F**: a functional block with no complex internal structure, carrying only a single characteristic. Formally a blank container, it can hold programs, algorithms, models, specific parameters, or encapsulate external programs and third-party applications as capability units. Within this paradigm, programs, algorithms, models, and encapsulated external components etc. sit at the same level, are treated equally, and are organized and operated by the same set of rules.
 
-在本范式下，任何行为的发起，必然由某一次数据变动所引发，并形成连锁反应。
+The two primary roles are **Matter** and **Energy**.
+
+- **Matter**: an entity possessing multiple characteristics, with relatively complex internal structure and collaboration mechanisms; may contain F, and may also contain other Matter.
+- **Energy**: represents changes in data, used to drive the operation of Matter; manifests as sequential data, parameters, etc. outside of Matter, represented in data form.
+
+Under this paradigm, the initiation of any behavior is necessarily triggered by a data change, forming a chain reaction.
 
 ---
 
 ## Matter
-Matter 的三个视角：
 
-| 视角 | 概念 | 本质 |
+Three perspectives of Matter:
+
+| Perspective | Concept | Essence |
 |---|---|---|
-| 从外部看 | Entity | 是一个实体，根据实体特征，可以得到 y=f(x) |
-| 从内部看 | Field | 有状态、有内在机能、有作用域、有行为和约束的场 |
-| 当它自指时 | Ego | 拥有自我迭代、自我演化的能力 |
+| From the outside | Entity | An entity; based on its characteristics, one obtains y=f(x) |
+| From the inside | Field | A field with state, internal mechanisms, scope of action, behavior and constraints |
+| When it self-refers | Ego | Possesses the ability for self-iteration and self-evolution |
 
-外部对待 Matter 的方式统一为 Entity，该 Entity 具备特定机制，可将输入转化为对应的输出。
-如果探究其内部结构，它是具备完整结构与作用机制的 Field；为 Field 赋予自我演化能力，即可将其转化为 Ego。
-转化为 Ego 的实际动作，是为 Field 增加一套自我驱动机制，该机制本身也属于 Matter。
-从逻辑上看，Ego 是两个 Matter 的叠加组合。
+The outside world treats Matter uniformly as Entity; this Entity possesses specific mechanisms that transform input into corresponding output.
 
-**命名规则（示例）**
-Entity 和 Field 使用相同名称，例如：Cat。
-当转化为 Ego 时，自我驱动机制的标识为在名称前增加“[]”，即：[]Cat。
-此时 `Cat = Cat + []Cat`。
+If one explores its internal structure, it is a Field with complete structure and operational mechanisms; endowing a Field with self-evolution capability transforms it into an Ego.
+
+The actual action of transforming into an Ego is to add a self-driving mechanism to the Field, and this mechanism itself is also Matter.
+
+Logically, Ego is the superimposed combination of two Matters.
+
+**Naming convention (example)**
+
+Entity and Field use the same name, e.g.: Cat.
+
+When transformed into Ego, the identifier of the self-driving mechanism adds "[]" before the name, i.e.: []Cat.
+
+At this point `Cat = Cat + []Cat`.
 
 ---
 
-## Field 五层结构与 Ego 七层结构
-### Field：S‑C‑R‑O‑F
-| 层 | 缩写 | 名称 | 含义 |
+## Field Five-Layer Structure and Ego Seven-Layer Structure
+
+### Field: S-C-R-O-F
+
+| Layer | Abbrev. | Name | Meaning |
 |---|---|---|---|
-| S | S | Structure | Matter 的组成模块与构成要件 |
-| C | C | Capability | 内部模块的运作方式、可组合的协作机能 |
-| R | R | Relation | 与外部实体的关联、协作及被使用关系 |
-| O | O | Ordinance | 全部机制、特征对应的阈值、行为规则与各类约束限制 |
-| F | F | Feature | 实体整体特征；可注册机能、关系链路，也可声明性能、时效等非功能特征 |
+| S | S | Structure | The constituent modules and components of Matter |
+| C | C | Capability | The operational modes of internal modules, composable collaboration functions |
+| R | R | Relation | Associations with external entities, collaboration, and usage relationships |
+| O | O | Ordinance | Thresholds, behavioral rules, and various constraint limits corresponding to all mechanisms and characteristics |
+| F | F | Feature | The overall characteristics of the entity; may register functions and relation chains, or declare non-functional characteristics such as performance and timeliness |
 
-### Ego：S‑C‑R‑O‑F‑G‑L
-| 层 | 缩写 | 名称 | 含义 |
+### Ego: S-C-R-O-F-G-L
+
+| Layer | Abbrev. | Name | Meaning |
 |---|---|---|---|
-| G | G | Goal | 自我指向性，承载多目标，用于自我驱动与自我优化 |
-| L | L | Symbol | 自我表征，供 []Cat 记录自身认知，认知允许与客观存在存在偏差 |
+| G | G | Goal | Self-directedness, carrying multiple goals, used for self-driving and self-optimization |
+| L | L | Symbol | Self-representation, used by []Cat to record its own cognition; cognition is allowed to deviate from objective existence |
 
-**Field 活在表里，Ego 试图改表。**
+**Field lives within the table; Ego attempts to rewrite the table.**
 
-Field 的五层不要求全部完备。区别于基础单位 F，Field 是多特征实体，并且一定具备明确的 Structure。
-对于 Ego：Goal(G) 是必备构件，Symbol(L) 为非必需构件。
+The five layers of Field need not all be complete. Unlike the basic unit F, Field is a multi-characteristic entity and necessarily possesses a clear Structure.
 
-> 补充（架构细节）：Ego内部的自我驱动机制 []Cat，其 Relation 层存在特殊用途，用于存储自身认知。
+For Ego: Goal (G) is a required component; Symbol (L) is an optional component.
+
+> Supplement (architectural detail): Within Ego, the self-driving mechanism []Cat has a special use for its Relation layer — it stores self-cognition.
 
 ---
 
 ## Energy
-**Energy**：数据变动的序列，代表变动的现实性；静态数据是 Energy 的沉积形态。
 
-数据包含数字、文本等多种形式，在架构层面划分为参数、约束、经历三类，分别对应不同的工程语义：
-- **参数**：描述性数据，包含权重系数等，属于截面快照值。
-- **约束**：各类运行阈值与边界条件，属于截面快照值。
-- **经历**：实体的演变记录，属于时序序列值，例如运行日志、金融历史行情数据等。
+**Energy**: a sequence of data changes, representing the reality of change; static data is the sedimented form of Energy.
 
-> 注：系统运行链条需要启动源头，引擎本身是一个固定的 F，由它产生初始 Energy 变动；外部输入、沉积数据也可以成为扰动触发源。
-> 本范式反转了传统程序的数据流模型：不再是程序主动寻找数据作为原材料进行计算，而是以数据变动（Energy）去驱动 Field 执行，该模式更适配 AI 与算法模型的运行特征。
+Data includes numbers, text, and other forms; at the architectural level it is divided into three categories — parameters, constraints, and experiences — each corresponding to different engineering semantics:
 
-Energy₁ --驱动--> Field₁ --变动--> Energy₂ --驱动--> Field₂ --变动--> Energy₃ --驱动--> ...
+- **Parameters**: descriptive data, including weight coefficients etc., belonging to cross-sectional snapshot values.
+- **Constraints**: various operational thresholds and boundary conditions, belonging to cross-sectional snapshot values.
+- **Experiences**: the evolution records of an entity, belonging to time-series values, e.g. operation logs, financial historical market data, etc.
+
+> Note: The system's operational chain needs an initiation source; the engine itself is a fixed F that produces the initial Energy change; external input and sedimented data can also become disturbance triggers.
+
+> This paradigm inverts the data flow model of traditional programs: rather than programs actively seeking data as raw material for computation, data changes (Energy) drive Field execution — a model better suited to the operational characteristics of AI and algorithmic models.
+
+Energy₁ --drives--> Field₁ --changes--> Energy₂ --drives--> Field₂ --changes--> Energy₃ --drives--> ...
 
 ---
 
-## 引擎（Engine）
-引擎本身是一个基础单位 F，分为两大类型：
+## Engine
 
-| 引擎类型 | 驱动对象 | 特征 |
+The engine itself is a basic unit F, divided into two major types:
+
+| Engine Type | Drives | Characteristics |
 |---|---|---|
-| Field 引擎 | 固定应用 | 特定目标，确定性应用 |
-| Ego 引擎 | 真正的 Ego | 多目标、自我演化 |
+| Field Engine | Fixed application | Specific goal, deterministic application |
+| Ego Engine | True Ego | Multi-goal, self-evolving |
 
-Field 引擎从 Feature（F）层启动，激活 Relation 与 Capability，组织外部资源（Energy、外部 Matter）以及内部模块（内部 Structure），在 Ordinance（O）约束之下完成运行。
-Ego 引擎从 G（Goal）层启动，结合算法模型与外部反馈，动态组织、调整实体的内部结构。
+The Field Engine starts from the Feature (F) layer, activates Relation and Capability, organizes external resources (Energy, external Matter) and internal modules (internal Structure), and completes operation under the constraints of Ordinance (O).
 
-**引擎是维持秩序的管家，不是发号施令的大脑。生命周期仍由约束层（O）管理，引擎只是执行。**
+The Ego Engine starts from the G (Goal) layer, combining algorithmic models and external feedback to dynamically organize and adjust the entity's internal structure.
 
----
-
-## 语言形态
-本范式在理论上可以实现为底层编程语言；现阶段定位为构建在其他宿主语言之上的 API 式描述层。
-- **F**：可由任意编程语言实现，对宿主语言无强制绑定。
-- **Matter 与 Ego**：采用描述式语法，支持关系表达式、能力伪代码以及完备的输入输出契约定义。
-
-输入输出契约包含六个维度：
-- **数据类型（结构态）**：定义输出数据的外壳结构。
-- **数值范围（值态）**：定义数据的取值大小与边界条件。
-- **状态标识（逻辑态）**：标记执行完成后的业务结果标签。
-- **时间与频率（时序态）**：规定输入输出发生的节奏。
-- **环境交互（环境态）**：记录数据的来源与流向，追踪实体与外部环境的交互轨迹。
-- **元数据（描述态）**：描述数据自身的附加信息。
-
-输入输出契约具备双重作用：既是系统识别 Entity 功能能力的依据；也是 Ego 目标驱动下 AI 生成工作的核心参照。AI 依据契约完成能力单元的代码或模型调整，产出初始实现版本后，再由约束层（O）完成校验与迭代修正。
-
-> 工程实现提示：Energy 在原型中常见两类存储形态，不代表范式强制存储方案：
-> - 参数、约束类截面快照数据：以 Key‑Values 键值对形式存储；
-> - 经历类时序演变记录：以时序表形式存储。
+**The engine is the steward that maintains order, not the brain that issues commands. Lifecycle is still managed by the constraint layer (O); the engine only executes.**
 
 ---
 
-## 外部组件接入
-外部程序、第三方框架与外部应用可以接入 SurvX 体系。
-最简单的接入方式是将其封装为 **F**，作为独立能力单元直接参与系统协作。
-随着业务与演化的需要，可以在此基础上逐步补充状态、约束、关系、目标等结构，从 F 演进为完整的 Matter（Entity），从而获得完整实体的全部能力，参与系统的数据流驱动、自我演化与约束管控。
+## Language Form
+
+This paradigm can theoretically be implemented as a low-level programming language; at this stage it is positioned as an API-style description layer built on top of other host languages.
+
+- **F**: can be implemented in any programming language, with no mandatory binding to the host language.
+- **Matter and Ego**: use descriptive syntax, supporting relational expressions, capability pseudocode, and complete input-output contract definitions.
+
+The input-output contract encompasses six dimensions:
+
+- **Data Type (structural state)**: defines the shell structure of output data.
+- **Value Range (value state)**: defines the magnitude and boundary conditions of data values.
+- **Status Identifier (logical state)**: labels the business result tag after execution completes.
+- **Time and Frequency (temporal state)**: specifies the rhythm at which input and output occur.
+- **Environment Interaction (environmental state)**: records the source and flow of data, tracking the entity's interaction trajectory with the external environment.
+- **Metadata (descriptive state)**: describes additional information about the data itself.
+
+The input-output contract serves a dual purpose: it is both the basis for the system to identify an Entity's functional capabilities, and the core reference for AI-generated work under Ego's goal-driven mode. AI completes code or model adjustments for capability units based on the contract, produces an initial implementation version, and then the constraint layer (O) completes validation and iterative correction.
+
+> Engineering implementation note: Energy commonly takes two storage forms in prototypes, which does not represent a paradigm-mandated storage scheme:
+> - Cross-sectional snapshot data (parameters, constraints): stored as Key-Values pairs;
+> - Time-series evolution records (experiences): stored as time-series tables.
 
 ---
 
-## AI 在 SurvX 中
-Matter 本质上也是数据，只是承载结构化蓝图语义的特殊数据。
-在这套体系下，AI 不再直接生成可执行脚本，而是负责生成与修改 Matter 蓝图；整套系统由 Energy 数据流驱动运行。
-目标层（G）提供演进方向，约束层（O）划定行为边界，将生成式 AI 限定为结构创作角色，不允许其直接掌控执行逻辑。
+## External Component Integration
+
+External programs, third-party frameworks, and external applications can be integrated into the SurvX system.
+
+The simplest integration method is to encapsulate them as **F**, participating directly in system collaboration as independent capability units.
+
+As business and evolution needs grow, one can progressively supplement state, constraints, relations, goals, and other structures on this basis, evolving from F into a complete Matter (Entity), thereby gaining the full capabilities of a complete entity and participating in the system's data-flow driving, self-evolution, and constraint management.
 
 ---
 
-## 演变式与补全式工作流
-在本体系下，无论是应用开发还是 Ego 的自我演化，主要存在两类基础工作流，实际场景中通常二者结合使用。
-- **演变式**：基于上一步已有的实体状态，在约束划定的可行域内迭代生成下一步状态，多轮推演累积形成整体候选可行空间；再通过全局约束与结果评判，筛选得到最终方案。
-- **补全式**：依据目标与当前现状，先明确输入输出契约，再由 AI 或人工设计补齐中间结构与能力单元，搭建从输入到输出的完整通路。
+## AI in SurvX
 
-目标拆解配合逐步演变是常见的组合模式，本范式整体运行逻辑也建立在两种工作流的协同之上。
+Matter is essentially also data, merely special data carrying structured blueprint semantics.
+
+Under this system, AI no longer directly generates executable scripts, but is responsible for generating and modifying Matter blueprints; the entire system is driven to run by the Energy data flow.
+
+The Goal layer (G) provides the direction of evolution, and the constraint layer (O) delineates behavioral boundaries, confining generative AI to the role of structural creation, not allowing it to directly control execution logic.
 
 ---
 
-## 工程结构
+## Evolutionary and Complementary Workflows
+
+Under this system, whether for application development or Ego's self-evolution, there are primarily two basic workflows, and in practice the two are usually used in combination.
+
+- **Evolutionary**: based on the existing entity state from the previous step, iteratively generate the next state within the feasible region delineated by constraints; multiple rounds of deduction accumulate to form an overall candidate feasible space; then, through global constraints and result evaluation, the final solution is selected.
+- **Complementary**: based on goals and current status, first clarify the input-output contract, then have AI or human design fill in the intermediate structure and capability units, building a complete pathway from input to output.
+
+Goal decomposition combined with step-by-step evolution is a common combination pattern, and the overall operational logic of this paradigm is also built on the synergy of the two workflows.
+
+---
+
+## Engineering Structure
 
 ```
 ├── core/
-│   ├── engine/   # 执行引擎
-│   ├── studio/   # 管理工具
-│   └── forge/    # 人工介入范式
-├── matter/       # Matter 库
-├── energy/       # 数据沉积
-├── extensions/   # 外部依赖
-├── docs/         # 设计文档
-├── applications/ # 完整应用
-├── tools/        # 工具开发
-├── examples/     # 示例
-└── tests/        # 测试
+│   ├── engine/   # Execution engine
+│   ├── studio/   # Management tools
+│   └── forge/    # Human intervention paradigm
+├── matter/       # Matter library
+├── energy/       # Data sediment
+├── extensions/   # External dependencies
+├── docs/         # Design documents
+├── applications/ # Complete applications
+├── tools/        # Tool development
+├── examples/     # Examples
+└── tests/        # Tests
 ```
 
-> 本架构下开发的应用遵循自己的工程结构，不强制与仓库根目录对齐。
+> Applications developed under this architecture follow their own engineering structure and are not forced to align with the repository root directory.
 
 ---
 
-## 一些延伸思考
-回到当下 AI 辅助编程的现实问题。当前 AI 辅助编程存在若干结构性问题：直接生成可执行流程，单元耦合度高，对模型版本变化依赖性强，同时缺少运行与生成阶段的审计抓手。
+## Some Extended Reflections
 
-SurvX 的应对思路是：让模型生成可组合的结构单元，而非一次性执行流程。**模型是变量，中间层蓝图是常量。**
-这并非 SurvX 的全部目标，只是范式在当前技术环境下的自然延伸。
+Returning to the practical problems of current AI-assisted programming. Current AI-assisted programming has several structural problems: directly generating executable processes, high unit coupling, strong dependence on model version changes, and a lack of audit handles during the runtime and generation phases.
+
+SurvX's approach: let the model generate composable structural units rather than one-off execution processes. **The model is a variable; the intermediate-layer blueprint is a constant.**
+
+This is not the entirety of SurvX's goals, merely a natural extension of the paradigm under the current technological environment.
 
 ---
 
-## 许可证
+## License
 
-- 根目录及大部分子目录：**MIT**，详见 [LICENSE](LICENSE)
-- `/applications`：**AGPL-3.0**，详见 [applications/LICENSE](applications/LICENSE)
+- Root directory and most subdirectories: **MIT**, see [LICENSE](LICENSE) for details
+- `/applications`: **AGPL-3.0**, see [applications/LICENSE](applications/LICENSE) for details
