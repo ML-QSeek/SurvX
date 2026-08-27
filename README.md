@@ -54,9 +54,9 @@ Logically, Ego is the superimposed combination of two Matters.
 
 Entity and Field use the same name, e.g.: Cat.
 
-When transformed into Ego, the identifier of the self-driving mechanism adds "[]" before the name, i.e.: []Cat.
+When transformed into Ego, the identifier of the self-driving mechanism adds "()" before the name, i.e.: ()Cat.
 
-At this point `Cat = Cat + []Cat`.
+At this point `Cat = Cat + ()Cat`.
 
 ---
 
