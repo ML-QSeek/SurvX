@@ -46,6 +46,12 @@ Matter 的三个视角：
 Entity 和 Field 使用相同名称，例如：Cat。
 当转化为 Ego 时，自我驱动机制的标识为在名称前增加“()”，即：()Cat。
 此时 `Cat = Cat + ()Cat`。
+单个实例可表示为：
+`Instance = (Cat + ()Cat) + _Cat + [Cat]<envname>`
+
+- `Cat`、`()Cat`：Matter (本体蓝图 + 自驱动机制)
+- `_Cat`：该实例专属的 Energy (实例内流动与沉积的数据)，不属于 Matter
+- `[Cat]<envname>`：环境 Matter；方括号内为驻留其中的实例主体（可以是多主体），`<envname>` 为环境名称
 
 ---
 
@@ -63,14 +69,14 @@ Entity 和 Field 使用相同名称，例如：Cat。
 | 层 | 缩写 | 名称 | 含义 |
 |---|---|---|---|
 | G | G | Goal | 自我指向性，承载多目标，用于自我驱动与自我优化 |
-| L | L | Symbol | 自我表征，供 []Cat 记录自身认知，认知允许与客观存在存在偏差 |
+| L | L | Symbol | 自我表征，供 ()Cat 记录自身认知，认知允许与客观存在存在偏差 |
 
 **Field 活在表里，Ego 试图改表。**
 
 Field 的五层不要求全部完备。区别于基础单位 F，Field 是多特征实体，并且一定具备明确的 Structure。
 对于 Ego：Goal(G) 是必备构件，Symbol(L) 为非必需构件。
 
-> 补充（架构细节）：Ego内部的自我驱动机制 []Cat，其 Relation 层存在特殊用途，用于存储自身认知。
+> 补充（架构细节）：Ego内部的自我驱动机制 ()Cat，其 Relation 层存在特殊用途，用于存储自身认知。
 
 ---
 
