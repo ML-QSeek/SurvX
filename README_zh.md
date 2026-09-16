@@ -37,18 +37,29 @@ python main.py
 🧪 原型仅供研究探索，不建议直接投入生产环境。
 
 ## 文档
+
 版本变更记录：[CHANGELOG.md](CHANGELOG.md)
+
 参与贡献指南：[CONTRIBUTING.md](CONTRIBUTING.md)
+
 框架设计说明：[design.md](docs/design.md)
+
 开发者指南：[developer-guide.md](docs/developer-guide.md)
+
 范式即解法框架：[paradigm-as-solution-framework.md](docs/paradigm-as-solution-framework.md)
+
 XGI：泛生命智能的数学模型：[XGI-A-Mathematical-Model-of-Pan-Life-Intelligence.md](docs/XGI-A-Mathematical-Model-of-Pan-Life-Intelligence.md)
+
 SurvX-XGI 长期研究策略：[SurvX-XGI-AI-Research-Longterm-Strategy.md](docs/SurvX-XGI-AI-Research-Longterm-Strategy.md)
 
 以下是引擎核心上下文文档：
+
 核心语义：[core-context.md](survx/survx_engine/prompts/core-context.md)
+
 建模流程：[modeling-flow.md](survx/survx_engine/prompts/modeling-flow.md)
+
 生命周期：[lifecycle.md](survx/survx_engine/prompts/lifecycle.md)
+
 语法规范：[syntax.md](survx/survx_engine/prompts/syntax.md)
 
 ## 工程结构

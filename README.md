@@ -39,18 +39,29 @@ Visit `http://localhost:8090`. In studio you can:
 🧪 For research and exploration only, not for production use.
 
 ## Documents
+
 Changelog: [CHANGELOG.md](CHANGELOG.md)
+
 Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+
 Design Spec: [design.md](docs/design.md)
+
 Developer Guide: [developer-guide.md](docs/developer-guide.md)
+
 Paradigm as Solution Framework: [paradigm-as-solution-framework.md](docs/paradigm-as-solution-framework.md)
+
 XGI: Mathematical Model of Pan-Life Intelligence: [XGI-A-Mathematical-Model-of-Pan-Life-Intelligence.md](docs/XGI-A-Mathematical-Model-of-Pan-Life-Intelligence.md)
+
 SurvX-XGI Long-Term Research Strategy: [SurvX-XGI-AI-Research-Longterm-Strategy.md](docs/SurvX-XGI-AI-Research-Longterm-Strategy.md)
 
 Core engine context documents:
+
 Core Semantics: [core-context.md](survx/survx_engine/prompts/core-context.md)
+
 Modeling Flow: [modeling-flow.md](survx/survx_engine/prompts/modeling-flow.md)
+
 Lifecycle: [lifecycle.md](survx/survx_engine/prompts/lifecycle.md)
+
 Syntax Spec: [syntax.md](survx/survx_engine/prompts/syntax.md)
 
 ## Project Structure
