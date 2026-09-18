@@ -1,114 +1,319 @@
-# SurvX Technical Design Document Outline
+# SurvX Technical Design Document
 
-This document serves as the low-level engineering implementation supplement to the **README paradigm architecture**. It covers only implementation details, source code rules, engineering structure, tool descriptions, and storage implementation — it does not reiterate top-level paradigm concepts.
+## Document Overview
+This document supplements the **README paradigm architecture** with concrete engineering implementation details.
+It covers project structure, source rules, toolchains, storage implementation, and runtime mechanics.
+High-level paradigm concepts are not repeated here.
 
-Adaptation phase: concept validation prototype (non-production)
+Stage: **Concept Validation Prototype (Non-production)**
 
----
-
-## 1. Project Positioning and Boundary Definition
-
-- **Paradigm layer (README)**: pure abstract models, architecture rules, entity definitions, workflows
-- **Engineering layer (this document)**: implementation, code organization, tool structure, storage solutions, runtime mechanisms
-- Clarification: the paradigm is not bound to any technology stack, storage, or engine implementation. This project is a **reference prototype implementation**.
-
----
-
-## 2. Repository Engineering Structure (Core Supplement)
-
-Place your complete directory tree + per-directory responsibility descriptions here.
-
-- **core/** — Core architecture implementation (engine, entity kernel, constraint scheduling)
-  - **core/engine** — Execution engine implementation details
-  - **core/studio** — Underlying support for management tools
-  - **core/forge** — Human intervention, review, and workflow paradigm implementation
-- **matter/** — Matter entity definition, parsing, and validation module
-- **energy/** — Data deposition, temporal recording, parameter snapshot management
-- **extensions/** — External component integration adapter layer
-- **applications/** — Formal applications built on the framework (AGPL)
-- **examples/** — Demonstration cases, minimal demos
-- **tools/** — Development auxiliary toolchain
-- **tests/** — Unit / entity / workflow tests
-- **dist/** — Build artifacts
-
-Key note: **repository structure ≠ user application development structure**. Applications produced by this architecture have their own independent directory conventions.
+Paradigm Statement:
+The top-level SurvX paradigm is **technology-agnostic**.
+This document describes only the **reference prototype implementation**.
 
 ---
 
-## 3. Developer Tool System Supplement (Engine / Forge / Studio)
+# Core Paradigm Philosophy
+> Note: This paradigm is best understood from a functional programming perspective.
+> The conceptual model does not enforce any specific programming stack or implementation.
 
-The README covers concepts only; this section covers engineering positioning and responsibilities.
+The paradigm defines **one fundamental unit** and **two core roles**.
 
-- **Engine**: the system runtime core scheduler F, containing dual scheduling logic for the Field engine and Ego engine
-- **Forge**: human-intervention workflow paradigm, executable review framework, workflow constraint middleware layer
-- **Studio**: entity visualization management, Matter/Energy inspection, contract management tools
+## Fundamental Unit: F
+**F** is the minimal atomic capability unit.
+- No complex internal structure
+- Carries only **one single feature/responsibility**
+- Acts as an empty container for code, algorithms, models, parameters, or external services
 
----
+In SurvX:
+**Native logic / algorithms / AI models / third-party systems are treated equally** and scheduled under one unified rule set.
 
-## 4. Storage Layer Engineering Implementation (SQLite Approach)
+## Two Core Roles
 
-The README only mentions the form; this section locks in the concrete implementation (self-imposed constraint).
+### Matter
+A structured, stateful entity with layered internal architecture, constraints, capabilities and relationships.
+A Matter can contain multiple F units and nested sub-Matters.
 
-- Prototype persistence solution: SQLite single-file database
-- Parameters/constraints: KV snapshot storage model
-- Experience/temporal data: temporal record table structure
-- Replaceability note: the paradigm is not bound to SQLite; it is only used for the prototype
-
----
-
-## 5. Core Module Technical Implementation Details
-
-### 5.1 Matter Entity Parsing and Validation Mechanism
-
-### 5.2 Energy Change Trigger and Drive Chain Implementation
-
-### 5.3 Dual-Engine Scheduling Logic (Field / Ego)
-
-### 5.4 Six-Dimensional Input/Output Contract Validation Implementation
-
-### 5.5 External F Component Integration Adapter Specification
-
-### 5.6 AI Structure Generation and Constraint Validation Pipeline
+### Energy
+Energy represents **data change events**, the **only driving force** of the entire system.
+- All system behaviors are triggered by data changes
+- Static persisted data is deposited Energy
+- System execution is a chain reaction driven by state perturbation
 
 ---
 
-## 6. Two Workflow Engineering Implementation Rules
+# Three Perspectives of Matter
 
-- **Evolutionary workflow**: iterative state updates, constraint feasible-domain computation, multi-version candidate management
-- **Completion workflow**: contract-driven completion, chain connectivity validation, automatic structure assembly
+| Perspective | Concept | Essence |
+|---|---|---|
+| External | Entity | Callable functional entity, abstracted as `y=f(x)` |
+| Internal | Field | Stateful, scoped operational field with rules and constraints |
+| Self-referential | Ego | Self-iterable, self-evolvable entity |
 
----
-
-## 7. Development Conventions and Architecture Constraints (Self-Imposed Hard Constraints)
-
-**This is what you need most: mandatory rules to prevent future development from drifting off course.**
-
-- All capabilities must be abstracted as F units; bare business logic is prohibited
-- All state must belong to Matter; stray global variables are prohibited
-- All behavior must be driven by Energy changes; active polling logic is prohibited
-- AI may only modify structure; it may not modify execution flow or bypass the constraint layer
-- Ego evolution must be Goal-driven; hardcoded evolution logic is prohibited
+An Ego is formed by attaching a **self-driving mechanism (also a Matter)** to a Field.
 
 ---
 
-## 8. Current Prototype Capability List & Unimplemented Capabilities
+# Field & Ego Layered Architecture
 
-- **Implemented**: basic F/Matter/Energy model, drive chain, contract validation
-- **Partially implemented**: Field engine, external component integration
-- **To be implemented**: complete Ego engine, self-evolution, Studio visualization, Forge review workflow
+## Field 5-Layer Structure (S-C-R-O-F)
+- **S – Structure**: Module composition and internal architecture
+- **C – Capability**: Internal functions, combinable behaviors
+- **R – Relation**: External dependencies, collaborations, interfaces
+- **O – Ordinance**: Rules, thresholds, constraints, boundaries
+- **F – Feature**: Entity traits, exposed capabilities, non-functional attributes
+
+## Ego 7-Layer Structure (S-C-R-O-F-G-L)
+Extends Field with two additional layers:
+- **G – Goal**: Self-direction, multi-objective driving (required)
+- **L – Symbol**: Self-representation, self-cognition state (optional)
+
+Architectural detail:
+Ego self-cognition data is stored in a dedicated partition of the **Relation layer**.
 
 ---
 
-## 9. Version Status and Development Notes
+# Energy System Design
 
-- Current status: concept validation prototype, not production-ready
-- API status: unstable, under continuous refactoring
-- Iteration principle: prioritize paradigm self-consistency first, then add features
+All data in the system falls into three engineering categories:
+
+1. **Parameters**
+Snapshot configuration: weights, coefficients, adjustable settings.
+
+2. **Constraints**
+Runtime boundaries, thresholds, validation rules, hard limits.
+
+3. **Experience (History)**
+Time-series evolution records: logs, iteration traces, state trajectories.
+
+## Trigger Sources
+- Initial perturbation from the engine’s built-in F unit
+- External input data
+- Changes to deposited static data
+
+## Core Runtime Characteristic
+**All execution is data-driven. No active polling, no spontaneous logic execution.**
 
 ---
 
-## 10. License (Engineering Refinement)
+# Engine Runtime Mechanism
 
-Refine the MIT / AGPL-3.0 division of labor, directory constraints, and derivative work rules.
+The Engine itself is a standard **F unit**.
+Two engine types serve different Matter types.
 
-> (Note: some content may be AI-generated)
+## Field Engine
+- Drives fixed, deterministic Field entities
+- Starts from the Feature(F) layer
+- Activates relations and capabilities
+- Executes under Ordinance constraints
+- For static, target-specified applications
+
+## Ego Engine
+- Drives self-evolvable Ego entities
+- Starts from the Goal(G) layer
+- Dynamically adjusts internal structure based on feedback
+- Supports multi-objective optimization
+
+### Engine Positioning
+The engine is an **execution manager**, not a decision-maker.
+Lifecycle and behavior boundaries are governed by the **Ordinance layer**.
+
+---
+
+# Language & Contract System
+
+## Language Form
+- **F units**: Implementable in any host language
+- **Matter / Ego**: Declarative descriptive syntax with structural rules and contracts
+
+## Six-Dimensional I/O Contract
+All entity interfaces are defined by six orthogonal contract dimensions:
+
+1. **Structure State**: Data schema and format definition
+2. **Value State**: Numeric range and valid value constraints
+3. **Logic State**: Execution status tags and business results
+4. **Temporal State**: Timing, frequency, timeout and rhythm rules
+5. **Environment State**: Data source, destination, external interaction tracing
+6. **Metadata State**: Descriptive attributes, versioning and annotations
+
+### Contract Purpose
+- Enables automatic system-level linkage and validation
+- Serves as the primary specification for AI structural generation
+- Standardizes all internal and external component integration
+
+---
+
+# External Component Integration
+
+Any external program, framework or service can join the SurvX system:
+
+1. **Basic Integration**
+Wrap external capability into an **F unit** for immediate data-driven scheduling.
+
+2. **Advanced Evolution**
+Gradually add Structure, Capability, Relation, Ordinance, and Goal layers
+to upgrade an F into a full **Matter entity**, supporting full lifecycle management and self-evolution.
+
+---
+
+# AI Positioning & Constraints
+
+In SurvX:
+- AI **does not execute logic directly**
+- AI **does not control runtime flow**
+- AI only generates and modifies **Matter structural blueprints**
+
+## AI Boundaries
+- **Goal layer** defines optimization direction
+- **Ordinance layer** enforces hard boundaries
+- All AI-generated structures pass through constraint validation pipelines
+
+AI acts purely as a **structure creator and optimizer**, never an executor.
+
+---
+
+# Two Fundamental Workflows
+
+All development and evolution in SurvX relies on two workflow paradigms:
+
+## 1. Evolution Workflow
+Iterative state update within feasible constraint domains.
+Generates multiple candidate states and selects optimal results via global evaluation.
+
+## 2. Completion Workflow
+Contract-driven structural completion.
+Fills missing capabilities and links to form complete input-output pipelines.
+
+Most practical scenarios use **hybrid completion + evolution**.
+
+---
+
+# Project Positioning & Boundaries
+
+- **Paradigm Layer (README)**: Abstract rules, universal models, conceptual workflows
+- **Engineering Layer (This Document)**: Concrete implementation, code structure, storage, runtime logic
+
+The paradigm is generic and stack-independent.
+This repository is an **official reference prototype**.
+
+---
+
+# Repository Structure
+
+```
+core/         # Core architecture kernel (engine, constraint, scheduling)
+core/engine   # Field & Ego runtime scheduling
+core/studio   # Visualization backend services
+core/forge    # Manual review, audit and human-in-loop workflows
+matter/       # Matter definition, parsing, validation
+energy/       # Data deposition, snapshot & time-series management
+extensions/   # External component adaptation layer
+applications/ # Official AGPL application implementations
+examples/     # Minimal demos & use cases
+tools/        # Dev toolchains
+tests/        # Unit / integration / workflow tests
+dist/         # Build artifacts
+```
+
+Important:
+**Repo structure ≠ end-user application structure**
+Built SurvX applications have independent lightweight structures.
+
+---
+
+# Developer Tool System
+
+## Engine
+Core runtime dispatcher for all data-driven execution.
+
+## Forge
+Human intervention framework: configurable review, audit, compliance middleware.
+
+## Studio
+Visual management platform:
+Matter/Energy inspection, contract management, topology visualization.
+
+---
+
+# Storage Implementation (SQLite Prototype)
+
+Prototype fixed storage strategy:
+
+1. **Snapshot Data (Params / Constraints)**
+Key-Value storage for instantaneous state.
+
+2. **Time-Series Data (Experience)**
+Structured time-series table for evolution history.
+
+Note:
+SQLite is only for prototype validation.
+The paradigm supports arbitrary database replacement in production.
+
+---
+
+# Core Module Implementation Details
+
+## 13.1 Matter Parsing & Validation
+Structural validation, nested rule checking, registration lifecycle control.
+
+## 13.2 Energy Trigger & Driving Pipeline
+Full data-change propagation chain:
+Perturbation → Dispatch → Execution → State Deposit.
+
+## 13.3 Dual-Engine Scheduling Logic
+Deterministic Field scheduling + goal-based Ego scheduling.
+
+## 13.4 Six-Dimension Contract Validation
+Unified validator for all entity input/output.
+
+## 13.5 External F Component Adaptation
+Standard wrapping, registration, constraint and access rules.
+
+## 13.6 AI Generation & Constraint Pipeline
+Blueprint generation → contract check → ordinance filtering → deployment.
+
+---
+
+# Development Rules & Architecture Constraints (Strict)
+
+1. All capabilities must be abstracted as **F units**. No bare business logic.
+2. All states must belong to **Matter**. No global floating state.
+3. All behaviors must be driven by **Energy changes**. No active polling.
+4. AI can only modify **structure**, never execution flow or constraints.
+5. Ego evolution must be **goal-driven**. No hardcoded evolution logic.
+
+---
+
+# Prototype Capability Status
+
+## Implemented
+- Basic F / Matter / Energy models
+- Data-driven driving links
+- Core contract validation
+
+## Partially Implemented
+- Field engine scheduling
+- Basic external component integration
+
+## Pending
+- Complete Ego self-evolution engine
+- Studio visualization system
+- Forge review workflow
+- Full AI constraint pipeline
+
+---
+
+# Version Status
+
+- Current: Concept verification prototype (non-production)
+- API: Unstable & under refactoring
+- Iteration Priority: Paradigm consistency > feature completeness
+
+---
+
+# License Engineering Specification
+
+- **MIT**: Core architecture, kernel engine, paradigm primitives
+- **AGPL-3.0**: Applications layer, integrated scenario projects
+
+Derived works must comply with corresponding directory license rules.
