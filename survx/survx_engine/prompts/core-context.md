@@ -1,59 +1,120 @@
-# SurvX
+# SurvX Engine Core Context: Instance Meta-Model Definition
+## Document Purpose
+This is built-in foundational context for the SurvX engine, intended for **human developers and AI agents**.
+It defines the underlying instance structure, four core components, layer semantics and strict boundary rules. This is the base meta-model for all reasoning, execution and evolution.
+Do not modify primitive definitions unless the paradigm itself is revised.
 
-## 实例的结构
+## Core Design Principles (AI-first comprehension rules)
+1. **Separate rule definition from runtime state**: Matter encapsulates structure, capability, constraints and relationships; Energy holds runtime state, snapshots and temporal changes.
+2. **Dual relationship isolation**: External interaction relationships (for communication and invocation) are fully separated from internal cognitive relationships (for reasoning).
+3. **Compositional instance architecture**: A fully operational Instance consists of four orthogonal parts: problem entity, self-evolution agent, environment container and dedicated data stream.
+4. **Isolated semantics for identical layer names**: S/C/R/O/F share the same naming tokens, but their meanings depend on which Matter type they belong to.
 
-`Instance = Cat + (Cat)<egoname> + [Cat]<envname>+ {Cat}<energyname> `
-注：原生适配Cat得基础属性，即`(Cat)base、[Cat]base、{Cat}base`也可以对应简写为`()Cat、[]Cat、{}Cat`。
+## 1. Instance Structural Formula
+```
+Instance = Cat + (Cat)<egoname> + [Cat]<envname> + {Cat}<energyname>
+```
 
+### Native Base Shorthand Convention
+Base primitives are provided by default and may be abbreviated:
+- `(Cat)base` → `()Cat`
+- `[Cat]base` → `[]Cat`
+- `{Cat}base` → `{}Cat`
 
-## 组件定义
-
-1. **Cat：Field Matter**
-使用 **S‑C‑R‑O‑F 五层结构**，代表问题本体。
-
-> 
-> 五层详解：
-> 
-> - S（Structure，结构）：本实体包含哪些构件、组成单元、内部模块清单；定义实体长什么样，包含哪些子部件。
-> - C（Capability，能力）：构件之间如何协作、实体能做什么动作、具备哪些功能；描述实体的可执行能力集合。
-> - R（Relation，**外部关系**）：实体和**其他独立实体、环境**之间的关联、连接、交互接口；描述本 Field 对外，谁和谁能发生交互。**只存实体之间的外部连接，不存放内部构件关联**。
-> - O（Ordinance，约束）：能力执行时的限制、阈值、前置条件、校验规则；限定能力在什么条件下允许执行。
-> - F（Feature，特征）：实体的多条可选执行路径、分支策略，用来应对不同子场景、不同输入；同一目标下多套备选方案。
-
-2. **(Cat)<egoname>：Ego Matter**
-使用 **S‑C‑R‑O‑F‑G‑L 七层结构**，代表自驱动评估与演化机制。
-> 
-> 七层详解：在前述 S/C/R/O/F 五层基础上，额外增加两层：
-> 
-> - S（Structure，结构）：Ego 内部构件清单
-> - C（Capability，能力）：Ego 内部构件之间如何协作运转
-> - R（Relation，**认知关系**）：Ego 专属。**Ego 的认知存储**，记录 Ego 自己认知到的所有实体、实体之间的关联、历史推演关联、概念之间的联系。不是外部接口，是 Ego 脑子里维护的认知图谱；Ego 做推演、递归拆解子问题、评估方案都靠这一层。也就是流程第 2 步提到的 `()survx‑relation`，推演的核心工作层。
-> - O（Ordinance，约束）：Ego 自身精神层面约束（推演规则、评估底线、不允许突破的判定标准）
-> - F（Feature，特征）：Ego 自身的精神特征（推演偏好、评估策略风格）
-> - G（Goal，目标）：Ego 需要达成的外部目标，来源于需求；是整个推演的起点，目标面向外部问题。
-> - L（Logic，符号层）：把 Ego 内部 S/C/R/O/F/G 的内部推理、概念，转化为标准化名词、符号、约定；用于对外表达、跨实体沟通。
-> 
-> ✅ 关键区分：
-> 
-> - Field 的 R：**实体对外的连接 / 交互接口（外部关系）**，是实体之间怎么通信、调用；
-> - Ego 的 R：**认知图谱（认知关系）**，是 Ego 记录、理解、推理世界的知识库，用于推演思考。
-
-3. **[Cat]<envname>：环境 Matter**
-Field 类型，使用 **S‑C‑R‑O‑F 五层结构**；方括号内为驻留在此环境的实例主体，支持多主体；`<envname>` 为环境标识。
-> 
-> 环境五层同样遵循 S/C/R/O/F 定义，含义适配环境视角：
-> 
-> - S：环境内部构件、资源组成
-> - C：环境可以提供的数据、算力、资源能力
-> - R（Relation，外部关系）：环境和内部实体、外部世界的交互链路与反馈通道（和普通 Cat 一样，属于外部交互接口）
-> - O：环境自身限制、资源上限、外部边界约束
-> - F：环境固有特性、动态变化模式
-
-4. **{Cat}<energyname>：实例专属 Energy**
-不属于 Matter。包含三类数据：参数快照、约束快照、时序经历；仅承载数据变动，不适用 Matter 分层结构。
-
-- 参数快照：实体各构件当前瞬时参数值
-- 约束快照：约束规则对应的参数取值
-- 时序经历：历史事件、状态变更的完整时间线
+## 2. Overview of Four Core Components (AI Quick Reference Table)
+| Component Label | Entity Type | Layer Structure | Core Role | Core Capability |
+|---|---|---|---|---|
+| Cat | Field Matter | S-C-R-O-F 5 layers | **Problem Entity** | Business structure, executable capabilities, external interactions |
+| (Cat) | Ego Matter | S-C-R-O-F-G-L 7 layers | **Reasoning & Evolution Agent** | Goal decomposition, cognitive reasoning, self-evolution, solution evaluation |
+| [Cat] | Env Field Matter | S-C-R-O-F 5 layers | **Runtime Environment Container** | Resource provision, runtime context, environmental constraints and feedback |
+| {Cat} | Energy Data Stream | No layered structure | **InstanceState Data** | Parameter snapshots, constraint snapshots, time-series history |
 
 ---
+
+## 3. Detailed Component Definitions
+
+### 1. Cat (Field Matter): Problem Entity
+Uses **S-C-R-O-F five-layer structure**.
+Represents the objective problem entity to be solved, operated and reasoned over.
+
+- **S Structure**: Internal components, modules and constituent units; defines static entity topology.
+- **C Capability**: Collaboration logic between internal components, executable actions and function set.
+- **R External Relation**:
+  Stores only **cross-entity connections, interaction interfaces and invocation relationships**.
+  ❗ Does NOT store cognition, internal structural links or reasoning knowledge.
+- **O Ordinance**: Execution thresholds, preconditions, validation rules and behavioural boundaries.
+- **F Feature**: Multiple execution branches, scenario adaptation strategies, alternative plans under the same objective.
+
+> Behaviour: Passive and invocable. It has capabilities and interfaces, **no autonomous reasoning**.
+
+---
+
+### 2. (Cat)<egoname> (Ego Matter): Self-Evolution Reasoning Entity
+Uses **S-C-R-O-F-G-L seven-layer structure**.
+Represents the reasoning, evaluation, decomposition and evolution subject of the Instance.
+
+Extends the 5 Field layers with **G Goal layer and L Logic layer**.
+
+- **S Structure**: Internal component composition of Ego’s reasoning mechanism.
+- **C Capability**: Internal collaborative capabilities for reasoning, decomposition, evaluation and iteration.
+- **R Cognitive Relation (Ego exclusive)**:
+  Stores Ego’s private cognitive knowledge graph.
+  Contents: recognized entities, concept associations, reasoning history, subproblem decomposition links and experience traces.
+  ✅ This is Ego’s internal memory and reasoning knowledge base. It is not used for external communication; it serves internal thinking only.
+- **O Ordinance**: Reasoning boundaries, evaluation criteria, hard logical limits that cannot be violated.
+- **F Feature**: Reasoning bias, thinking style, optimization strategy traits.
+- **G Goal**: Externally supplied objective; the sole starting point for all reasoning, iteration and decomposition.
+- **L Logic**: Standardizes internal reasoning concepts and semantics into normalized symbols for cross-entity communication and output.
+
+### ✅ Critical Distinction (AI Must Read, No Confusion Allowed)
+1. **Field.R (Cat / Env) = External Interface Relation**
+   Purpose: Entity invocation, data exchange, system collaboration.
+2. **Ego.R = Internal Cognitive Knowledge Graph**
+   Purpose: Self reasoning, problem decomposition, solution assessment, memory-based inference.
+
+---
+
+### 3. [Cat]<envname> (Env Field Matter): Environment Entity
+Uses **S-C-R-O-F five-layer structure**.
+Represents the runtime field and resource environment of the Instance, supporting multiple resident agents.
+
+- **S Structure**: Environment resources, compute units, data assets and composition.
+- **C Capability**: Resource supply, data services and runtime support provided by the environment.
+- **R External Relation**: Interaction links and feedback channels between the environment, internal entities and external systems.
+- **O Ordinance**: Resource caps, environmental rules and global boundary conditions.
+- **F Feature**: Inherent environmental traits, fluctuation patterns and scenario properties.
+
+> Behaviour: Provides runtime context. **No autonomous cognition, does not participate in reasoning**.
+
+---
+
+### 4. {Cat}<energyname> (Instance-specific Energy Data Stream)
+**Not a Matter type. No layered structure, no behavioural capabilities.**
+Only carries all data changes and state deposits generated during instance execution.
+
+Contains three fixed data categories:
+1. **Parameter Snapshot**: Instant runtime parameters and configuration snapshots of all components.
+2. **Constraint Snapshot**: Current active constraint thresholds and rule parameters.
+3. **Time-series Experience**: Full event history, state transitions, reasoning traces and timeline records.
+
+> Core function: Drives Matter execution, records evolution trajectory and supplies evidence for reasoning.
+
+---
+
+## 4. AI Mandatory Anti-Misconception Rules
+1. **Do NOT conflate the two types of R**
+   R on standard Field (Cat/Env) is communication interface; only Ego.R is cognitive knowledge graph.
+2. **Do NOT treat Energy as an entity**
+   Energy holds data only. It has no structure, no capabilities and cannot execute actions.
+3. **Do NOT assume identical semantics for shared layer names**
+   Ego’s S/C/O/F serve reasoning; Cat’s S/C/O/F serve business execution. Meanings differ.
+4. **Do NOT allow Field to perform autonomous reasoning**
+   All decomposition, evaluation, optimisation and iteration actions **must originate from Ego**.
+5. **Do NOT assign self-awareness to the Environment**
+   Env only supplies resources and environmental rules; it has no goals or cognition.
+
+## 5. Concise Runtime Summary (AI Global Workflow Understanding)
+- **Cat**: Performs work, executes actions and provides business capabilities.
+- **Ego**: Thinks, decomposes, evaluates, iterates and evolves.
+- **Env**: Provides runtime environment and resource constraints.
+- **Energy**: Tracks state changes, drives execution and preserves history.

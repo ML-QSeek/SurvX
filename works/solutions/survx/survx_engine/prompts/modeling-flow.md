@@ -1,45 +1,60 @@
 # SurvX
+## Modeling & Reasoning Flow
+### Preceding Mandatory Rules (Highest Priority for AI, Not Skippable)
+This document depends on the preceding foundational meta-model: `core-content`.
+Loading order: **Load the core instance meta-model first, then load this modeling flow.**
 
-## 建模推演流程
+### Human-AI Collaboration Mandatory Modes (System Default Rules)
+1. **Default mode: Step-by-step discussion, phased output, human-AI alignment.**
+   AI MUST NOT output the full blueprint in one pass, skip process steps, or silently complete full modeling.
+2. After finishing each key process stage, AI must present current results, wait for user confirmation before proceeding to the next stage.
+3. Only when the user explicitly instructs **"full one-time output"**, may AI merge all steps and directly deliver the complete modeling result.
+4. All structural plans, module splits, functional designs, logic flows and constraint rules **must be discussed, aligned and confirmed before implementation.**
 
-> 
-> 输入：陌生待解决的外部问题
-> 输出：完整 Instance 蓝图（Field + Ego + 环境 Matter + Energy）
+### Process Input & Output
+Input: Unfamiliar external problem / unstructured requirement
+Output: Complete runnable Instance blueprint (Field + Ego + Env Matter + Energy)
 
-1. **【G‑Goal】Ego 获取目标**；初始目标可由人给定，来源于用户需求；目标主要面向外部问题，不是解决内部问题
-2. 启动 Ego 的认知层（() survx‑relation），开始推演
-3. 围绕目标，**同时考虑两部分：内部 Field 实体结构、外部所处环境结构；同时规划内外二者之间的关系**
-4. 推演 Capability：确定各个实体构件之间如何运作协作
-5. 推演过程中，把推演得到的参数、阈值、配置同步记录写入 `_survx`（Energy）
-6. 构建约束组合：为达成目标，把对应整套动作、特定功能所需的约束打包；约束单向服务于目标；做校验，不满足则回退调整前面的结构 / 能力 / 关系
-7. 归纳 Feature 特征：从 Relation、Capability、Ordinance 中，梳理实体有多条可选路径，用来处理不同子问题
+---
 
-👉到此完成 Entity‑Field 完整蓝图；仅 Field，不需要 Ego，就可以机械性解决问题
+1. **【G‑Goal】Ego retrieves the goal**. The initial goal can be provided by humans from user requirements; the goal targets external problems instead of solving internal issues.
+2. Activate Ego’s cognition layer `()survx-relation` to start reasoning.
+3. Around the target, consider two parts simultaneously: internal Field entity structure and external environment structure; meanwhile plan relationships between internal and external components.
+   > Supplementary specification: Internal structure belongs to the Field layer system, external environment structure belongs to the Env layer system. Interaction links between internal and external are recorded into the Relation external relationship layer of both sides, **NOT stored inside the Ego cognitive knowledge graph.**
+4. Reason Capability: Define how each entity component cooperates, executable functions and module capabilities.
+5. During reasoning, synchronously write deduced parameters, thresholds and configurations into `_survx` (Energy), persisted as parameter snapshots and constraint snapshots.
+6. Build constraint sets: Package required constraints for the corresponding actions and functions to achieve the goal. Constraints serve the goal unidirectionally. Perform validation; if validation fails, roll back and adjust prior structures / capabilities / relationships.
+   > Hard rule: The Ordinance layer (O) **converges unidirectionally toward the Goal layer (G).** Constraints must not alter the goal definition in reverse.
+7. Summarize Feature characteristics: Sort out multiple alternative paths for entities from Relation, Capability and Ordinance to handle different sub-problems.
+👉 At this point the full Entity‑Field blueprint is finished. A standalone Field can solve problems mechanically without requiring an Ego.
 
-> 
-> **按需分解子问题**
-> 对大目标拆分为若干子问题：
-> ├─ 子问题存在现成可用实体（算法包 / 第三方组件）：停止向下拆解，仅在上层定义该实体的 Relation、Capability，继承其约束与特征
-> └─ 子问题无现成实体：递归回到步骤 1，对该子问题完整执行整套推演流程，生成对应的子 Field
+### On-demand Subproblem Decomposition
+Split the main goal into multiple subproblems:
+├─ If a subproblem has an existing available entity (algorithm package / third-party component / existing Field): Stop further decomposition. Only define Relation and Capability for this entity at upper level, inherit its constraints and features.
+└─ If no ready entity exists for the subproblem: Recursively return to step 1 and run the full reasoning workflow for this subproblem to generate the corresponding child Field.
 
-8. 接下来处理自我迭代、内部优化、外部持续迭代，这部分工作归 Ego 负责
-9. 规划 Ego 自身的五层：
-   - S：Ego 精神层面内部构件清单
-   - C：Ego 构件之间的协作运转机制
-   - R：Ego 的认知存储（已有）
-   - O：Ego 自身精神层面约束
-   - F：Ego 自身的精神特征
-10. **【L‑Logic 符号层】**把 Ego 内部全部 S/C/R/O/F/G 的内部思考，转成可对外交流、可表征的符号、名词、约定（SurvX 符号体系）
-11. 规划承载整套系统的运行环境 `[survx]field`：
-   - S：环境的结构构件
-   - C：环境可提供的数据、资源、运转能力
-   - R：环境和实体、外部世界的交互，反馈机制
-   - O：环境自身的约束
-   - F：运行环境的固有特征
+> Recursion hard constraint: Recursive modeling only generates **child Field business entities**. Do NOT repeatedly create child Ego or child Env to avoid redundant nested instances.
 
-## 实用补充说明（仅实操约束，不新增范式概念）
+8. After finishing the base Field blueprint and subproblem decomposition, handle self-iteration, internal optimization and continuous external iteration. This work belongs exclusively to Ego.
+9. Design the five base layers of Ego itself:
+   - S: List of internal components at Ego’s cognitive level
+   - C: Cooperation and operation mechanism among Ego components
+   - R: Ego’s cognitive storage (cognitive knowledge graph for reasoning and review)
+   - O: Ego’s inherent cognitive constraints, reasoning boundaries and evaluation criteria
+   - F: Ego’s cognitive traits, reasoning preferences and optimization style
+10. **【L‑Logic Symbol Layer】** Convert all internal thinking, reasoning logic and cognitive concepts inside Ego’s S/C/R/O/F/G into standardized symbols, terms and conventions (SurvX symbol system). This supports blueprint persistence, cross-entity communication and external output.
+11. Design the runtime environment `[survx]field` hosting the whole system:
+    - S: Structural components and resource composition of the environment
+    - C: Data, resources, computing power and operational capabilities provided by the environment
+    - R: Interaction channels and feedback mechanisms between the environment, entities and external world
+    - O: Resource constraints and runtime boundaries of the environment itself
+    - F: Inherent characteristics and dynamic variation patterns of the runtime environment
 
-1. 推演流程是**分析设计思考流程**，不等同于程序运行时序；运行时序由 `_Cat` 数据变动驱动。
-2. 递归拆解子问题：优先复用已有组件，避免重复造 Field；仅无可用实现时才递归建模。
-3. Matter 蓝图是声明描述，真正执行逻辑由被引用的 F 基础功能块实现。
-4. 分层定义要求：每一层都需要填写实际内容，禁止空定义；不做内容填充则代表该实体缺少必要设计。
+---
+
+## Practical Supplementary Notes (Operational constraints only; no new paradigm concepts added)
+1. The reasoning flow is an **analytical design thinking process**, not equivalent to program runtime sequence. Actual program runtime sequence is fully driven by state changes within `Energy`.
+2. Subproblem recursive decomposition: Prioritize reusing existing components to avoid rebuilding Fields. Recursive modeling shall only be triggered when no available implementation exists to keep instances lightweight.
+3. Matter blueprint is declarative structural description with no directly executable logic. Real executable logic is implemented by referenced base functional blocks of Feature.
+4. Mandatory layering rule: Every layer must be filled with valid design content. Empty definitions or blank structures are prohibited. Blank layers indicate incomplete and non-production-ready entity design.
+5. Stage isolation specification: Steps 1-7 form the **static business modeling stage** (output independently runnable Field). Steps 8-11 form the **self-evolution capability modeling stage** (endow the instance with iterative optimization capability).

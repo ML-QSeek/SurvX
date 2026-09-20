@@ -19,8 +19,8 @@ This document describes only the **reference prototype implementation**.
 
 The paradigm defines **one fundamental unit** and **two core roles**.
 
-## Fundamental Unit: F
-**F** is the minimal atomic capability unit.
+## Fundamental Unit: Q
+**Q** is the minimal atomic capability unit.
 - No complex internal structure
 - Carries only **one single feature/responsibility**
 - Acts as an empty container for code, algorithms, models, parameters, or external services
@@ -200,19 +200,18 @@ This repository is an **official reference prototype**.
 
 # Repository Structure
 
+
 ```
-core/         # Core architecture kernel (engine, constraint, scheduling)
-core/engine   # Field & Ego runtime scheduling
-core/studio   # Visualization backend services
-core/forge    # Manual review, audit and human-in-loop workflows
-matter/       # Matter definition, parsing, validation
-energy/       # Data deposition, snapshot & time-series management
-extensions/   # External component adaptation layer
-applications/ # Official AGPL application implementations
-examples/     # Minimal demos & use cases
-tools/        # Dev toolchains
-tests/        # Unit / integration / workflow tests
-dist/         # Build artifacts
+├── survx/               # 核心模块
+│   └── survx_engine/    # 引擎
+├── models/              # 开发目录
+├── works/               # 工作工场，承载迭代、改进与灰度验证
+│   ├── solutions/       # 解决方案
+│   ├── tools/           # 工具
+│   └── examples/        # 开发示例
+├── instances/           # 可运行实例
+│   └── survx_studio/    # 开发管理工具
+└── docs/                # 设计文档
 ```
 
 Important:
