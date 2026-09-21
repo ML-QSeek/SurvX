@@ -1165,3 +1165,41 @@ _register = {
 ### Mandatory Conventions
 - Uniform function signature `def qxxxxxx():`, no extra underscores
 - prompts and reason comments are mandatory
+
+# Part IV: Coding Principles
+
+This section is language-agnostic and applies to Python, JS, Rust and any implementation languages adopted later.
+
+The following principles are **mandatory constraints**, not stylistic suggestions. Any violation renders the implementation non-compliant.
+
+1. Prioritize structure over syntactic gimmicks
+Code exists primarily to express structure. Prefer implementations that clearly articulate structures, relationships and constraints; minimize advanced language features. Do not introduce decorators, metaclasses, macros, implicit conversions or other tricks merely for the sake of "elegance".
+
+2. Core components rely only on standard libraries
+Engine core, instance structure definitions, registration mechanisms and scaffolding tools must use nothing but the native standard library of the language. Third-party packages are forbidden here.
+
+3. Import third-party dependencies on-demand and locally
+Third-party packages required for business capabilities must be imported on-demand within the specific functional unit, used locally and released locally. Do not pollute the global scope, and do not leak dependencies into structure definitions.
+When switching package sources or libraries, modify only the corresponding functional unit; leave other parts untouched.
+
+4. Local fallback for dependency failures
+When importing dependencies inside a functional unit, handle missing packages, version mismatches, initialization failures and similar cases locally. Provide clear alerts instead of bubbling exceptions up to the upper call chain.
+
+5. Readability beats brevity
+Favor one statement per line, explicit declarations and fixed placements over inline merging, loop-generated code or dynamic assembly. Structures must be directly interpretable by humans and AI without execution.
+
+6. Separate declarations from logic
+Use declarative style for structures, parameters, constraints and relationships; use functional style for actions, calculations and reasoning. The two styles must not be mixed or nested within each other.
+
+7. Naming follows semantics, not length
+Preserve full semantic meaning for entities, commands and table names; do not prioritize name shortening. Local abbreviations are limited to temporary variables inside functions only.
+
+8. Minimize metaprogramming; write straightforward code
+Use plain dictionaries instead of classes where feasible; use plain functions instead of decorators where feasible; use explicit keys instead of dynamic assembly where feasible. Do not sacrifice predictability for "advanced" techniques.
+
+9. Principles survive language replacement
+These principles are not bound to Python.
+They shall be followed equally when later adopting JS, Rust or other languages: structure-first design, no third-party dependencies in core, local dependency imports, local failure fallback, readability-first. Violations make the implementation non-compliant.
+
+10. Design for persistence and migration
+Write code to closely match target storage layout. Flat keys map to database rows, explicit fields map to table columns, version fields map to versioned rows. Avoid structures that are hard to flatten or migrate.
