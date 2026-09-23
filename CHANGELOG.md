@@ -1,25 +1,19 @@
-# Changelog
+# CHANGELOG.md
 
-## [0.1.0] - 2026-08-20
-
+## [0.1.0] - 2026-09-26
 ### Added
-
-- Project enters versioned phase; changes are officially recorded starting from this commit
-- Integrated and released the first runnable version based on prior development work
-- Includes core foundational features (replace with your actual features here)
+- Project officially enters version control and starts recording changelog
+- Completed preliminary requirements, design, architecture, and documentation; overall plan finalized
+- Initialized project structure and officially entered coding development phase
 
 ### Notes
+- Current version is **design milestone**; business feature code is under development
+- Changelog will only be updated for major milestones / version releases
 
-- This version is an early preview; features are still under active refinement
-- Feedback and suggestions are welcome 🙌
-
-## [Pre-release Development] - Before 2026-08-20
-
-> This phase was the project startup and foundational feature exploration period. It primarily completed technology selection, core module scaffolding, and basic feature validation, laying the groundwork for subsequent version iteration.
+## [Preparatory Phase] - Before 2026-09-26
+> Requirements clarification, project research, and design phase.
 
 ### Key Achievements
-
-- Completed project initialization and technology stack selection
-- Established the basic engineering architecture and directory structure
-- Completed initial development and validation of core modules
-- Achieved end-to-end connectivity of the basic feature pipeline
+- Completed requirements analysis, tech selection, and overall architecture design
+- Wrote and finalized core documentation
+- Established development specifications, directory structure, and code repository initialization
