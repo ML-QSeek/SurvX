@@ -97,13 +97,45 @@ The following special keys are common across all tables:
 
 ## 1.8 Naming Rules
 ### 1.8.1 Entity ID
-Format: `[A-Za-z_][A-Za-z0-9_]*`
+Format: `[A-Za-z][A-Za-z0-9]*`
 Applicable to all entities: Matter, Ego, Env
 Applicable to all records: parameters, constraints, relations
 Applicable to all components: Q
-Q allows non-semantic identifiers, may use q_ + random number / auto-increment number
+Q allows non-semantic identifiers, may use q + random number / auto-increment number
 
-### 1.8.2 Key Format & ID Rules
+### 1.8.2 Symbol Restrictions and Exclusive Rules
+`_` and `-` are engine-exclusive delimiters and shall not be embedded within any names.
+
+**Prohibited Scope**
+- Entity names (names of Matter, Ego, Env, Energy)
+- Each segment of path keys (hierarchical labels, local IDs)
+- All record IDs, component IDs, Q IDs
+
+**Exclusive Usage**
+- `_`: Reserved solely as the hierarchical delimiter for path keys
+  Format: `ParentPath_HierarchicalLabel_LocalID`
+  Examples: `SurvXStudio_s_1`, `Cat_c_1`
+- `-`: Reserved solely for id0-id1 concatenation in parameter tables, constraint tables and relation table keys
+  Format: `id0-id1`
+  Examples: `Cat-Phys_s_1`, `CatFood-Cat`
+
+**Naming Requirements**
+- Only ASCII letters and numbers are permitted
+- First character must be a letter
+- Multi-word names shall use PascalCase, with the first letter capitalized
+  Examples: `SurvXStudio`, `CatFood`, `Phys`
+
+**Invalid Examples**
+- `survx_studio`: Entity name contains `_`
+- `survx-studio`: Entity name contains `-`
+- `survx studio`: Contains spaces
+- `survxstudio`: Valid but not recommended, poor readability
+
+**Valid Examples**
+- `SurvXStudio_s_1`: Entity name `SurvXStudio`, `_` acts as hierarchical delimiter
+- `Cat-Phys_s_1`: `-` as concatenator, `_` as hierarchical delimiter
+
+### 1.8.3 Key Format & ID Rules
 - Hierarchy nodes use path keys as dictionary keys
 - Path key format: `parentpath_hierarchylabel_localID`
 - Local ID has two categories:
@@ -119,7 +151,7 @@ root_s_self_s       # system reserved keyword
 root_s_meta_s       # system reserved keyword
 ```
 
-### 1.8.3 Versioning Rules
+### 1.8.4 Versioning Rules
 - hoc: Script-level version number written in script header; individual nodes do not carry `version`
 - dbfs: Node-level version number; every node carries its own `version`
 - Format: `YYYYMMDDHHMMSS`
@@ -432,7 +464,7 @@ _relation = {
 matter = {
     "Cat": "",
     "phys_s_2": "weight",
-    "cat_food": ""
+    "CatFood": ""
 }
 # Parameter table
 _parameter = {
@@ -440,7 +472,7 @@ _parameter = {
 }
 # Relation table
 _relation = {
-    "cat_food-param_1": [
+    "CatFood-param_1": [
         ["q:q7b2c", 1, "20260101000000"]
     ]
 }
@@ -483,7 +515,7 @@ INSERT INTO _relation (id0, id1, value, idx, version) VALUES
 ('Cat_s_1', 'Cat_s_2', 'q:q3f8a2', 1, '20260918224522');
 -- External relation
 INSERT INTO _relation (id0, id1, value, idx, version) VALUES
-('cat_food', 'param_1', 'q:q7b2c', 2, '20260918224522');
+('CatFood', 'param_1', 'q:q7b2c', 2, '20260918224522');
 ```
 
 ### Special Provision

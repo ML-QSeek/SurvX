@@ -97,13 +97,47 @@ Instance = {
 
 ## 1.8 命名规则
 ### 1.8.1 实体 ID
-格式：`[A-Za-z_][A-Za-z0-9_]*`
+格式：`[A-Za-z][A-Za-z0-9]*`
 适用于所有实体：Matter、Ego、Env
 适用于所有记录：参数、约束、关系
 适用于所有构件：Q
-Q 允许无语义，可用 q_ + 随机数/自增数
+Q 允许无语义，可用 q + 随机数/自增数
 
-### 1.8.2 key 格式与 ID 规则
+
+### 1.8.2 符号禁用与专属规则
+
+`_` 和 `-` 为引擎专属分隔符，不进入任何名字内部。
+
+**禁用范围**
+- 实体名（Matter、Ego、Env、Energy 的名字）
+- 路径 key 的各段（分层标签、局部ID）
+- 所有记录 ID、构件 ID、Q ID
+
+**专属位置**
+- `_`：仅用于路径 key 的分层分隔符
+  格式：`父路径_分层标签_局部ID`
+  示例：`SurvXStudio_s_1`、`Cat_c_1`
+- `-`：仅用于参数表、约束表、关系表 key 的 id0-id1 拼接
+  格式：`id0-id1`
+  示例：`Cat-Phys_s_1`、`CatFood-Cat`
+
+**命名要求**
+- 只能用 ASCII 字母、数字
+- 首字符为字母
+- 多词用驼峰命名，首字母大写
+  示例：`SurvXStudio`、`CatFood`、`Phys`
+
+**非法示例**
+- `survx_studio`：实体名含 `_`
+- `survx-studio`：实体名含 `-`
+- `survx studio`：含空格
+- `survxstudio`：合法，但不推荐，可读性差
+
+**合法示例**
+- `SurvXStudio_s_1`：实体名 `SurvXStudio`，`_` 为分层分隔符
+- `Cat-Phys_s_1`：`-` 为拼接符，`_` 为分层分隔符
+
+### 1.8.3 key 格式与 ID 规则
 - 分层节点以路径 key 作为字典 key
 - 路径 key 格式：`父路径_分层标签_局部ID`
 - 局部 ID 分两类：
@@ -119,7 +153,7 @@ root_s_self_s       # 系统保留关键字
 root_s_meta_s       # 系统保留关键字
 ```
 
-### 1.8.3 版本号规则
+### 1.8.4 版本号规则
 - hoc：脚本级版本号，写在脚本头部，节点不单独带 `version`
 - dbfs：节点级版本号，每个节点自带 `version`
 - 格式：`YYYYMMDDHHMMSS`
@@ -250,17 +284,17 @@ INSERT INTO Cat (key, value, version) VALUES
 # Matter 表
 matter = {
     "Cat": "",
-    "体征_s_1": "height",
-    "体征_s_2": "weight"
+    "Phys_s_1": "height",
+    "Phys_s_2": "weight"
 }
 # 参数表
 _parameter = {
-    "Cat-体征_s_1": [
+    "Cat-Phys_s_1": [
         [30, 1, "20260101000000"],
         [32, 1, "20260601000000"],
         [35, 1, "20261201000000"]
     ],
-    "Cat-体征_s_2": [
+    "Cat-Phys_s_2": [
         [4.5, 2, "20260101000000"]
     ]
 }
@@ -295,10 +329,10 @@ CREATE TABLE _parameter (
 **示例数据**
 ```sql
 INSERT INTO _parameter (id0, id1, value, idx, version) VALUES
-('Cat', '体征_s_1', '30', 1, '20260101000000'),
-('Cat', '体征_s_1', '32', 1, '20260601000000'),
-('Cat', '体征_s_1', '35', 1, '20261201000000'),
-('Cat', '体征_s_2', '4.5', 2, '20260101000000');
+('Cat', 'Phys_s_1', '30', 1, '20260101000000'),
+('Cat', 'Phys_s_1', '32', 1, '20260601000000'),
+('Cat', 'Phys_s_1', '35', 1, '20261201000000'),
+('Cat', 'Phys_s_2', '4.5', 2, '20260101000000');
 ```
 
 ### 特殊设定
@@ -308,7 +342,7 @@ INSERT INTO _parameter (id0, id1, value, idx, version) VALUES
 - 同一条参数可有多版本记录，按 version 排序，取最大值为最新
 
 **两种声明方式**
-1. **主体 + 语义**：`('Cat', '体征_s_1', '30', 1, '20260101000000')` 表示 Cat 的身高是 30。
+1. **主体 + 语义**：`('Cat', 'Phys_s_1', '30', 1, '20260101000000')` 表示 Cat 的身高是 30。
 2. **参数 + 指标**：`('param_1', 'confidence', '0.6', 2, '20260101000000')` 表示第 1 条参数（Cat 的身高）的置信度是 0.6。
 
 > 补充约定：`param_1` 这类前缀派生 ID，支持引擎自动生成或手动书写，**前缀仅为引用层标识，不存入数据表原始记录**。
@@ -332,12 +366,12 @@ INSERT INTO _parameter (id0, id1, value, idx, version) VALUES
 # Matter 表
 matter = {
     "Cat": "",
-    "体征_s_1": "height",
-    "体征_s_2": "weight"
+    "Phys_s_1": "height",
+    "Phys_s_2": "weight"
 }
 # 约束表
 _constraint = {
-    "Cat-体征_s_1": [
+    "Cat-Phys_s_1": [
         ["q:```val <= 200```", 1, "20260101000000"],
         ["q:q3f8a2", 1, "20260101000001"]
     ]
@@ -375,8 +409,8 @@ CREATE TABLE _constraint (
 **示例数据**
 ```sql
 INSERT INTO _constraint (id0, id1, value, idx, version) VALUES
-('Cat', '体征_s_1', 'q:```val <= 200```', 1, '20260101000000'),
-('Cat', '体征_s_1', 'q:q3f8a2', 1, '20260101000001');
+('Cat', 'Phys_s_1', 'q:```val <= 200```', 1, '20260101000000'),
+('Cat', 'Phys_s_1', 'q:q3f8a2', 1, '20260101000001');
 ```
 
 ### 特殊设定
@@ -388,7 +422,7 @@ INSERT INTO _constraint (id0, id1, value, idx, version) VALUES
 - 约束执行后必须返回结果：True / False / 差值
 
 **两种声明方式**
-1. **约束参数**：`('Cat', '体征_s_1', 'q:```val <= 200```', 1, '20260101000000')` 表示：Cat 的身高这个参数，约束值是 ≤ 200。
+1. **约束参数**：`('Cat', 'Phys_s_1', 'q:```val <= 200```', 1, '20260101000000')` 表示：Cat 的身高这个参数，约束值是 ≤ 200。
 2. **约束 + 指标**：`('constraint_1', 'severity', 'q:```val > 0.8```', 3, '20260101000000')` 表示：第 1 条约束的严重程度判断是 val > 0.8。
 
 > 补充约定：`constraint_1` 这类前缀派生 ID，支持引擎自动生成或手动书写，**前缀仅为引用层标识，不存入数据表原始记录**。
@@ -431,16 +465,16 @@ _relation = {
 # Matter 表
 matter = {
     "Cat": "",
-    "体征_s_2": "weight",
-    "猫粮": ""
+    "Phys_s_2": "weight",
+    "CatFood": ""
 }
 # 参数表
 _parameter = {
-    "Cat-体征_s_2": [[4.5, 1, "20260101000000"]]
+    "Cat-Phys_s_2": [[4.5, 1, "20260101000000"]]
 }
 # 关系表
 _relation = {
-    "猫粮-param_1": [
+    "CatFood-param_1": [
         ["q:q7b2c", 1, "20260101000000"]
     ]
 }
@@ -483,7 +517,7 @@ INSERT INTO _relation (id0, id1, value, idx, version) VALUES
 ('Cat_s_1', 'Cat_s_2', 'q:q3f8a2', 1, '20260918224522');
 -- 外部关系
 INSERT INTO _relation (id0, id1, value, idx, version) VALUES
-('猫粮', 'param_1', 'q:q7b2c', 2, '20260918224522');
+('CatFood', 'param_1', 'q:q7b2c', 2, '20260918224522');
 ```
 
 ### 特殊设定
