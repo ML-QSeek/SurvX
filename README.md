@@ -11,7 +11,7 @@ One cutting-edge direction is **XGI — Xenogenic General Intelligence**, an int
 (XGI shares conceptual overlaps with AGI. Unlike mainstream AGI, Xenogenic focuses on evolved intelligence with emergent origins.)
 
 ## Quick Start
-> ⚠️ This is a research prototype and not published on PyPI. Clone the full repository to run locally.
+> ⚠️ This is a research prototype. Clone the full repository to run locally.
 
 **1. Clone repository**
 ```bash
@@ -54,13 +54,13 @@ XGI: Mathematical Model of Pan-Life Intelligence: [XGI-A-Mathematical-Model-of-P
 
 SurvX-XGI Long-Term Research Strategy: [SurvX-XGI-AI-Research-Longterm-Strategy.md](docs/SurvX-XGI-AI-Research-Longterm-Strategy.md)
 
+Lifecycle: [lifecycle.md](docs/lifecycle.md)
+
 Core engine context documents:
 
 Core Semantics: [core-context.md](survx/survx_engine/prompts/core-context.md)
 
 Modeling Flow: [modeling-flow.md](survx/survx_engine/prompts/modeling-flow.md)
-
-Lifecycle: [lifecycle.md](survx/survx_engine/prompts/lifecycle.md)
 
 Syntax Spec: [syntax.md](survx/survx_engine/prompts/syntax.md)
 

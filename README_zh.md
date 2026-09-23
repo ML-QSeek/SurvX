@@ -9,7 +9,7 @@ SurvX 是一套用于构建智能系统的范式，既可适配各类 AI 底座�
 （XGI 概念与 AGI 相近，当下 AGI 通常偏向指代类人智能，因此使用 Xenogenic 来做概念上的区分）
 
 ## 快速开始
-> ⚠️ 本项目为理念验证原型，尚未发布 PyPI 包，请克隆完整仓库进行本地运行。
+> ⚠️ 本项目为理念验证原型，请克隆完整仓库进行本地运行。
 
 **1. 获取代码**
 ```bash
@@ -32,35 +32,35 @@ python main.py
 - 创建、开发你自己的项目
 
 > 如果你不需要 studio，也可以直接使用引擎开发项目。
-> 详见 [developer-guide.md](docs/developer-guide.md)。
+> 详见 [developer-guide_zh.md](docs/developer-guide_zh.md)。
 
 🧪 原型仅供研究探索，不建议直接投入生产环境。
 
 ## 文档
 
-版本变更记录：[CHANGELOG.md](CHANGELOG.md)
+版本变更记录：[CHANGELOG_zh.md](CHANGELOG_zh.md)
 
-参与贡献指南：[CONTRIBUTING.md](CONTRIBUTING.md)
+参与贡献指南：[CONTRIBUTING_zh.md](CONTRIBUTING_zh.md)
 
-框架设计说明：[design.md](docs/design.md)
+框架设计说明：[design_zh.md](docs/design_zh.md)
 
-开发者指南：[developer-guide.md](docs/developer-guide.md)
+开发者指南：[developer-guide_zh.md](docs/developer-guide_zh.md)
 
-范式即解法框架：[paradigm-as-solution-framework.md](docs/paradigm-as-solution-framework.md)
+范式即解法框架：[paradigm-as-solution-framework_zh.md](docs/paradigm-as-solution-framework_zh.md)
 
-XGI：泛生命智能的数学模型：[XGI-A-Mathematical-Model-of-Pan-Life-Intelligence.md](docs/XGI-A-Mathematical-Model-of-Pan-Life-Intelligence.md)
+XGI：泛生命智能的数学模型：[XGI-A-Mathematical-Model-of-Pan-Life-Intelligence_zh.md](docs/XGI-A-Mathematical-Model-of-Pan-Life-Intelligence_zh.md)
 
-SurvX-XGI 长期研究策略：[SurvX-XGI-AI-Research-Longterm-Strategy.md](docs/SurvX-XGI-AI-Research-Longterm-Strategy.md)
+SurvX-XGI 长期研究策略：[SurvX-XGI-AI-Research-Longterm-Strategy_zh.md](docs/SurvX-XGI-AI-Research-Longterm-Strategy_zh.md)
+
+生命周期：[lifecycle_zh.md](docs/lifecycle_zh.md)
 
 以下是引擎核心上下文文档：
 
-核心语义：[core-context.md](survx/survx_engine/prompts/core-context.md)
+核心语义：[core-context_zh.md](survx/survx_engine/prompts/core-context_zh.md)
 
-建模流程：[modeling-flow.md](survx/survx_engine/prompts/modeling-flow.md)
+建模流程：[modeling-flow_zh.md](survx/survx_engine/prompts/modeling-flow_zh.md)
 
-生命周期：[lifecycle.md](survx/survx_engine/prompts/lifecycle.md)
-
-语法规范：[syntax.md](survx/survx_engine/prompts/syntax.md)
+语法规范：[syntax_zh.md](survx/survx_engine/prompts/syntax_zh.md)
 
 ## 工程结构
 ```
