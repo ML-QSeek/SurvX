@@ -1,187 +1,152 @@
-# SXM: Mathematics of Autonomous Subjects
+# SXM: Mathematics of Autonomous Agents
+## I. Core Research Problem
+Given an evolution function $S$, this paper investigates how to construct self-driven internal mechanisms for an object such that its time-series trajectory $\{M_t\}$ approximates $S$ under constraints.
 
-This document does not yet develop specific formulas. Its primary task is to pose the research question, delineate boundaries, establish method, and provide a validation scheme. Formulas belong to subsequent work; the current goal is to fully establish the problem space.
+The mechanism is defined along two functional dimensions. Both suspend ontological discussions and rely only on observable functional criteria. Analogous to properties such as "differentiable" or "integrable", they may be defined for arbitrary objects:
+1. **Egoification**: model a single object as an independent autonomous agent;
+2. **Nosification**: decompose a complex whole into a structured cluster of autonomous agents.
 
-## 1. The Research Question
+Judgment serves as a preliminary tool. The ultimate objective is optimization: via ego/nos mechanism construction, the object performs multi-objective optimization under constraints to improve the matching degree between its trajectory and $S$.
 
-Phenomena such as self-awareness, individual behavior, and collective effects have long been studied, yet a unified mathematical tool for them has never emerged.
+Notation convention: **ego** denotes a single autonomous agent; **nos** denotes a structured ensemble formed by interacting egos.
 
-Ideas about "how a subject behaves, how it cognizes, how it evolves" are scattered across psychology, behavioral science, game theory, cybernetics, and complex systems, but no unified and operational core has formed.
+---
+## II. Core Concepts: Ego and Nos
+### 1. Ego (Single Autonomous Agent)
+Functional definition, unbound to ontological attributes such as consciousness, intelligence or self-awareness:
+> **ego**: an autonomous object that performs multi-objective optimization relying on its core variables within a multi-constraint environment, builds internal cognition through external feedback, and continuously maintains its persistence.
 
-The goal of this document is to establish a researchable mathematical problem space for such phenomena.
+Required functional conditions:
+- A set of core variables $C$ exists;
+- Situated in a multi-constraint environment;
+- Contains conflicting multiple objectives;
+- Possesses feedback-enabled internal cognition;
+- Capable of sustaining its own persistence.
 
-## 2. Method
+Agent hierarchy and complexity are matters for subsequent subdivision and do not affect the base definition.
 
-A functionalist approach is adopted, setting aside ontological discussion.
+### 2. Nos (Multi-Agent Cluster)
+> **nos**: a complex system decomposable into multiple independent ego sub-agents. Sub-agents interact with one another, and the global behavior of the system can be jointly derived from sub-agent behaviors.
 
-Only this methodology is followed: start from function, examine what the object "does," rather than asking "what it essentially is."
+A nos is not a loose collection but an integrated whole structured by interactions among sub-agents.
 
-The mystery surrounding consciousness arises largely not from its internal mechanism, but from its mode of access: it can only be perceived from within, in the first person; it cannot be directly shared or publicly verified, yet it can be communicated. Therefore, approaching it from function and behavior is the only publicly verifiable path.
+---
+## III. Methodology and Validation Framework
+This work adopts functionalism: only behavioral and functional outputs of objects are examined. Non-verifiable ontological speculation is discarded; only observable, computable and simulatable content is retained.
 
-This methodology governs all subsequent trade-offs: anything that cannot be functionally verified is excluded from the framework.
+The framework forms an experimentally quantifiable system. Primary validation is simulation backtesting: agents are run inside a dynamic environment, with performance evaluated over long-term and short-term horizons. **Survival curve** is the core quantitative metric.
 
-## 3. Theoretical Core
+Validation imposes structural constraints on the model: all variables and model structures must be observable, computable and simulatable so that survival curves can be plotted and quantified.
 
-A set of core variables + two roles + a feedback loop.
+---
+## IV. Minimal Kernel of an Autonomous Agent
+The minimal complete kernel of a single ego:
+> Core variables $C$ + dual functional roles + closed-loop feedback system capable of generating internal representations.
 
-Core variables are a set of variables that include internal states.
+### 1. Dual Roles of Core Variables
+The set of core variables $C$ carries two coupled functions:
+- **Persistence carrier**: governed by safety thresholds; the agent fails once variables breach hazard bounds;
+- **Behavior driver**: gaps in variables trigger adaptive actions of the agent.
 
-The same set of core variables simultaneously plays two roles:
+Persistence constraints and behavioral driving originate from the same variables and represent two functional manifestations of one entity.
 
-1. Maintained objects: subject to survival constraints; once they fall below a danger zone, the subject fails;
-2. Behavioral drivers: when these variables have deficits, they drive the subject to produce behavior.
+### 2. Cognitive Feedback Loop
+The agent maintains a bidirectional closed loop: inward sensing of its own state, outward intervention on the environment.
 
-Survival (maintaining one's own existence) and drive (generating goals and demands) are not two independent things, but two functions of the same set of core variables.
+A plain signal loop does not constitute cognition. A feedback loop becomes cognitive **only if feedback can generate and retrieve internal representations**, enabling iterative cognitive updates for the agent.
 
-Deficit → drives behavior; falling below the threshold → survival fails.
+---
+## V. Two Core Sets of Criteria
+### 1. Selfifiability (E1–E7)
+Definition: an object can delineate an independent self-boundary and organize persistent autonomous behavior around its core.
 
-The feedback loop has two branches:
+The object is selfifiable (modelable as an ego) if all seven criteria are satisfied:
+```text
+E1 Can delineate independent core variables C
+E2 Can maintain persistence relying on C
+E3 Can drive behavior via gaps in C
+E4 Can construct a complete inward-outward feedback loop
+E5 Feedback can generate internal state representations
+E6 Internal representations can connect into the cognitive system
+E7 Can continuously perform multi-objective optimization under constraints
+```
 
-Inward: reading one's own state
-Outward: changing the external environment
+### 2. Groupability (G1–G4)
+Definition: a complex whole can be decomposed into a structured cluster of autonomous agents (modelable as nos).
 
-The two form a closed loop; subject behavior is the result of this loop's continuous solving.
+The whole is groupable if all four criteria are satisfied:
+```text
+G1 The whole can be partitioned into multiple independent sub-agents
+G2 Every sub-agent satisfies selfifiability criteria
+G3 Stable interactions exist between sub-agents
+G4 Global system behavior can be jointly derived from sub-agent behaviors
+```
 
-Thus the minimal core can be summarized as:
+---
+## VI. Agent Structure and Temporal Update Rules
+An evolving agent consists of four core components:
+- **Structure $M$**: organizational morphology;
+- **Self-cognition $E$**: internal model of self and environment;
+- **Mechanism $\Phi$**: internal rule functions;
+- **Core variables $C$**: the core for persistence and behavioral driving.
 
-A set of core variables + the dual role of maintenance/drive + a feedback loop.
-
-## 4. System Properties
-
-The system described here is a coupled nonlinear system with feedback, dynamically variable goal weights, coexisting multiple objectives, and time-varying constraints.
-
-From this it follows:
-
-- In most scenarios, no concise analytical solution exists;
-- In stable environments, feasible solutions and approximate optimal solutions can be found;
-- Real environments are open and dynamic; no global optimum exists, only continuously adaptive feasible solutions.
-
-Therefore this mathematical framework does not pursue the "optimal," but the "feasible."
-
-It does not describe "how to solve an optimization problem," but "how a subject continuously adapts and maintains survival in an open environment."
-
-## 5. Cognitive Mechanism
-
-Individual cognition is not equivalent to the real environment.
-
-The environment is unknown to the individual; the individual possesses its own internal cognition.
-
-The "optimum" an individual solves for is optimal relative to its own cognition, not the global optimum of the real environment.
-
-The deviation between cognition and environment drives continuous cognitive updating.
-
-Two modes can be distinguished, exploitation and exploration:
-
-- Not actively updating cognition: an approximate optimal solution is obtained under existing cognition;
-- Active cognitive exploration: "reducing cognitive deviation" is incorporated into the goal set, adding an exploratory goal, at which point the global optimum no longer holds.
-
-This means that within this mathematical framework, the "optimum" is an unstable concept, changing with cognition and exploratory behavior. What can be solved for is only the feasible solution under current cognition.
-
-## 6. Validation Scheme
-
-This framework is an experimental system, not purely deductive speculation.
-
-Validation method: backtesting, similar in spirit to quantitative investing, placing the subject into an environment for simulated runs.
-
-Performance evaluation includes both long-term and short-term dimensions.
-
-The core observable metric: the survival curve, characterizing the subject's survival performance along the time axis.
-
-Extendable research directions:
-
-- How to enable an individual to grow better and more purposefully;
-- Environment design (education, governance, opinion guidance, etc.);
-- Deriving collective behavior from individual evolution.
-
-The validation method constrains the framework's form:
-
-The model must support simulation and backtesting;
-Variables must be observable and computable;
-Otherwise the survival curve cannot be drawn.
-
-## 7. Research Boundaries
-
-The research object must simultaneously satisfy:
-
-Continuously maintaining a set of core internal variables;
-Being situated in a multi-constraint environment;
-Having multiple mutually conflicting goals;
-Possessing inward perception and outward action, forming a closed feedback loop;
-Behavior being the result of this system's continuous dynamic solving.
-
-System boundaries:
-
-The framework defines only the behavioral and cognitive growth rules of a single autonomous individual; populations and generational evolution are extension directions, not the starting point.
-
-It is a purely mathematical rule system, bound to no biological, machine, or simulation substrate, capable of generally describing all autonomous systems.
-
-It offers no ontological conclusions, upholding only the functionalist methodology.
-
-## 8. Positioning of the Program
-
-This document does not provide final answers, but constructs a problem space:
-
-Defining which problems are worth studying, what method to adopt, how to judge research success, and what lies outside the research scope.
-
-Whether the system ultimately proves simple or complex is left to subsequent research; the current goal is to make the research problem of autonomous subjects researchable, verifiable, and advanceable.
-
-## 9. Mathematical Form
-
-### 9.1 The Subject
-
-The subject evolves within an environment; its structure, self-cognition, and mechanism change over time.
-
-The subject consists of the following elements:
-
-- Structure M: the subject's organizational form;
-- Self-cognition E: the subject's internal model of itself and the environment;
-- Mechanism Φ: the relations and functions within the subject (i.e., the abstraction of Q);
-- Core variables C: a set of variables that are maintained and simultaneously drive behavior.
-
-The update rule for the subject's structure over time is:
-
+The system evolves dynamically over time. Environment $V$ acts as evolutionary constraints and is not treated as a peer entity alongside the agent:
+```text
 M_{t+1} = F( M_t , E_t , Φ_t ; C_t )
-
-The update rule for self-cognition over time is:
-
 E_{t+1} = G( E_t , M_t ; C_t )
-
-where F and G are update rules, and C_t is the value of the core variables at time t.
-
-The environment V is the background of the subject's evolution, not an independent term parallel to the subject, but a condition appearing in the above updates.
-
-The environment itself changes over time:
-
 V_{t+1} = H( V_t , M_t , E_t )
+```
 
-### 9.2 External Standard
+---
+## VII. Top-Level Optimization Objective and Constraints
+### 1. Evolution Evaluation Metric
+User-specified evolution function:
+```text
+S : {M_t} → matching score
+```
+Two types:
+- **Finite objective**: matching measured by distance between terminal state $M_T$ and target;
+- **Infinite objective**: cumulative matching score of state rate-of-change across the full time series.
 
-The external standard is given by the researcher, acting on the subject's developmental trajectory and outputting a degree of match:
+### 2. Core Optimization Problem
+Objective:
+```text
+max  Match( {M_t}, S )
+```
+Hard constraints:
+- **Self-consistency constraint**: all agent behaviors must be consistent with its cognitive model $E$;
+- **Persistence constraint**: core variables $C$ stay within safe bounds to prevent agent failure.
 
-S : {M_t} → degree of match
+---
+## VIII. Core System Properties
+The system described herein is a nonlinearly coupled system with cognitive feedback, dynamic weights, multiple objectives and time-varying constraints. Key properties:
+1. No closed-form analytical solution exists for general scenarios; no universal global optimum;
+2. Approximate optima and feasible solutions can be obtained in static stable environments;
+3. In open dynamic environments, only continuously adapted feasible solutions are attainable.
 
-It falls into two categories:
+The framework prioritizes **feasibility over static optimality**. It characterizes how agents continuously adapt and sustain persistence within open environments.
 
-- Finite goal: S({M_t}) = distance(M_T, S)
-- Infinite goal: S({M_t}) = accumulated match of the rate of change of M_t over time
+---
+## IX. Cognitive Iteration Mechanism
+An agent’s internal cognitive model inherently deviates from the real environment. The "optimum" solved by the agent is locally optimal under its own cognition and is not equivalent to the global optimum in reality.
 
-### 9.3 The Top-Level Problem
+Cognitive mismatch drives continual cognitive updates. Two operational modes:
+1. **Exploitation mode**: freeze existing cognition and solve for approximate feasible solutions for the current environment;
+2. **Exploration mode**: incorporate "reducing cognitive mismatch" into the objective set and actively update the cognitive model; under this mode, the classical notion of optimality breaks down.
 
-Given an external standard S, find the configuration that maximizes the match between the subject's trajectory {M_t} and S:
+Accordingly, optimality is dynamically unstable. The agent can only attain feasible solutions conditioned on its current cognition.
 
-max Match( {M_t}, S )
+---
+## X. Targets and Boundaries of the Framework
+### 1. Eligible Objects of Study
+Objects must satisfy all of the following:
+- Able to maintain core internal variables;
+- Situated within multi-constraint environments;
+- Possess conflicting multiple objectives;
+- Equipped with inward sensing and outward action closed loops;
+- Behavior emerges from dynamic system solving.
 
-Constraints:
-
-- Self-consistency constraint: all behavior must be self-consistent within self-cognition E;
-- Survival constraint: those variables in core variables C that serve as maintained objects must not fall below the danger zone.
-
-### 9.4 The Position of Core Variables
-
-Core variables C are the pivot of the subject:
-
-- As maintained objects, they enter the survival constraint;
-- As behavioral drivers, they enter the update rules F and G;
-- Their deficits drive behavior, and their thresholds determine failure.
-
-Mechanism Φ is not listed separately; it is embedded in F and G, manifesting as functional relations.
+### 2. Framework Boundaries
+- The theory starts from rules for a single ego; collective and generational evolution are incorporated via groupability criteria;
+- A general mathematical rule system with no carrier binding, capable of characterizing all autonomous systems;
+- Commits to functionalism, excludes ontological arguments; all claims are simulatable and verifiable.
