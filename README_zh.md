@@ -50,8 +50,6 @@ python main.py
 
 SXM：自治主体的数学：[sxm-mathematics-of-autonomous-subjects_zh.md](docs/sxm-mathematics-of-autonomous-subjects_zh.md)
 
-SurvX-XGI 长期研究策略：[survx-xgi-ai-research-longterm-strategy_zh.md](docs/survx-xgi-ai-research-longterm-strategy_zh.md)
-
 生命周期：[lifecycle_zh.md](docs/lifecycle_zh.md)
 
 以下是引擎核心上下文文档：

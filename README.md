@@ -50,8 +50,6 @@ Developer Guide: [developer-guide.md](docs/developer-guide.md)
 
 Paradigm as Solution Framework: [paradigm-as-solution-framework.md](docs/paradigm-as-solution-framework.md)
 
-SXM: Mathematics of Autonomous Subjects: [sxm-mathematics-of-autonomous-subjects.md](docs/sxm-mathematics-of-autonomous-subjects.md)
-
 SurvX-XGI Long-Term Research Strategy: [survx-xgi-ai-research-longterm-strategy.md](docs/survx-xgi-ai-research-longterm-strategy.md)
 
 Lifecycle: [lifecycle.md](docs/lifecycle.md)
