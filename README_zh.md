@@ -48,9 +48,9 @@ python main.py
 
 范式即解法框架：[paradigm-as-solution-framework_zh.md](docs/paradigm-as-solution-framework_zh.md)
 
-XGI：泛生命智能的数学模型：[XGI-A-Mathematical-Model-of-Pan-Life-Intelligence_zh.md](docs/XGI-A-Mathematical-Model-of-Pan-Life-Intelligence_zh.md)
+SXM：自治主体的数学：[sxm-mathematics-of-autonomous-subjects_zh.md](docs/sxm-mathematics-of-autonomous-subjects_zh.md)
 
-SurvX-XGI 长期研究策略：[SurvX-XGI-AI-Research-Longterm-Strategy_zh.md](docs/SurvX-XGI-AI-Research-Longterm-Strategy_zh.md)
+SurvX-XGI 长期研究策略：[survx-xgi-ai-research-longterm-strategy_zh.md](docs/survx-xgi-ai-research-longterm-strategy_zh.md)
 
 生命周期：[lifecycle_zh.md](docs/lifecycle_zh.md)
 

@@ -50,9 +50,9 @@ Developer Guide: [developer-guide.md](docs/developer-guide.md)
 
 Paradigm as Solution Framework: [paradigm-as-solution-framework.md](docs/paradigm-as-solution-framework.md)
 
-XGI: Mathematical Model of Pan-Life Intelligence: [XGI-A-Mathematical-Model-of-Pan-Life-Intelligence.md](docs/XGI-A-Mathematical-Model-of-Pan-Life-Intelligence.md)
+SXM: Mathematics of Autonomous Subjects: [sxm-mathematics-of-autonomous-subjects.md](docs/sxm-mathematics-of-autonomous-subjects.md)
 
-SurvX-XGI Long-Term Research Strategy: [SurvX-XGI-AI-Research-Longterm-Strategy.md](docs/SurvX-XGI-AI-Research-Longterm-Strategy.md)
+SurvX-XGI Long-Term Research Strategy: [survx-xgi-ai-research-longterm-strategy.md](docs/survx-xgi-ai-research-longterm-strategy.md)
 
 Lifecycle: [lifecycle.md](docs/lifecycle.md)
 
