@@ -52,13 +52,17 @@ SXM：自治主体的数学：[sxm-mathematics-of-autonomous-subjects_zh.md](doc
 
 生命周期：[lifecycle_zh.md](docs/lifecycle_zh.md)
 
+AI工程锻造：[forge_zh.md](survx/engine/forge/forge_zh.md)
+
 以下是引擎核心上下文文档：
 
-核心语义：[core-context_zh.md](survx/survx_engine/prompts/core-context_zh.md)
+核心语义：[core-context_zh.md](survx/engine/prompts/core-context_zh.md)
 
-建模流程：[modeling-flow_zh.md](survx/survx_engine/prompts/modeling-flow_zh.md)
+建模流程：[modeling-flow_zh.md](survx/engine/prompts/modeling-flow_zh.md)
 
-语法规范：[syntax_zh.md](survx/survx_engine/prompts/syntax_zh.md)
+语法规范：[syntax_zh.md](survx/engine/prompts/syntax_zh.md)
+
+Q函数设计规范：[q-iio-schema_zh.md](survx/engine/prompts/q-iio-schema_zh.md)
 
 ## 工程结构
 ```

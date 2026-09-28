@@ -1,4 +1,4 @@
-# FORGE · SurvX Embedded AI Engineering Forging System (Core Engine Perspective)
+# FORGE · SurvX Embedded AI Engineering Forging System
 ## 1. Core Overview & Engine Positioning
 **Core Positioning**: FORGE and GOV are natively built-in engineering discipline modules of the SurvX engine. They have no independent architecture, do not rely on external governance systems, and fully operate on SurvX native entity models (Instance / Cat / Ego / Env / Energy).
 

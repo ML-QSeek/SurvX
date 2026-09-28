@@ -54,13 +54,17 @@ SurvX-XGI Long-Term Research Strategy: [survx-xgi-ai-research-longterm-strategy.
 
 Lifecycle: [lifecycle.md](docs/lifecycle.md)
 
+AI Engineering Forging System：[forge.md](survx/engine/forge/forge.md)
+
 Core engine context documents:
 
-Core Semantics: [core-context.md](survx/survx_engine/prompts/core-context.md)
+Core Semantics: [core-context.md](survx/engine/prompts/core-context.md)
 
-Modeling Flow: [modeling-flow.md](survx/survx_engine/prompts/modeling-flow.md)
+Modeling Flow: [modeling-flow.md](survx/engine/prompts/modeling-flow.md)
 
-Syntax Spec: [syntax.md](survx/survx_engine/prompts/syntax.md)
+Syntax Spec: [syntax.md](survx/engine/prompts/syntax.md)
+
+Q-function Design Specification: [q-iio-schema.md](survx/engine/prompts/q-iio-schema.md)
 
 ## Project Structure
 ```
