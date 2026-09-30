@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SurvX Studio</title>
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon" />
+    <style>
+        /* ===== CSS Variables - 明亮白蓝科技配色 (极简无阴影) ===== */
+        :root {
+            --primary: #1a7cff;
+            --primary-dark: #0a5fcf;
+            --primary-light: #6aaaff;
+            --primary-transparent: rgba(26, 124, 255, 0.10);
+            --bg-primary: #f5f9ff;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #eaf2fe;
+            --text-primary: #0b1e33;
+            --text-secondary: #2c3e5c;
+            --text-tertiary: #6a7f9e;
+            --border-color: #d4e2fc;
+            --error-color: #f15b4a;
+            --success-color: #1a7cff;
+            --card-hover: rgba(26, 124, 255, 0.05);
+            --scrollbar-track: #eaf2fe;
+            --scrollbar-thumb: #b6cff5;
+            --scrollbar-thumb-hover: #8bb0f0;
+            --menu-highlight: rgba(26, 124, 255, 0.18);
+            --history-user-msg: rgba(26, 124, 255, 0.07);
+            --history-ai-msg: rgba(26, 124, 255, 0.02);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+        ::-webkit-scrollbar-corner { background: var(--scrollbar-track); }
+        * { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-weight: 350;
+            font-size: 13px;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== Main 撑满 ===== */
+        #main {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 画布上的品牌标识 */
+        .brand-on-canvas {
+            position: absolute;
+            top: 24px;
+            left: 28px;
+            z-index: 20;
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #0b1e33 0%, #1a7cff 50%, #0a5fcf 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            cursor: default;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-tertiary);
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            opacity: 0.6;
+            text-align: center;
+            z-index: 1;
+        }
+        .placeholder .big { font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.4; }
+
+        /* ===== 右侧边缘工具条组 ===== */
+        .edge-toolbar-group {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 150;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .edge-toolbar {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .edge-toolbar .color-bar {
+            width: 4px;
+            background: var(--primary);
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .edge-toolbar:hover .color-bar {
+            background: var(--primary-dark);
+        }
+
+        .edge-toolbar .tool-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-right: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 0;
+            gap: 0;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            flex-shrink: 0;
+            width: 44px;
+        }
+        .edge-toolbar:hover .tool-box {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        .edge-toolbar .tool-box .tool-btn {
+            width: 100%;
+            height: 32px;
+            min-height: 32px;
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+            border-radius: 0;
+            font-family: inherit;
+            padding: 0;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .edge-toolbar .tool-box .tool-btn:hover {
+            color: var(--primary);
+            background: var(--card-hover);
+        }
+        .edge-toolbar .tool-box .tool-btn:active {
+            transform: scale(0.95);
+        }
+        .edge-toolbar .tool-box .tool-btn:not(:last-child) {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .edge-toolbar .tool-box .tool-btn.active {
+            color: var(--primary);
+        }
+
+        /* ===== 底部工具栏 ===== */
+        .bottom-color-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 155;
+            width: 188px;
+            height: 3px;
+            background: var(--primary);
+            transition: background 0.2s;
+            pointer-events: none;
+        }
+
+        .bottom-tool-box {
+            position: fixed;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%) translateY(8px);
+            z-index: 160;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            padding: 3px 6px;
+            gap: 2px;
+            width: 188px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .bottom-trigger-area {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 165;
+            width: 200px;
+            height: 44px;
+            cursor: default;
+        }
+
+        .bottom-trigger-area:hover ~ .bottom-tool-box,
+        .bottom-tool-box:hover {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .bottom-tool-box .bottom-btn {
+            width: 36px;
+            height: 30px;
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+            border-radius: 0;
+            font-family: inherit;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        .bottom-tool-box .bottom-btn:hover {
+            color: var(--primary);
+            background: var(--card-hover);
+        }
+        .bottom-tool-box .bottom-btn:active {
+            transform: scale(0.95);
+        }
+        .bottom-tool-box .bottom-divider {
+            width: 1px;
+            height: 18px;
+            background: var(--border-color);
+            flex-shrink: 0;
+            margin: 0 2px;
+        }
+
+        /* ===== 底部字幕区 ===== */
+        #subtitleArea {
+            position: fixed;
+            bottom: 56px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 140;
+            width: 70%;
+            max-width: 800px;
+            min-height: 44px;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-primary);
+            font-size: 22px;
+            font-weight: 350;
+            letter-spacing: 0.6px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0;
+            transform: translateX(-50%) translateY(16px);
+            pointer-events: none;
+            line-height: 1.6;
+            word-break: break-word;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+        #subtitleArea.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: none;
+        }
+        #subtitleArea .subtitle-line {
+            opacity: 0;
+            animation: subtitleFade 3.2s ease-in-out forwards;
+            display: inline-block;
+        }
+        @keyframes subtitleFade {
+            0% { opacity: 0; transform: translateY(8px); }
+            18% { opacity: 1; transform: translateY(0); }
+            82% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-8px); }
+        }
+
+        /* ===== 对话框 ===== */
+        .dialog-container {
+            position: fixed;
+            bottom: 160px;
+            left: 160px;
+            width: 520px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 99;
+        }
+        .dialog-container.hidden {
+            opacity: 0;
+            transform: scale(0.96) translateY(6px);
+            pointer-events: none;
+        }
+        .dialog-drag-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 14px;
+            cursor: grab;
+            z-index: 10;
+            background: transparent;
+        }
+        .dialog-drag-area:active { cursor: grabbing; }
+
+        .dialog-body {
+            display: flex;
+            align-items: stretch;
+            padding: 0;
+            min-height: 44px;
+        }
+        .dialog-body .input-area {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: none;
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            min-height: 44px;
+            max-height: 150px;
+        }
+        .dialog-body .input-area:focus { border: none; }
+        .dialog-body .input-area::placeholder {
+            color: var(--text-tertiary);
+            font-size: 13px;
+        }
+
+        .dialog-body .send-btn {
+            width: 10px;
+            min-height: 44px;
+            background: var(--primary);
+            border: none;
+            color: transparent;
+            cursor: pointer;
+            transition: background 0.2s, width 0.2s;
+            flex-shrink: 0;
+            padding: 0;
+            font-size: 0;
+        }
+        .dialog-body .send-btn:hover {
+            background: var(--primary-dark);
+            width: 14px;
+        }
+        .dialog-body .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== 对话框上方 聊天记录面板 ===== */
+        .history-panel {
+            position: fixed;
+            left: 160px;
+            bottom: calc(160px + 44px + 4px);
+            width: 520px;
+            max-height: 340px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            z-index: 97;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(6px) scale(0.97);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            transform-origin: bottom center;
+        }
+        .history-panel.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+
+        .history-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-height: 0;
+        }
+
+        .history-msg {
+            padding: 6px 12px;
+            border-radius: 0;
+            font-size: 13px;
+            line-height: 1.6;
+            max-width: 92%;
+            word-break: break-word;
+        }
+        .history-msg.user {
+            align-self: flex-end;
+            background: var(--history-user-msg);
+            border-left: 2px solid var(--primary);
+            color: var(--text-primary);
+        }
+        .history-msg.ai {
+            align-self: flex-start;
+            background: var(--history-ai-msg);
+            border-left: 2px solid var(--text-tertiary);
+            color: var(--text-secondary);
+        }
+        .history-msg .msg-time {
+            font-size: 10px;
+            color: var(--text-tertiary);
+            opacity: 0.6;
+            display: block;
+            margin-top: 2px;
+        }
+        .history-empty {
+            color: var(--text-tertiary);
+            font-size: 13px;
+            text-align: center;
+            padding: 30px 0;
+            opacity: 0.5;
+        }
+
+        /* ===== 对话框下方菜单面板 ===== */
+        .dialog-menu-panel {
+            position: fixed;
+            left: 160px;
+            top: calc(160px + 44px + 2px);
+            width: 520px;
+            height: 32px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            gap: 2px;
+            z-index: 98;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-6px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .dialog-menu-panel.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .dialog-menu-panel .menu-item {
+            height: 26px;
+            padding: 0 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+            border-radius: 0;
+            white-space: nowrap;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .dialog-menu-panel .menu-item:hover {
+            color: var(--primary);
+            background: var(--card-hover);
+        }
+        .dialog-menu-panel .menu-item:active {
+            transform: scale(0.95);
+        }
+        .dialog-menu-panel .menu-item.highlight {
+            color: var(--primary);
+            background: var(--menu-highlight);
+        }
+        .dialog-menu-panel .menu-divider {
+            width: 1px;
+            height: 18px;
+            background: var(--border-color);
+            flex-shrink: 0;
+            margin: 0 2px;
+        }
+
+        @media (max-width: 640px) {
+            .dialog-container {
+                width: calc(100% - 32px);
+                left: 16px;
+                bottom: 56px;
+            }
+            .dialog-body .input-area { font-size: 13px; padding: 8px 12px; min-height: 40px; }
+            .dialog-body .send-btn { width: 8px; min-height: 40px; }
+            .dialog-body .send-btn:hover { width: 12px; }
+            .edge-toolbar .tool-box { width: 36px; }
+            .edge-toolbar .tool-box .tool-btn { height: 28px; min-height: 28px; font-size: 15px; }
+
+            .bottom-color-bar,
+            .bottom-tool-box {
+                width: 152px;
+            }
+            .bottom-color-bar { height: 3px; }
+            .bottom-tool-box { padding: 3px 4px; bottom: 3px; }
+            .bottom-tool-box .bottom-btn {
+                width: 30px;
+                height: 28px;
+                font-size: 13px;
+            }
+            .bottom-tool-box .bottom-divider {
+                height: 16px;
+                margin: 0 1px;
+            }
+            .bottom-trigger-area {
+                width: 164px;
+                height: 40px;
+            }
+            #subtitleArea {
+                width: 90%;
+                font-size: 18px;
+                padding: 12px 16px;
+                bottom: 48px;
+                min-height: 38px;
+            }
+
+            .dialog-menu-panel {
+                left: 16px;
+                top: calc(56px + 40px + 2px);
+                width: calc(100% - 32px);
+                height: 28px;
+                padding: 0 4px;
+            }
+            .dialog-menu-panel .menu-item {
+                font-size: 11px;
+                padding: 0 8px;
+                height: 22px;
+            }
+            .dialog-menu-panel .menu-divider {
+                height: 14px;
+                margin: 0 1px;
+            }
+
+            .history-panel {
+                left: 16px;
+                bottom: calc(56px + 40px + 3px);
+                width: calc(100% - 32px);
+                max-height: 240px;
+            }
+            .history-panel-body { padding: 6px 8px; }
+            .history-msg { font-size: 12px; padding: 4px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== MAIN 撑满，品牌标识放在画布上 ===== -->
+    <div id="main">
+        <div class="brand-on-canvas">SurvX Studio</div>
+        <div class="placeholder" id="placeholder">
+            <span class="big">⌘</span>
+            空画布 · 等待指令
+            <br />
+            <span style="font-size:12px;opacity:0.6;">AI 生成的内容将在这里呈现</span>
+        </div>
+    </div>
+
+    <!-- ===== 右侧边缘工具条组 ===== -->
+    <div class="edge-toolbar-group">
+        <!-- 第一组 -->
+        <div class="edge-toolbar">
+            <div class="tool-box">
+                <button class="tool-btn" id="toolChat" title="聊天">💬</button>
+                <button class="tool-btn" id="toolCaption" title="字幕">📝</button>
+                <button class="tool-btn" id="toolMode" title="切换输入模式">⌨</button>
+            </div>
+            <div class="color-bar"></div>
+        </div>
+        <!-- 第二组 -->
+        <div class="edge-toolbar">
+            <div class="tool-box">
+                <button class="tool-btn" id="toolHome" title="主菜单">🏠</button>
+                <button class="tool-btn" id="toolMenu" title="当前菜单">☰</button>
+                <button class="tool-btn" id="toolHistory" title="历史记录">🕐</button>
+            </div>
+            <div class="color-bar"></div>
+        </div>
+    </div>
+
+    <!-- ===== 底部工具栏 ===== -->
+    <div class="bottom-trigger-area"></div>
+    <div class="bottom-tool-box">
+        <button class="bottom-btn" id="btnSave" title="保存当前HTML">💾</button>
+        <div class="bottom-divider"></div>
+        <button class="bottom-btn" id="btnSubmit" title="提交让AI修改">📤</button>
+        <div class="bottom-divider"></div>
+        <button class="bottom-btn" id="btnPrev" title="上一个HTML">◀</button>
+        <button class="bottom-btn" id="btnNext" title="下一个HTML">▶</button>
+    </div>
+    <div class="bottom-color-bar"></div>
+
+    <!-- ===== 底部字幕区 ===== -->
+    <div id="subtitleArea"></div>
+
+    <!-- ===== 历史面板 ===== -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-panel-body" id="historyBody"></div>
+    </div>
+
+    <!-- ===== 对话框 ===== -->
+    <div class="dialog-container" id="dialog">
+        <div class="dialog-drag-area" id="dialogDragArea"></div>
+        <div class="dialog-body">
+            <textarea class="input-area" id="chatInput" placeholder="输入消息 … 回车发送 · Shift+回车换行" rows="2"></textarea>
+            <button class="send-btn" id="sendBtn" title="发送 (Enter)"></button>
+        </div>
+    </div>
+
+    <!-- ===== 对话框下方菜单面板 ===== -->
+    <div class="dialog-menu-panel" id="dialogMenuPanel">
+        <button class="menu-item" data-action="new">📄 新建</button>
+        <button class="menu-item" data-action="open">📂 打开</button>
+        <button class="menu-item" data-action="save">💾 保存</button>
+        <div class="menu-divider"></div>
+        <button class="menu-item" data-action="export">📤 导出</button>
+        <button class="menu-item" data-action="share">🔗 分享</button>
+        <div class="menu-divider"></div>
+        <button class="menu-item" data-action="delete">🗑 删除</button>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            const dialog = document.getElementById('dialog');
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const placeholder = document.getElementById('placeholder');
+            const dragArea = document.getElementById('dialogDragArea');
+
+            const toolChat = document.getElementById('toolChat');
+            const toolCaption = document.getElementById('toolCaption');
+            const toolMode = document.getElementById('toolMode');
+            const toolHome = document.getElementById('toolHome');
+            const toolMenu = document.getElementById('toolMenu');
+            const toolHistory = document.getElementById('toolHistory');
+
+            const btnSave = document.getElementById('btnSave');
+            const btnSubmit = document.getElementById('btnSubmit');
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+
+            const historyPanel = document.getElementById('historyPanel');
+            const historyBody = document.getElementById('historyBody');
+            let historyPanelOpen = false;
+
+            const menuPanel = document.getElementById('dialogMenuPanel');
+            const menuItems = menuPanel.querySelectorAll('.menu-item');
+            let highlightIndex = -1;
+            let menuPanelOpen = false;
+
+            const subtitleArea = document.getElementById('subtitleArea');
+            let captionOn = false;
+            let isSubtitlePlaying = false;
+            let subtitleTimer = null;
+
+            const DEFAULT_DIALOG_LEFT = 160;
+            const DEFAULT_DIALOG_BOTTOM = 160;
+
+            const chatHistory = [
+                { role: 'user', text: '你好，SurvX Studio！', time: '10:32' },
+                { role: 'ai', text: '你好！有什么可以帮你的？', time: '10:32' },
+                { role: 'user', text: '帮我生成一个登录页面', time: '10:33' },
+                { role: 'ai', text: '好的，正在生成一个简洁的登录页面...', time: '10:33' },
+                { role: 'ai', text: '已完成！包含用户名、密码输入框和登录按钮，采用明亮白蓝风格。', time: '10:34' },
+                { role: 'user', text: '能加一个注册链接吗？', time: '10:35' },
+                { role: 'ai', text: '没问题，已添加"注册新账号"链接在登录按钮下方。', time: '10:35' },
+                { role: 'user', text: '界面再精致一些', time: '10:36' },
+                { role: 'ai', text: '已优化：添加了渐变背景和更细腻的动效。', time: '10:37' },
+                { role: 'user', text: '完美，谢谢！', time: '10:38' },
+                { role: 'ai', text: '不客气！有需要随时找我 😊', time: '10:38' },
+                { role: 'user', text: '对了，支持暗色模式吗？', time: '10:39' },
+                { role: 'ai', text: '当前是明亮白蓝主题，暗色模式开发中。', time: '10:40' },
+            ];
+
+            function renderHistory() {
+                if (chatHistory.length === 0) {
+                    historyBody.innerHTML = `<div class="history-empty">暂无聊天记录</div>`;
+                    return;
+                }
+                let html = '';
+                chatHistory.forEach(msg => {
+                    const roleClass = msg.role === 'user' ? 'user' : 'ai';
+                    const label = msg.role === 'user' ? '你' : 'SurvX';
+                    html += `
+                        <div class="history-msg ${roleClass}">
+                            <strong>${label}</strong>：${msg.text}
+                            <span class="msg-time">${msg.time}</span>
+                        </div>
+                    `;
+                });
+                historyBody.innerHTML = html;
+                historyBody.scrollTop = historyBody.scrollHeight;
+            }
+
+            function updateHistoryPanelPosition() {
+                const rect = dialog.getBoundingClientRect();
+                const gap = 4;
+                historyPanel.style.left = rect.left + 'px';
+                historyPanel.style.width = rect.width + 'px';
+                historyPanel.style.bottom = (window.innerHeight - rect.top + gap) + 'px';
+            }
+
+            function openHistoryPanel() {
+                if (historyPanelOpen) return;
+                historyPanelOpen = true;
+                historyPanel.classList.add('open');
+                toolHistory.classList.add('active');
+                updateHistoryPanelPosition();
+                renderHistory();
+            }
+
+            function closeHistoryPanel() {
+                if (!historyPanelOpen) return;
+                historyPanelOpen = false;
+                historyPanel.classList.remove('open');
+                toolHistory.classList.remove('active');
+            }
+
+            function toggleHistoryPanel() {
+                if (historyPanelOpen) {
+                    closeHistoryPanel();
+                } else {
+                    openHistoryPanel();
+                }
+            }
+
+            const pageHistory = {
+                pages: [
+                    '<h1>页面 1</h1><p>这是第一个页面</p>',
+                    '<h1>页面 2</h1><p>这是第二个页面</p>',
+                    '<h1>页面 3</h1><p>这是第三个页面</p>'
+                ],
+                currentIndex: 0,
+                currentContent: ''
+            };
+
+            function getCurrentCanvasHTML() {
+                return placeholder.innerHTML;
+            }
+
+            function updateCanvasContent(html) {
+                placeholder.innerHTML = html;
+                pageHistory.currentContent = html;
+            }
+
+            function handleSave() {
+                console.log('[SurvX Studio] 保存当前HTML');
+                btnSave.style.color = 'var(--success-color)';
+                setTimeout(() => { btnSave.style.color = ''; }, 400);
+                placeholder.innerHTML = `
+                    <span class="big">💾</span>
+                    HTML 已保存
+                    <br /><br />
+                    <span style="font-size:12px;opacity:0.5;">页面已保存到当前主题</span>
+                `;
+            }
+
+            function handleSubmit() {
+                console.log('[SurvX Studio] 提交HTML让AI修改');
+                btnSubmit.style.color = 'var(--primary)';
+                setTimeout(() => { btnSubmit.style.color = ''; }, 400);
+                placeholder.innerHTML = `
+                    <span class="big">📤</span>
+                    已提交 AI 处理
+                    <br /><br />
+                    <span style="font-size:12px;opacity:0.5;">AI 正在分析并生成修改方案...</span>
+                `;
+            }
+
+            function handlePrev() {
+                if (pageHistory.currentIndex > 0) {
+                    pageHistory.currentIndex--;
+                    updateCanvasContent(pageHistory.pages[pageHistory.currentIndex]);
+                    btnPrev.style.color = 'var(--primary)';
+                    setTimeout(() => { btnPrev.style.color = ''; }, 300);
+                } else {
+                    btnPrev.style.color = 'var(--error-color)';
+                    setTimeout(() => { btnPrev.style.color = ''; }, 300);
+                }
+            }
+
+            function handleNext() {
+                if (pageHistory.currentIndex < pageHistory.pages.length - 1) {
+                    pageHistory.currentIndex++;
+                    updateCanvasContent(pageHistory.pages[pageHistory.currentIndex]);
+                    btnNext.style.color = 'var(--primary)';
+                    setTimeout(() => { btnNext.style.color = ''; }, 300);
+                } else {
+                    btnNext.style.color = 'var(--error-color)';
+                    setTimeout(() => { btnNext.style.color = ''; }, 300);
+                }
+            }
+
+            btnSave.addEventListener('click', handleSave);
+            btnSubmit.addEventListener('click', handleSubmit);
+            btnPrev.addEventListener('click', handlePrev);
+            btnNext.addEventListener('click', handleNext);
+
+            function updateMenuPanelPosition() {
+                const rect = dialog.getBoundingClientRect();
+                menuPanel.style.left = rect.left + 'px';
+                menuPanel.style.width = rect.width + 'px';
+                menuPanel.style.top = (rect.top + rect.height + 2) + 'px';
+            }
+
+            function clearHighlight() {
+                menuItems.forEach(item => item.classList.remove('highlight'));
+                highlightIndex = -1;
+            }
+
+            function setHighlight(index) {
+                clearHighlight();
+                if (index >= 0 && index < menuItems.length) {
+                    highlightIndex = index;
+                    menuItems[index].classList.add('highlight');
+                    menuItems[index].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                }
+            }
+
+            function closeMenuPanel() {
+                menuPanelOpen = false;
+                menuPanel.classList.remove('open');
+                clearHighlight();
+                if (!dialog.classList.contains('hidden')) {
+                    chatInput.focus();
+                }
+            }
+
+            function openMenuPanel() {
+                menuPanelOpen = true;
+                menuPanel.classList.add('open');
+                const firstItem = menuPanel.querySelector('.menu-item:not(.menu-divider)');
+                if (firstItem) {
+                    const idx = Array.from(menuItems).indexOf(firstItem);
+                    setHighlight(idx);
+                }
+            }
+
+            function toggleMenuPanel() {
+                if (menuPanelOpen) {
+                    closeMenuPanel();
+                } else {
+                    openMenuPanel();
+                }
+            }
+
+            function handleMenuKeydown(e) {
+                if (!menuPanelOpen) return;
+                const key = e.key.toLowerCase();
+                const items = Array.from(menuItems).filter(el => !el.classList.contains('menu-divider'));
+                if (items.length === 0) return;
+
+                let currentIdx = -1;
+                if (highlightIndex >= 0) {
+                    const currentItem = menuItems[highlightIndex];
+                    if (currentItem && !currentItem.classList.contains('menu-divider')) {
+                        currentIdx = items.indexOf(currentItem);
+                    }
+                }
+                if (currentIdx === -1) {
+                    let found = -1;
+                    for (let i = 0; i < menuItems.length; i++) {
+                        if (menuItems[i].classList.contains('highlight') && !menuItems[i].classList.contains('menu-divider')) {
+                            found = i;
+                            break;
+                        }
+                    }
+                    if (found !== -1) {
+                        currentIdx = items.indexOf(menuItems[found]);
+                    } else {
+                        currentIdx = -1;
+                    }
+                }
+
+                if (key === 'a') {
+                    e.preventDefault();
+                    if (currentIdx > 0) {
+                        const newItem = items[currentIdx - 1];
+                        const newIdx = Array.from(menuItems).indexOf(newItem);
+                        setHighlight(newIdx);
+                    } else if (currentIdx === -1 && items.length > 0) {
+                        const lastItem = items[items.length - 1];
+                        setHighlight(Array.from(menuItems).indexOf(lastItem));
+                    } else {
+                        const lastItem = items[items.length - 1];
+                        setHighlight(Array.from(menuItems).indexOf(lastItem));
+                    }
+                } else if (key === 'd') {
+                    e.preventDefault();
+                    if (currentIdx < items.length - 1 && currentIdx >= 0) {
+                        const newItem = items[currentIdx + 1];
+                        const newIdx = Array.from(menuItems).indexOf(newItem);
+                        setHighlight(newIdx);
+                    } else if (currentIdx === -1 && items.length > 0) {
+                        const firstItem = items[0];
+                        setHighlight(Array.from(menuItems).indexOf(firstItem));
+                    } else {
+                        const firstItem = items[0];
+                        setHighlight(Array.from(menuItems).indexOf(firstItem));
+                    }
+                } else if (key === 's') {
+                    e.preventDefault();
+                    if (highlightIndex >= 0) {
+                        const item = menuItems[highlightIndex];
+                        if (item && !item.classList.contains('menu-divider')) {
+                            item.click();
+                        }
+                    }
+                } else {
+                    closeMenuPanel();
+                }
+            }
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const action = this.dataset.action;
+                    console.log('[SurvX Studio] 菜单操作:', action);
+                    placeholder.innerHTML = `
+                        <span class="big">📋</span>
+                        执行操作：<strong>${this.textContent.trim()}</strong>
+                        <br /><br />
+                        <span style="font-size:12px;opacity:0.5;">菜单项 "${action}" 已触发（演示模式）</span>
+                    `;
+                    closeMenuPanel();
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                const homeBtn = document.getElementById('toolHome');
+                const menuBtn = document.getElementById('toolMenu');
+                const historyBtn = document.getElementById('toolHistory');
+                const dialogEl = document.getElementById('dialog');
+
+                if (menuPanel.contains(e.target) ||
+                    homeBtn.contains(e.target) ||
+                    menuBtn.contains(e.target) ||
+                    historyBtn.contains(e.target) ||
+                    dialogEl.contains(e.target) ||
+                    historyPanel.contains(e.target)) {
+                    return;
+                }
+                closeMenuPanel();
+            });
+
+            document.addEventListener('keydown', function(e) {
+                const key = e.key.toLowerCase();
+                if (key === 'escape') {
+                    if (historyPanelOpen) {
+                        closeHistoryPanel();
+                        return;
+                    }
+                    if (menuPanelOpen) {
+                        closeMenuPanel();
+                        return;
+                    }
+                }
+                if (menuPanelOpen) {
+                    if (key === 'a' || key === 'd' || key === 's') {
+                        handleMenuKeydown(e);
+                        return;
+                    }
+                    if (e.key.length === 1 || e.key === 'Enter' || e.key === ' ' || e.key === 'Backspace') {
+                        const activeEl = document.activeElement;
+                        if (activeEl && activeEl.tagName === 'TEXTAREA') {
+                            closeMenuPanel();
+                            return;
+                        }
+                        closeMenuPanel();
+                    }
+                }
+            });
+
+            function resetDialogPosition() {
+                dialog.style.left = DEFAULT_DIALOG_LEFT + 'px';
+                dialog.style.bottom = DEFAULT_DIALOG_BOTTOM + 'px';
+                dialog.style.right = 'auto';
+                dialog.style.top = 'auto';
+                dialog.style.transform = 'none';
+                if (!dialog.classList.contains('hidden')) {
+                    updateMenuPanelPosition();
+                }
+            }
+
+            function closeDialog() {
+                dialog.classList.add('hidden');
+                closeMenuPanel();
+                if (historyPanelOpen) {
+                    closeHistoryPanel();
+                }
+            }
+
+            function openDialog() {
+                resetDialogPosition();
+                dialog.classList.remove('hidden');
+                setTimeout(() => chatInput.focus(), 120);
+            }
+
+            function toggleDialog() {
+                if (dialog.classList.contains('hidden')) {
+                    openDialog();
+                } else {
+                    closeDialog();
+                }
+            }
+
+            toolChat.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleDialog();
+            });
+
+            function handleMenuButtonClick(e, label) {
+                e.stopPropagation();
+                if (dialog.classList.contains('hidden')) {
+                    openDialog();
+                }
+                updateMenuPanelPosition();
+                toggleMenuPanel();
+                placeholder.innerHTML = `
+                    <span class="big">${label === '主菜单' ? '🏠' : '☰'}</span>
+                    ${label}
+                    <br /><br />
+                    <span style="font-size:12px;opacity:0.5;">${label === '主菜单' ? '仪表盘 · 工作区 · 设置' : '文件 · 编辑 · 视图 · 工具'}</span>
+                `;
+            }
+
+            toolHome.addEventListener('click', function(e) {
+                handleMenuButtonClick(e, '主菜单');
+            });
+
+            toolMenu.addEventListener('click', function(e) {
+                handleMenuButtonClick(e, '当前菜单');
+            });
+
+            toolHistory.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (dialog.classList.contains('hidden')) {
+                    openDialog();
+                }
+                if (menuPanelOpen) {
+                    closeMenuPanel();
+                }
+                updateHistoryPanelPosition();
+                toggleHistoryPanel();
+            });
+
+            function splitTextByWidth(text, maxWidth, fontSize, fontFamily) {
+                if (maxWidth <= 0 || !text) return [text || ''];
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.font = `${fontSize}px ${fontFamily}`;
+                const bufferChar = '字';
+                const bufferWidth = ctx.measureText(bufferChar.repeat(5)).width;
+                const effectiveMaxWidth = maxWidth - bufferWidth;
+                const finalMaxWidth = Math.max(effectiveMaxWidth, maxWidth * 0.5);
+                const lines = [];
+                let currentLine = '';
+                for (const char of text) {
+                    const testLine = currentLine + char;
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > finalMaxWidth && currentLine.length > 0) {
+                        lines.push(currentLine);
+                        currentLine = char;
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                if (currentLine) lines.push(currentLine);
+                return lines.length > 0 ? lines : [text];
+            }
+
+            function showSubtitleLines(lines, index) {
+                if (!captionOn || index >= lines.length) {
+                    isSubtitlePlaying = false;
+                    subtitleArea.classList.remove('active');
+                    subtitleArea.innerHTML = '';
+                    return;
+                }
+                subtitleArea.innerHTML = '';
+                const span = document.createElement('span');
+                span.className = 'subtitle-line';
+                span.textContent = lines[index];
+                subtitleArea.appendChild(span);
+                subtitleArea.classList.add('active');
+                subtitleTimer = setTimeout(() => {
+                    showSubtitleLines(lines, index + 1);
+                }, 3200);
+            }
+
+            function startSubtitle(text) {
+                if (subtitleTimer) {
+                    clearTimeout(subtitleTimer);
+                    subtitleTimer = null;
+                }
+                subtitleArea.classList.remove('active');
+                subtitleArea.innerHTML = '';
+                if (!captionOn) return;
+                const rect = subtitleArea.getBoundingClientRect();
+                const paddingLeft = parseInt(window.getComputedStyle(subtitleArea).paddingLeft) || 24;
+                const paddingRight = parseInt(window.getComputedStyle(subtitleArea).paddingRight) || 24;
+                const maxWidth = rect.width - paddingLeft - paddingRight;
+                const computedStyle = window.getComputedStyle(subtitleArea);
+                const fontSize = parseInt(computedStyle.fontSize) || 22;
+                const fontFamily = computedStyle.fontFamily || '"Inter", "PingFang SC", "Microsoft YaHei", sans-serif';
+                const lines = splitTextByWidth(text, maxWidth, fontSize, fontFamily);
+                if (lines.length === 0) return;
+                isSubtitlePlaying = true;
+                showSubtitleLines(lines, 0);
+            }
+
+            function stopSubtitle() {
+                if (subtitleTimer) {
+                    clearTimeout(subtitleTimer);
+                    subtitleTimer = null;
+                }
+                subtitleArea.classList.remove('active');
+                subtitleArea.innerHTML = '';
+                isSubtitlePlaying = false;
+            }
+
+            toolCaption.addEventListener('click', function(e) {
+                e.stopPropagation();
+                captionOn = !captionOn;
+                this.style.color = captionOn ? 'var(--primary)' : '';
+                if (!captionOn) {
+                    stopSubtitle();
+                    placeholder.innerHTML = `
+                        <span class="big">📝</span>
+                        字幕已关闭
+                        <br /><br />
+                        <span style="font-size:12px;opacity:0.5;">字幕功能已停用</span>
+                    `;
+                } else {
+                    placeholder.innerHTML = `
+                        <span class="big">📝</span>
+                        字幕已开启
+                        <br /><br />
+                        <span style="font-size:12px;opacity:0.5;">实时转录已激活</span>
+                    `;
+                    const inputText = chatInput.value.trim();
+                    if (inputText) startSubtitle(inputText);
+                }
+            });
+
+            let modeIndex = 0;
+            const modes = ['九键', '全键盘', '语音'];
+            toolMode.addEventListener('click', function(e) {
+                e.stopPropagation();
+                modeIndex = (modeIndex + 1) % modes.length;
+                console.log('[SurvX Studio] 切换输入模式:', modes[modeIndex]);
+            });
+
+            function handleSend() {
+                const text = chatInput.value.trim();
+                if (!text) {
+                    chatInput.style.border = '1px solid var(--error-color)';
+                    setTimeout(() => { chatInput.style.border = 'none'; }, 500);
+                    return;
+                }
+                if (captionOn) startSubtitle(text);
+                placeholder.innerHTML = `
+                    <span class="big">💬</span>
+                    你发送了：<br />
+                    <span style="font-size:20px;color:var(--primary);">“${text}”</span>
+                    <br /><br />
+                    <span style="font-size:12px;opacity:0.5;">${captionOn ? '字幕已显示 ✓' : 'AI 正在处理 …（演示模式）'}</span>
+                `;
+                chatInput.value = '';
+                chatInput.focus();
+            }
+
+            sendBtn.addEventListener('click', handleSend);
+            chatInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    if (e.shiftKey) return;
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+
+            let isDragging = false;
+            let offsetX = 0, offsetY = 0;
+
+            dragArea.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return;
+                if (dialog.classList.contains('hidden')) return;
+                isDragging = true;
+                const rect = dialog.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                dialog.style.cursor = 'grabbing';
+                document.body.style.userSelect = 'none';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                let left = e.clientX - offsetX;
+                let top = e.clientY - offsetY;
+                const maxX = window.innerWidth - dialog.offsetWidth - 10;
+                const maxY = window.innerHeight - dialog.offsetHeight - 10;
+                left = Math.max(10, Math.min(left, maxX));
+                top = Math.max(10, Math.min(top, maxY));
+                dialog.style.left = left + 'px';
+                dialog.style.top = top + 'px';
+                dialog.style.right = 'auto';
+                dialog.style.bottom = 'auto';
+                dialog.style.transform = 'none';
+                if (menuPanelOpen) updateMenuPanelPosition();
+                if (historyPanelOpen) updateHistoryPanelPosition();
+                e.preventDefault();
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    dialog.style.cursor = '';
+                    document.body.style.userSelect = '';
+                }
+            });
+
+            let resizeTimeout;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    if (!dialog.classList.contains('hidden')) {
+                        if (menuPanelOpen) updateMenuPanelPosition();
+                        if (historyPanelOpen) updateHistoryPanelPosition();
+                    }
+                    if (captionOn && isSubtitlePlaying) {
+                        const currentText = subtitleArea.textContent || '';
+                        if (currentText) {
+                            const rect = subtitleArea.getBoundingClientRect();
+                            const paddingLeft = parseInt(window.getComputedStyle(subtitleArea).paddingLeft) || 24;
+                            const paddingRight = parseInt(window.getComputedStyle(subtitleArea).paddingRight) || 24;
+                            const maxWidth = rect.width - paddingLeft - paddingRight;
+                            const computedStyle = window.getComputedStyle(subtitleArea);
+                            const fontSize = parseInt(computedStyle.fontSize) || 22;
+                            const fontFamily = computedStyle.fontFamily || '"Inter", "PingFang SC", "Microsoft YaHei", sans-serif';
+                            const newLines = splitTextByWidth(currentText, maxWidth, fontSize, fontFamily);
+                            if (newLines.length > 0 && subtitleTimer) {
+                                if (subtitleTimer) {
+                                    clearTimeout(subtitleTimer);
+                                    subtitleTimer = null;
+                                }
+                                subtitleArea.innerHTML = '';
+                                const span = document.createElement('span');
+                                span.className = 'subtitle-line';
+                                span.textContent = newLines[0] || currentText;
+                                subtitleArea.appendChild(span);
+                                subtitleArea.classList.add('active');
+                                subtitleTimer = setTimeout(() => {
+                                    if (newLines.length > 1) {
+                                        showSubtitleLines(newLines.slice(1), 0);
+                                    } else {
+                                        isSubtitlePlaying = false;
+                                        subtitleArea.classList.remove('active');
+                                        subtitleArea.innerHTML = '';
+                                    }
+                                }, 3200);
+                            }
+                        }
+                    }
+                }, 200);
+            });
+
+            resetDialogPosition();
+            renderHistory();
+            console.log('SurvX Studio Demo 已启动 ✅ (极简无阴影，无标题栏)');
+            console.log('💡 点击右侧 📝 开启字幕，输入文字后发送即可显示在底部字幕区');
+            console.log('💡 点击右侧 🏠 或 ☰ 在对话框下方展开菜单面板');
+            console.log('💡 菜单打开时：A/D 左右移动光标，S 选择，其他按键关闭菜单');
+            console.log('💡 点击 🕐 在对话框上方展开/关闭历史聊天记录面板');
+        })();
+    </script>
+
+</body>
+</html>
