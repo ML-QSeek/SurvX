@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>编辑器 · SurvX</title>
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+body {
+    font: 350 13px/1.6 'Consolas','Monaco',monospace;
+    background: #0d1117;
+    color: #e6edf3;
+    display: flex;
+    flex-direction: column;
+}
+.bar { display:flex; align-items:center; gap:8px; padding:6px 12px; background:#161b22;
+       border-bottom:1px solid #30363d; font-size:12px; color:#8b949e; flex-shrink:0; }
+.bar .name { color:#e6edf3; }
+.bar .spacer { flex:1; }
+.bar button { font:inherit; font-size:12px; background:#21262d; color:#c9d1d9; border:1px solid #30363d;
+              padding:3px 10px; border-radius:4px; cursor:pointer; }
+.bar button:hover { color:#58a6ff; }
+.editor { flex:1; min-height:0; padding:16px; }
+textarea { width:100%; height:100%; background:#0d1117; color:#e6edf3; border:1px solid #30363d;
+           outline:none; padding:12px; font:inherit; font-size:13px; resize:none; border-radius:6px;
+           box-sizing:border-box; }
+.log { height:120px; flex-shrink:0; background:#161b22; border-top:1px solid #30363d; padding:8px 12px;
+       font:11px/1.5 'Consolas','Monaco',monospace; color:#8b949e; overflow-y:auto; }
+.log .line { white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<div class="bar">
+    <span class="name" id="title">🐍 demo.py</span>
+    <span style="color:#484f58;">·</span>
+    <span id="status">就绪</span>
+    <span class="spacer"></span>
+    <button onclick="run()">▶ 运行</button>
+</div>
+
+<div class="editor">
+    <textarea id="code" spellcheck="false"># 试试跟 AI 说：“改标题” 或 “加个按钮” 或 “生成表格”
+print("Hello, SurvX Studio!")
+
+for i in range(3):
+    print("line", i)
+</textarea>
+</div>
+
+<div class="log" id="log"><div class="line">[boot] editor.html 已加载</div></div>
+
+<script>
+const APP_ID = 'editor';
+const APP_TITLE = 'Python 编辑器';
+const MENU = [
+    { key: 'save',     label: '💾 保存',     action: 'save' },
+    { key: 'run',      label: '▶ 运行',      action: 'run' },
+    { divider: true },
+    { key: 'format',   label: '✨ 格式化',   action: 'format' },
+    { key: 'clearLog', label: '🧹 清空日志', action: 'clearLog' },
+];
+
+/* ---------- 通用：注册 + WS + 监听父页面 ---------- */
+(async function register() {
+    try {
+        await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ app_id: APP_ID, title: APP_TITLE, menu: MENU }),
+        });
+        await fetch('/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: 'child:' + APP_ID, to: 'parent', kind: 'menu', payload: { menu: MENU } }),
+        });
+    } catch (e) { console.warn(e); }
+})();
+
+(function ws() {
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const sock = new WebSocket(`${proto}://${location.host}/ws?as=child:${APP_ID}`);
+    sock.onmessage = ev => {
+        const data = JSON.parse(ev.data);
+        if (data.type !== 'message') return;
+        const msg = data.message;
+        if (msg.kind === 'script' && msg.payload && msg.payload.url) {
+            fetch(msg.payload.url).then(r => r.text()).then(code => {
+                try {
+                    new Function(code)();
+                    logLine('🤖 执行 AI 脚本: ' + (msg.payload.summary || ''));
+                } catch (e) { logLine('❌ 脚本错误: ' + e.message); }
+            });
+        }
+    };
+    sock.onclose = () => setTimeout(ws, 2000);
+})();
+
+window.addEventListener('message', e => {
+    const d = e.data;
+    if (!d || d.type !== 'svx:action') return;
+    const a = d.action;
+    if (a === 'save') save();
+    else if (a === 'run') run();
+    else if (a === 'format') format();
+    else if (a === 'clearLog') clearLog();
+});
+
+/* ---------- 编辑器功能 ---------- */
+const $ = id => document.getElementById(id);
+const code = $('code'), logEl = $('log'), statusEl = $('status');
+
+function logLine(s) {
+    const d = document.createElement('div');
+    d.className = 'line';
+    d.textContent = '[' + new Date().toTimeString().slice(0,8) + '] ' + s;
+    logEl.appendChild(d);
+    logEl.scrollTop = logEl.scrollHeight;
+}
+function clearLog() { logEl.innerHTML = ''; }
+
+function save() {
+    statusEl.textContent = '已保存';
+    logLine('💾 保存');
+    setTimeout(() => statusEl.textContent = '就绪', 1200);
+}
+function run() {
+    statusEl.textContent = '运行中…';
+    logLine('▶ 开始运行');
+    const lines = code.value.split('\n').filter(l => /^\s*print\(/.test(l));
+    lines.forEach((l, i) => setTimeout(() => logLine('  ' + l.replace(/^\s*print\(|\)\s*$/g, '')), i * 120));
+    setTimeout(() => {
+        statusEl.textContent = '完成';
+        logLine('✓ 完成');
+        setTimeout(() => statusEl.textContent = '就绪', 1200);
+    }, lines.length * 120 + 400);
+}
+function format() {
+    logLine('✨ 已格式化');
+    code.value = code.value.split('\n').map(l => l.replace(/\s+$/, '')).join('\n');
+}
+
+logLine('editor 已就绪，菜单已上报');
+</script>
+
+</body>
+</html>

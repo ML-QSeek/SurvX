@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SurvX Studio</title>
+<style>
+:root {
+    --primary: #1a7cff; --primary-dark: #0a5fcf;
+    --bg-primary: #f5f9ff; --bg-secondary: #ffffff; --bg-tertiary: #eaf2fe;
+    --text-primary: #0b1e33; --text-secondary: #2c3e5c; --text-tertiary: #6a7f9e;
+    --border: #d4e2fc; --error: #f15b4a;
+    --hover: rgba(26,124,255,.05); --highlight: rgba(26,124,255,.18);
+    --user-msg: rgba(26,124,255,.07); --ai-msg: rgba(26,124,255,.02);
+    --bar: 3px; --panel-w: 640px; --toolbar-w: 188px; --menu-h: 32px;
+    --edge-gap: 40px; --input-h: 44px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+    font: 350 13px/1.5 'Inter','Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    background: var(--bg-primary); color: var(--text-secondary);
+    display: flex; flex-direction: column;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-tertiary); }
+::-webkit-scrollbar-thumb { background: #b6cff5; }
+::-webkit-scrollbar-thumb:hover { background: #8bb0f0; }
+
+#main {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-primary);
+    min-height: 0;      /* 关键：防止 flex 子项被内容撑开 */
+}
+#studioFrame {
+    position: absolute;
+    inset: 0;           /* top/right/bottom/left 全 0 */
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: var(--bg-primary);
+}
+/* 右侧工具条 */
+.edge-toolbar-group {
+    position: fixed; right: 0; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 6px; align-items: flex-end; z-index: 150;
+}
+.edge-toolbar { display: flex; align-items: stretch; }
+.edge-toolbar .color-bar { width: 4px; background: var(--primary); transition: background .2s; }
+.edge-toolbar:hover .color-bar { background: var(--primary-dark); }
+.edge-toolbar .tool-box {
+    display: flex; flex-direction: column; width: 44px;
+    background: var(--bg-secondary); border: 1px solid var(--border); border-right: none;
+    opacity: 0; pointer-events: none; transform: translateX(8px);
+    transition: opacity .2s, transform .2s;
+}
+.edge-toolbar:hover .tool-box { opacity: 1; pointer-events: auto; transform: translateX(0); }
+.tool-btn {
+    display: flex; align-items: center; justify-content: center; height: 32px;
+    font: inherit; font-size: 18px; color: var(--text-tertiary);
+    background: none; border: none; cursor: pointer;
+    transition: background .2s, color .2s;
+}
+.tool-btn + .tool-btn { border-top: 1px solid var(--border); }
+.tool-btn:hover { color: var(--primary); background: var(--hover); }
+.tool-btn:active { transform: scale(.95); }
+.tool-btn.active { color: var(--primary); }
+
+/* 右下工具栏 */
+.toolbar-color-bar {
+    position: fixed; right: var(--edge-gap); bottom: 0;
+    width: var(--toolbar-w); height: var(--bar);
+    background: var(--primary); pointer-events: none; z-index: 155;
+}
+.bottom-trigger-area {
+    position: fixed; right: var(--edge-gap); bottom: 0;
+    width: var(--toolbar-w); height: 44px; z-index: 165;
+}
+.bottom-tool-box {
+    position: fixed; right: var(--edge-gap); bottom: var(--bar);
+    display: flex; align-items: center; justify-content: center; gap: 2px;
+    width: var(--toolbar-w); padding: 3px 6px;
+    background: var(--bg-secondary); border: 1px solid var(--border); border-bottom: none;
+    opacity: 0; pointer-events: none; transform: translateY(8px);
+    transition: opacity .2s, transform .2s; z-index: 160;
+}
+.bottom-trigger-area:hover ~ .bottom-tool-box,
+.bottom-tool-box:hover { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.bottom-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 30px; font: inherit; font-size: 15px;
+    color: var(--text-tertiary); background: none; border: none; cursor: pointer;
+    transition: background .2s, color .2s;
+}
+.bottom-btn:hover { color: var(--primary); background: var(--hover); }
+.bottom-btn:active { transform: scale(.95); }
+.bottom-divider { width: 1px; height: 18px; background: var(--border); margin: 0 2px; }
+
+/* 色条 / 对话框 / 字幕 / 历史 / 菜单（同之前） */
+.dialog-color-bar {
+    position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: var(--panel-w); height: var(--bar); background: var(--primary);
+    pointer-events: none; z-index: 95;
+}
+.dialog-container {
+    position: fixed; left: 50%; bottom: var(--bar); transform: translateX(-50%);
+    width: var(--panel-w); display: flex; flex-direction: column;
+    background: var(--bg-secondary); border: 1px solid var(--border); overflow: hidden;
+    transition: opacity .2s, transform .2s; z-index: 99;
+}
+.dialog-container.hidden { opacity: 0; pointer-events: none; transform: translateX(-50%) scale(.96) translateY(6px); }
+.dialog-body { display: flex; min-height: var(--input-h); }
+.input-area {
+    flex: 1; width: 100%; padding: 10px 14px;
+    font: inherit; font-size: 14px; line-height: 1.6;
+    color: var(--text-primary); background: var(--bg-tertiary);
+    border: none; outline: none; resize: none;
+    min-height: var(--input-h); max-height: 150px;
+}
+.input-area::placeholder { color: var(--text-tertiary); font-size: 13px; }
+
+#subtitleArea {
+    position: fixed; bottom: 56px; left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    display: flex; align-items: center; justify-content: center;
+    width: 70%; max-width: 800px; min-height: 44px; padding: 14px 24px;
+    text-align: center; font-size: 22px; font-weight: 350; letter-spacing: .6px;
+    line-height: 1.6; color: var(--text-primary);
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s, transform .3s;
+    word-break: break-word; z-index: 140;
+}
+#subtitleArea.active { opacity: 1; transform: translateX(-50%) translateY(0); }
+.subtitle-line { display: inline-block; opacity: 0; animation: subtitleFade 3.2s ease-in-out forwards; }
+@keyframes subtitleFade {
+    0% { opacity: 0; transform: translateY(8px); }
+    18% { opacity: 1; transform: translateY(0); }
+    82% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-8px); }
+}
+
+.history-panel {
+    position: fixed; left: 50%; width: var(--panel-w); max-height: 340px;
+    display: flex; flex-direction: column;
+    background: var(--bg-secondary); border: 1px solid var(--border); border-bottom: none;
+    overflow: hidden; opacity: 0; pointer-events: none;
+    transform: translateX(-50%) translateY(6px) scale(.97);
+    transform-origin: bottom center;
+    transition: opacity .2s, transform .2s; z-index: 97;
+}
+.history-panel.open { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0) scale(1); }
+.history-panel-body { flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; overflow-y: auto; min-height: 0; }
+.history-msg { max-width: 92%; padding: 6px 12px; font-size: 13px; line-height: 1.6; word-break: break-word; }
+.history-msg.user { align-self: flex-end; background: var(--user-msg); border-left: 2px solid var(--primary); color: var(--text-primary); }
+.history-msg.ai { align-self: flex-start; background: var(--ai-msg); border-left: 2px solid var(--text-tertiary); color: var(--text-secondary); }
+.history-msg.sys { align-self: center; font-size: 11px; color: var(--text-tertiary); opacity: .7; }
+.msg-time { display: block; margin-top: 2px; font-size: 10px; color: var(--text-tertiary); opacity: .6; }
+.history-empty { padding: 30px 0; text-align: center; font-size: 13px; color: var(--text-tertiary); opacity: .5; }
+
+.dialog-menu-panel {
+    position: fixed; left: 50%; bottom: var(--bar);
+    display: flex; align-items: center; gap: 2px;
+    width: var(--panel-w); height: var(--menu-h); padding: 0 6px;
+    background: var(--bg-secondary); border: 1px solid var(--border); border-top: none;
+    overflow-x: auto; overflow-y: hidden;
+    opacity: 0; pointer-events: none;
+    transform: translateX(-50%) translateY(24px);
+    transition: opacity .22s, transform .22s; z-index: 100;
+}
+.dialog-menu-panel.open { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.menu-item {
+    display: flex; align-items: center; justify-content: center;
+    height: 26px; padding: 0 12px; font: inherit; font-size: 12px;
+    white-space: nowrap; color: var(--text-tertiary);
+    background: transparent; border: none; cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.menu-item:hover { color: var(--primary); background: var(--hover); }
+.menu-item.highlight { color: var(--primary); background: var(--highlight); }
+.menu-item.active { color: var(--primary); background: var(--highlight); }
+.menu-divider { flex-shrink: 0; width: 1px; height: 18px; background: var(--border); margin: 0 2px; }
+
+/* toast */
+.toast {
+    position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-20px);
+    padding: 10px 20px; background: var(--text-primary); color: #fff;
+    font-size: 13px; border-radius: 8px; opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .25s; z-index: 300;
+}
+.toast.show { opacity: .95; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 640px) {
+    :root { --panel-w: calc(100vw - 32px); --toolbar-w: 152px; --edge-gap: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div id="main">
+    <iframe id="studioFrame" src="files/welcome.html" title="SurvX Studio"></iframe>
+</div>
+
+<!-- 右侧工具条 -->
+<div class="edge-toolbar-group">
+    <div class="edge-toolbar">
+        <div class="tool-box">
+            <button class="tool-btn" id="toolChat" title="聊天 / 输入">💬</button>
+            <button class="tool-btn" id="toolCaption" title="字幕">📝</button>
+            <button class="tool-btn" id="toolMode" title="切换输入模式">⌨</button>
+        </div>
+        <div class="color-bar"></div>
+    </div>
+    <div class="edge-toolbar">
+        <div class="tool-box">
+            <button class="tool-btn" id="toolHome" title="主菜单">🏠</button>
+            <button class="tool-btn" id="toolMenu" title="当前菜单">☰</button>
+            <button class="tool-btn" id="toolHistory" title="历史记录">🕐</button>
+        </div>
+        <div class="color-bar"></div>
+    </div>
+</div>
+
+<div class="toolbar-color-bar"></div>
+
+<div class="bottom-trigger-area"></div>
+<div class="bottom-tool-box">
+    <button class="bottom-btn" id="btnSave" title="保存">💾</button>
+    <div class="bottom-divider"></div>
+    <button class="bottom-btn" id="btnSubmit" title="提交 AI">📤</button>
+    <div class="bottom-divider"></div>
+    <button class="bottom-btn" id="btnPrev" title="上一 app">◀</button>
+    <button class="bottom-btn" id="btnNext" title="下一 app">▶</button>
+</div>
+
+<div class="dialog-color-bar"></div>
+<div id="subtitleArea"></div>
+
+<div class="history-panel" id="historyPanel">
+    <div class="history-panel-body" id="historyBody"></div>
+</div>
+
+<div class="dialog-container hidden" id="dialog">
+    <div class="dialog-body">
+        <textarea class="input-area" id="chatInput"
+            placeholder="跟 AI 说点什么 … 比如「改标题」「加个表格」" rows="2"></textarea>
+    </div>
+</div>
+
+<div class="dialog-menu-panel" id="dialogMenuPanel"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const frame = $('studioFrame');
+    const dialog = $('dialog'), chatInput = $('chatInput');
+    const toolChat = $('toolChat'), toolCaption = $('toolCaption'), toolMode = $('toolMode');
+    const toolHome = $('toolHome'), toolMenu = $('toolMenu'), toolHistory = $('toolHistory');
+    const btnSave = $('btnSave'), btnSubmit = $('btnSubmit'), btnPrev = $('btnPrev'), btnNext = $('btnNext');
+    const historyPanel = $('historyPanel'), historyBody = $('historyBody');
+    const menuPanel = $('dialogMenuPanel');
+    const subtitleArea = $('subtitleArea');
+    const toastEl = $('toast');
+
+    let ws = null;
+    let captionOn = false;
+    let subtitleTimer = null;
+    let historyPanelOpen = false;
+    let menuPanelOpen = false;
+    let menuKind = null;        // 'main' | 'context'
+    let contextMenu = [];       // 从服务器拉的当前 app 菜单
+    let activeAppTitle = '';
+    let menuButtons = [];
+    let highlightIndex = -1;
+
+    // 聊天历史（父页面自己的视角）
+    const chatLog = [];
+
+    /* ============================================================
+     * WS 连接
+     * ============================================================ */
+    function connectWS() {
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        ws = new WebSocket(`${proto}://${location.host}/ws?as=parent`);
+
+        ws.onopen = () => console.log('[parent] WS connected');
+        ws.onclose = () => { console.warn('[parent] WS closed, reconnect in 2s'); setTimeout(connectWS, 2000); };
+        ws.onerror = e => console.warn('[parent] WS error', e);
+
+        ws.onmessage = ev => {
+            const data = JSON.parse(ev.data);
+            if (data.type !== 'message') return;
+            const msg = data.message;
+            handleIncoming(msg);
+        };
+    }
+
+    function handleIncoming(msg) {
+        // 来自 LLM 的聊天回复 → 显示在历史面板
+        if (msg.kind === 'chat' && msg.from === 'llm' && msg.to === 'parent') {
+            chatLog.push({ role: 'ai', text: msg.payload.text, time: ts2hhmm(msg.ts) });
+            if (historyPanelOpen) renderHistory();
+        }
+        // 子页面上报 menu → 刷新 ☰ 当前菜单
+        if (msg.kind === 'menu' && msg.from.startsWith('child:')) {
+            loadActiveMenu();
+        }
+        // 通知类
+        if (msg.kind === 'notify' && msg.to === 'parent') {
+            toast(msg.payload.text || '');
+        }
+    }
+
+    /* ============================================================
+     * 主菜单（固定） & 当前菜单（从服务器拉）
+     * ============================================================ */
+    const MAIN_MENU = [
+        { key: 'welcome',   label: '🏠 首页',   action: 'goto:welcome.html' },
+        { key: 'editor',    label: '🐍 编辑器', action: 'goto:editor.html' },
+        { key: 'dashboard', label: '📊 看板',   action: 'goto:dashboard.html' },
+        { key: 'todo',      label: '✅ 待办',   action: 'goto:todo.html' },
+        { divider: true },
+        { key: 'reload',    label: '🔄 重载',   action: 'reload' },
+        { key: 'history',   label: '🕐 历史',   action: 'panel:history' },
+        { key: 'log',       label: '📋 日志',   action: 'panel:log' },
+    ];
+
+    async function loadActiveMenu() {
+        try {
+            const r = await fetch('/menu/active');
+            const d = await r.json();
+            contextMenu = d.menu || [];
+            activeAppTitle = d.title || '';
+            if (menuPanelOpen && menuKind === 'context') renderMenu();
+        } catch (e) { /* ignore */ }
+    }
+
+    function renderMenu() {
+        const items = menuKind === 'main' ? MAIN_MENU : contextMenu;
+        menuPanel.innerHTML = '';
+        menuButtons = [];
+
+        if (menuKind === 'context' && !items.length) {
+            const empty = document.createElement('div');
+            empty.style.cssText = 'padding:0 12px;font-size:12px;color:var(--text-tertiary);';
+            empty.textContent = '当前页面未上报菜单';
+            menuPanel.appendChild(empty);
+            return;
+        }
+
+        items.forEach(item => {
+            if (item.divider) {
+                const dv = document.createElement('div');
+                dv.className = 'menu-divider';
+                menuPanel.appendChild(dv);
+                return;
+            }
+            const b = document.createElement('button');
+            b.className = 'menu-item';
+            b.textContent = item.label;
+            b.dataset.action = item.action || item.key;
+            b.addEventListener('click', e => {
+                e.stopPropagation();
+                runMenuAction(item);
+                closeMenuPanel();
+            });
+            menuPanel.appendChild(b);
+            menuButtons.push(b);
+        });
+    }
+
+    function runMenuAction(item) {
+        const act = item.action || item.key;
+        // 父页面固定项：直接执行
+        if (menuKind === 'main') {
+            if (act.startsWith('goto:')) {
+                const file = act.split(':', 2)[1];
+                loadApp(file);
+            } else if (act === 'reload') {
+                frame.src = frame.src;
+            } else if (act === 'panel:history') {
+                openHistoryPanel();
+            } else if (act === 'panel:log') {
+                // 日志用历史面板兼容展示
+                openHistoryPanel('log');
+            }
+            return;
+        }
+
+        // 当前菜单：转发给子页面 + 通知服务器
+        postToChild({ type: 'svx:action', action: act, item });
+        fetch('/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                from: 'parent', to: 'child:' + (currentAppId() || 'unknown'),
+                kind: 'action', payload: { action: act, label: item.label },
+            }),
+        }).catch(() => {});
+    }
+
+    function currentAppId() {
+        const src = frame.getAttribute('src') || '';
+        const m = src.match(/files\/([^\/?#]+)\.html/);
+        return m ? m[1] : null;
+    }
+
+    /* ============================================================
+     * 菜单面板
+     * ============================================================ */
+    function setHighlight(i) {
+        menuButtons.forEach(b => b.classList.remove('highlight'));
+        highlightIndex = i;
+        if (i >= 0 && i < menuButtons.length) {
+            menuButtons[i].classList.add('highlight');
+            menuButtons[i].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+    }
+    function moveHighlight(delta) {
+        if (!menuButtons.length) return;
+        let idx = highlightIndex < 0 ? (delta > 0 ? -1 : 0) : highlightIndex;
+        idx = (idx + delta + menuButtons.length) % menuButtons.length;
+        setHighlight(idx);
+    }
+
+    function openMenuPanel(kind) {
+        menuKind = kind;
+        if (kind === 'context') loadActiveMenu().then(renderMenu);
+        else renderMenu();
+        menuPanelOpen = true;
+        menuPanel.classList.add('open');
+        setHighlight(0);
+        toolHome.classList.toggle('active', kind === 'main');
+        toolMenu.classList.toggle('active', kind === 'context');
+    }
+    function closeMenuPanel() {
+        menuPanelOpen = false;
+        menuKind = null;
+        menuPanel.classList.remove('open');
+        menuButtons.forEach(b => b.classList.remove('highlight'));
+        highlightIndex = -1;
+        toolHome.classList.remove('active');
+        toolMenu.classList.remove('active');
+    }
+    function toggleMenuPanel(kind) {
+        if (menuPanelOpen && menuKind === kind) closeMenuPanel();
+        else openMenuPanel(kind);
+    }
+
+    /* ============================================================
+     * 加载 app（切 iframe）
+     * ============================================================ */
+    function loadApp(file) {
+        frame.src = 'files/' + file;
+        contextMenu = [];
+        activeAppTitle = '';
+        toast('加载: ' + file);
+    }
+
+    /* ============================================================
+     * 历史面板
+     * ============================================================ */
+    function renderHistory() {
+        if (!chatLog.length) {
+            historyBody.innerHTML = '<div class="history-empty">暂无对话</div>';
+            return;
+        }
+        historyBody.innerHTML = chatLog.map(m => {
+            const cls = m.role === 'user' ? 'user' : (m.role === 'sys' ? 'sys' : 'ai');
+            const label = m.role === 'user' ? '你' : (m.role === 'sys' ? '' : 'AI');
+            return `<div class="history-msg ${cls}">
+                ${label ? `<strong>${label}</strong>：` : ''}${escapeHtml(m.text)}
+                <span class="msg-time">${m.time || ''}</span>
+            </div>`;
+        }).join('');
+        historyBody.scrollTop = historyBody.scrollHeight;
+    }
+    function updateHistoryPanelPosition() {
+        const rect = dialog.getBoundingClientRect();
+        historyPanel.style.left = (rect.left + rect.width / 2) + 'px';
+        historyPanel.style.width = rect.width + 'px';
+        historyPanel.style.bottom = (window.innerHeight - rect.top + 2) + 'px';
+    }
+    function openHistoryPanel() {
+        if (historyPanelOpen) return;
+        historyPanelOpen = true;
+        historyPanel.classList.add('open');
+        toolHistory.classList.add('active');
+        updateHistoryPanelPosition();
+        renderHistory();
+    }
+    function closeHistoryPanel() {
+        if (!historyPanelOpen) return;
+        historyPanelOpen = false;
+        historyPanel.classList.remove('open');
+        toolHistory.classList.remove('active');
+    }
+
+    /* ============================================================
+     * 对话框：提交给 LLM
+     * ============================================================ */
+    function openDialog() {
+        dialog.classList.remove('hidden');
+        setTimeout(() => chatInput.focus(), 120);
+    }
+    function closeDialog() {
+        dialog.classList.add('hidden');
+        closeMenuPanel();
+        closeHistoryPanel();
+    }
+    toolChat.addEventListener('click', e => {
+        e.stopPropagation();
+        dialog.classList.contains('hidden') ? openDialog() : closeDialog();
+    });
+
+    chatInput.addEventListener('keydown', async e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const text = chatInput.value.trim();
+            if (!text) return;
+            chatInput.value = '';
+
+            // 记录用户消息
+            chatLog.push({ role: 'user', text, time: nowHHMM() });
+            if (historyPanelOpen) renderHistory();
+            if (captionOn) startSubtitle(text);
+
+            // 组装上下文，提交给 /llm
+            const context = {
+                app_id: currentAppId(),
+                app_title: activeAppTitle,
+            };
+            try {
+                const r = await fetch('/llm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: text, context }),
+                });
+                const d = await r.json();
+                // AI 的回复会通过 WS 推回来（/llm 里也会往 parent 写一条 chat）
+                if (!d.success) toast('LLM 请求失败: ' + (d.error || ''));
+            } catch (err) {
+                toast('网络错误: ' + err.message);
+            }
+            chatInput.focus();
+        }
+    });
+
+    /* ============================================================
+     * 工具条按钮
+     * ============================================================ */
+    toolHome.addEventListener('click', e => {
+        e.stopPropagation();
+        if (dialog.classList.contains('hidden')) openDialog();
+        toggleMenuPanel('main');
+    });
+    toolMenu.addEventListener('click', e => {
+        e.stopPropagation();
+        if (dialog.classList.contains('hidden')) openDialog();
+        toggleMenuPanel('context');
+    });
+    toolHistory.addEventListener('click', e => {
+        e.stopPropagation();
+        if (dialog.classList.contains('hidden')) openDialog();
+        if (menuPanelOpen) closeMenuPanel();
+        if (historyPanelOpen) closeHistoryPanel(); else openHistoryPanel();
+    });
+
+    toolCaption.addEventListener('click', e => {
+        e.stopPropagation();
+        captionOn = !captionOn;
+        toolCaption.style.color = captionOn ? 'var(--primary)' : '';
+    });
+
+    let modeIndex = 0;
+    const modes = ['九键', '全键盘', '语音'];
+    toolMode.addEventListener('click', e => {
+        e.stopPropagation();
+        modeIndex = (modeIndex + 1) % modes.length;
+        toast('输入模式: ' + modes[modeIndex]);
+    });
+
+    /* ============================================================
+     * 底部工具栏
+     * ============================================================ */
+    function flash(btn) {
+        btn.style.color = 'var(--primary)';
+        setTimeout(() => btn.style.color = '', 350);
+    }
+    btnSave.addEventListener('click', () => {
+        flash(btnSave);
+        postToChild({ type: 'svx:action', action: 'save' });
+    });
+    btnSubmit.addEventListener('click', () => {
+        flash(btnSubmit);
+        const t = chatInput.value.trim() || '（来自底栏的提交）';
+        chatInput.value = t;
+        openDialog();
+        chatInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    });
+    btnPrev.addEventListener('click', () => {
+        flash(btnPrev);
+        postToChild({ type: 'svx:action', action: 'prev' });
+    });
+    btnNext.addEventListener('click', () => {
+        flash(btnNext);
+        postToChild({ type: 'svx:action', action: 'next' });
+    });
+
+    /* ============================================================
+     * 键盘交互（菜单）
+     * ============================================================ */
+    document.addEventListener('keydown', e => {
+        const key = e.key.toLowerCase();
+        if (key === 'escape') {
+            if (historyPanelOpen) return closeHistoryPanel();
+            if (menuPanelOpen) return closeMenuPanel();
+        }
+        if (menuPanelOpen) {
+            const el = document.activeElement;
+            if (el && el.tagName === 'TEXTAREA') return;
+            if (key === 'a') { e.preventDefault(); moveHighlight(-1); }
+            else if (key === 'd') { e.preventDefault(); moveHighlight(1); }
+            else if (key === 's' || e.key === 'Enter') {
+                e.preventDefault();
+                if (highlightIndex >= 0 && menuButtons[highlightIndex]) menuButtons[highlightIndex].click();
+            }
+        }
+    });
+
+    document.addEventListener('click', e => {
+        if (menuPanel.contains(e.target)) return;
+        if (toolHome.contains(e.target) || toolMenu.contains(e.target)) return;
+        if (toolHistory.contains(e.target) || dialog.contains(e.target) || historyPanel.contains(e.target)) return;
+        if (menuPanelOpen) closeMenuPanel();
+    });
+
+    /* ============================================================
+     * 父 → 子 消息
+     * ============================================================ */
+    function postToChild(payload) {
+        try { frame.contentWindow.postMessage(payload, '*'); } catch (e) {}
+    }
+
+    /* ============================================================
+     * 子 → 父 postMessage（例如 toast、请求切换 app）
+     * ============================================================ */
+    window.addEventListener('message', e => {
+        const d = e.data;
+        if (!d || typeof d !== 'object') return;
+        if (d.type === 'svx:toast') {
+            toast(d.text || '');
+        } else if (d.type === 'svx:goto' && d.file) {
+            loadApp(d.file);
+        } else if (d.type === 'svx:submit') {
+            // 子页面希望父页面把内容提交给 AI
+            openDialog();
+            chatInput.value = d.text || '';
+            chatInput.focus();
+        }
+    });
+
+    /* ============================================================
+     * 小工具
+     * ============================================================ */
+    function ts2hhmm(ts) {
+        const d = new Date(ts * 1000);
+        return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
+    function nowHHMM() {
+        const d = new Date();
+        return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
+    function escapeHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    let toastTimer = null;
+    function toast(text) {
+        if (!text) return;
+        toastEl.textContent = text;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+
+    function splitTextByWidth(text, maxWidth, fontSize, fontFamily) {
+        if (maxWidth <= 0 || !text) return [text || ''];
+        const ctx = document.createElement('canvas').getContext('2d');
+        ctx.font = `${fontSize}px ${fontFamily}`;
+        const lines = []; let line = '';
+        const finalMax = Math.max(maxWidth * 0.85, maxWidth - fontSize * 5);
+        for (const ch of text) {
+            if (ctx.measureText(line + ch).width > finalMax && line) {
+                lines.push(line); line = ch;
+            } else line += ch;
+        }
+        if (line) lines.push(line);
+        return lines.length ? lines : [text];
+    }
+    function showSubtitleLines(lines, i) {
+        if (!captionOn || i >= lines.length) {
+            subtitleArea.classList.remove('active');
+            subtitleArea.innerHTML = '';
+            return;
+        }
+        subtitleArea.innerHTML = `<span class="subtitle-line">${lines[i]}</span>`;
+        subtitleArea.classList.add('active');
+        subtitleTimer = setTimeout(() => showSubtitleLines(lines, i + 1), 3200);
+    }
+    function startSubtitle(text) {
+        clearTimeout(subtitleTimer);
+        subtitleArea.classList.remove('active');
+        subtitleArea.innerHTML = '';
+        if (!captionOn) return;
+        const rect = subtitleArea.getBoundingClientRect();
+        const cs = getComputedStyle(subtitleArea);
+        const maxWidth = rect.width - parseInt(cs.paddingLeft) - parseInt(cs.paddingRight);
+        const lines = splitTextByWidth(text, maxWidth, parseInt(cs.fontSize), cs.fontFamily);
+        showSubtitleLines(lines, 0);
+    }
+
+    /* ============================================================
+     * 启动
+     * ============================================================ */
+    connectWS();
+    loadActiveMenu();
+    renderHistory();
+    console.log('[parent] SurvX Studio 已启动 ✅');
+})();
+</script>
+
+</body>
+</html>

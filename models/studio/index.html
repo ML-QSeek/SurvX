@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SurvX Studio</title>
+<link rel="shortcut icon" href="/files/favicon.ico" type="image/x-icon" />
+<style>
+/* ===== 变量 ===== */
+:root {
+    --primary: #1a7cff;
+    --primary-dark: #0a5fcf;
+    --bg-primary: #f5f9ff;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #eaf2fe;
+    --text-primary: #0b1e33;
+    --text-secondary: #2c3e5c;
+    --text-tertiary: #6a7f9e;
+    --border: #d4e2fc;
+    --error: #f15b4a;
+    --hover: rgba(26, 124, 255, .05);
+    --highlight: rgba(26, 124, 255, .18);
+    --user-msg: rgba(26, 124, 255, .07);
+    --ai-msg: rgba(26, 124, 255, .02);
+
+    --bar: 3px;            /* 色条厚度 */
+    --panel-w: 640px;      /* 对话框 / 菜单 / 色条 / 历史 宽度 */
+    --toolbar-w: 188px;    /* 底部工具栏宽度 */
+    --menu-h: 32px;        /* 菜单高度 */
+    --edge-gap: 40px;      /* 工具栏距右边空隙 */
+    --input-h: 44px;       /* 输入框高度 */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+    font: 350 13px/1.5 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-tertiary); }
+::-webkit-scrollbar-thumb { background: #b6cff5; }
+::-webkit-scrollbar-thumb:hover { background: #8bb0f0; }
+* { scrollbar-width: thin; scrollbar-color: #b6cff5 var(--bg-tertiary); }
+
+/* ===== 画布 ===== */
+#main {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+#studioFrame {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: var(--bg-primary);
+}
+.placeholder {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-size: 14px; letter-spacing: .5px;
+    color: var(--text-tertiary);
+    opacity: .6;
+}
+.placeholder .big { display: block; font-size: 48px; margin-bottom: 12px; opacity: .4; }
+
+/* ===== 右侧工具条 ===== */
+.edge-toolbar-group {
+    position: fixed;
+    right: 0; top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+    z-index: 150;
+}
+.edge-toolbar { display: flex; align-items: stretch; }
+.edge-toolbar .color-bar {
+    width: 4px;
+    background: var(--primary);
+    transition: background .2s;
+}
+.edge-toolbar:hover .color-bar { background: var(--primary-dark); }
+.edge-toolbar .tool-box {
+    display: flex;
+    flex-direction: column;
+    width: 44px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-right: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(8px);
+    transition: opacity .2s, transform .2s;
+}
+.edge-toolbar:hover .tool-box {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+}
+.tool-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    font: inherit;
+    font-size: 18px;
+    color: var(--text-tertiary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+}
+.tool-btn + .tool-btn { border-top: 1px solid var(--border); }
+.tool-btn:hover { color: var(--primary); background: var(--hover); }
+.tool-btn:active { transform: scale(.95); }
+.tool-btn.active { color: var(--primary); }
+
+/* ===== 工具栏色条（常驻，右下角） ===== */
+.toolbar-color-bar {
+    position: fixed;
+    right: var(--edge-gap);
+    bottom: 0;
+    width: var(--toolbar-w);
+    height: var(--bar);
+    background: var(--primary);
+    pointer-events: none;
+    z-index: 155;
+}
+
+/* ===== 底部工具栏（右下角，色条上方滑出） ===== */
+.bottom-trigger-area {
+    position: fixed;
+    right: var(--edge-gap);
+    bottom: 0;
+    width: var(--toolbar-w);
+    height: 44px;
+    z-index: 165;
+}
+.bottom-tool-box {
+    position: fixed;
+    right: var(--edge-gap);
+    bottom: var(--bar);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: var(--toolbar-w);
+    padding: 3px 6px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity .2s, transform .2s;
+    z-index: 160;
+}
+.bottom-trigger-area:hover ~ .bottom-tool-box,
+.bottom-tool-box:hover {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+.bottom-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 30px;
+    font: inherit;
+    font-size: 15px;
+    color: var(--text-tertiary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+}
+.bottom-btn:hover { color: var(--primary); background: var(--hover); }
+.bottom-btn:active { transform: scale(.95); }
+.bottom-divider {
+    width: 1px; height: 18px;
+    background: var(--border);
+    margin: 0 2px;
+}
+
+/* ===== 对话框色条（常驻，底部正中） ===== */
+.dialog-color-bar {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: var(--panel-w);
+    height: var(--bar);
+    background: var(--primary);
+    pointer-events: none;
+    z-index: 95;
+}
+
+/* ===== 字幕 ===== */
+#subtitleArea {
+    position: fixed;
+    bottom: 56px; left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70%;
+    max-width: 800px;
+    min-height: 44px;
+    padding: 14px 24px;
+    text-align: center;
+    font-size: 22px; font-weight: 350; letter-spacing: .6px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s, transform .3s;
+    word-break: break-word;
+    z-index: 140;
+}
+#subtitleArea.active {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.subtitle-line {
+    display: inline-block;
+    opacity: 0;
+    animation: subtitleFade 3.2s ease-in-out forwards;
+}
+@keyframes subtitleFade {
+    0%   { opacity: 0; transform: translateY(8px); }
+    18%  { opacity: 1; transform: translateY(0); }
+    82%  { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-8px); }
+}
+
+/* ===== 对话框（底部正中，色条上方） ===== */
+.dialog-container {
+    position: fixed;
+    left: 50%;
+    bottom: var(--bar);
+    transform: translateX(-50%);
+    width: var(--panel-w);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: opacity .2s, transform .2s;
+    z-index: 99;
+}
+.dialog-container.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) scale(.96) translateY(6px);
+}
+.dialog-body { display: flex; align-items: stretch; min-height: var(--input-h); }
+/* 输入框占满整行（发送按钮已删除） */
+.input-area {
+    flex: 1;
+    width: 100%;
+    padding: 10px 14px;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    border: none;
+    outline: none;
+    resize: none;
+    min-height: var(--input-h);
+    max-height: 150px;
+}
+.input-area::placeholder { color: var(--text-tertiary); font-size: 13px; }
+
+/* ===== 历史面板（对话框上方） ===== */
+.history-panel {
+    position: fixed;
+    left: 50%;
+    width: var(--panel-w);
+    max-height: 340px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(6px) scale(.97);
+    transform-origin: bottom center;
+    transition: opacity .2s, transform .2s;
+    z-index: 97;
+}
+.history-panel.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+.history-panel-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 12px;
+    overflow-y: auto;
+    min-height: 0;
+}
+.history-msg {
+    max-width: 92%;
+    padding: 6px 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    word-break: break-word;
+}
+.history-msg.user {
+    align-self: flex-end;
+    background: var(--user-msg);
+    border-left: 2px solid var(--primary);
+    color: var(--text-primary);
+}
+.history-msg.ai {
+    align-self: flex-start;
+    background: var(--ai-msg);
+    border-left: 2px solid var(--text-tertiary);
+    color: var(--text-secondary);
+}
+.msg-time {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    opacity: .6;
+}
+.history-empty {
+    padding: 30px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-tertiary);
+    opacity: .5;
+}
+
+/* ===== 菜单面板（底部上滑，对话框色条上方） ===== */
+.dialog-menu-panel {
+    position: fixed;
+    left: 50%;
+    bottom: var(--bar);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    width: var(--panel-w);
+    height: var(--menu-h);
+    padding: 0 6px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-top: none;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(24px);
+    transition: opacity .22s, transform .22s;
+    z-index: 100;
+}
+.dialog-menu-panel.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+.menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 12px;
+    white-space: nowrap;
+    color: var(--text-tertiary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.menu-item:hover { color: var(--primary); background: var(--hover); }
+.menu-item:active { transform: scale(.95); }
+.menu-item.highlight { color: var(--primary); background: var(--highlight); }
+.menu-divider {
+    width: 1px; height: 18px;
+    background: var(--border);
+    margin: 0 2px;
+}
+
+/* ===== 移动端 ===== */
+@media (max-width: 640px) {
+    :root { --panel-w: calc(100vw - 32px); --toolbar-w: 152px; --edge-gap: 16px; }
+    .edge-toolbar .tool-box { width: 36px; }
+    .tool-btn { height: 28px; font-size: 15px; }
+    .bottom-tool-box { padding: 3px 4px; }
+    .bottom-btn { width: 30px; height: 28px; font-size: 13px; }
+    .bottom-divider { height: 16px; margin: 0 1px; }
+    #subtitleArea { width: 90%; bottom: 48px; font-size: 18px; padding: 12px 16px; min-height: 38px; }
+    .dialog-menu-panel { height: 28px; padding: 0 4px; }
+    .menu-item { height: 22px; padding: 0 8px; font-size: 11px; }
+    .menu-divider { height: 14px; margin: 0 1px; }
+    .history-panel { max-height: 240px; }
+    .history-panel-body { padding: 6px 8px; }
+    .history-msg { padding: 4px 10px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div id="main">
+    <!-- 隐藏的占位符：保留给原脚本 setCanvas() 使用，不再显示 -->
+    <div class="placeholder" id="placeholder" style="display:none;"></div>
+
+    <iframe id="studioFrame" src="files/welcome.html" title="SurvX Studio"></iframe>
+</div>
+
+<!-- 右侧工具条 -->
+<div class="edge-toolbar-group">
+    <div class="edge-toolbar">
+        <div class="tool-box">
+            <button class="tool-btn" id="toolChat" title="聊天">💬</button>
+            <button class="tool-btn" id="toolCaption" title="字幕">📝</button>
+            <button class="tool-btn" id="toolMode" title="切换输入模式">⌨</button>
+        </div>
+        <div class="color-bar"></div>
+    </div>
+    <div class="edge-toolbar">
+        <div class="tool-box">
+            <button class="tool-btn" id="toolHome" title="主菜单">🏠</button>
+            <button class="tool-btn" id="toolMenu" title="当前菜单">☰</button>
+            <button class="tool-btn" id="toolHistory" title="历史记录">🕐</button>
+        </div>
+        <div class="color-bar"></div>
+    </div>
+</div>
+
+<!-- 工具栏色条（常驻，右下角） -->
+<div class="toolbar-color-bar"></div>
+
+<!-- 底部工具栏（右下角，色条上方滑出） -->
+<div class="bottom-trigger-area"></div>
+<div class="bottom-tool-box">
+    <button class="bottom-btn" id="btnSave" title="保存当前HTML">💾</button>
+    <div class="bottom-divider"></div>
+    <button class="bottom-btn" id="btnSubmit" title="提交让AI修改">📤</button>
+    <div class="bottom-divider"></div>
+    <button class="bottom-btn" id="btnPrev" title="上一个HTML">◀</button>
+    <button class="bottom-btn" id="btnNext" title="下一个HTML">▶</button>
+</div>
+
+<!-- 对话框色条（常驻，底部正中） -->
+<div class="dialog-color-bar"></div>
+
+<!-- 字幕 -->
+<div id="subtitleArea"></div>
+
+<!-- 历史面板 -->
+<div class="history-panel" id="historyPanel">
+    <div class="history-panel-body" id="historyBody"></div>
+</div>
+
+<!-- 对话框（底部正中，色条上方；默认隐藏） -->
+<div class="dialog-container hidden" id="dialog">
+    <div class="dialog-body">
+        <textarea class="input-area" id="chatInput" placeholder="输入消息 … 回车发送 · Shift+回车换行" rows="2"></textarea>
+    </div>
+</div>
+
+<!-- 菜单面板（底部上滑，对话框色条上方） -->
+<div class="dialog-menu-panel" id="dialogMenuPanel">
+    <button class="menu-item" data-action="new">📄 新建</button>
+    <button class="menu-item" data-action="open">📂 打开</button>
+    <button class="menu-item" data-action="save">💾 保存</button>
+    <div class="menu-divider"></div>
+    <button class="menu-item" data-action="export">📤 导出</button>
+    <button class="menu-item" data-action="share">🔗 分享</button>
+    <div class="menu-divider"></div>
+    <button class="menu-item" data-action="delete">🗑 删除</button>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    const $ = id => document.getElementById(id);
+    const dialog = $('dialog'), chatInput = $('chatInput');
+    const placeholder = $('placeholder');
+    const toolChat = $('toolChat'), toolCaption = $('toolCaption'), toolMode = $('toolMode');
+    const toolHome = $('toolHome'), toolMenu = $('toolMenu'), toolHistory = $('toolHistory');
+    const btnSave = $('btnSave'), btnSubmit = $('btnSubmit'), btnPrev = $('btnPrev'), btnNext = $('btnNext');
+    const historyPanel = $('historyPanel'), historyBody = $('historyBody');
+    const menuPanel = $('dialogMenuPanel');
+    const menuItems = menuPanel.querySelectorAll('.menu-item');
+    const subtitleArea = $('subtitleArea');
+
+    let historyPanelOpen = false;
+    let menuPanelOpen = false;
+    let highlightIndex = -1;
+    let captionOn = false;
+    let isSubtitlePlaying = false;
+    let subtitleTimer = null;
+
+    /* ---------- 历史记录 ---------- */
+    const chatHistory = [
+        { role: 'user', text: '你好，SurvX Studio！', time: '10:32' },
+        { role: 'ai', text: '你好！有什么可以帮你的？', time: '10:32' },
+        { role: 'user', text: '帮我生成一个登录页面', time: '10:33' },
+        { role: 'ai', text: '好的，正在生成一个简洁的登录页面...', time: '10:33' },
+        { role: 'ai', text: '已完成！包含用户名、密码输入框和登录按钮，采用明亮白蓝风格。', time: '10:34' },
+        { role: 'user', text: '能加一个注册链接吗？', time: '10:35' },
+        { role: 'ai', text: '没问题，已添加"注册新账号"链接在登录按钮下方。', time: '10:35' },
+        { role: 'user', text: '界面再精致一些', time: '10:36' },
+        { role: 'ai', text: '已优化：添加了渐变背景和更细腻的动效。', time: '10:37' },
+        { role: 'user', text: '完美，谢谢！', time: '10:38' },
+        { role: 'ai', text: '不客气！有需要随时找我 😊', time: '10:38' },
+        { role: 'user', text: '对了，支持暗色模式吗？', time: '10:39' },
+        { role: 'ai', text: '当前是明亮白蓝主题，暗色模式开发中。', time: '10:40' },
+    ];
+
+    function renderHistory() {
+        if (!chatHistory.length) {
+            historyBody.innerHTML = '<div class="history-empty">暂无聊天记录</div>';
+            return;
+        }
+        historyBody.innerHTML = chatHistory.map(m => {
+            const cls = m.role === 'user' ? 'user' : 'ai';
+            const label = m.role === 'user' ? '你' : 'SurvX';
+            return `<div class="history-msg ${cls}">
+                        <strong>${label}</strong>：${m.text}
+                        <span class="msg-time">${m.time}</span>
+                    </div>`;
+        }).join('');
+        historyBody.scrollTop = historyBody.scrollHeight;
+    }
+
+    function updateHistoryPanelPosition() {
+        const rect = dialog.getBoundingClientRect();
+        const gap = 2;
+        historyPanel.style.left = (rect.left + rect.width / 2) + 'px';
+        historyPanel.style.width = rect.width + 'px';
+        historyPanel.style.bottom = (window.innerHeight - rect.top + gap) + 'px';
+    }
+
+    function openHistoryPanel() {
+        if (historyPanelOpen) return;
+        historyPanelOpen = true;
+        historyPanel.classList.add('open');
+        toolHistory.classList.add('active');
+        updateHistoryPanelPosition();
+        renderHistory();
+    }
+    function closeHistoryPanel() {
+        if (!historyPanelOpen) return;
+        historyPanelOpen = false;
+        historyPanel.classList.remove('open');
+        toolHistory.classList.remove('active');
+    }
+    function toggleHistoryPanel() {
+        historyPanelOpen ? closeHistoryPanel() : openHistoryPanel();
+    }
+
+    /* ---------- 页面历史 ---------- */
+    const pageHistory = {
+        pages: [
+            '<h1>页面 1</h1><p>这是第一个页面</p>',
+            '<h1>页面 2</h1><p>这是第二个页面</p>',
+            '<h1>页面 3</h1><p>这是第三个页面</p>'
+        ],
+        currentIndex: 0
+    };
+    const setCanvas = html => { placeholder.innerHTML = html; };
+
+    function flash(btn, color) {
+        btn.style.color = color;
+        setTimeout(() => btn.style.color = '', 350);
+    }
+
+    btnSave.addEventListener('click', () => {
+        flash(btnSave, 'var(--primary)');
+        setCanvas(`<span class="big">💾</span>HTML 已保存<br /><br />
+            <span style="font-size:12px;opacity:.5;">页面已保存到当前主题</span>`);
+    });
+    btnSubmit.addEventListener('click', () => {
+        flash(btnSubmit, 'var(--primary)');
+        setCanvas(`<span class="big">📤</span>已提交 AI 处理<br /><br />
+            <span style="font-size:12px;opacity:.5;">AI 正在分析并生成修改方案...</span>`);
+    });
+    btnPrev.addEventListener('click', () => {
+        if (pageHistory.currentIndex > 0) {
+            pageHistory.currentIndex--;
+            setCanvas(pageHistory.pages[pageHistory.currentIndex]);
+            flash(btnPrev, 'var(--primary)');
+        } else flash(btnPrev, 'var(--error)');
+    });
+    btnNext.addEventListener('click', () => {
+        if (pageHistory.currentIndex < pageHistory.pages.length - 1) {
+            pageHistory.currentIndex++;
+            setCanvas(pageHistory.pages[pageHistory.currentIndex]);
+            flash(btnNext, 'var(--primary)');
+        } else flash(btnNext, 'var(--error)');
+    });
+
+    /* ---------- 菜单 ---------- */
+    function clearHighlight() {
+        menuItems.forEach(i => i.classList.remove('highlight'));
+        highlightIndex = -1;
+    }
+    function setHighlight(i) {
+        clearHighlight();
+        if (i >= 0 && i < menuItems.length) {
+            highlightIndex = i;
+            menuItems[i].classList.add('highlight');
+            menuItems[i].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+    }
+    function closeMenuPanel() {
+        menuPanelOpen = false;
+        menuPanel.classList.remove('open');
+        clearHighlight();
+        if (!dialog.classList.contains('hidden')) chatInput.focus();
+    }
+    function openMenuPanel() {
+        menuPanelOpen = true;
+        menuPanel.classList.add('open');
+        const first = menuPanel.querySelector('.menu-item:not(.menu-divider)');
+        if (first) setHighlight(Array.from(menuItems).indexOf(first));
+    }
+    function toggleMenuPanel() {
+        menuPanelOpen ? closeMenuPanel() : openMenuPanel();
+    }
+
+    function handleMenuKeydown(e) {
+        const key = e.key.toLowerCase();
+        const items = Array.from(menuItems).filter(el => !el.classList.contains('menu-divider'));
+        if (!items.length) return;
+
+        let currentIdx = -1;
+        if (highlightIndex >= 0 && !menuItems[highlightIndex].classList.contains('menu-divider')) {
+            currentIdx = items.indexOf(menuItems[highlightIndex]);
+        }
+
+        if (key === 'a') {
+            e.preventDefault();
+            const idx = currentIdx > 0 ? currentIdx - 1 : items.length - 1;
+            setHighlight(Array.from(menuItems).indexOf(items[idx]));
+        } else if (key === 'd') {
+            e.preventDefault();
+            const idx = (currentIdx >= 0 && currentIdx < items.length - 1) ? currentIdx + 1 : 0;
+            setHighlight(Array.from(menuItems).indexOf(items[idx]));
+        } else if (key === 's') {
+            e.preventDefault();
+            if (highlightIndex >= 0) menuItems[highlightIndex].click();
+        } else {
+            closeMenuPanel();
+        }
+    }
+
+    menuItems.forEach(item => item.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const action = this.dataset.action;
+        setCanvas(`<span class="big">📋</span>执行操作：<strong>${this.textContent.trim()}</strong><br /><br />
+            <span style="font-size:12px;opacity:.5;">菜单项 "${action}" 已触发（演示模式）</span>`);
+        closeMenuPanel();
+    }));
+
+    document.addEventListener('click', e => {
+        if (menuPanel.contains(e.target) ||
+            toolHome.contains(e.target) || toolMenu.contains(e.target) || toolHistory.contains(e.target) ||
+            dialog.contains(e.target) || historyPanel.contains(e.target)) return;
+        closeMenuPanel();
+    });
+
+    document.addEventListener('keydown', e => {
+        const key = e.key.toLowerCase();
+        if (key === 'escape') {
+            if (historyPanelOpen) return closeHistoryPanel();
+            if (menuPanelOpen) return closeMenuPanel();
+        }
+        if (menuPanelOpen) {
+            if (key === 'a' || key === 'd' || key === 's') return handleMenuKeydown(e);
+            if (e.key.length === 1 || ['Enter', ' ', 'Backspace'].includes(e.key)) {
+                const el = document.activeElement;
+                if (el && el.tagName === 'TEXTAREA') return closeMenuPanel();
+                closeMenuPanel();
+            }
+        }
+    });
+
+    /* ---------- 对话框 ---------- */
+    function closeDialog() {
+        dialog.classList.add('hidden');
+        closeMenuPanel();
+        if (historyPanelOpen) closeHistoryPanel();
+    }
+    function openDialog() {
+        dialog.classList.remove('hidden');
+        setTimeout(() => chatInput.focus(), 120);
+    }
+    toolChat.addEventListener('click', e => {
+        e.stopPropagation();
+        dialog.classList.contains('hidden') ? openDialog() : closeDialog();
+    });
+
+    function handleMenuButtonClick(e, label) {
+        e.stopPropagation();
+        if (dialog.classList.contains('hidden')) openDialog();
+        toggleMenuPanel();
+        setCanvas(`<span class="big">${label === '主菜单' ? '🏠' : '☰'}</span>${label}<br /><br />
+            <span style="font-size:12px;opacity:.5;">${label === '主菜单' ? '仪表盘 · 工作区 · 设置' : '文件 · 编辑 · 视图 · 工具'}</span>`);
+    }
+    toolHome.addEventListener('click', e => handleMenuButtonClick(e, '主菜单'));
+    toolMenu.addEventListener('click', e => handleMenuButtonClick(e, '当前菜单'));
+
+    toolHistory.addEventListener('click', e => {
+        e.stopPropagation();
+        if (dialog.classList.contains('hidden')) openDialog();
+        if (menuPanelOpen) closeMenuPanel();
+        updateHistoryPanelPosition();
+        toggleHistoryPanel();
+    });
+
+    /* ---------- 字幕 ---------- */
+    function splitTextByWidth(text, maxWidth, fontSize, fontFamily) {
+        if (maxWidth <= 0 || !text) return [text || ''];
+        const ctx = document.createElement('canvas').getContext('2d');
+        ctx.font = `${fontSize}px ${fontFamily}`;
+        const buffer = ctx.measureText('字'.repeat(5)).width;
+        const finalMax = Math.max(maxWidth - buffer, maxWidth * 0.5);
+        const lines = [];
+        let line = '';
+        for (const ch of text) {
+            if (ctx.measureText(line + ch).width > finalMax && line) {
+                lines.push(line);
+                line = ch;
+            } else line += ch;
+        }
+        if (line) lines.push(line);
+        return lines.length ? lines : [text];
+    }
+
+    function showSubtitleLines(lines, i) {
+        if (!captionOn || i >= lines.length) {
+            isSubtitlePlaying = false;
+            subtitleArea.classList.remove('active');
+            subtitleArea.innerHTML = '';
+            return;
+        }
+        subtitleArea.innerHTML = `<span class="subtitle-line">${lines[i]}</span>`;
+        subtitleArea.classList.add('active');
+        subtitleTimer = setTimeout(() => showSubtitleLines(lines, i + 1), 3200);
+    }
+
+    function startSubtitle(text) {
+        clearTimeout(subtitleTimer);
+        subtitleArea.classList.remove('active');
+        subtitleArea.innerHTML = '';
+        if (!captionOn) return;
+        const rect = subtitleArea.getBoundingClientRect();
+        const cs = getComputedStyle(subtitleArea);
+        const maxWidth = rect.width - parseInt(cs.paddingLeft) - parseInt(cs.paddingRight);
+        const lines = splitTextByWidth(text, maxWidth, parseInt(cs.fontSize), cs.fontFamily);
+        if (!lines.length) return;
+        isSubtitlePlaying = true;
+        showSubtitleLines(lines, 0);
+    }
+
+    function stopSubtitle() {
+        clearTimeout(subtitleTimer);
+        subtitleArea.classList.remove('active');
+        subtitleArea.innerHTML = '';
+        isSubtitlePlaying = false;
+    }
+
+    toolCaption.addEventListener('click', e => {
+        e.stopPropagation();
+        captionOn = !captionOn;
+        e.currentTarget.style.color = captionOn ? 'var(--primary)' : '';
+        if (!captionOn) {
+            stopSubtitle();
+            setCanvas(`<span class="big">📝</span>字幕已关闭<br /><br />
+                <span style="font-size:12px;opacity:.5;">字幕功能已停用</span>`);
+        } else {
+            setCanvas(`<span class="big">📝</span>字幕已开启<br /><br />
+                <span style="font-size:12px;opacity:.5;">实时转录已激活</span>`);
+            const t = chatInput.value.trim();
+            if (t) startSubtitle(t);
+        }
+    });
+
+    let modeIndex = 0;
+    const modes = ['九键', '全键盘', '语音'];
+    toolMode.addEventListener('click', e => {
+        e.stopPropagation();
+        modeIndex = (modeIndex + 1) % modes.length;
+        console.log('[SurvX Studio] 切换输入模式:', modes[modeIndex]);
+    });
+
+    /* ---------- 发送（回车） ---------- */
+    function handleSend() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        if (captionOn) startSubtitle(text);
+        setCanvas(`<span class="big">💬</span>你发送了：<br />
+            <span style="font-size:20px;color:var(--primary);">“${text}”</span><br /><br />
+            <span style="font-size:12px;opacity:.5;">${captionOn ? '字幕已显示 ✓' : 'AI 正在处理 …（演示模式）'}</span>`);
+        chatInput.value = '';
+        chatInput.focus();
+    }
+    chatInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    });
+
+    /* ---------- 窗口尺寸变化 ---------- */
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (!dialog.classList.contains('hidden') && historyPanelOpen) {
+                updateHistoryPanelPosition();
+            }
+            if (captionOn && isSubtitlePlaying) {
+                const current = subtitleArea.textContent;
+                if (current) {
+                    clearTimeout(subtitleTimer);
+                    const rect = subtitleArea.getBoundingClientRect();
+                    const cs = getComputedStyle(subtitleArea);
+                    const maxWidth = rect.width - parseInt(cs.paddingLeft) - parseInt(cs.paddingRight);
+                    const lines = splitTextByWidth(current, maxWidth, parseInt(cs.fontSize), cs.fontFamily);
+                    if (lines.length) {
+                        subtitleArea.innerHTML = `<span class="subtitle-line">${lines[0]}</span>`;
+                        subtitleArea.classList.add('active');
+                        subtitleTimer = setTimeout(() => {
+                            if (lines.length > 1) showSubtitleLines(lines.slice(1), 0);
+                            else {
+                                isSubtitlePlaying = false;
+                                subtitleArea.classList.remove('active');
+                                subtitleArea.innerHTML = '';
+                            }
+                        }, 3200);
+                    }
+                }
+            }
+        }, 200);
+    });
+
+    renderHistory();
+    /* ---------- iframe 与欢迎页通信 ---------- */
+    const studioFrame = document.getElementById('studioFrame');
+    
+    window.addEventListener('message', e => {
+        const data = e.data;
+        if (!data || data.type !== 'survx-welcome') return;
+    
+        if (data.action === 'start') {
+            // 欢迎页点了「开始使用」→ 切到编辑器
+            studioFrame.src = 'files/editor.html';
+        } else if (data.action === 'docs') {
+            // 「查看用法」→ 在这里可以弹自己的说明，或者干脆不管
+            alert(
+                '用法速览：\n' +
+                '1. 点击顶部「打开目录…」选择本地文件夹\n' +
+                '2. 在左侧文件树中点击 .py 打开并运行\n' +
+                '3. 点击 .db / .duckdb 文件查看表并执行 SQL\n' +
+                '4. Ctrl+S 保存，Enter 执行 SQL'
+            );
+        }
+    });
+    console.log('SurvX Studio Demo 已启动 ✅');
+})();
+</script>
+
+</body>
+</html>

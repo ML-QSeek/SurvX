@@ -2,29 +2,64 @@
 """
 llmgate.py
 
-LLM 网关管控台。FastAPI + SQLite。
+中文：LLM 网关管控台。基于 FastAPI + SQLite，提供 Agent 权限管理、Agent Server 子进程管控、全局熔断、调用日志与统计看板。
+English: LLM gateway console. Built on FastAPI + SQLite; provides agent permission management, agent server subprocess control, global circuit breaker, call logs and a stats dashboard.
 
-功能
-----
-- Agent 权限表：启用/禁用、配额、模型（SQLite）
-- Agent Server 管理：配置、启停、重启、删除（子进程）
-- 全局熔断：一键 block / recover
-- 调用日志：SQLite
-- 统计：KPI、趋势、错误分布、告警
-- 页面：templates/index.html
+版本: 20260929150000
+作者: quruyi
+时间: 20260929150000 # 最后修改时间
 
-启动
-----
-python llmgate.py
+用法:
+    # 启动服务（默认监听 0.0.0.0:5000）
+    python llmgate.py
 
-环境变量
---------
-LLMGATE_HOST  默认 0.0.0.0
-LLMGATE_PORT  默认 5000
-AGENT_SCRIPT  默认 agent.py（同目录）
+环境变量:
+    LLMGATE_HOST   监听地址（默认 0.0.0.0）
+    LLMGATE_PORT   监听端口（默认 5000）
+    AGENT_SCRIPT   Agent 脚本路径（默认同目录 deepseek.py）
+
+功能:
+    - Agent 权限表：启用/禁用、日配额、模型（SQLite 表 agents）
+    - Agent Server 管理：配置、启停、重启、删除（以子进程方式拉起 AGENT_SCRIPT）
+    - 全局熔断：一键 block / recover
+    - 调用日志：SQLite 表 logs，记录 token、延迟、状态码、错误信息
+    - 统计：KPI、24h 趋势、错误分布、告警
+    - 页面：templates/index.html
+
+接口:
+    GET    /api/agents                      Agent 列表
+    POST   /api/agents/{agent_id}           注册 / 更新 Agent
+    POST   /api/agents/{agent_id}/enable    启用
+    POST   /api/agents/{agent_id}/disable   禁用
+    POST   /api/agents/{agent_id}/quota     设置配额
+    POST   /api/report                       Agent 上报调用记录
+    GET    /api/global/status                全局熔断状态
+    POST   /api/global/block                 开启熔断
+    POST   /api/global/recover               解除熔断
+    GET    /api/stats/overview               KPI 概览
+    GET    /api/stats/trend                  24h 趋势
+    GET    /api/stats/errors                 错误分布
+    GET    /api/stats/alerts                 告警
+    GET    /api/servers                      Server 列表
+    POST   /api/servers                      新增 Server
+    PUT    /api/servers/{name}               更新 Server
+    POST   /api/servers/{name}/start         启动
+    POST   /api/servers/{name}/stop          停止
+    POST   /api/servers/{name}/restart       重启
+    DELETE /api/servers/{name}               删除
+    GET    /api/logs                         调用日志
+
+说明:
+    - 子进程通过命令行参数与环境变量双通道把配置传给 AGENT_SCRIPT
+    - 子进程 stdout/stderr 重定向到 logs/{name}.log，便于排查启动问题
+    - 后台监控线程每 3 秒检查一次子进程状态，退出则更新 servers.status
+    - lifespan 启动时自动拉起 enabled=1 且 auto_start=1 的 Server
+    - api_key 在 /api/servers 列表中只返回 has_key，不返回明文
+    - 管理接口 /api/* 不做鉴权，生产环境请自行加 token 校验
 """
 
 import os
+import sys
 import sqlite3
 import subprocess
 import threading
@@ -46,7 +81,8 @@ from pydantic import BaseModel
 BASE_DIR = Path(__file__).parent
 DB_FILE = BASE_DIR / "llmgate.db"
 TEMPLATES_DIR = BASE_DIR / "templates"
-AGENT_SCRIPT = os.environ.get("AGENT_SCRIPT", str(BASE_DIR / "agent.py"))
+LOG_DIR = BASE_DIR / "logs"
+AGENT_SCRIPT = os.environ.get("AGENT_SCRIPT", str(BASE_DIR / "deepseek.py"))
 
 HOST = os.environ.get("LLMGATE_HOST", "0.0.0.0")
 PORT = int(os.environ.get("LLMGATE_PORT", "5000"))
@@ -158,7 +194,7 @@ def _start_server(name: str):
 
     # 命令行参数
     args = [
-        "python", AGENT_SCRIPT,
+        sys.executable, AGENT_SCRIPT,
         "--name", s["name"],
         "--provider", s["provider"],
         "--port", str(s["port"]),
@@ -182,13 +218,17 @@ def _start_server(name: str):
         "MODEL": s.get("model") or "",
     })
 
+    # 子进程输出写日志文件，便于排查
+    LOG_DIR.mkdir(exist_ok=True)
+    log_file = open(LOG_DIR / f"{name}.log", "a", encoding="utf-8")
+
     try:
         p = subprocess.Popen(
             args,
             env=env,
             cwd=str(BASE_DIR),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=log_file,
+            stderr=subprocess.STDOUT,
         )
     except Exception as e:
         return {"code": 1, "msg": f"启动失败: {e}"}
@@ -203,7 +243,7 @@ def _start_server(name: str):
     conn.commit()
     conn.close()
 
-    print(f"[启动] {name} pid={p.pid} port={s['port']}")
+    print(f"[启动] {name} pid={p.pid} port={s['port']} log={LOG_DIR / (name + '.log')}")
     return {"code": 0, "msg": "已启动", "pid": p.pid}
 
 
@@ -302,7 +342,7 @@ app = FastAPI(title="LLM-Gate", lifespan=lifespan)
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 # ============================================================

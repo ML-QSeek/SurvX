@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>欢迎 · SurvX</title>
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font: 350 14px/1.6 'Inter','PingFang SC',sans-serif;
+    background: #f5f9ff;
+    color: #2c3e5c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;      /* 内容超出时自身滚动，不影响父页面 */
+    padding: 40px 24px;
+    box-sizing: border-box;
+}
+.wrap { max-width: 720px; text-align: center; }
+.logo { display:inline-flex; align-items:center; justify-content:center; width:72px; height:72px; font-size:36px;
+        background:linear-gradient(135deg,#1a7cff,#0a5fcf); border-radius:18px; margin-bottom:20px;
+        box-shadow:0 6px 24px rgba(26,124,255,.18); }
+h1 { font-size: 28px; font-weight:600; color:#0b1e33; margin-bottom:10px; }
+h1 span { background:linear-gradient(135deg,#0b1e33,#1a7cff 60%,#0a5fcf);
+          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+p { color:#6a7f9e; margin-bottom:24px; }
+.apps { display:grid; grid-template-columns: repeat(2,1fr); gap:12px; margin-top:32px; }
+.app-card { padding:16px; background:#fff; border:1px solid #d4e2fc; border-radius:10px; cursor:pointer;
+            transition: all .2s; text-align:left; }
+.app-card:hover { border-color:#1a7cff; transform: translateY(-2px); box-shadow:0 6px 20px rgba(26,124,255,.12); }
+.app-card .ico { font-size:22px; margin-bottom:6px; }
+.app-card h3 { font-size:14px; color:#0b1e33; margin-bottom:4px; }
+.app-card p { font-size:12px; color:#6a7f9e; margin:0; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+    <div class="logo">🛠</div>
+    <h1>欢迎使用 <span>SurvX Studio</span></h1>
+    <p>从下面选一个应用开始。所有 app 都会向服务器注册，并向父页面 ☰ 上报自己的菜单。</p>
+
+    <div class="apps">
+        <div class="app-card" data-goto="editor.html">
+            <div class="ico">🐍</div>
+            <h3>Python 编辑器</h3>
+            <p>上报：保存 / 运行 / 格式化 菜单</p>
+        </div>
+        <div class="app-card" data-goto="dashboard.html">
+            <div class="ico">📊</div>
+            <h3>数据看板</h3>
+            <p>上报：刷新 / 导出 菜单</p>
+        </div>
+        <div class="app-card" data-goto="todo.html">
+            <div class="ico">✅</div>
+            <h3>待办清单</h3>
+            <p>上报：添加 / 清空 菜单</p>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+ * 子页面通用脚本（建议复制到每个子页面）
+ * ============================================================ */
+
+// 1. 注册自己
+(async function register() {
+    const app_id = 'welcome';
+    const title = '首页';
+    const menu = [
+        { key: 'goto-editor',    label: '🐍 打开编辑器', action: 'goto:editor.html' },
+        { key: 'goto-dashboard', label: '📊 打开看板',   action: 'goto:dashboard.html' },
+        { key: 'goto-todo',      label: '✅ 打开待办',   action: 'goto:todo.html' },
+    ];
+    try {
+        await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ app_id, title, menu }),
+        });
+        // 上报菜单（同时更新 active_app）
+        await fetch('/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: 'child:' + app_id, to: 'parent', kind: 'menu', payload: { menu } }),
+        });
+    } catch (e) { console.warn('注册失败', e); }
+})();
+
+// 2. 建立 WS，收脚本
+(function connectWS() {
+    const app_id = 'welcome';
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${proto}://${location.host}/ws?as=child:${app_id}`);
+
+    ws.onmessage = ev => {
+        const data = JSON.parse(ev.data);
+        if (data.type !== 'message') return;
+        const msg = data.message;
+
+        // 收到脚本 → 下载 → 执行
+        if (msg.kind === 'script' && msg.payload && msg.payload.url) {
+            fetch(msg.payload.url)
+                .then(r => r.text())
+                .then(code => {
+                    try {
+                        new Function(code)();
+                        console.log('[child] 执行脚本:', msg.payload.summary);
+                        if (window.parent !== window) {
+                            window.parent.postMessage({ type: 'svx:toast', text: '🤖 ' + (msg.payload.summary || '脚本已执行') }, '*');
+                        }
+                    } catch (err) {
+                        console.error('脚本执行失败', err);
+                    }
+                });
+        }
+    };
+    ws.onclose = () => setTimeout(connectWS, 2000);
+})();
+
+// 3. 监听父页面的动作指令
+window.addEventListener('message', e => {
+    const d = e.data;
+    if (!d || d.type !== 'svx:action') return;
+    console.log('[child] 收到父页面动作:', d.action);
+    // welcome 页面处理 goto
+    if (typeof d.action === 'string' && d.action.startsWith('goto:')) {
+        const file = d.action.split(':', 2)[1];
+        if (window.parent !== window) {
+            window.parent.postMessage({ type: 'svx:goto', file }, '*');
+        } else {
+            location.href = file;
+        }
+    }
+});
+
+// 4. 卡片点击 → 通知父页面切换
+document.querySelectorAll('[data-goto]').forEach(el => {
+    el.addEventListener('click', () => {
+        const file = el.dataset.goto;
+        if (window.parent !== window) window.parent.postMessage({ type: 'svx:goto', file }, '*');
+        else location.href = file;
+    });
+});
+</script>
+
+</body>
+</html>

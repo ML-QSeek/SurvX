@@ -1,36 +1,49 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 deepseek.py
 
-DeepSeek Agent 服务（网关适配版）。FastAPI。
+中文：DeepSeek Agent 服务（网关适配版）。启动时从命令行 / 环境变量读取配置，向 llmgate 网关注册；提供同步对话、流式对话、异步脚本生成与文件拉取，并通过 WebSocket 广播脚本完成事件。
+English: DeepSeek Agent service (gateway-adapted). On startup reads config from CLI args / env vars and registers with the llmgate gateway; provides synchronous chat, streaming chat, async script generation and file fetching, and broadcasts script-ready events over WebSocket.
 
-由 llmgate 拉起，通过命令行 / 环境变量接收配置：
-    --name / AGENT_NAME          实例名（如 agent-deepseek）
-    --provider / PROVIDER         固定 deepseek
-    --port / PORT                监听端口
-    --api-key / API_KEY          DeepSeek API Key
-    --base-url / BASE_URL        API 地址（可选）
-    --model / MODEL              默认模型（可选）
-    --gateway-url / GATEWAY_URL  网关地址
+版本: 20260929150000
+作者: quruyi
+时间: 20260929150000 # 最后修改时间
 
-手动运行：
+用法:
+    # 由 llmgate 拉起（推荐）
+    python deepseek.py --name agent-deepseek --provider deepseek --port 8000 \
+        --api-key sk-xxx --gateway-url http://127.0.0.1:5000
+
+    # 手动运行
     python deepseek.py --port 8000 --api-key sk-xxx --name agent-deepseek
 
-两种模式
---------
-chat   : 同步等 AI，直接返回 content（适合聊天）
-script : 立即返回，agent 后台跑；跑完 WS 广播，客户端来拉文件
+环境变量:
+    AGENT_NAME    实例名（如 agent-deepseek）
+    PROVIDER      固定 deepseek
+    PORT          监听端口
+    API_KEY       DeepSeek API Key
+    BASE_URL      API 地址（可选，默认 https://api.deepseek.com）
+    MODEL         默认模型（可选，默认 deepseek-chat）
+    GATEWAY_URL   网关地址（默认 http://127.0.0.1:5000）
+    HOST          监听地址（默认 0.0.0.0）
 
-接口
-----
-GET  /                    服务信息
-GET  /health              健康检查
-GET  /stats               统计
-POST /chat                对话（mode=chat 同步；mode=script 异步）
-POST /chat/stream         流式对话（SSE）
-GET  /files/{file_id}     拉脚本文件
-WS   /ws/script_ready     订阅脚本完成广播
+接口:
+    GET  /                    服务信息
+    GET  /health              健康检查
+    GET  /stats               统计
+    POST /chat                对话（mode=chat 同步；mode=script 异步）
+    POST /chat/stream         流式对话（SSE）
+    GET  /files/{file_id}     拉脚本文件
+    WS   /ws/script_ready     订阅脚本完成广播
+
+说明:
+    - chat 模式：同步等 AI 返回 content，适合聊天
+    - script 模式：立即返回 task_id，agent 后台跑；完成后通过 WS 广播 file_id，客户端来拉文件
+    - 每次调用 AI 后向网关 /api/report 上报 token 用量与延迟，网关据此累计配额
+    - 调用前会向网关 /api/agents 查权限；网关不可用时默认放行，保障业务
+    - 脚本文件存到 generated_code/{task_id}/{file_id}.py，重启后按目录扫描恢复 file_id 映射
+    - 失败任务也会存 {file_id}_error.py 并广播 success=false
+    - WebSocket 广播池共用一份连接集合，按 session_id 让客户端认领自己的任务
 """
 
 import os

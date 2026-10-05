@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL 调试器</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/brace-fold.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.css">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font: 13px/1.5 'Consolas', 'Monaco', monospace;
+    background: #0d1117;
+    color: #e6edf3;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ---------- 总布局 ---------- */
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 8px 12px;
+    gap: 6px;
+}
+.main {
+    display: grid;
+    grid-template-columns: 1fr 0.85fr;
+    gap: 6px;
+    flex: 1;
+    min-height: 0;
+}
+
+/* ---------- 面板通用 ---------- */
+.panel {
+    display: flex;
+    flex-direction: column;
+    background: #161b22;
+    border: 1px solid #30363d;
+    overflow: hidden;
+    min-height: 0;
+}
+.panel > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 10px;
+    min-height: 30px;
+    border-bottom: 1px solid #30363d;
+    font-size: 12px;
+    color: #8b949e;
+    flex-shrink: 0;
+}
+.panel > .body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+}
+
+/* ---------- 按钮 ---------- */
+button {
+    font: inherit;
+    background: transparent;
+    color: #c9d1d9;
+    border: none;
+    padding: 2px 10px;
+    cursor: pointer;
+}
+button:hover:not(:disabled) { color: #58a6ff; }
+button:disabled { opacity: .3; cursor: not-allowed; }
+
+.btn-save {
+    background: #21262d;
+    color: #c9d1d9;
+    padding: 3px 14px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.btn-save:hover { background: #30363d; color: #c9d1d9; }
+
+.btn-run {
+    background: #1f6feb;
+    color: #fff;
+    padding: 3px 14px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.btn-run:hover:not(:disabled) { background: #388bfd; color: #fff; }
+.btn-run:disabled { background: #21262d; color: #484f58; }
+
+/* ---------- 左侧编辑器 ---------- */
+.editor .CodeMirror {
+    height: 100% !important;
+    font: 13px/1.5 'Consolas', 'Monaco', monospace;
+    background: #0d1117;
+    color: #e6edf3;
+}
+.editor .CodeMirror-gutters {
+    background: #0d1117;
+    border-right: 1px solid #1e2630;
+}
+
+/* ---------- 右侧 ---------- */
+.right {
+    display: grid;
+    grid-template-rows: 1fr 1fr 2fr 56px;
+    gap: 6px;
+    min-height: 0;
+}
+
+/* 文件浏览器 */
+.files header .wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.files header .selector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: #8b949e;
+}
+.files header .selector:hover { color: #58a6ff; }
+.files header .selector .name { color: #e6edf3; font-weight: 500; }
+.files header .selector .arrow { font-size: 10px; transition: transform .2s; }
+.files header .selector .arrow.open { transform: rotate(180deg); }
+
+.files header .dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 320px;
+    max-width: 560px;
+    max-height: 320px;
+    overflow-y: auto;
+    background: #161b22;
+    border: 1px solid #30363d;
+    z-index: 100;
+    padding: 4px 0;
+}
+.files header .dropdown.open { display: block; }
+.files header .dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 4px 14px;
+    font-size: 12px;
+    color: #c9d1d9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.files header .dropdown button:hover { background: #1c2333; color: #58a6ff; }
+.files header .dropdown button.create { color: #3fb950; }
+.files header .dropdown button.create:hover { background: #1a2a1a; }
+.files header .dropdown .divider {
+    height: 1px;
+    background: #30363d;
+    margin: 4px 10px;
+}
+
+/* 文件树 */
+.files .body { padding: 4px 6px; }
+.file-empty { padding: 20px; text-align: center; color: #484f58; font-size: 12px; }
+
+/* 树节点 */
+.tree-node {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    font-size: 12px;
+    color: #8b949e;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tree-node:hover { background: #1c2333; color: #58a6ff; }
+.tree-node.active { background: #1c2a3d; color: #58a6ff; border-color: #1f6feb; }
+
+.tree-node .arrow {
+    display: inline-block;
+    width: 12px;
+    text-align: center;
+    font-size: 9px;
+    color: #484f58;
+    flex-shrink: 0;
+    transition: transform .15s;
+}
+.tree-node .arrow.open { transform: rotate(90deg); }
+.tree-node .arrow.leaf { visibility: hidden; }
+
+.tree-node .icon { flex-shrink: 0; }
+.tree-node .name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.tree-node .size { color: #484f58; font-size: 10px; flex-shrink: 0; }
+
+.tree-children { display: none; }
+.tree-children.open { display: block; }
+
+/* 查询结果 */
+.result table {
+    width: 100%;
+    border-collapse: collapse;
+    font: 12px/1.5 'Consolas', 'Monaco', monospace;
+}
+.result th {
+    position: sticky; top: 0;
+    background: #1c2333;
+    color: #58a6ff;
+    text-align: left;
+    padding: 5px 10px;
+    border-bottom: 1px solid #30363d;
+    border-right: 1px solid #21262d;
+    white-space: nowrap;
+    font-weight: 600;
+    z-index: 5;
+}
+.result td {
+    padding: 4px 10px;
+    border-bottom: 1px solid #1a2129;
+    border-right: 1px solid #1a2129;
+    color: #c9d1d9;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.result td.null { color: #484f58; font-style: italic; }
+.result td.num  { color: #d29922; }
+.result .empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #484f58;
+}
+
+/* 表列表 */
+.table-list {
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.table-list .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #484f58;
+    margin-bottom: 4px;
+}
+.table-list .header-row button {
+    color: #58a6ff;
+    font-size: 11px;
+    padding: 1px 8px;
+}
+.table-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #c9d1d9;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+.table-item:hover { background: #1c2333; color: #58a6ff; border-color: #1f6feb; }
+.table-item .tname { flex: 1; }
+.table-item .trows { color: #484f58; font-size: 11px; }
+
+/* 日志 */
+.log textarea {
+    width: 100%;
+    height: 100%;
+    background: #0d1117;
+    color: #e6edf3;
+    border: none;
+    outline: none;
+    padding: 6px 10px;
+    font: 12px/1.5 'Consolas', 'Monaco', monospace;
+    resize: none;
+    display: block;
+}
+
+/* SQL 输入 */
+.input {
+    display: flex;
+    background: #161b22;
+    border: 1px solid #30363d;
+}
+.input input {
+    flex: 1;
+    background: #0d1117;
+    color: #e6edf3;
+    border: none;
+    outline: none;
+    padding: 8px 12px;
+    font: 13px/1.5 'Consolas', 'Monaco', monospace;
+    min-width: 0;
+}
+.input input::placeholder { color: #484f58; }
+.input .run {
+    width: 8px;
+    background: #30363d;
+    padding: 0;
+    cursor: pointer;
+}
+.input .run:hover { background: #58a6ff; }
+.input .run:disabled { background: #21262d; cursor: not-allowed; }
+
+/* 状态点 */
+.dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    background: #484f58;
+    vertical-align: middle;
+}
+.dot.success { background: #3fb950; }
+.dot.error   { background: #f85149; }
+.dot.running { background: #d29922; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: #30363d; }
+</style>
+</head>
+<body>
+
+<div class="app">
+    <div class="main">
+
+        <!-- 左侧：脚本编辑器 -->
+        <section class="panel editor">
+            <header>
+                <span id="editorTitle">🐍 脚本</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="dot" id="statusDot"></span>
+                    <span id="statusText">未打开目录</span>
+                    <span id="elapsedText" style="color:#484f58;font-size:10px;"></span>
+                    <button class="btn-save" id="btnSave" onclick="handleSaveCode()" disabled>💾 保存</button>
+                    <button class="btn-run" id="btnRunCode" onclick="handleRunCode()" disabled>▶ 运行</button>
+                </div>
+            </header>
+            <div class="body" id="editorHost"></div>
+        </section>
+
+        <!-- 右侧 -->
+        <div class="right">
+
+            <!-- 文件浏览器 -->
+            <section class="panel files">
+                <header>
+                    <div class="wrapper">
+                        <span style="color:#484f58;">📁</span>
+                        <div class="selector" id="fileSelector" onclick="toggleFileDropdown()">
+                            <span class="name" id="workspaceName">未打开目录</span>
+                            <span class="arrow" id="dropdownArrow">▼</span>
+                        </div>
+                        <div class="dropdown" id="fileDropdown"></div>
+                    </div>
+                    <span style="color:#484f58;font-size:10px;" id="fileCount"></span>
+                </header>
+                <div class="body" id="fileTree">
+                    <div class="file-empty">点击 📁 打开本地目录</div>
+                </div>
+            </section>
+
+            <!-- 查询结果 -->
+            <section class="panel result">
+                <header>
+                    <span>🗄️ 查询结果</span>
+                    <span style="color:#484f58;font-size:10px;" id="resultMeta">—</span>
+                </header>
+                <div class="body" id="resultBody">
+                    <div class="empty">执行 SQL 或点击数据库文件后在此查看结果</div>
+                </div>
+            </section>
+
+            <!-- 日志 -->
+            <section class="panel log">
+                <header>
+                    <span>📋 日志</span>
+                    <button style="font-size:10px;color:#484f58;padding:1px 8px;" onclick="handleClearLog()">清空</button>
+                </header>
+                <div class="body">
+                    <textarea id="logEditor" spellcheck="false" readonly></textarea>
+                </div>
+            </section>
+
+            <!-- SQL 输入 -->
+            <div class="input">
+                <input id="sqlInput" type="text" placeholder="输入 SQL 语句… 回车执行" spellcheck="false">
+                <button class="run" id="btnRunSql" onclick="handleRunSql()" title="执行 SQL"></button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+ * CodeMirror
+ * ============================================================ */
+const cmEditor = CodeMirror(document.getElementById('editorHost'), {
+    value: '',
+    mode: 'python',
+    theme: 'dracula',
+    lineNumbers: true,
+    tabSize: 4,
+    indentUnit: 4,
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    foldGutter: true,
+    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+    extraKeys: {
+        'Ctrl-/': 'toggleComment',
+        'Cmd-/': 'toggleComment',
+        'Ctrl-S': () => { handleSaveCode(); return false; },
+        'Cmd-S': () => { handleSaveCode(); return false; }
+    }
+});
+function refreshEditor() { cmEditor.refresh(); }
+setTimeout(refreshEditor, 100);
+window.addEventListener('resize', refreshEditor);
+
+/* ============================================================
+ * 全局状态
+ * ============================================================ */
+let isRunning = false;
+let workspace = null;        // 工作目录路径
+let tree = [];               // 树形结构 [{type, name, path, size?, children?}]
+let currentFile = null;      // 当前打开文件相对路径
+let currentFileType = null;
+let currentFileSavedContent = '';
+let activeDb = null;         // 最近点击的数据库相对路径
+let activeDbKind = null;
+let expandedDirs = new Set();  // 已展开的目录 path 集合
+
+/* ============================================================
+ * DOM
+ * ============================================================ */
+const $ = id => document.getElementById(id);
+const logEditor    = $('logEditor');
+const sqlInput     = $('sqlInput');
+const btnRunSql    = $('btnRunSql');
+const btnRunCode   = $('btnRunCode');
+const btnSave      = $('btnSave');
+const statusDot    = $('statusDot');
+const statusText   = $('statusText');
+const elapsedText  = $('elapsedText');
+const editorTitle  = $('editorTitle');
+const resultBody   = $('resultBody');
+const resultMeta   = $('resultMeta');
+const workspaceName= $('workspaceName');
+const fileDropdown = $('fileDropdown');
+const dropdownArrow= $('dropdownArrow');
+const fileTree     = $('fileTree');
+const fileCount    = $('fileCount');
+
+/* ============================================================
+ * 工具
+ * ============================================================ */
+const getCode = () => cmEditor.getValue();
+const getSql  = () => sqlInput.value.trim();
+
+function setStatus(text, type = 'idle') {
+    statusDot.className = 'dot ' + type;
+    statusText.textContent = text;
+}
+function setElapsed(ms) {
+    elapsedText.textContent = ms > 0 ? `⏱ ${ms}ms` : '';
+}
+function setLog(content) {
+    logEditor.value = content || '';
+    logEditor.scrollTop = logEditor.scrollHeight;
+}
+function esc(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function isDirty() {
+    return currentFile && getCode() !== currentFileSavedContent;
+}
+function fileIcon(type) {
+    return { sqlite: '🗄️', duckdb: '🦆', python: '🐍', text: '📄' }[type] || '📄';
+}
+function countFiles(nodes) {
+    let n = 0;
+    for (const nd of nodes) {
+        if (nd.type === 'dir') n += countFiles(nd.children || []);
+        else n++;
+    }
+    return n;
+}
+
+/* ============================================================
+ * 日志
+ * ============================================================ */
+async function refreshLog() {
+    try {
+        const r = await fetch('/api/log');
+        const d = await r.json();
+        if (d.success) setLog(d.content);
+    } catch (e) {}
+}
+async function handleClearLog() {
+    try {
+        await fetch('/api/log/clear', { method: 'POST' });
+        setLog('');
+    } catch (e) {}
+}
+
+/* ============================================================
+ * 工作目录
+ * ============================================================ */
+async function openWorkspace() {
+    setStatus('等待选择目录…', 'running');
+    try {
+        const r = await fetch('/api/workspace/pick', { method: 'POST' });
+        const d = await r.json();
+        if (!d.success) {
+            if (d.error !== '未选择目录') {
+                alert('打开失败: ' + d.error);
+                setStatus('打开失败', 'error');
+            } else {
+                setStatus('就绪', 'success');
+            }
+            return;
+        }
+        workspace = d.workspace;
+        tree = d.tree || [];
+        expandedDirs.clear();   // 全部收起
+        // 默认展开顶层目录
+        // tree.forEach(n => { if (n.type === 'dir') expandedDirs.add(n.path); });
+        workspaceName.textContent = workspace;
+        renderFileDropdown();
+        renderFileTree();
+        setStatus('就绪', 'success');
+        await refreshLog();
+    } catch (e) {
+        alert('请求失败: ' + e.message);
+        setStatus('请求失败', 'error');
+    }
+}
+
+/* ============================================================
+ * 下拉菜单
+ * ============================================================ */
+function toggleFileDropdown() {
+    fileDropdown.classList.toggle('open');
+    dropdownArrow.classList.toggle('open');
+    if (fileDropdown.classList.contains('open')) renderFileDropdown();
+}
+
+function renderFileDropdown() {
+    fileDropdown.innerHTML = '';
+
+    const openBtn = document.createElement('button');
+    openBtn.textContent = '📂 打开目录…';
+    openBtn.onclick = () => { toggleFileDropdown(); openWorkspace(); };
+    fileDropdown.appendChild(openBtn);
+
+    if (workspace) {
+        const newBtn = document.createElement('button');
+        newBtn.className = 'create';
+        newBtn.textContent = '＋ 新建文件…';
+        newBtn.onclick = () => { toggleFileDropdown(); handleCreateFile(); };
+        fileDropdown.appendChild(newBtn);
+
+        const refreshBtn = document.createElement('button');
+        refreshBtn.textContent = '🔄 刷新';
+        refreshBtn.onclick = () => { toggleFileDropdown(); refreshTree(); };
+        fileDropdown.appendChild(refreshBtn);
+
+        const div = document.createElement('div');
+        div.className = 'divider';
+        fileDropdown.appendChild(div);
+
+        // 下拉里显示所有文件的扁平路径（方便快速跳转）
+        const allFiles = [];
+        (function walk(nodes) {
+            for (const n of nodes) {
+                if (n.type === 'dir') walk(n.children || []);
+                else allFiles.push(n);
+            }
+        })(tree);
+
+        allFiles.forEach(f => {
+            const b = document.createElement('button');
+            b.textContent = fileIcon(f.type) + ' ' + f.path;
+            b.title = f.path;
+            b.onclick = () => { toggleFileDropdown(); handleFileClick(f); };
+            fileDropdown.appendChild(b);
+        });
+    }
+}
+
+/* ============================================================
+ * 文件树
+ * ============================================================ */
+function renderFileTree() {
+    fileTree.innerHTML = '';
+    if (!workspace) {
+        fileTree.innerHTML = '<div class="file-empty">点击 📁 打开本地目录</div>';
+        fileCount.textContent = '';
+        return;
+    }
+    if (!tree.length) {
+        fileTree.innerHTML = '<div class="file-empty">目录为空</div>';
+        fileCount.textContent = '0';
+        return;
+    }
+    fileCount.textContent = countFiles(tree) + ' 个文件';
+
+    const root = document.createElement('div');
+    tree.forEach(node => root.appendChild(buildNode(node)));
+    fileTree.appendChild(root);
+}
+
+function buildNode(node) {
+    if (node.type === 'dir') {
+        const wrap = document.createElement('div');
+
+        const row = document.createElement('div');
+        row.className = 'tree-node';
+        row.title = node.path;
+
+        const open = expandedDirs.has(node.path);
+        const arrow = document.createElement('span');
+        arrow.className = 'arrow' + (open ? ' open' : '');
+        arrow.textContent = '▶';
+
+        const icon = document.createElement('span');
+        icon.className = 'icon';
+        icon.textContent = open ? '📂' : '📁';
+
+        const name = document.createElement('span');
+        name.className = 'name';
+        name.textContent = node.name;
+
+        row.appendChild(arrow);
+        row.appendChild(icon);
+        row.appendChild(name);
+
+        const children = document.createElement('div');
+        children.className = 'tree-children' + (open ? ' open' : '');
+        // 只渲染展开的目录的子节点，节省开销
+        if (open) {
+            (node.children || []).forEach(c => children.appendChild(buildNode(c)));
+        } else {
+            children.dataset.lazy = '1';
+        }
+
+        row.onclick = e => {
+            e.stopPropagation();
+            const isOpen = expandedDirs.has(node.path);
+            if (isOpen) {
+                expandedDirs.delete(node.path);
+            } else {
+                expandedDirs.add(node.path);
+            }
+            // 重新渲染这个分支
+            const fresh = buildNode(node);
+            wrap.replaceWith(fresh);
+        };
+
+        wrap.appendChild(row);
+        wrap.appendChild(children);
+        return wrap;
+    } else {
+        // 文件节点
+        const row = document.createElement('div');
+        row.className = 'tree-node' + (node.path === currentFile ? ' active' : '');
+        row.title = node.path;
+
+        const arrow = document.createElement('span');
+        arrow.className = 'arrow leaf';
+
+        const icon = document.createElement('span');
+        icon.className = 'icon';
+        icon.textContent = fileIcon(node.type);
+
+        const name = document.createElement('span');
+        name.className = 'name';
+        name.textContent = node.name;
+
+        const size = document.createElement('span');
+        size.className = 'size';
+        size.textContent = formatSize(node.size);
+
+        row.appendChild(arrow);
+        row.appendChild(icon);
+        row.appendChild(name);
+        row.appendChild(size);
+
+        row.onclick = e => {
+            e.stopPropagation();
+            handleFileClick(node);
+        };
+        return row;
+    }
+}
+
+function formatSize(bytes) {
+    if (bytes === undefined || bytes === null) return '';
+    if (bytes < 1024) return bytes + 'B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'K';
+    return (bytes / (1024 * 1024)).toFixed(1) + 'M';
+}
+
+async function refreshTree() {
+    if (!workspace) return;
+    try {
+        const r = await fetch('/api/workspace');
+        const d = await r.json();
+        if (d.success) {
+            tree = d.tree || [];
+            renderFileTree();
+            renderFileDropdown();
+        }
+    } catch (e) {}
+}
+
+/* 点击外部关闭下拉 */
+document.addEventListener('click', e => {
+    const sel = $('fileSelector');
+    if (!fileDropdown.contains(e.target) && !sel.contains(e.target)) {
+        fileDropdown.classList.remove('open');
+        dropdownArrow.classList.remove('open');
+    }
+});
+
+/* ============================================================
+ * 新建文件
+ * ============================================================ */
+async function handleCreateFile() {
+    if (!workspace) { alert('请先打开目录'); return; }
+    const name = prompt('新建文件名（支持子目录，如 scripts/test.py）：');
+    if (!name) return;
+
+    try {
+        const r = await fetch('/api/file/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        });
+        const d = await r.json();
+        if (!d.success) { alert('创建失败: ' + d.error); return; }
+
+        tree = d.tree || [];
+        // 自动展开新文件的父目录
+        const normalized = name.replace(/\\/g, '/');
+        const parts = normalized.split('/');
+        let acc = '';
+        for (let i = 0; i < parts.length - 1; i++) {
+            acc = acc ? acc + '/' + parts[i] : parts[i];
+            expandedDirs.add(acc);
+        }
+        renderFileTree();
+        renderFileDropdown();
+        await refreshLog();
+
+        // 找到并打开新文件
+        const target = findNode(tree, normalized);
+        if (target) await handleFileClick(target);
+    } catch (e) {
+        alert('请求失败: ' + e.message);
+    }
+}
+
+function findNode(nodes, path) {
+    for (const n of nodes) {
+        if (n.type === 'dir') {
+            const r = findNode(n.children || [], path);
+            if (r) return r;
+        } else if (n.path === path) {
+            return n;
+        }
+    }
+    return null;
+}
+
+/* ============================================================
+ * 点击文件
+ * ============================================================ */
+async function handleFileClick(f) {
+    if (isDirty() && currentFile) {
+        const ok = confirm(`当前文件 "${currentFile}" 有未保存的修改，是否保存？`);
+        if (ok) await handleSaveCode(true);
+    }
+
+    currentFile = f.path;
+    currentFileType = f.type;
+    renderFileTree();
+
+    if (f.type === 'sqlite' || f.type === 'duckdb') {
+        activeDb = f.path;
+        activeDbKind = f.type;
+        currentFile = null;
+        currentFileType = null;
+        currentFileSavedContent = '';
+        cmEditor.setValue('');
+        editorTitle.textContent = '🗄️ ' + f.path;
+        btnRunCode.disabled = true;
+        btnSave.disabled = true;
+        await loadDbTables(f.path);
+    } else {
+        try {
+            const r = await fetch('/api/file?name=' + encodeURIComponent(f.path));
+            const d = await r.json();
+            if (!d.success) { alert('打开失败: ' + d.error); return; }
+
+            const mode = (f.type === 'python') ? 'python' :
+                         (f.path.endsWith('.sql') ? 'sql' : null);
+            cmEditor.setOption('mode', mode);
+            cmEditor.setValue(d.content || '');
+            currentFileSavedContent = d.content || '';
+            editorTitle.textContent = fileIcon(f.type) + ' ' + f.path;
+
+            btnRunCode.disabled = (f.type !== 'python');
+            btnSave.disabled = false;
+
+            setTimeout(refreshEditor, 50);
+            await refreshLog();
+        } catch (e) {
+            alert('读取失败: ' + e.message);
+        }
+    }
+}
+
+/* ============================================================
+ * 数据库：列出表 / 预览
+ * ============================================================ */
+async function loadDbTables(dbName) {
+    setStatus('加载表…', 'running');
+    try {
+        const r = await fetch('/api/db/tables', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ db: dbName })
+        });
+        const d = await r.json();
+        if (!d.success) {
+            resultBody.innerHTML = `<div class="empty">加载失败: ${esc(d.error)}</div>`;
+            setStatus('加载失败', 'error');
+            return;
+        }
+
+        if (!d.tables.length) {
+            resultBody.innerHTML = '<div class="empty">数据库中没有表</div>';
+            resultMeta.textContent = dbName;
+        } else {
+            renderTableList(dbName, d.tables);
+            resultMeta.textContent = `${dbName} · ${d.tables.length} 张表`;
+        }
+        setStatus('就绪', 'success');
+        await refreshLog();
+    } catch (e) {
+        resultBody.innerHTML = `<div class="empty">请求失败: ${esc(e.message)}</div>`;
+        setStatus('请求失败', 'error');
+    }
+}
+
+function renderTableList(dbName, tables) {
+    let html = `<div class="table-list">
+        <div class="header-row">
+            <span>🗄️ ${esc(dbName)}</span>
+            <span>${tables.length} 张表</span>
+        </div>`;
+    tables.forEach(t => {
+        html += `<div class="table-item" data-table="${esc(t.name)}">
+            <span class="tname">📋 ${esc(t.name)}</span>
+            <span class="trows">${t.rows >= 0 ? t.rows + ' 行' : '?'}</span>
+        </div>`;
+    });
+    html += '</div>';
+    resultBody.innerHTML = html;
+
+    resultBody.querySelectorAll('.table-item').forEach(el => {
+        el.onclick = () => loadTablePreview(el.dataset.table);
+    });
+}
+
+async function loadTablePreview(tableName) {
+    if (!activeDb) return;
+    setStatus('预览中…', 'running');
+    try {
+        const r = await fetch('/api/db/preview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ db: activeDb, table: tableName, limit: 10 })
+        });
+        const d = await r.json();
+        if (!d.success) {
+            resultBody.innerHTML = `<div class="empty">预览失败: ${esc(d.error)}</div>`;
+            setStatus('预览失败', 'error');
+            return;
+        }
+        renderResultWithBack(d.columns, d.rows, `${activeDb} · ${tableName} 前 ${d.rows.length} 条`);
+        setStatus('就绪', 'success');
+        await refreshLog();
+    } catch (e) {
+        resultBody.innerHTML = `<div class="empty">请求失败: ${esc(e.message)}</div>`;
+        setStatus('请求失败', 'error');
+    }
+}
+
+function renderResultWithBack(columns, rows, meta) {
+    let html = `<div style="padding: 6px 10px 0;">
+        <button onclick="loadDbTables(activeDb)" style="font-size:11px;color:#58a6ff;padding:2px 8px;">← 返回表列表</button>
+    </div>`;
+    if (!columns || !columns.length) {
+        html += '<div class="empty" style="height:auto;padding:40px;">无数据</div>';
+        resultBody.innerHTML = html;
+        resultMeta.textContent = meta || '';
+        return;
+    }
+    html += '<table><thead><tr>';
+    columns.forEach(c => html += `<th>${esc(c)}</th>`);
+    html += '</tr></thead><tbody>';
+    rows.forEach(row => {
+        html += '<tr>';
+        row.forEach(v => {
+            let cls = '', txt;
+            if (v === null || v === undefined) { cls = 'null'; txt = 'NULL'; }
+            else if (typeof v === 'number' || typeof v === 'bigint') { cls = 'num'; txt = v; }
+            else txt = String(v).slice(0, 200);
+            html += `<td class="${cls}">${esc(txt)}</td>`;
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+    resultBody.innerHTML = html;
+    resultMeta.textContent = meta || '';
+}
+
+function renderResult(columns, rows, meta) {
+    if (!columns || !columns.length) {
+        resultBody.innerHTML = '<div class="empty">执行成功，无返回结果</div>';
+        resultMeta.textContent = meta || '—';
+        return;
+    }
+    if (!rows || !rows.length) {
+        resultBody.innerHTML = '<div class="empty">查询成功，无数据</div>';
+        resultMeta.textContent = meta || '0 行';
+        return;
+    }
+    let html = '<table><thead><tr>';
+    columns.forEach(c => html += `<th>${esc(c)}</th>`);
+    html += '</tr></thead><tbody>';
+    const limit = Math.min(rows.length, 500);
+    for (let i = 0; i < limit; i++) {
+        html += '<tr>';
+        rows[i].forEach(v => {
+            let cls = '', txt;
+            if (v === null || v === undefined) { cls = 'null'; txt = 'NULL'; }
+            else if (typeof v === 'number' || typeof v === 'bigint') { cls = 'num'; txt = v; }
+            else txt = String(v).slice(0, 200);
+            html += `<td class="${cls}">${esc(txt)}</td>`;
+        });
+        html += '</tr>';
+    }
+    html += '</tbody></table>';
+    resultBody.innerHTML = html;
+    const more = rows.length > limit ? ` (前 ${limit})` : '';
+    resultMeta.textContent = (meta || `${rows.length} 行`) + more;
+}
+
+/* ============================================================
+ * SQL 执行
+ * ============================================================ */
+async function handleRunSql() {
+    if (isRunning) return;
+    const sql = getSql();
+    if (!sql) return;
+    if (!activeDb) {
+        alert('请先点击一个 SQLite / DuckDB 文件，确定要操作的数据库');
+        return;
+    }
+
+    isRunning = true;
+    btnRunSql.disabled = true;
+    setStatus('执行中…', 'running');
+
+    try {
+        const r = await fetch('/api/sql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ db: activeDb, sql })
+        });
+        const d = await r.json();
+
+        if (!d.success) {
+            resultBody.innerHTML = `<div class="empty">❌ ${esc(d.error)}</div>`;
+            setStatus('执行失败', 'error');
+            await refreshLog();
+            return;
+        }
+
+        if (d.columns && d.columns.length) {
+            renderResult(d.columns, d.rows, `${d.rows.length} 行 · ${d.elapsed_ms}ms`);
+        } else {
+            resultBody.innerHTML = `<div class="empty">✅ 执行成功，影响 ${d.affected ?? 0} 行</div>`;
+            resultMeta.textContent = `${d.elapsed_ms}ms`;
+        }
+        setStatus('完成', 'success');
+        setElapsed(d.elapsed_ms);
+        await refreshLog();
+    } catch (e) {
+        resultBody.innerHTML = `<div class="empty">请求失败: ${esc(e.message)}</div>`;
+        setStatus('请求失败', 'error');
+    } finally {
+        isRunning = false;
+        btnRunSql.disabled = false;
+    }
+}
+
+/* ============================================================
+ * 保存脚本
+ * ============================================================ */
+async function handleSaveCode(silent = false) {
+    if (!currentFile) {
+        if (!silent) alert('没有打开的文件');
+        return;
+    }
+    const code = getCode();
+    setStatus('保存中…', 'running');
+    try {
+        const r = await fetch('/api/file/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: currentFile, content: code })
+        });
+        const d = await r.json();
+        if (!d.success) {
+            if (!silent) alert('保存失败: ' + d.error);
+            setStatus('保存失败', 'error');
+            return;
+        }
+        currentFileSavedContent = code;
+        tree = d.tree || tree;
+        renderFileTree();
+        renderFileDropdown();
+        setStatus('已保存', 'success');
+        await refreshLog();
+    } catch (e) {
+        if (!silent) alert('请求失败: ' + e.message);
+        setStatus('保存失败', 'error');
+    }
+}
+
+/* ============================================================
+ * 运行 Python
+ * ============================================================ */
+async function handleRunCode() {
+    if (isRunning) return;
+    if (!currentFile || currentFileType !== 'python') {
+        alert('请先打开一个 .py 文件');
+        return;
+    }
+    if (isDirty()) {
+        setStatus('保存后运行…', 'running');
+        await handleSaveCode(true);
+    }
+
+    isRunning = true;
+    btnRunCode.disabled = true;
+    btnRunCode.textContent = '⏳...';
+    setStatus('运行中…', 'running');
+    setElapsed(0);
+
+    try {
+        const r = await fetch('/api/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file: currentFile })
+        });
+        const d = await r.json();
+
+        if (!d.success) {
+            setStatus('运行失败', 'error');
+            alert('运行失败: ' + d.error);
+        } else {
+            const map = { success: ['成功', 'success'], error: ['报错', 'error'], timeout: ['超时', 'error'] };
+            const [txt, cls] = map[d.status] || ['完成', 'idle'];
+            setStatus(txt, cls);
+            setElapsed(d.elapsed_ms);
+        }
+        await refreshLog();
+    } catch (e) {
+        setStatus('请求失败', 'error');
+        alert('请求失败: ' + e.message);
+    } finally {
+        isRunning = false;
+        btnRunCode.textContent = '▶ 运行';
+        btnRunCode.disabled = (currentFileType !== 'python');
+    }
+}
+
+/* ============================================================
+ * 快捷键
+ * ============================================================ */
+sqlInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); handleRunSql(); }
+});
+document.addEventListener('keydown', e => {
+    if (e.target.closest('.CodeMirror')) return;
+    if (['TEXTAREA', 'INPUT'].includes(e.target.tagName)) return;
+    if (e.key === 'Escape') {
+        fileDropdown.classList.remove('open');
+        dropdownArrow.classList.remove('open');
+    }
+});
+
+/* ============================================================
+ * 启动
+ * ============================================================ */
+setStatus('未打开目录');
+renderFileTree();
+(async () => {
+    try {
+        const r = await fetch('/api/workspace');
+        const d = await r.json();
+        if (d.success && d.workspace) {
+            workspace = d.workspace;
+            tree = d.tree || [];
+            // tree.forEach(n => { if (n.type === 'dir') expandedDirs.add(n.path); });
+            workspaceName.textContent = workspace;
+            renderFileTree();
+            renderFileDropdown();
+            setStatus('就绪', 'success');
+        }
+        await refreshLog();
+    } catch (e) {}
+})();
+
+setTimeout(refreshEditor, 200);
+</script>
+
+</body>
+</html>

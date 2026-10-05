@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>看板 · SurvX</title>
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font: 350 13px/1.6 'Inter','PingFang SC',sans-serif;
+    background: #f5f9ff;
+    color: #2c3e5c;
+    overflow-y: auto;             /* 内容超出时自身滚动 */
+    padding: 24px;
+    box-sizing: border-box;
+}
+h1 { font-size:20px; color:#0b1e33; margin-bottom:16px; }
+.grid { display:grid; grid-template-columns: repeat(3,1fr); gap:12px; margin-bottom:20px; }
+.card { padding:16px; background:#fff; border:1px solid #d4e2fc; border-radius:10px; }
+.card .num { font-size:28px; font-weight:600; color:#1a7cff; font-variant-numeric: tabular-nums; }
+.card .label { font-size:12px; color:#6a7f9e; margin-top:4px; }
+.bars { padding:16px; background:#fff; border:1px solid #d4e2fc; border-radius:10px; }
+.bar-row { display:flex; align-items:center; gap:10px; margin:6px 0; }
+.bar-row .name { width:80px; font-size:12px; color:#6a7f9e; }
+.bar-row .bar { height:14px; background:linear-gradient(90deg,#1a7cff,#0a5fcf); border-radius:4px; transition: width .6s; }
+.bar-row .val { font-size:12px; color:#2c3e5c; }
+</style>
+</head>
+<body>
+<h1>📊 数据看板</h1>
+
+<div class="grid">
+    <div class="card"><div class="num" id="v1">0</div><div class="label">今日访问</div></div>
+    <div class="card"><div class="num" id="v2">0</div><div class="label">活跃用户</div></div>
+    <div class="card"><div class="num" id="v3">0</div><div class="label">处理任务</div></div>
+</div>
+
+<div class="bars">
+    <div class="bar-row"><span class="name">周一</span><div class="bar" style="width:60%"></div><span class="val">60</span></div>
+    <div class="bar-row"><span class="name">周二</span><div class="bar" style="width:80%"></div><span class="val">80</span></div>
+    <div class="bar-row"><span class="name">周三</span><div class="bar" style="width:40%"></div><span class="val">40</span></div>
+    <div class="bar-row"><span class="name">周四</span><div class="bar" style="width:95%"></div><span class="val">95</span></div>
+</div>
+
+<script>
+const APP_ID = 'dashboard';
+const APP_TITLE = '数据看板';
+const MENU = [
+    { key: 'refresh', label: '🔄 刷新',  action: 'refresh' },
+    { key: 'export',  label: '📤 导出',  action: 'export' },
+    { divider: true },
+    { key: 'reset',   label: '♻️ 重置',  action: 'reset' },
+];
+
+(async function register() {
+    try {
+        await fetch('/register', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ app_id: APP_ID, title: APP_TITLE, menu: MENU }),
+        });
+        await fetch('/messages', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: 'child:' + APP_ID, to: 'parent', kind: 'menu', payload: { menu: MENU } }),
+        });
+    } catch (e) {}
+})();
+
+(function ws() {
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const sock = new WebSocket(`${proto}://${location.host}/ws?as=child:${APP_ID}`);
+    sock.onmessage = ev => {
+        const d = JSON.parse(ev.data);
+        if (d.type !== 'message') return;
+        const msg = d.message;
+        if (msg.kind === 'script' && msg.payload && msg.payload.url) {
+            fetch(msg.payload.url).then(r => r.text()).then(code => {
+                try { new Function(code)(); } catch (e) {}
+            });
+        }
+    };
+    sock.onclose = () => setTimeout(ws, 2000);
+})();
+
+window.addEventListener('message', e => {
+    const d = e.data;
+    if (!d || d.type !== 'svx:action') return;
+    if (d.action === 'refresh') refresh();
+    else if (d.action === 'export') exportData();
+    else if (d.action === 'reset') reset();
+});
+
+function refresh() {
+    ['v1','v2','v3'].forEach(id => {
+        document.getElementById(id).textContent = (Math.random() * 1000 | 0);
+    });
+}
+function exportData() {
+    alert('已导出（演示）');
+}
+function reset() {
+    ['v1','v2','v3'].forEach(id => document.getElementById(id).textContent = '0');
+}
+
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>
