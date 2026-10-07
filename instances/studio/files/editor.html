@@ -449,14 +449,14 @@ window.addEventListener('resize', refreshEditor);
  * 全局状态
  * ============================================================ */
 let isRunning = false;
-let workspace = null;        // 工作目录路径
-let tree = [];               // 树形结构 [{type, name, path, size?, children?}]
-let currentFile = null;      // 当前打开文件相对路径
+let workspace = null;
+let tree = [];
+let currentFile = null;
 let currentFileType = null;
 let currentFileSavedContent = '';
-let activeDb = null;         // 最近点击的数据库相对路径
+let activeDb = null;
 let activeDbKind = null;
-let expandedDirs = new Set();  // 已展开的目录 path 集合
+let expandedDirs = new Set();
 
 /* ============================================================
  * DOM
@@ -551,9 +551,7 @@ async function openWorkspace() {
         }
         workspace = d.workspace;
         tree = d.tree || [];
-        expandedDirs.clear();   // 全部收起
-        // 默认展开顶层目录
-        // tree.forEach(n => { if (n.type === 'dir') expandedDirs.add(n.path); });
+        expandedDirs.clear();
         workspaceName.textContent = workspace;
         renderFileDropdown();
         renderFileTree();
@@ -566,8 +564,7 @@ async function openWorkspace() {
 }
 
 /* ============================================================
- * 下拉菜单
- * ============================================================ */
+ * 下拉菜单 * ============================================================ */
 function toggleFileDropdown() {
     fileDropdown.classList.toggle('open');
     dropdownArrow.classList.toggle('open');
@@ -598,7 +595,6 @@ function renderFileDropdown() {
         div.className = 'divider';
         fileDropdown.appendChild(div);
 
-        // 下拉里显示所有文件的扁平路径（方便快速跳转）
         const allFiles = [];
         (function walk(nodes) {
             for (const n of nodes) {
@@ -666,22 +662,15 @@ function buildNode(node) {
 
         const children = document.createElement('div');
         children.className = 'tree-children' + (open ? ' open' : '');
-        // 只渲染展开的目录的子节点，节省开销
         if (open) {
             (node.children || []).forEach(c => children.appendChild(buildNode(c)));
-        } else {
-            children.dataset.lazy = '1';
         }
 
         row.onclick = e => {
             e.stopPropagation();
             const isOpen = expandedDirs.has(node.path);
-            if (isOpen) {
-                expandedDirs.delete(node.path);
-            } else {
-                expandedDirs.add(node.path);
-            }
-            // 重新渲染这个分支
+            if (isOpen) expandedDirs.delete(node.path);
+            else expandedDirs.add(node.path);
             const fresh = buildNode(node);
             wrap.replaceWith(fresh);
         };
@@ -690,7 +679,6 @@ function buildNode(node) {
         wrap.appendChild(children);
         return wrap;
     } else {
-        // 文件节点
         const row = document.createElement('div');
         row.className = 'tree-node' + (node.path === currentFile ? ' active' : '');
         row.title = node.path;
@@ -743,7 +731,6 @@ async function refreshTree() {
     } catch (e) {}
 }
 
-/* 点击外部关闭下拉 */
 document.addEventListener('click', e => {
     const sel = $('fileSelector');
     if (!fileDropdown.contains(e.target) && !sel.contains(e.target)) {
@@ -770,7 +757,6 @@ async function handleCreateFile() {
         if (!d.success) { alert('创建失败: ' + d.error); return; }
 
         tree = d.tree || [];
-        // 自动展开新文件的父目录
         const normalized = name.replace(/\\/g, '/');
         const parts = normalized.split('/');
         let acc = '';
@@ -782,7 +768,6 @@ async function handleCreateFile() {
         renderFileDropdown();
         await refreshLog();
 
-        // 找到并打开新文件
         const target = findNode(tree, normalized);
         if (target) await handleFileClick(target);
     } catch (e) {
@@ -851,7 +836,7 @@ async function handleFileClick(f) {
 }
 
 /* ============================================================
- * 数据库：列出表 / 预览
+ * 数据库
  * ============================================================ */
 async function loadDbTables(dbName) {
     setStatus('加载表…', 'running');
@@ -989,7 +974,7 @@ function renderResult(columns, rows, meta) {
 }
 
 /* ============================================================
- * SQL 执行
+ * SQL
  * ============================================================ */
 async function handleRunSql() {
     if (isRunning) return;
@@ -1038,7 +1023,7 @@ async function handleRunSql() {
 }
 
 /* ============================================================
- * 保存脚本
+ * 保存
  * ============================================================ */
 async function handleSaveCode(silent = false) {
     if (!currentFile) {
@@ -1135,18 +1120,30 @@ document.addEventListener('keydown', e => {
 });
 
 /* ============================================================
- * 启动
+ * 启动：先处理 ?path= ，再拉 /api/workspace
  * ============================================================ */
 setStatus('未打开目录');
 renderFileTree();
 (async () => {
     try {
+        // 支持独立打开：editor.html?path=xxx
+        const params = new URLSearchParams(location.search);
+        const p = params.get('path');
+        if (p) {
+            try {
+                await fetch('/api/workspace/open', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: p })
+                });
+            } catch (e) {}
+        }
+
         const r = await fetch('/api/workspace');
         const d = await r.json();
         if (d.success && d.workspace) {
             workspace = d.workspace;
             tree = d.tree || [];
-            // tree.forEach(n => { if (n.type === 'dir') expandedDirs.add(n.path); });
             workspaceName.textContent = workspace;
             renderFileTree();
             renderFileDropdown();

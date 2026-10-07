@@ -1,0 +1,48 @@
+{
+  "groups": [
+    {
+      "id": "solutions",
+      "name": "Solutions",
+      "desc": "最完整的产品级方案",
+      "icon": "🧩",
+      "projects": [
+        { "name": "FinancialMarkets", "title": "金融市场" },
+        { "name": "Humans",           "title": "人物" },
+        { "name": "MoLin",            "title": "墨林" },
+        { "name": "survx",            "title": "SurvX" }
+      ]
+    },
+    {
+      "id": "tools",
+      "name": "Tools",
+      "desc": "可复用的工具集",
+      "icon": "🔧",
+      "projects": [
+        { "name": "CommServer",     "title": "通信服务" },
+        { "name": "Connectors",     "title": "连接器" },
+        { "name": "FinDataFetcher", "title": "金融数据抓取" },
+        { "name": "Frontend",       "title": "前端" },
+        { "name": "LLMGate",        "title": "LLM 网关" },
+        { "name": "Studio",         "title": "Studio 工作台" }
+      ]
+    },
+    {
+      "id": "examples",
+      "name": "Examples",
+      "desc": "入门示例与演示",
+      "icon": "🎓",
+      "projects": [
+        { "name": "AITown",               "title": "AI 小镇" },
+        { "name": "DynamicFormView",      "title": "动态表单" },
+        { "name": "EgoAdaptiveThreshold", "title": "自适应阈值" },
+        { "name": "EgoSelfMonitor",       "title": "自我监控" },
+        { "name": "HelloWorld",           "title": "Hello World" },
+        { "name": "MultiEntityLink",      "title": "多实体链接" },
+        { "name": "SensorSim",            "title": "传感器模拟" },
+        { "name": "SimpleCounter",        "title": "简单计数器" },
+        { "name": "ViewCombineWorkspace", "title": "视图组合工作区" },
+        { "name": "WorksGrayDemo",        "title": "工作区灰度演示" }
+      ]
+    }
+  ]
+}

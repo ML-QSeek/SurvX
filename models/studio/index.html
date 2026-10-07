@@ -23,12 +23,12 @@
     --user-msg: rgba(26, 124, 255, .07);
     --ai-msg: rgba(26, 124, 255, .02);
 
-    --bar: 3px;            /* 色条厚度 */
-    --panel-w: 640px;      /* 对话框 / 菜单 / 色条 / 历史 宽度 */
-    --toolbar-w: 188px;    /* 底部工具栏宽度 */
-    --menu-h: 32px;        /* 菜单高度 */
-    --edge-gap: 40px;      /* 工具栏距右边空隙 */
-    --input-h: 44px;       /* 输入框高度 */
+    --bar: 3px;
+    --panel-w: 640px;
+    --toolbar-w: 188px;
+    --menu-h: 32px;
+    --edge-gap: 40px;
+    --input-h: 44px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -265,7 +265,6 @@ body {
     transform: translateX(-50%) scale(.96) translateY(6px);
 }
 .dialog-body { display: flex; align-items: stretch; min-height: var(--input-h); }
-/* 输入框占满整行（发送按钮已删除） */
 .input-area {
     flex: 1;
     width: 100%;
@@ -421,9 +420,7 @@ body {
 <body>
 
 <div id="main">
-    <!-- 隐藏的占位符：保留给原脚本 setCanvas() 使用，不再显示 -->
     <div class="placeholder" id="placeholder" style="display:none;"></div>
-
     <iframe id="studioFrame" src="files/welcome.html" title="SurvX Studio"></iframe>
 </div>
 
@@ -860,28 +857,60 @@ body {
     });
 
     renderHistory();
-    /* ---------- iframe 与欢迎页通信 ---------- */
+
+    /* ---------- iframe 与子页通信 ---------- */
     const studioFrame = document.getElementById('studioFrame');
-    
-    window.addEventListener('message', e => {
+
+    window.addEventListener('message', async e => {
         const data = e.data;
-        if (!data || data.type !== 'survx-welcome') return;
-    
-        if (data.action === 'start') {
-            // 欢迎页点了「开始使用」→ 切到编辑器
-            studioFrame.src = 'files/editor.html';
-        } else if (data.action === 'docs') {
-            // 「查看用法」→ 在这里可以弹自己的说明，或者干脆不管
-            alert(
-                '用法速览：\n' +
-                '1. 点击顶部「打开目录…」选择本地文件夹\n' +
-                '2. 在左侧文件树中点击 .py 打开并运行\n' +
-                '3. 点击 .db / .duckdb 文件查看表并执行 SQL\n' +
-                '4. Ctrl+S 保存，Enter 执行 SQL'
-            );
+        if (!data) return;
+
+        // ---- 来自 welcome.html ----
+        if (data.type === 'survx-welcome') {
+            if (data.action === 'start') {
+                studioFrame.src = 'files/editor.html';
+            } else if (data.action === 'projects') {
+                studioFrame.src = 'files/projects.html';
+            } else if (data.action === 'docs') {
+                alert(
+                    '用法速览：\n' +
+                    '1. 点击「📦 打开项目」选择 models/ 下的项目\n' +
+                    '2. 或在编辑器里点 📁 打开任意本地目录\n' +
+                    '3. 点击 .py 打开并运行，点击 .db / .duckdb 执行 SQL\n' +
+                    '4. Ctrl+S 保存，Enter 执行 SQL'
+                );
+            }
+            return;
+        }
+
+        // ---- 来自 projects.html ----
+        if (data.type === 'survx-projects') {
+            if (data.action === 'back') {
+                studioFrame.src = 'files/welcome.html';
+                return;
+            }
+            if (data.action === 'open') {
+                try {
+                    const r = await fetch('/api/workspace/open', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: data.path })
+                    });
+                    const d = await r.json();
+                    if (!d.success) {
+                        alert('打开项目失败: ' + d.error);
+                        return;
+                    }
+                    studioFrame.src = 'files/editor.html';
+                } catch (err) {
+                    alert('请求失败: ' + err.message);
+                }
+                return;
+            }
         }
     });
-    console.log('SurvX Studio Demo 已启动 ✅');
+
+    console.log('SurvX Studio 已启动 ✅');
 })();
 </script>
 

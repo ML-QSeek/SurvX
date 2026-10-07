@@ -10,12 +10,15 @@ studio.py
     python studio.py
 
 HTTP 路由（页面）:
-    GET  /                            主页（渲染 templates/index.html）
+    GET  /                            主页（渲染 index.html）
 
 HTTP 路由（API - 工作目录）:
     POST /api/workspace/pick          弹系统文件夹选择框，返回选中的路径
     POST /api/workspace/open          直接打开指定路径  body: {"path": "D:/myproj"}
     GET  /api/workspace               获取当前工作目录和文件树
+
+HTTP 路由（API - 项目清单）:
+    GET  /api/projects                读取 projects.json，返回分类项目清单
 
 HTTP 路由（API - 文件）:
     GET  /api/file?name=app.py        读取文件内容（name 支持相对路径 sub/a.py）
@@ -36,13 +39,16 @@ HTTP 路由（API - 日志）:
     POST /api/log/clear               清空日志
 
 配置（环境变量）:
-    STUDIO_HOST       默认 0.0.0.0
-    STUDIO_PORT       默认 8090
-    RUN_TIMEOUT       默认 180 秒
-    PYTHON_BIN        默认 python
+    STUDIO_HOST           默认 0.0.0.0
+    STUDIO_PORT           默认 8090
+    RUN_TIMEOUT           默认 180 秒
+    PYTHON_BIN            默认 python
+    STUDIO_MODELS_ROOT    项目根目录，默认 <studio.py 所在目录>/../../models
+    STUDIO_PROJECTS_FILE  项目清单 JSON，默认 <studio.py 所在目录>/projects.json
 """
 
 import os
+import json
 import time
 import sqlite3
 import subprocess
@@ -61,11 +67,28 @@ from fastapi.staticfiles import StaticFiles
 # 配置
 # ============================================================
 
+BASE_DIR = Path(__file__).parent.resolve()
+
+
 class Config:
     HOST = os.environ.get("STUDIO_HOST", "0.0.0.0")
     PORT = int(os.environ.get("STUDIO_PORT", "8090"))
     RUN_TIMEOUT = int(os.environ.get("RUN_TIMEOUT", "180"))
     PYTHON_BIN = os.environ.get("PYTHON_BIN", "python")
+
+    # Studio.py 所在目录
+    BASE_DIR = BASE_DIR
+
+    # 项目根目录：默认 studio.py 上两级 / models
+    MODELS_ROOT = Path(
+        os.environ.get("STUDIO_MODELS_ROOT", str(BASE_DIR / "../../../models"))
+    ).resolve()
+
+    # 项目清单 JSON
+    PROJECTS_FILE = Path(
+        os.environ.get("STUDIO_PROJECTS_FILE", str(BASE_DIR / "projects.json"))
+    ).resolve()
+
 
 config = Config()
 
@@ -84,6 +107,7 @@ class State:
     workspace: Optional[Path] = None
     log: List[str] = []
 
+
 state = State()
 
 TYPE_MAP = {
@@ -100,21 +124,26 @@ SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "env",
 def get_file_type(name: str) -> str:
     return TYPE_MAP.get(Path(name).suffix.lower(), "text")
 
+
 def log_line(msg: str) -> None:
     line = f"[{time.strftime('%H:%M:%S')}] {msg}"
     state.log.append(line)
     if len(state.log) > 500:
         state.log = state.log[-500:]
 
+
 def require_workspace() -> Path:
     if state.workspace is None:
         raise HTTPException(status_code=400, detail="尚未打开工作目录")
     return state.workspace
 
+
 def safe_join(name: str) -> Path:
     """把相对路径解析到工作目录内，禁止越界。"""
     ws = require_workspace()
     if not name:
+        raise HTTPException(status_code=400, detail="非法文件名")
+    if "\x00" in name:
         raise HTTPException(status_code=400, detail="非法文件名")
     name = name.replace("\\", "/").lstrip("/")
     target = (ws / name).resolve()
@@ -169,7 +198,6 @@ def build_tree(base: Path, rel: str = "") -> List[Dict[str, Any]]:
                 "size": size,
             })
 
-    # 目录在前，文件在后
     return dirs + files
 
 
@@ -179,11 +207,46 @@ def list_tree() -> List[Dict[str, Any]]:
         return []
     return build_tree(ws, "")
 
+
+# ============================================================
+# 项目清单加载
+# ============================================================
+
+def load_projects_catalog() -> Dict[str, Any]:
+    """读取 projects.json。失败时返回空清单，不抛异常。"""
+    path = config.PROJECTS_FILE
+    if not path.exists():
+        logger.warning(f"项目清单不存在: {path}")
+        return {"groups": []}
+    try:
+        raw = path.read_text(encoding="utf-8")
+        data = json.loads(raw)
+    except Exception as e:
+        logger.warning(f"项目清单解析失败: {e}")
+        return {"groups": []}
+
+    if not isinstance(data, dict) or not isinstance(data.get("groups"), list):
+        logger.warning("项目清单格式不对：顶层应为 {'groups': [...]}")
+        return {"groups": []}
+    return data
+
+
+def _project_path(name: str) -> Path:
+    """把项目名解析到 MODELS_ROOT 下的绝对路径，禁止越界。"""
+    root = config.MODELS_ROOT
+    target = (root / name).resolve()
+    try:
+        target.relative_to(root)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="非法项目名")
+    return target
+
+
 # ============================================================
 # FastAPI 应用
 # ============================================================
 
-app = FastAPI(title="SQL/Python Studio", version="1.2.0")
+app = FastAPI(title="SQL/Python Studio", version="1.3.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -193,10 +256,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-BASE_DIR = Path(__file__).parent
-templates = Jinja2Templates(directory=str(BASE_DIR))
+templates = Jinja2Templates(directory=str(config.BASE_DIR))
 
-app.mount("/files", StaticFiles(directory=str(BASE_DIR / "files")), name="files")
+FILES_DIR = config.BASE_DIR / "files"
+FILES_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/files", StaticFiles(directory=str(FILES_DIR)), name="files")
+
 
 # ============================================================
 # 请求模型
@@ -205,30 +270,38 @@ app.mount("/files", StaticFiles(directory=str(BASE_DIR / "files")), name="files"
 class WorkspaceOpenRequest(BaseModel):
     path: str = Field(..., min_length=1)
 
+
 class FileSaveRequest(BaseModel):
     name: str = Field(..., min_length=1)
     content: str = ""
 
+
 class FileCreateRequest(BaseModel):
     name: str = Field(..., min_length=1)
+
 
 class FileDeleteRequest(BaseModel):
     name: str = Field(..., min_length=1)
 
+
 class DbTablesRequest(BaseModel):
     db: str = Field(..., min_length=1)
+
 
 class DbPreviewRequest(BaseModel):
     db: str = Field(..., min_length=1)
     table: str = Field(..., min_length=1)
     limit: int = 10
 
+
 class SqlRequest(BaseModel):
     db: str = Field(..., min_length=1)
     sql: str = Field(..., min_length=1)
 
+
 class RunRequest(BaseModel):
     file: str = Field(..., min_length=1)
+
 
 # ============================================================
 # 页面路由
@@ -241,6 +314,52 @@ async def index(request: Request):
         name="index.html",
         context={}
     )
+
+
+# ============================================================
+# API - 项目清单
+# ============================================================
+
+@app.get("/api/projects")
+async def api_projects():
+    """返回 projects.json 中的清单，并附上每个项目在磁盘上的存在性。"""
+    catalog = load_projects_catalog()
+    root = config.MODELS_ROOT
+    root_exists = root.is_dir()
+
+    groups = []
+    for g in catalog.get("groups", []):
+        items = []
+        for p in g.get("projects", []):
+            name = p.get("name", "")
+            if not name:
+                continue
+            try:
+                path = _project_path(name)
+            except HTTPException:
+                continue
+            items.append({
+                "name": name,
+                "title": p.get("title", name),
+                "path": str(path),
+                "exists": path.is_dir(),
+            })
+        groups.append({
+            "id": g.get("id", ""),
+            "name": g.get("name", ""),
+            "desc": g.get("desc", ""),
+            "icon": g.get("icon", "📦"),
+            "projects": items,
+        })
+
+    return {
+        "success": True,
+        "models_root": str(root),
+        "models_root_exists": root_exists,
+        "projects_file": str(config.PROJECTS_FILE),
+        "groups": groups,
+    }
+
 
 # ============================================================
 # API - 工作目录
@@ -322,6 +441,7 @@ async def api_workspace_get():
         "tree": list_tree(),
     }
 
+
 # ============================================================
 # API - 文件
 # ============================================================
@@ -400,6 +520,7 @@ async def api_file_delete(req: FileDeleteRequest):
     log_line(f"🗑 删除文件: {req.name}")
     return {"success": True, "tree": list_tree()}
 
+
 # ============================================================
 # API - 数据库
 # ============================================================
@@ -434,11 +555,14 @@ def _query_tables(conn, kind: str) -> List[Dict[str, Any]]:
             ORDER BY name
         """)
     else:
-        cur.execute("""
-            SELECT table_name FROM information_schema.tables
-            WHERE table_schema='main'
-            ORDER BY table_name
-        """)
+        try:
+            cur.execute("""
+                SELECT table_name FROM information_schema.tables
+                WHERE table_schema='main'
+                ORDER BY table_name
+            """)
+        except Exception:
+            cur.execute("SHOW TABLES")
     for (name,) in cur.fetchall():
         try:
             cur.execute(f'SELECT COUNT(*) FROM "{name}"')
@@ -529,6 +653,7 @@ async def api_sql(req: SqlRequest):
         except Exception:
             pass
 
+
 # ============================================================
 # API - Python 运行
 # ============================================================
@@ -588,6 +713,7 @@ async def api_run(req: RunRequest):
         log_line(f"❌ 运行异常: {e}")
         return {"success": False, "error": str(e), "elapsed_ms": elapsed}
 
+
 # ============================================================
 # API - 日志
 # ============================================================
@@ -602,6 +728,7 @@ async def api_log_clear():
     state.log = []
     return {"success": True}
 
+
 # ============================================================
 # 启动入口
 # ============================================================
@@ -614,8 +741,11 @@ def main():
     print(f"📡 服务地址: http://{config.HOST}:{config.PORT}")
     print(f"⏰ 运行超时: {config.RUN_TIMEOUT} 秒")
     print(f"🐍 Python:   {config.PYTHON_BIN}")
+    print(f"📦 项目根:   {config.MODELS_ROOT}")
+    print(f"📋 清单文件: {config.PROJECTS_FILE}")
     print("=" * 60)
     uvicorn.run(app, host=config.HOST, port=config.PORT, log_level="info")
+
 
 if __name__ == "__main__":
     main()

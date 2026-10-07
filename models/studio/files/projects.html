@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>项目 · SurvX Studio</title>
+<style>
+:root {
+    --primary: #1a7cff;
+    --primary-dark: #0a5fcf;
+    --bg-primary: #f5f9ff;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #eaf2fe;
+    --text-primary: #0b1e33;
+    --text-secondary: #2c3e5c;
+    --text-tertiary: #6a7f9e;
+    --border: #d4e2fc;
+    --hover: rgba(26, 124, 255, .05);
+    --shadow: 0 4px 20px rgba(26, 124, 255, .08);
+    --error: #f15b4a;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+    font: 350 14px/1.6 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    padding: 32px 24px 48px;
+    overflow-y: auto;
+}
+.wrap { width: 100%; max-width: 880px; margin: 0 auto; }
+
+.head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+.head .title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.head .title .logo {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 42px; height: 42px; font-size: 22px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 10px; box-shadow: var(--shadow);
+}
+.head h1 {
+    font-size: 20px; font-weight: 600;
+    color: var(--text-primary); letter-spacing: -.3px;
+}
+.head .root {
+    font-size: 12px; color: var(--text-tertiary);
+    font-family: 'Consolas', 'Monaco', monospace;
+    margin-top: 2px;
+    word-break: break-all;
+}
+.back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    font: inherit; font-size: 13px; cursor: pointer;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all .2s;
+    flex-shrink: 0;
+}
+.back-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+.warn {
+    padding: 12px 16px;
+    background: #fff5f3;
+    border: 1px solid #ffd6cf;
+    border-radius: 8px;
+    color: var(--error);
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: none;
+    word-break: break-all;
+}
+.warn.show { display: block; }
+.warn code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    background: rgba(241, 91, 74, .1);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.group { margin-bottom: 26px; }
+.group-head {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+}
+.group-head .ico { font-size: 18px; }
+.group-head h2 {
+    font-size: 15px; font-weight: 600;
+    color: var(--text-primary);
+}
+.group-head .desc {
+    font-size: 12px; color: var(--text-tertiary);
+    margin-left: auto;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+.card {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 14px 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .18s;
+    position: relative;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    overflow: hidden;
+}
+.card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+.card:active { transform: translateY(0); }
+.card .name {
+    font-size: 14px; font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.card .sub {
+    font-size: 12px; color: var(--text-tertiary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.card.missing {
+    opacity: .55;
+    cursor: not-allowed;
+    border-style: dashed;
+}
+.card.missing:hover {
+    border-color: var(--border);
+    transform: none;
+    box-shadow: none;
+}
+.card .badge {
+    position: absolute; top: 8px; right: 10px;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+}
+.card .badge.err { background: #ffe7e3; color: var(--error); }
+
+.loading {
+    text-align: center; padding: 60px 0;
+    color: var(--text-tertiary); font-size: 13px;
+}
+
+@media (max-width: 560px) {
+    body { padding: 20px 14px 32px; }
+    .head h1 { font-size: 17px; }
+    .grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+    <div class="head">
+        <div class="title">
+            <div class="logo">📦</div>
+            <div>
+                <h1>打开项目</h1>
+                <div class="root" id="rootPath">加载中…</div>
+            </div>
+        </div>
+        <button class="back-btn" id="btnBack">← 返回</button>
+    </div>
+
+    <div class="warn" id="warnBox"></div>
+
+    <div id="content">
+        <div class="loading">正在加载项目清单…</div>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    const $ = id => document.getElementById(id);
+    const content = $('content');
+    const rootPath = $('rootPath');
+    const warnBox = $('warnBox');
+    const btnBack = $('btnBack');
+
+    function notifyParent(action, payload) {
+        try {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage(
+                    Object.assign({ type: 'survx-projects', action }, payload || {}),
+                    '*'
+                );
+                return true;
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    btnBack.addEventListener('click', () => {
+        if (!notifyParent('back')) {
+            location.href = 'welcome.html';
+        }
+    });
+
+    function esc(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    async function loadProjects() {
+        let data;
+        try {
+            const r = await fetch('/api/projects');
+            data = await r.json();
+        } catch (e) {
+            content.innerHTML = `<div class="loading">加载失败：${esc(e.message)}</div>`;
+            return;
+        }
+        if (!data.success) {
+            content.innerHTML = `<div class="loading">加载失败</div>`;
+            return;
+        }
+
+        rootPath.textContent = 'models/  →  ' + data.models_root;
+
+        if (!data.models_root_exists) {
+            warnBox.classList.add('show');
+            warnBox.innerHTML =
+                '未找到项目根目录：<code>' + esc(data.models_root) + '</code>' +
+                '。请检查 <code>Studio.py</code> 上两级是否存在 <code>models/</code>，' +
+                '或设置环境变量 <code>STUDIO_MODELS_ROOT</code>。';
+        }
+
+        if (!data.groups.length) {
+            content.innerHTML = '<div class="loading">清单为空，请检查 projects.json</div>';
+            return;
+        }
+
+        let html = '';
+        for (const g of data.groups) {
+            html += `<div class="group">
+                <div class="group-head">
+                    <span class="ico">${esc(g.icon)}</span>
+                    <h2>${esc(g.name)}</h2>
+                    <span class="desc">${esc(g.desc)}</span>
+                </div>
+                <div class="grid">`;
+            for (const p of g.projects) {
+                const cls = p.exists ? 'card' : 'card missing';
+                const badge = p.exists ? '' : '<span class="badge err">缺失</span>';
+                html += `<button class="${cls}"
+                            data-name="${esc(p.name)}"
+                            data-path="${esc(p.path)}"
+                            ${p.exists ? '' : 'disabled'}>
+                    ${badge}
+                    <span class="name">${esc(p.title || p.name)}</span>
+                    <span class="sub">${esc(p.name)}</span>
+                </button>`;
+            }
+            html += `</div></div>`;
+        }
+        content.innerHTML = html;
+
+        content.querySelectorAll('.card:not(.missing)').forEach(el => {
+            el.addEventListener('click', () => {
+                const name = el.dataset.name;
+                const path = el.dataset.path;
+                if (!notifyParent('open', { name, path })) {
+                    location.href = 'editor.html?path=' + encodeURIComponent(path);
+                }
+            });
+        });
+    }
+
+    loadProjects();
+})();
+</script>
+
+</body>
+</html>

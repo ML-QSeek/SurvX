@@ -128,6 +128,7 @@ body {
     justify-content: center;
     gap: 12px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 .btn {
     display: inline-flex;
@@ -234,7 +235,10 @@ body {
 
     <!-- 行动 -->
     <div class="actions">
-        <button class="btn btn-primary" id="btnStart">
+        <button class="btn btn-primary" id="btnProjects">
+            📦 打开项目
+        </button>
+        <button class="btn btn-ghost" id="btnStart">
             ▶ 开始使用
         </button>
         <button class="btn btn-ghost" id="btnDocs">
@@ -257,10 +261,11 @@ body {
 (function () {
     'use strict';
 
-    const btnStart = document.getElementById('btnStart');
-    const btnDocs  = document.getElementById('btnDocs');
+    const btnStart    = document.getElementById('btnStart');
+    const btnDocs     = document.getElementById('btnDocs');
+    const btnProjects = document.getElementById('btnProjects');
 
-    // 通知父窗口（index.html）切换到编辑器
+    // 通知父窗口（index.html）切换页面
     function notifyParent(action) {
         try {
             if (window.parent && window.parent !== window) {
@@ -271,10 +276,14 @@ body {
         return false;
     }
 
+    btnProjects.addEventListener('click', () => {
+        if (!notifyParent('projects')) {
+            location.href = 'projects.html';
+        }
+    });
+
     btnStart.addEventListener('click', () => {
-        // 通知父窗口打开编辑器（父窗口收到后会把 iframe 切到 editor.html）
         if (!notifyParent('start')) {
-            // 独立打开时的兜底：直接跳转到编辑器
             location.href = 'editor.html';
         }
     });
@@ -283,9 +292,9 @@ body {
         if (!notifyParent('docs')) {
             alert(
                 '用法速览：\n' +
-                '1. 点击顶部「打开目录…」选择本地文件夹\n' +
-                '2. 在左侧文件树中点击 .py 打开并运行\n' +
-                '3. 点击 .db / .duckdb 文件查看表并执行 SQL\n' +
+                '1. 点击「📦 打开项目」选择 models/ 下的项目\n' +
+                '2. 或在编辑器里点 📁 打开任意本地目录\n' +
+                '3. 点击 .py 打开并运行，点击 .db / .duckdb 执行 SQL\n' +
                 '4. Ctrl+S 保存，Enter 执行 SQL'
             );
         }
