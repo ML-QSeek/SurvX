@@ -18,34 +18,11 @@ English: HelloWorld hoc plugin script.
 # ============================================================
 HelloWorld = {}
 
-# [S] 结构层
-#HelloWorld["HelloWorld_s_1"] = "..."
 # [F] 特征层
 HelloWorld["HelloWorld_f_main"] = "q:q44905478"
-# [Ego] 看需求添加
-#HelloWorld["()HelloWorld_s_1"] = "..."
-# [Env] 看需求添加
-#HelloWorld["[]HelloWorld_s_1"] = "..."
 
 # ============================================================
-# 2. 初始数值（Energy）
-# ============================================================
-HelloWorld["_parameter"] = {}    # _parameter 参数表
-HelloWorld["_constraint"] = {}   # _constraint 约束表
-HelloWorld["_relation"] = {}     # _relation 关系表
-HelloWorld["_sequence"] = {}     # _sequence 序列表
-HelloWorld["_experience"] = {}   # _experience 经历表
-HelloWorld["_report"] = {}       # _report 报告总结表
-HelloWorld["_llm"] = {}          # _llm AI 协作表
-
-# Ego 专属认知表，看需求添加
-#HelloWorld["_intent"] = {}     # _intent 意图表
-#HelloWorld["_feedback"] = {}   # _feedback 反馈表
-#HelloWorld["_language"] = {}   # _language 语言表
-#HelloWorld["_train"] = {}      # _train 训练数据表
-
-# ============================================================
-# 3. Q 函数
+# 2. Q 函数
 # ============================================================
 def q44905478():
     # prompt: HelloWorld 主入口
@@ -54,16 +31,7 @@ def q44905478():
     return
 
 # ============================================================
-# 4. 内存表 / 注册表
-# ============================================================
-_state = {}
-_state["_HelloWorld_state"] = {}
-_state["_[]HelloWorld_state"] = {}
-
-_register = {}
-
-# ============================================================
-# 5. 启动
+# 3. 启动
 # ============================================================
 if __name__ == "__main__":
     main_ref = HelloWorld.get("HelloWorld_f_main")
