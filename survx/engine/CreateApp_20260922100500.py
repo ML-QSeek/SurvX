@@ -98,12 +98,17 @@ def create_duckdb_energy(db_path: str):
 
     conn = duckdb.connect(db_path)
 
+    # 三个 idx 自增序列
+    conn.execute("CREATE SEQUENCE IF NOT EXISTS _parameter_idx_seq START 1")
+    conn.execute("CREATE SEQUENCE IF NOT EXISTS _constraint_idx_seq START 1")
+    conn.execute("CREATE SEQUENCE IF NOT EXISTS _relation_idx_seq START 1")
+
     conn.execute("""
         CREATE TABLE IF NOT EXISTS _parameter (
             id0      TEXT,
             id1      TEXT,
             value    TEXT,
-            idx      INTEGER,
+            idx      INTEGER DEFAULT nextval('_parameter_idx_seq'),
             version  TEXT
         )
     """)
@@ -113,7 +118,7 @@ def create_duckdb_energy(db_path: str):
             id0      TEXT,
             id1      TEXT,
             value    TEXT,
-            idx      INTEGER,
+            idx      INTEGER DEFAULT nextval('_constraint_idx_seq'),
             version  TEXT
         )
     """)
@@ -123,7 +128,7 @@ def create_duckdb_energy(db_path: str):
             id0      TEXT,
             id1      TEXT,
             value    TEXT,
-            idx      INTEGER,
+            idx      INTEGER DEFAULT nextval('_relation_idx_seq'),
             version  TEXT
         )
     """)
