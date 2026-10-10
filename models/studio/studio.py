@@ -76,15 +76,12 @@ class Config:
     RUN_TIMEOUT = int(os.environ.get("RUN_TIMEOUT", "180"))
     PYTHON_BIN = os.environ.get("PYTHON_BIN", "python")
 
-    # Studio.py 所在目录
     BASE_DIR = BASE_DIR
 
-    # 项目根目录：默认 studio.py 上两级 / models
     MODELS_ROOT = Path(
         os.environ.get("STUDIO_MODELS_ROOT", str(BASE_DIR / "../../models"))
     ).resolve()
 
-    # 项目清单 JSON
     PROJECTS_FILE = Path(
         os.environ.get("STUDIO_PROJECTS_FILE", str(BASE_DIR / "projects.json"))
     ).resolve()
@@ -155,13 +152,6 @@ def safe_join(name: str) -> Path:
 
 
 def build_tree(base: Path, rel: str = "") -> List[Dict[str, Any]]:
-    """递归扫描目录，返回树形结构。
-
-    每个节点:
-      目录: {"type": "dir",  "name": "src", "path": "src", "children": [...]}
-      文件: {"type": "python"/"sqlite"/"duckdb"/"text", "name": "app.py",
-             "path": "src/app.py", "size": 123}
-    """
     nodes: List[Dict[str, Any]] = []
     try:
         entries = sorted(base.iterdir(), key=lambda p: (p.is_file(), p.name.lower()))
@@ -213,7 +203,6 @@ def list_tree() -> List[Dict[str, Any]]:
 # ============================================================
 
 def load_projects_catalog() -> Dict[str, Any]:
-    """读取 projects.json。失败时返回空清单，不抛异常。"""
     path = config.PROJECTS_FILE
     if not path.exists():
         logger.warning(f"项目清单不存在: {path}")
@@ -232,7 +221,6 @@ def load_projects_catalog() -> Dict[str, Any]:
 
 
 def _project_path(name: str) -> Path:
-    """把项目名解析到 MODELS_ROOT 下的绝对路径，禁止越界。"""
     root = config.MODELS_ROOT
     target = (root / name).resolve()
     try:
@@ -246,7 +234,7 @@ def _project_path(name: str) -> Path:
 # FastAPI 应用
 # ============================================================
 
-app = FastAPI(title="SQL/Python Studio", version="1.3.0")
+app = FastAPI(title="SQL/Python Studio", version="1.4.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -322,7 +310,6 @@ async def index(request: Request):
 
 @app.get("/api/projects")
 async def api_projects():
-    """返回 projects.json 中的清单，并附上每个项目在磁盘上的存在性。"""
     catalog = load_projects_catalog()
     root = config.MODELS_ROOT
     root_exists = root.is_dir()
@@ -658,6 +645,11 @@ async def api_sql(req: SqlRequest):
 # API - Python 运行
 # ============================================================
 
+# ★ 改动 1：用 Popen 逐行读 stdout/stderr，实时写入 state.log
+#    - 前端轮询 /api/log 就能看到输出一行一行冒出来
+#    - 超时逻辑保留，超时后 kill 进程
+#    - 返回值结构与原来一致（success/status/output/elapsed_ms/returncode）
+
 @app.post("/api/run")
 async def api_run(req: RunRequest):
     ws = require_workspace()
@@ -673,45 +665,71 @@ async def api_run(req: RunRequest):
     logger.info(f"运行: {path}")
     t0 = time.time()
 
+    proc = None
     try:
-        result = subprocess.run(
+        proc = subprocess.Popen(
             [config.PYTHON_BIN, str(path)],
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,      # 合并 stderr 到 stdout，保持原始顺序
             text=True,
-            timeout=config.RUN_TIMEOUT,
-            cwd=str(ws),
             encoding="utf-8",
             errors="replace",
+            cwd=str(ws),
+            bufsize=1,                     # 行缓冲
         )
-        elapsed = int((time.time() - t0) * 1000)
-
-        out = result.stdout or ""
-        err = result.stderr or ""
-        combined = out
-        if err:
-            if combined and not combined.endswith("\n"):
-                combined += "\n"
-            combined += err
-
-        status = "success" if result.returncode == 0 else "error"
-
-        for line in combined.splitlines():
-            log_line(f"  {line}")
-        log_line(f"✓ 运行结束 ({status}) {elapsed}ms")
-
-        return {"success": True, "status": status, "output": combined,
-                "elapsed_ms": elapsed, "returncode": result.returncode}
-
-    except subprocess.TimeoutExpired:
-        elapsed = int((time.time() - t0) * 1000)
-        log_line(f"⏰ 运行超时（>{config.RUN_TIMEOUT}s）")
-        return {"success": True, "status": "timeout",
-                "output": f"运行超时（超过 {config.RUN_TIMEOUT} 秒）",
-                "elapsed_ms": elapsed}
     except Exception as e:
         elapsed = int((time.time() - t0) * 1000)
-        log_line(f"❌ 运行异常: {e}")
+        log_line(f"❌ 启动失败: {e}")
         return {"success": False, "error": str(e), "elapsed_ms": elapsed}
+
+    output_lines: List[str] = []
+    timed_out = False
+
+    try:
+        # 逐行读，边读边写日志（前端轮询 /api/log 就能看到）
+        for line in proc.stdout:
+            line = line.rstrip("\r\n")
+            output_lines.append(line)
+            log_line(f"  {line}")
+            # 超时检查：每读一行检查一次
+            if time.time() - t0 > config.RUN_TIMEOUT:
+                timed_out = True
+                proc.kill()
+                break
+    except Exception as e:
+        log_line(f"❌ 读取输出异常: {e}")
+
+    try:
+        proc.wait(timeout=5)
+    except Exception:
+        try:
+            proc.kill()
+        except Exception:
+            pass
+
+    elapsed = int((time.time() - t0) * 1000)
+    combined = "\n".join(output_lines)
+
+    if timed_out:
+        log_line(f"⏰ 运行超时（>{config.RUN_TIMEOUT}s）")
+        return {
+            "success": True,
+            "status": "timeout",
+            "output": combined + f"\n\n运行超时（超过 {config.RUN_TIMEOUT} 秒）",
+            "elapsed_ms": elapsed,
+        }
+
+    rc = proc.returncode if proc.returncode is not None else -1
+    status = "success" if rc == 0 else "error"
+    log_line(f"✓ 运行结束 ({status}) {elapsed}ms")
+
+    return {
+        "success": True,
+        "status": status,
+        "output": combined,
+        "elapsed_ms": elapsed,
+        "returncode": rc,
+    }
 
 
 # ============================================================
