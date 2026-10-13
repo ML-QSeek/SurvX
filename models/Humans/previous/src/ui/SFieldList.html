@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>场域卡片 · 暖色调</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --field-primary: #d4a06a;
+            --field-primary-light: #e8c49a;
+            --field-primary-dark: #b8885a;
+            --field-border: #8a7a5a;
+            --field-glow: rgba(212, 160, 106, 0.12);
+            --bg-primary: #0e0b0a;
+            --bg-secondary: #1a1412;
+            --bg-tertiary: #221c19;
+            --bg-hover: #2a221e;
+            --border-color: #3a2c24;
+            --text-primary: #e4d7cf;
+            --text-secondary: #c4b4a8;
+            --text-tertiary: #a28c7c;
+            --delete-color: #e74c3c;
+        }
+
+        /* ===== 滚动条样式 - 暖色主题 ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(212, 160, 106, 0.25);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(212, 160, 106, 0.45);
+        }
+        ::-webkit-scrollbar-corner {
+            background: var(--bg-primary);
+        }
+        /* Firefox 滚动条 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(212, 160, 106, 0.25) var(--bg-primary);
+        }
+
+        body {
+            font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(212, 160, 106, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(184, 136, 90, 0.03) 0%, transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .section-title i {
+            color: var(--field-primary);
+        }
+
+        .section-title .count {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--text-tertiary);
+            margin-left: auto;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 3rem;
+            justify-items: center;
+        }
+
+        .field-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--field-border);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(212, 160, 106, 0.05) inset;
+            width: 100%;
+            max-width: 200px;
+            aspect-ratio: 5 / 7;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s ease;
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+            cursor: default;
+        }
+
+        .field-card:hover {
+            border-color: var(--field-primary);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 35px var(--field-glow), 0 0 0 1px rgba(212, 160, 106, 0.2) inset;
+            background: var(--bg-hover);
+        }
+
+        /* ===== 长按激活状态 ===== */
+        .field-card.long-press-active {
+            border-color: var(--delete-color);
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.2), 0 0 0 1px rgba(231, 76, 60, 0.2) inset;
+            transform: scale(1.02);
+        }
+
+        /* ===== 删除按钮 - 右上角叉叉 ===== */
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            background: rgba(231, 76, 60, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            line-height: 1;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            animation: popIn 0.2s ease;
+        }
+
+        .delete-btn.show {
+            display: flex;
+        }
+
+        .delete-btn:hover {
+            background: rgba(192, 57, 43, 1);
+            transform: scale(1.15);
+            box-shadow: 0 4px 25px rgba(231, 76, 60, 0.6);
+        }
+
+        .delete-btn:active {
+            transform: scale(0.9);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .card-image {
+            flex: 0 0 55%;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--field-border);
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .field-card:hover .card-image img {
+            transform: scale(1.04);
+        }
+
+        .card-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(212, 160, 106, 0.06) 0%, rgba(14, 11, 10, 0.12) 100%);
+            pointer-events: none;
+        }
+
+        .card-image .fallback-icon {
+            font-size: 2.8rem;
+            color: var(--text-tertiary);
+            opacity: 0.5;
+            z-index: 1;
+        }
+
+        .card-info {
+            flex: 1;
+            padding: 0.8rem 0.7rem 0.6rem 0.7rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--bg-secondary);
+            gap: 0.25rem;
+        }
+
+        .field-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+
+        .field-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            opacity: 0.9;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: var(--text-tertiary);
+            padding: 3rem 0;
+            font-size: 1rem;
+        }
+
+        .empty-tip i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* ===== 确认对话框 ===== */
+        .confirm-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .confirm-dialog-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .confirm-dialog {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(231, 76, 60, 0.1) inset;
+            width: 420px;
+            max-width: 92vw;
+            padding: 2rem 2rem 1.8rem;
+            border-radius: 6px;
+            position: relative;
+        }
+        .confirm-dialog::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--delete-color), transparent);
+            opacity: 0.5;
+        }
+        .confirm-dialog .dialog-icon {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--delete-color);
+            margin-bottom: 0.8rem;
+        }
+        .confirm-dialog .dialog-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .confirm-dialog .dialog-message {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            padding: 0 0.5rem;
+        }
+        .confirm-dialog .dialog-message .highlight {
+            color: var(--field-primary-light);
+            font-weight: 500;
+        }
+        .confirm-dialog .dialog-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .confirm-dialog .dialog-actions button {
+            padding: 0.6rem 2.2rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        .confirm-dialog .dialog-actions .btn-cancel:hover {
+            background: var(--bg-hover);
+            border-color: var(--text-tertiary);
+        }
+        .confirm-dialog .dialog-actions .btn-delete {
+            background: var(--delete-color);
+            border-color: var(--delete-color);
+            color: #fff;
+            font-weight: 600;
+        }
+        .confirm-dialog .dialog-actions .btn-delete:hover {
+            background: #c0392b;
+            border-color: #c0392b;
+            box-shadow: 0 0 24px rgba(231, 76, 60, 0.2);
+        }
+
+        @media (max-width: 480px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            .field-card {
+                max-width: 100%;
+            }
+            .field-name {
+                font-size: 0.85rem;
+            }
+            .field-desc {
+                font-size: 0.7rem;
+            }
+            .confirm-dialog {
+                padding: 1.5rem 1.2rem 1.2rem;
+            }
+            .confirm-dialog .dialog-actions button {
+                padding: 0.5rem 1.5rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .card-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.8rem;
+            }
+            .field-name {
+                font-size: 0.75rem;
+            }
+            .field-desc {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="fieldSection" style="display:none;">
+            <div class="section-title">
+                <i class="fas fa-globe-asia"></i> 场域
+                <span class="count" id="fieldCount"></span>
+            </div>
+            <div class="card-grid" id="fieldGrid"></div>
+        </div>
+
+        <div id="emptyState" style="display:none;">
+            <div class="empty-tip">
+                <i class="fas fa-folder-open"></i>
+                暂无场域
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 删除确认对话框 ===== -->
+    <div class="confirm-dialog-overlay" id="confirmDialog">
+        <div class="confirm-dialog">
+            <div class="dialog-icon">🗑️</div>
+            <div class="dialog-title">确认删除</div>
+            <div class="dialog-message" id="dialogMessage">
+                确定要删除场域 <span class="highlight" id="dialogFileName">未命名</span> 吗？<br />
+                此操作不可撤销！
+            </div>
+            <div class="dialog-actions">
+                <button class="btn-cancel" id="dialogCancel">取消</button>
+                <button class="btn-delete" id="dialogConfirm">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const fieldGrid = document.getElementById('fieldGrid');
+        const fieldSection = document.getElementById('fieldSection');
+        const fieldCount = document.getElementById('fieldCount');
+        const emptyState = document.getElementById('emptyState');
+
+        // 删除对话框
+        const confirmDialog = document.getElementById('confirmDialog');
+        const dialogMessage = document.getElementById('dialogMessage');
+        const dialogFileName = document.getElementById('dialogFileName');
+        const dialogCancel = document.getElementById('dialogCancel');
+        const dialogConfirm = document.getElementById('dialogConfirm');
+
+        let pendingDeleteCard = null;
+
+        // ===== 关闭所有卡片的删除模式 =====
+        function clearAllDeleteModes() {
+            document.querySelectorAll('.field-card.long-press-active').forEach(card => {
+                card.classList.remove('long-press-active');
+                const btn = card.querySelector('.delete-btn');
+                if (btn) btn.classList.remove('show');
+            });
+        }
+
+        // ===== 点击卡片外部关闭删除模式 =====
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.field-card')) {
+                clearAllDeleteModes();
+            }
+        });
+
+        // ===== 生成卡片 =====
+        function createCard(data, jsonFileName) {
+            const card = document.createElement('div');
+            card.className = 'field-card';
+            card.dataset.json = jsonFileName;
+            card.dataset.base = jsonFileName.replace('.json', '');
+            card.dataset.name = data.name || '未命名';
+
+            // ---- 删除按钮 ----
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '✕';
+            deleteBtn.title = '删除场域';
+            card.appendChild(deleteBtn);
+
+            // 删除按钮点击事件
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const cardEl = this.closest('.field-card');
+                const fileName = cardEl.dataset.json;
+                const displayName = cardEl.dataset.name || fileName;
+                showDeleteDialog(cardEl, displayName, fileName);
+            });
+
+            // ---- 图片区域 ----
+            const imageDiv = document.createElement('div');
+            imageDiv.className = 'card-image';
+            
+            const img = document.createElement('img');
+            if (data.img) {
+                img.src = `./assets/images/${data.img}`;
+            } else {
+                const baseName = jsonFileName.replace('.json', '');
+                img.src = `./assets/images/${baseName}.jpg`;
+            }
+            img.alt = data.name || '场域';
+            
+            img.onerror = function() {
+                this.style.display = 'none';
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-globe fallback-icon';
+                this.parentElement.appendChild(icon);
+            };
+            
+            imageDiv.appendChild(img);
+            card.appendChild(imageDiv);
+
+            // ---- 信息区域 ----
+            const info = document.createElement('div');
+            info.className = 'card-info';
+            
+            const name = document.createElement('div');
+            name.className = 'field-name';
+            name.textContent = data.name || '未命名';
+            
+            const desc = document.createElement('div');
+            desc.className = 'field-desc';
+            desc.textContent = data.note || '暂无描述';
+            
+            info.appendChild(name);
+            info.appendChild(desc);
+            card.appendChild(info);
+
+            // ============================================================
+            // 长按逻辑：长按 3 秒显示删除按钮
+            // ============================================================
+            let pressTimer = null;
+            let isLongPress = false;
+            const LONG_PRESS_DURATION = 3000;
+
+            card.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return;
+                if (e.target.closest('.delete-btn')) return;
+
+                clearAllDeleteModes();
+
+                isLongPress = false;
+                pressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    this.classList.add('long-press-active');
+                    const btn = this.querySelector('.delete-btn');
+                    if (btn) btn.classList.add('show');
+                    console.log('🔨 长按激活场域:', this.dataset.json);
+                }, LONG_PRESS_DURATION);
+            });
+
+            card.addEventListener('mouseup', function(e) {
+                if (e.button !== 0) return;
+                clearTimeout(pressTimer);
+                if (!isLongPress && !e.target.closest('.delete-btn')) {
+                    console.log('👆 单击场域:', this.dataset.json);
+                }
+            });
+
+            card.addEventListener('mouseleave', function() {
+                clearTimeout(pressTimer);
+            });
+
+            card.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+
+            return card;
+        }
+
+        // ===== 显示删除确认对话框 =====
+        function showDeleteDialog(card, displayName, fileName) {
+            pendingDeleteCard = card;
+            dialogFileName.textContent = displayName;
+            dialogMessage.innerHTML = `
+                确定要删除场域 <span class="highlight">${displayName}</span> 吗？<br />
+                将删除文件：<span style="color:var(--text-tertiary);font-size:0.85rem;">${fileName}</span><br />
+                此操作不可撤销！
+            `;
+            confirmDialog.classList.add('active');
+        }
+
+        // ===== 关闭删除对话框 =====
+        function closeDeleteDialog() {
+            confirmDialog.classList.remove('active');
+            pendingDeleteCard = null;
+        }
+
+        // ===== 执行删除 =====
+        async function executeDelete() {
+            if (!pendingDeleteCard) return;
+
+            const card = pendingDeleteCard;
+            const baseName = card.dataset.base;
+            const displayName = card.dataset.name || baseName;
+
+            console.log(`🗑️ 删除场域: ${displayName} (${baseName})`);
+
+            try {
+                const result = await window.parent.pywebview.api.delete_entity(baseName, 'field');
+
+                if (result && result.success) {
+                    card.remove();
+                    console.log(`✅ 已删除: ${baseName}`);
+
+                    const remainingCards = document.querySelectorAll('.field-card').length;
+                    fieldCount.textContent = `共 ${remainingCards} 个`;
+
+                    if (remainingCards === 0) {
+                        fieldSection.style.display = 'none';
+                        emptyState.style.display = 'block';
+                    }
+
+                    closeDeleteDialog();
+                } else {
+                    alert(`删除失败: ${result?.message || '未知错误'}`);
+                    closeDeleteDialog();
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                alert(`删除失败: ${error.message || '网络错误'}`);
+                closeDeleteDialog();
+            }
+        }
+
+        // ===== 对话框事件绑定 =====
+        dialogCancel.addEventListener('click', closeDeleteDialog);
+        dialogConfirm.addEventListener('click', executeDelete);
+
+        confirmDialog.addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteDialog();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (confirmDialog.classList.contains('active')) {
+                    closeDeleteDialog();
+                } else {
+                    clearAllDeleteModes();
+                }
+            }
+        });
+
+        // ===== 主逻辑 =====
+        async function init() {
+            try {
+                const result = await window.parent.pywebview.api.get_files_in_directory('../data/s_field/');
+                
+                if (!result.success || !result.files || result.files.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                const files = result.files;
+                console.log('文件列表:', files);
+                
+                const dbFiles = files.filter(file => file.endsWith('.db'));
+                
+                if (dbFiles.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                console.log('DB文件:', dbFiles);
+
+                const pairs = [];
+                for (const dbFile of dbFiles) {
+                    const baseName = dbFile.replace('.db', '');
+                    const jsonFile = `${baseName}.json`;
+                    
+                    try {
+                        const testResponse = await fetch(`./data/s_field/${jsonFile}`);
+                        if (testResponse.ok) {
+                            pairs.push({
+                                db: dbFile,
+                                json: jsonFile,
+                                baseName: baseName
+                            });
+                        } else {
+                            console.warn(`跳过 ${dbFile}：找不到对应的 ${jsonFile}`);
+                        }
+                    } catch (err) {
+                        console.warn(`跳过 ${dbFile}：加载 ${jsonFile} 失败`, err);
+                    }
+                }
+
+                console.log('配对:', pairs);
+
+                if (pairs.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                fieldSection.style.display = 'block';
+                fieldCount.textContent = `共 ${pairs.length} 个`;
+
+                for (const pair of pairs) {
+                    try {
+                        const jsonResponse = await fetch(`./data/s_field/${pair.json}`);
+                        if (!jsonResponse.ok) {
+                            console.warn(`加载 ${pair.json} 失败: ${jsonResponse.status}`);
+                            continue;
+                        }
+                        const data = await jsonResponse.json();
+                        const card = createCard(data, pair.json);
+                        fieldGrid.appendChild(card);
+                    } catch (err) {
+                        console.error(`加载 ${pair.json} 失败:`, err);
+                    }
+                }
+
+                console.log(`✅ 加载完成: ${pairs.length} 个场域`);
+
+            } catch (error) {
+                console.error('初始化失败:', error);
+                emptyState.style.display = 'block';
+                const tip = emptyState.querySelector('.empty-tip');
+                if (tip) {
+                    tip.innerHTML = `<i class="fas fa-exclamation-triangle"></i>加载失败: ${error.message}`;
+                }
+            }
+        }
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

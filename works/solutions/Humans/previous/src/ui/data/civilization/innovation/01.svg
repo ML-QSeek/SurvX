@@ -1,0 +1,79 @@
+<svg viewBox="-200 -180 400 360" xmlns="http://www.w3.org/2000/svg" style="background:#f0f4f8;">
+  <defs>
+    <linearGradient id="leaf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a8a3a"/>
+      <stop offset="40%" stop-color="#4a7a2a"/>
+      <stop offset="100%" stop-color="#3a5a1a"/>
+    </linearGradient>
+    <linearGradient id="stickGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b89060"/>
+      <stop offset="100%" stop-color="#7a5030"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7ab8e0" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#5090c0" stop-opacity="0.9"/>
+    </linearGradient>
+    <filter id="shadow2">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- 标题 -->
+  <text x="0" y="-160" text-anchor="middle" font-size="15" font-weight="bold" fill="#3a5030">淡水收集器 · 结构图</text>
+  <text x="0" y="-143" text-anchor="middle" font-size="10" fill="#6a8a50">原点：收集面投影中心（距地 60cm）</text>
+
+  <!-- 坐标轴 -->
+  <line x1="-190" y1="0" x2="190" y2="0" stroke="#c0d0c0" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <line x1="0" y1="-140" x2="0" y2="140" stroke="#c0d0c0" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <circle cx="0" cy="0" r="3.5" fill="#e05030" stroke="#a03020" stroke-width="1.5"/>
+  <text x="7" y="-5" font-size="8" fill="#e05030" font-weight="bold">原点</text>
+
+  <!-- 地面线 -->
+  <line x1="-180" y1="125" x2="180" y2="125" stroke="#a09070" stroke-width="1.5" stroke-dasharray="8,3"/>
+
+  <!-- 倾斜支架A（前左） -->
+  <line x1="-90" y1="-40" x2="-90" y2="125" stroke="url(#stickGrad)" stroke-width="6" stroke-linecap="round" filter="url(#shadow2)"/>
+  <!-- 倾斜支架B（前右） -->
+  <line x1="90" y1="-40" x2="90" y2="125" stroke="url(#stickGrad)" stroke-width="6" stroke-linecap="round" filter="url(#shadow2)"/>
+  <!-- 倾斜支架C（后中，较高） -->
+  <line x1="0" y1="-75" x2="0" y2="125" stroke="url(#stickGrad)" stroke-width="6" stroke-linecap="round" filter="url(#shadow2)"/>
+
+  <!-- 大叶片（收集面，25°倾斜，前低后高） -->
+  <polygon points="-130,-35 130,-35 80,-75 -80,-75" fill="url(#leaf)" opacity="0.85" filter="url(#shadow2)"/>
+  <polygon points="-130,-35 130,-35 80,-75 -80,-75" fill="none" stroke="#3a5a1a" stroke-width="1.5"/>
+  <!-- 叶脉 -->
+  <line x1="0" y1="-75" x2="0" y2="-35" stroke="#3a5a1a" stroke-width="1" opacity="0.6"/>
+  <line x1="-40" y1="-55" x2="-40" y2="-35" stroke="#3a5a1a" stroke-width="0.7" opacity="0.5"/>
+  <line x1="40" y1="-55" x2="40" y2="-35" stroke="#3a5a1a" stroke-width="0.7" opacity="0.5"/>
+  <line x1="-80" y1="-65" x2="-80" y2="-42" stroke="#3a5a1a" stroke-width="0.5" opacity="0.4"/>
+  <line x1="80" y1="-65" x2="80" y2="-42" stroke="#3a5a1a" stroke-width="0.5" opacity="0.4"/>
+
+  <!-- 导流槽（竹筒） -->
+  <path d="M -10 -40 L -45 100" stroke="#8a9a40" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.8"/>
+  <path d="M -10 -40 L -45 100" stroke="#6a7a20" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.5"/>
+
+  <!-- 承接容器（椰子壳） -->
+  <path d="M -60 95 A 18 18 0 0 1 -30 95 Z" fill="#6a4a2a" stroke="#4a3010" stroke-width="1.5"/>
+  <!-- 容器中的水 -->
+  <ellipse cx="-45" cy="94" rx="12" ry="4" fill="url(#water)"/>
+
+  <!-- 雨滴示意 -->
+  <circle cx="-60" cy="-50" r="1.5" fill="#70a8d0" opacity="0.6"/>
+  <circle cx="20" cy="-45" r="1.5" fill="#70a8d0" opacity="0.6"/>
+  <circle cx="-30" cy="-55" r="1.5" fill="#70a8d0" opacity="0.6"/>
+  <circle cx="50" cy="-48" r="1.5" fill="#70a8d0" opacity="0.6"/>
+  <circle cx="-10" cy="-52" r="1.5" fill="#70a8d0" opacity="0.6"/>
+
+  <!-- 标注 -->
+  <text x="-90" y="-50" text-anchor="middle" font-size="8" fill="#5a4030">前左支架</text>
+  <text x="90" y="-50" text-anchor="middle" font-size="8" fill="#5a4030">前右支架</text>
+  <text x="0" y="-85" text-anchor="middle" font-size="8" fill="#5a4030">后中支架（高）</text>
+  <text x="0" y="-42" text-anchor="middle" font-size="8" fill="#2a4a10" font-weight="bold">收集叶片（25°倾斜）</text>
+  <text x="-75" y="70" text-anchor="end" font-size="8" fill="#5a6a2a">导流槽（竹筒）</text>
+  <text x="-45" y="120" text-anchor="middle" font-size="8" fill="#5a4030">椰子壳容器</text>
+
+  <!-- 倾斜角度标注 -->
+  <path d="M 100 -35 Q 110 -10 100 20" fill="none" stroke="#c0a070" stroke-width="0.6"/>
+  <text x="114" y="-5" font-size="7" fill="#c0a070">25°</text>
+
+</svg>

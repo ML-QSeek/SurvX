@@ -1,0 +1,86 @@
+<svg viewBox="-220 -140 440 280" xmlns="http://www.w3.org/2000/svg" style="background:#f0efe8;">
+  <defs>
+    <linearGradient id="frameWood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b89050"/>
+      <stop offset="100%" stop-color="#6a4020"/>
+    </linearGradient>
+    <linearGradient id="leafCover" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a9a30"/>
+      <stop offset="40%" stop-color="#4a7a1a"/>
+      <stop offset="100%" stop-color="#3a5a10"/>
+    </linearGradient>
+    <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c0a870"/>
+      <stop offset="100%" stop-color="#8a7040"/>
+    </linearGradient>
+    <filter id="shadow3">
+      <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- 标题 -->
+  <text x="0" y="-125" text-anchor="middle" font-size="14" font-weight="bold" fill="#5a4030">庇护所 · 结构图</text>
+  <text x="0" y="-112" text-anchor="middle" font-size="9" fill="#8b6940">原点：内部地面几何中心</text>
+
+  <!-- 坐标轴 -->
+  <line x1="-210" y1="0" x2="210" y2="0" stroke="#d8d0c0" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <line x1="0" y1="-100" x2="0" y2="100" stroke="#d8d0c0" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <circle cx="0" cy="0" r="3.5" fill="#e05030" stroke="#a03020" stroke-width="1.5"/>
+  <text x="7" y="-5" font-size="8" fill="#e05030" font-weight="bold">原点</text>
+
+  <!-- 地面 -->
+  <rect x="-200" y="85" width="400" height="15" fill="url(#groundGrad)" opacity="0.4"/>
+  <line x1="-200" y1="85" x2="200" y2="85" stroke="#a09070" stroke-width="1"/>
+
+  <!-- 地面垫层（干草） -->
+  <rect x="-120" y="83" width="240" height="6" rx="3" fill="#c8b860" opacity="0.7"/>
+  <text x="0" y="96" text-anchor="middle" font-size="7" fill="#8a7a40">干草垫层（厚3cm）</text>
+
+  <!-- 地桩 -->
+  <rect x="-135" y="82" width="8" height="20" rx="2" fill="#6a4020"/>
+  <rect x="127" y="82" width="8" height="20" rx="2" fill="#6a4020"/>
+
+  <!-- A型框架A（前） -->
+  <line x1="-130" y1="85" x2="0" y2="-70" stroke="url(#frameWood)" stroke-width="7" stroke-linecap="round" filter="url(#shadow3)"/>
+  <line x1="130" y1="85" x2="0" y2="-70" stroke="url(#frameWood)" stroke-width="7" stroke-linecap="round" filter="url(#shadow3)"/>
+
+  <!-- A型框架B（后，略淡） -->
+  <line x1="-130" y1="85" x2="0" y2="-70" stroke="#906830" stroke-width="5" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- 横梁（脊梁） -->
+  <line x1="-130" y1="-70" x2="130" y2="-70" stroke="#8a6030" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- 覆盖层 - 底层 -->
+  <path d="M -160 85 Q -140 60 -130 -70 L 130 -70 Q 140 60 160 85 Z" fill="url(#leafCover)" opacity="0.5"/>
+  <!-- 覆盖层 - 中层 -->
+  <path d="M -150 80 Q -135 55 -125 -65 L 125 -65 Q 135 55 150 80 Z" fill="url(#leafCover)" opacity="0.55"/>
+  <!-- 覆盖层 - 顶层 -->
+  <path d="M -140 75 Q -130 50 -120 -60 L 120 -60 Q 130 50 140 75 Z" fill="url(#leafCover)" opacity="0.6"/>
+  <!-- 覆盖层轮廓 -->
+  <path d="M -160 85 Q -140 60 -130 -70 L 130 -70 Q 140 60 160 85" fill="none" stroke="#3a5a10" stroke-width="1.5"/>
+
+  <!-- 叶脉纹理（覆盖层上） -->
+  <line x1="-60" y1="-65" x2="-50" y2="70" stroke="#2a4a08" stroke-width="0.6" opacity="0.3"/>
+  <line x1="60" y1="-65" x2="50" y2="70" stroke="#2a4a08" stroke-width="0.6" opacity="0.3"/>
+  <line x1="0" y1="-70" x2="0" y2="80" stroke="#2a4a08" stroke-width="0.8" opacity="0.25"/>
+
+  <!-- 固定藤蔓 -->
+  <circle cx="-130" cy="85" r="4" fill="none" stroke="#8a9a30" stroke-width="1.5"/>
+  <circle cx="130" cy="85" r="4" fill="none" stroke="#8a9a30" stroke-width="1.5"/>
+
+  <!-- 标注 -->
+  <text x="0" y="-80" text-anchor="middle" font-size="8" fill="#5a4030" font-weight="bold">A型框架 + 横梁</text>
+  <text x="160" y="-20" text-anchor="start" font-size="7" fill="#3a5a10">覆盖层（3层棕榈叶）</text>
+  <text x="-135" y="72" text-anchor="end" font-size="7" fill="#6a4020">地桩+藤蔓固定</text>
+
+  <!-- 内部空间标注 -->
+  <text x="0" y="20" text-anchor="middle" font-size="9" fill="#a09070" font-style="italic">内部空间 2.5m²</text>
+  <text x="0" y="32" text-anchor="middle" font-size="7" fill="#a09070">入口→</text>
+
+  <!-- 尺寸标注 -->
+  <line x1="-130" y1="105" x2="130" y2="105" stroke="#c0a870" stroke-width="0.5"/>
+  <line x1="-130" y1="102" x2="-130" y2="108" stroke="#c0a870" stroke-width="0.5"/>
+  <line x1="130" y1="102" x2="130" y2="108" stroke="#c0a870" stroke-width="0.5"/>
+  <text x="0" y="115" text-anchor="middle" font-size="7" fill="#c0a870">跨度 260cm</text>
+
+</svg>

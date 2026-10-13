@@ -1,0 +1,605 @@
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_203b5a50] 连接建立
+[INFO] connection open
+[INFO] [conn_9d0ee25c] 连接建立
+[INFO] [conn_9d0ee25c] 注册为 field: 房主_测试
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: field 测试 
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: None 测试 
+[INFO] connection open
+[INFO] [conn_189f5d72] 连接建立
+[INFO] [conn_189f5d72] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] [频道 0] 已就绪
+[INFO] [频道 0] 游戏已开始，频道锁定
+[INFO] [协调器] 测试 频道 0 已设为就绪并锁定
+[INFO] [协调器] 测试 游戏开始，玩家: ['小人儿']
+[INFO] [协调器] 测试 start_game 完成
+[INFO] HTTP: 从数据库加载世界地形: 测试 -> field_荒岛.db
+[INFO] connection open
+[INFO] [conn_20b3fc1c] 连接建立
+[INFO] [conn_20b3fc1c] 注册为 dashboard: 仪表盘_测试
+[INFO] [conn_20b3fc1c] 连接断开
+[INFO] HTTP: 从数据库加载世界地形: 测试 -> field_荒岛.db
+[INFO] connection open
+[INFO] [conn_7f9b9b9e] 连接建立
+[INFO] [conn_7f9b9b9e] 注册为 dashboard: 仪表盘_测试
+[INFO] [协调器] 测试 已停止 (频道 0)
+[INFO] [conn_7f9b9b9e] 连接断开
+[INFO] [conn_9d0ee25c] 连接断开
+[INFO] connection open
+[INFO] [conn_976d372f] 连接建立
+[INFO] [conn_976d372f] 注册为 field: 房主_测试2
+[INFO] [协调器] 测试2 field 就绪
+[INFO] [协调器] 收到 ready: None 测试2 
+[INFO] connection open
+[INFO] [conn_3696c879] 连接建立
+[INFO] [conn_3696c879] 注册为 ego: 小人儿
+[INFO] [协调器] 测试2 玩家 小人儿 加入
+[INFO] [频道 0] 已就绪
+[INFO] [频道 0] 游戏已开始，频道锁定
+[INFO] [协调器] 测试2 频道 0 已设为就绪并锁定
+[INFO] [协调器] 测试2 游戏开始，玩家: ['小人儿']
+[INFO] [协调器] 测试2 start_game 完成
+[INFO] HTTP: 从数据库加载世界地形: 测试2 -> field_粼光城.db
+[INFO] connection open
+[INFO] [conn_1399665e] 连接建立
+[INFO] [conn_1399665e] 注册为 dashboard: 仪表盘_测试2
+[INFO] [conn_189f5d72] 连接断开
+[INFO] [协调器] 收到 ready: field 测试2 
+[INFO] [协调器] 测试2 field 就绪
+[INFO] [conn_1399665e] 连接断开
+[INFO] HTTP: 从数据库加载世界地形: 测试2 -> field_粼光城.db
+[INFO] connection open
+[INFO] [conn_71179860] 连接建立
+[INFO] [conn_71179860] 注册为 dashboard: 仪表盘_测试2
+[INFO] [conn_71179860] 连接断开
+[INFO] HTTP: 从数据库加载世界地形: 测试2 -> field_粼光城.db
+[INFO] connection open
+[INFO] [conn_4fbf9ccb] 连接建立
+[INFO] [conn_4fbf9ccb] 注册为 dashboard: 仪表盘_测试2
+[INFO] [协调器] 测试2 已停止 (频道 0)
+[INFO] [conn_4fbf9ccb] 连接断开
+[INFO] [conn_976d372f] 连接断开
+[INFO] [conn_3696c879] 连接断开
+[INFO] [conn_203b5a50] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_86db651f] 连接建立
+[INFO] [conn_86db651f] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_53559bc3] 连接建立
+[INFO] connection open
+[INFO] [conn_8f5e6d18] 连接建立
+[INFO] [conn_8f5e6d18] 注册为 field: 房主_测试
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: field 测试 
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: None 测试 
+[INFO] connection open
+[INFO] [conn_6a14de4e] 连接建立
+[INFO] [conn_6a14de4e] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] [频道 0] 已就绪
+[INFO] [频道 0] 游戏已开始，频道锁定
+[INFO] [协调器] 测试 频道 0 已设为就绪并锁定
+[INFO] [协调器] 测试 游戏开始，玩家: ['小人儿']
+[INFO] [协调器] 测试 start_game 完成
+[WARNING] HTTP: 世界 测试 的数据库不存在: None
+[INFO] connection open
+[INFO] [conn_6267cc93] 连接建立
+[INFO] [conn_6267cc93] 注册为 dashboard: 仪表盘_测试
+[INFO] [协调器] 测试 玩家 小人儿 离开
+[INFO] [conn_6a14de4e] 连接断开
+[INFO] [协调器] 测试 field 断开，清理状态
+[INFO] [conn_8f5e6d18] 连接断开
+[INFO] [conn_6267cc93] 连接断开
+[INFO] [conn_53559bc3] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_6a08577b] 连接建立
+[INFO] [conn_6a08577b] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_307e99cd] 连接建立
+[INFO] [conn_307e99cd] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_ca5a5742] 连接建立
+[INFO] connection open
+[INFO] [conn_f8607a5a] 连接建立
+[INFO] [conn_f8607a5a] 注册为 field: 房主_测试
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: field 测试 
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: None 测试 
+[INFO] connection open
+[INFO] [conn_ecb09581] 连接建立
+[INFO] [conn_ecb09581] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] [频道 0] 已就绪
+[INFO] [频道 0] 游戏已开始，频道锁定
+[INFO] [协调器] 测试 频道 0 已设为就绪并锁定
+[INFO] [协调器] 测试 游戏开始，玩家: ['小人儿']
+[INFO] [协调器] 测试 start_game 完成
+[WARNING] HTTP: 世界 测试 的数据库不存在: None
+[INFO] connection open
+[INFO] [conn_d0387a3b] 连接建立
+[INFO] [conn_d0387a3b] 注册为 dashboard: 仪表盘_测试
+[INFO] [协调器] 测试 已停止 (频道 0)
+[INFO] [conn_f8607a5a] 连接断开
+[INFO] [conn_d0387a3b] 连接断开
+[INFO] [conn_ecb09581] 连接断开
+[INFO] [conn_ca5a5742] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_6a2e1d26] 连接建立
+[INFO] [conn_6a2e1d26] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_0f552a07] 连接建立
+[INFO] [conn_0f552a07] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_1a5fceed] 连接建立
+[INFO] [conn_1a5fceed] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_4714a833] 连接建立
+[INFO] [conn_4714a833] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_605ce95f] 连接建立
+[INFO] [conn_605ce95f] 连接断开
+[INFO] connection open
+[INFO] [conn_6a06d3fe] 连接建立
+[INFO] [conn_6a06d3fe] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_1a636203] 连接建立
+[INFO] connection open
+[INFO] [conn_0b74afb7] 连接建立
+[INFO] [conn_0b74afb7] 注册为 field: 房主_测试2
+[INFO] [协调器] 测试2 field 就绪
+[INFO] [协调器] 收到 ready: field 测试2 
+[INFO] [协调器] 测试2 field 就绪
+[INFO] [协调器] 收到 ready: None 测试2 
+[INFO] connection open
+[INFO] [conn_275f9109] 连接建立
+[INFO] [conn_275f9109] 注册为 ego: 小人儿
+[INFO] [协调器] 测试2 玩家 小人儿 加入
+[INFO] [频道 0] 已就绪
+[INFO] [频道 0] 游戏已开始，频道锁定
+[INFO] [协调器] 测试2 频道 0 已设为就绪并锁定
+[INFO] [协调器] 测试2 游戏开始，玩家: ['小人儿']
+[INFO] [协调器] 测试2 start_game 完成
+[INFO] HTTP: 从数据库加载世界地形: 测试2 -> field_粼光城.db
+[INFO] connection open
+[INFO] [conn_5c3d502b] 连接建立
+[INFO] [conn_5c3d502b] 注册为 dashboard: 仪表盘_测试2
+[INFO] [协调器] 测试2 field 断开，清理状态
+[INFO] [conn_0b74afb7] 连接断开
+[INFO] [conn_275f9109] 连接断开
+[INFO] [conn_5c3d502b] 连接断开
+[INFO] [conn_1a636203] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_1a526dce] 连接建立
+[INFO] connection open
+[INFO] [conn_13a04be4] 连接建立
+[INFO] [conn_13a04be4] 注册为 field: 房主_测试
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: field 测试 
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: None 测试 
+[INFO] connection open
+[INFO] [conn_2cad498d] 连接建立
+[INFO] [conn_2cad498d] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] [频道 0] 已就绪
+[INFO] [频道 0] 游戏已开始，频道锁定
+[INFO] [协调器] 测试 频道 0 已设为就绪并锁定
+[INFO] [协调器] 测试 游戏开始，玩家: ['小人儿']
+[INFO] [协调器] 测试 start_game 完成
+[INFO] HTTP: 从数据库加载世界地形: 测试 -> field_荒岛.db
+[INFO] connection open
+[INFO] [conn_fd19bebf] 连接建立
+[INFO] [conn_fd19bebf] 注册为 dashboard: 仪表盘_测试
+[INFO] [conn_fd19bebf] 连接断开
+[INFO] HTTP: 从数据库加载世界地形: 测试 -> field_荒岛.db
+[INFO] connection open
+[INFO] [conn_4423357b] 连接建立
+[INFO] [conn_4423357b] 注册为 dashboard: 仪表盘_测试
+[INFO] [协调器] 测试 field 断开，清理状态
+[INFO] [conn_13a04be4] 连接断开
+[INFO] [conn_2cad498d] 连接断开
+[INFO] [conn_4423357b] 连接断开
+[INFO] [conn_1a526dce] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[ERROR] WebSocket 服务异常: [Errno 10048] error while attempting to bind on address ('127.0.0.1', 8765): [winerror 10048] 通常每个套接字地址(协议/网络地址/端口)只允许使用一次。
+[INFO] connection open
+[INFO] [conn_53f914fa] 连接建立
+[INFO] [conn_53f914fa] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[ERROR] WebSocket 服务异常: [Errno 10048] error while attempting to bind on address ('127.0.0.1', 8765): [winerror 10048] 通常每个套接字地址(协议/网络地址/端口)只允许使用一次。
+[INFO] connection open
+[INFO] [conn_ee85217b] 连接建立
+[INFO] [conn_ee85217b] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[ERROR] WebSocket 服务异常: [Errno 10048] error while attempting to bind on address ('127.0.0.1', 8765): [winerror 10048] 通常每个套接字地址(协议/网络地址/端口)只允许使用一次。
+[INFO] connection open
+[INFO] [conn_1ef8564d] 连接建立
+[INFO] [协调器] 收到 ready: None 测试 
+[INFO] connection open
+[INFO] [conn_fdf62111] 连接建立
+[INFO] [conn_fdf62111] 注册为 field: 房主_测试
+[INFO] [conn_fdf62111] 连接断开
+[INFO] connection open
+[INFO] [conn_5de2c1ab] 连接建立
+[INFO] [conn_5de2c1ab] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 取消大厅 (频道 0)
+[INFO] [频道 0] 未就绪
+[INFO] [协调器] 测试 已清理完成
+[INFO] connection open
+[INFO] [conn_2c25e533] 连接建立
+[INFO] [conn_2c25e533] 注册为 field: 房主_测试2
+[INFO] [协调器] 测试2 field 就绪
+[INFO] [协调器] 收到 ready: field 测试2 
+[INFO] [协调器] 测试2 field 就绪
+[INFO] [协调器] 收到 ready: None 测试2 
+[INFO] connection open
+[INFO] [conn_849bb079] 连接建立
+[INFO] [conn_849bb079] 注册为 ego: 小人儿
+[INFO] [协调器] 测试2 玩家 小人儿 加入
+[INFO] [频道 0] 已就绪
+[INFO] [频道 0] 游戏已开始，频道锁定
+[INFO] [协调器] 测试2 频道 0 已设为就绪并锁定
+[INFO] [协调器] 测试2 游戏开始，玩家: ['小人儿']
+[INFO] [协调器] 测试2 start_game 完成
+[INFO] HTTP: 从数据库加载世界地形: 测试2 -> field_粼光城.db
+[INFO] connection open
+[INFO] [conn_14d70588] 连接建立
+[INFO] [conn_14d70588] 注册为 dashboard: 仪表盘_测试2
+[INFO] [conn_5de2c1ab] 连接断开
+[INFO] [协调器] 测试2 玩家 小人儿 离开
+[INFO] [conn_849bb079] 连接断开
+[INFO] [协调器] 测试2 field 断开，清理状态
+[INFO] [conn_2c25e533] 连接断开
+[INFO] [conn_14d70588] 连接断开
+[INFO] [conn_1ef8564d] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_672918f6] 连接建立
+[INFO] [conn_672918f6] 注册为 field: 房主_测试
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: field 测试 
+[INFO] [协调器] 测试 field 就绪
+[INFO] connection open
+[INFO] [conn_01714d36] 连接建立
+[INFO] [conn_01714d36] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] [协调器] 测试 field 断开，清理状态
+[INFO] [频道 0] 未就绪
+[INFO] [conn_672918f6] 连接断开
+[INFO] [conn_01714d36] 连接断开
+[INFO] connection open
+[INFO] [conn_b40c9345] 连接建立
+[INFO] [conn_b40c9345] 注册为 field: 房主_测试
+[INFO] [conn_b40c9345] 连接断开
+[INFO] connection open
+[INFO] [conn_ce00b406] 连接建立
+[INFO] [conn_ce00b406] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] connection open
+[INFO] [conn_5489178a] 连接建立
+[INFO] [conn_5489178a] 注册为 field: 房主_测试2
+[INFO] [协调器] 测试2 field 就绪
+[INFO] [协调器] 收到 ready: field 测试2 
+[INFO] [协调器] 测试2 field 就绪
+[INFO] connection open
+[INFO] [conn_b86a9829] 连接建立
+[INFO] [conn_b86a9829] 注册为 ego: 小人儿
+[INFO] [协调器] 测试2 玩家 小人儿 加入
+[INFO] [协调器] 测试 玩家 小人儿 离开
+[INFO] [conn_ce00b406] 连接断开
+[INFO] [协调器] 测试2 field 断开，清理状态
+[INFO] [频道 1] 未就绪
+[INFO] [conn_5489178a] 连接断开
+[INFO] [conn_b86a9829] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_1e18de15] 连接建立
+[INFO] connection open
+[INFO] [conn_f4841d80] 连接建立
+[INFO] [conn_f4841d80] 注册为 field: 房主_测试
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: field 测试 
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: None 测试 
+[INFO] connection open
+[INFO] [conn_3fd1d498] 连接建立
+[INFO] [conn_3fd1d498] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] [频道 0] 已就绪
+[INFO] [频道 0] 游戏已开始，频道锁定
+[INFO] [协调器] 测试 频道 0 已设为就绪并锁定
+[INFO] [协调器] 测试 游戏开始，玩家: ['小人儿']
+[INFO] [协调器] 测试 start_game 完成
+[INFO] HTTP: 从数据库加载世界地形: 测试 -> field_荒岛.db
+[INFO] connection open
+[INFO] [conn_f066c446] 连接建立
+[INFO] [conn_f066c446] 注册为 dashboard: 仪表盘_测试
+[INFO] [协调器] 测试 已停止 (频道 0)
+[INFO] [conn_f066c446] 连接断开
+[INFO] [conn_f4841d80] 连接断开
+[INFO] [conn_3fd1d498] 连接断开
+[INFO] [conn_1e18de15] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_56e05a9c] 连接建立
+[INFO] connection open
+[INFO] [conn_740d93fc] 连接建立
+[INFO] [conn_740d93fc] 注册为 field: 房主_测试
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: field 测试 
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: None 测试 
+[INFO] connection open
+[INFO] [conn_42bf4a17] 连接建立
+[INFO] [conn_42bf4a17] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] [协调器] 测试 取消大厅 (频道 0)
+[INFO] [频道 0] 未就绪
+[INFO] [协调器] 测试 已清理完成
+[INFO] [conn_740d93fc] 连接断开
+[INFO] [conn_42bf4a17] 连接断开
+[INFO] [conn_56e05a9c] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_c75ccbe6] 连接建立
+[INFO] connection open
+[INFO] [conn_e7be05b6] 连接建立
+[INFO] [conn_e7be05b6] 注册为 field: 房主_测试
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: field 测试 
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: None 测试 
+[INFO] connection open
+[INFO] [conn_bc65518c] 连接建立
+[INFO] [conn_bc65518c] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] [协调器] 测试 取消大厅 (频道 0)
+[INFO] [频道 0] 未就绪
+[INFO] [协调器] 测试 已清理完成
+[INFO] [conn_e7be05b6] 连接断开
+[INFO] [conn_bc65518c] 连接断开
+[INFO] [conn_c75ccbe6] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_ec94ced9] 连接建立
+[INFO] [conn_ec94ced9] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_587f6f61] 连接建立
+[INFO] [conn_587f6f61] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_cd40a055] 连接建立
+[INFO] connection open
+[INFO] [conn_49d9adfe] 连接建立
+[INFO] [conn_49d9adfe] 注册为 field: 房主_测试
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: field 测试 
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: None 测试 
+[INFO] connection open
+[INFO] [conn_d5c110bc] 连接建立
+[INFO] [conn_d5c110bc] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] [协调器] 测试 取消大厅 (频道 0)
+[INFO] [频道 0] 未就绪
+[INFO] [协调器] 测试 已清理完成
+[INFO] [conn_49d9adfe] 连接断开
+[INFO] [conn_d5c110bc] 连接断开
+[INFO] [conn_cd40a055] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_88b437c8] 连接建立
+[INFO] [conn_88b437c8] 连接断开
+[INFO] 消息队列服务器已启动
+[INFO] WebSocket: ws://127.0.0.1:8765
+[INFO] HTTP: http://127.0.0.1:8766
+[INFO] 预设频道: 3 个
+[INFO] 每频道上限: 5 人
+[INFO] server listening on 127.0.0.1:8765
+[INFO] WebSocket 服务启动: ws://127.0.0.1:8765
+[INFO] HTTP 服务启动: http://127.0.0.1:8766
+[INFO] connection open
+[INFO] [conn_b862a63f] 连接建立
+[INFO] connection open
+[INFO] [conn_baee8957] 连接建立
+[INFO] [conn_baee8957] 注册为 field: 房主_测试
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: field 测试 
+[INFO] [协调器] 测试 field 就绪
+[INFO] [协调器] 收到 ready: None 测试 
+[INFO] connection open
+[INFO] [conn_527251f7] 连接建立
+[INFO] [conn_527251f7] 注册为 ego: 小人儿
+[INFO] [协调器] 测试 玩家 小人儿 加入
+[INFO] [频道 0] 已就绪
+[INFO] [频道 0] 游戏已开始，频道锁定
+[INFO] [协调器] 测试 频道 0 已设为就绪并锁定
+[INFO] [协调器] 测试 游戏开始，玩家: ['小人儿']
+[INFO] [协调器] 测试 start_game 完成
+[INFO] HTTP: 从数据库加载世界地形: 测试 -> field_荒岛.db
+[INFO] connection open
+[INFO] [conn_168498da] 连接建立
+[INFO] [conn_168498da] 注册为 dashboard: 仪表盘_测试
+[INFO] [协调器] 测试 已停止 (频道 0)
+[INFO] [conn_baee8957] 连接断开
+[INFO] [conn_168498da] 连接断开
+[INFO] [conn_527251f7] 连接断开
+[INFO] [conn_b862a63f] 连接断开

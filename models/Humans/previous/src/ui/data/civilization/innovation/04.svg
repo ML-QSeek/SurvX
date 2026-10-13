@@ -1,0 +1,94 @@
+<svg viewBox="-140 -140 280 280" xmlns="http://www.w3.org/2000/svg" style="background:#faf8f2;">
+  <defs>
+    <radialGradient id="shellGrad" cx="0.4" cy="0.3" r="0.6">
+      <stop offset="0%" stop-color="#f0e8d8"/>
+      <stop offset="50%" stop-color="#d8c8a8"/>
+      <stop offset="100%" stop-color="#a08060"/>
+    </radialGradient>
+    <radialGradient id="ember" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ffcc00"/>
+      <stop offset="30%" stop-color="#ff8800"/>
+      <stop offset="70%" stop-color="#cc3300"/>
+      <stop offset="100%" stop-color="#881100"/>
+    </radialGradient>
+    <linearGradient id="sandGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0d0a0"/>
+      <stop offset="100%" stop-color="#b0a070"/>
+    </linearGradient>
+    <linearGradient id="fuelGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8a6a30"/>
+      <stop offset="100%" stop-color="#5a4020"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow4">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- 标题 -->
+  <text x="0" y="-125" text-anchor="middle" font-size="14" font-weight="bold" fill="#5a4030">火种保存器 · 结构图</text>
+  <text x="0" y="-112" text-anchor="middle" font-size="9" fill="#8b6940">原点：容器几何中心（阴燃区中心）</text>
+
+  <!-- 坐标轴 -->
+  <line x1="-130" y1="0" x2="130" y2="0" stroke="#e0d8c8" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <line x1="0" y1="-100" x2="0" y2="100" stroke="#e0d8c8" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <circle cx="0" cy="0" r="3.5" fill="#e05030" stroke="#a03020" stroke-width="1.5"/>
+  <text x="7" y="-5" font-size="8" fill="#e05030" font-weight="bold">原点</text>
+
+  <!-- 隔热垫层（沙子） -->
+  <ellipse cx="0" cy="50" rx="55" ry="18" fill="url(#sandGrad)" opacity="0.6"/>
+  <path d="M -55 50 Q -50 60 -40 65 Q 0 75 40 65 Q 50 60 55 50" fill="url(#sandGrad)" opacity="0.4"/>
+
+  <!-- 耐火容器（大贝壳/碗） -->
+  <path d="M -50 -45 Q -55 0 -50 45 Q -40 55 0 56 Q 40 55 50 45 Q 55 0 50 -45 Q 40 -55 0 -56 Q -40 -55 -50 -45 Z" fill="url(#shellGrad)" stroke="#a08060" stroke-width="1.5" filter="url(#shadow4)"/>
+  <!-- 容器内部 -->
+  <ellipse cx="0" cy="-10" rx="42" ry="38" fill="#c8b898" opacity="0.5"/>
+
+  <!-- 芯材螺旋体（椰壳纤维绳） -->
+  <!-- 螺旋体侧面示意（在容器内部） -->
+  <rect x="-15" y="-40" width="30" height="55" rx="10" fill="url(#fuelGrad)" opacity="0.7"/>
+  <!-- 螺旋纹理 -->
+  <path d="M -12 -35 Q 12 -30 12 -25 Q -12 -20 -12 -15 Q 12 -10 12 -5 Q -12 0 -12 5 Q 12 10 12 15" fill="none" stroke="#7a5a20" stroke-width="1.2" opacity="0.6"/>
+  <path d="M -14 -37 Q 10 -32 10 -27 Q -14 -22 -14 -17 Q 10 -12 10 -7 Q -14 -2 -14 3 Q 10 8 10 13" fill="none" stroke="#906a30" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- 阴燃区（发光） -->
+  <circle cx="0" cy="-32" r="10" fill="url(#ember)" filter="url(#glow)" opacity="0.85"/>
+  <circle cx="0" cy="-32" r="6" fill="#ffaa00" opacity="0.7"/>
+  <circle cx="0" cy="-32" r="3" fill="#ffdd66" opacity="0.9"/>
+
+  <!-- 灰烬层 -->
+  <ellipse cx="0" cy="-23" rx="10" ry="3" fill="#666" opacity="0.4"/>
+
+  <!-- 上升热气流示意 -->
+  <path d="M -3 -42 Q -8 -55 -5 -65" fill="none" stroke="#ff8800" stroke-width="0.8" opacity="0.3"/>
+  <path d="M 2 -42 Q 6 -52 4 -62" fill="none" stroke="#ff8800" stroke-width="0.6" opacity="0.25"/>
+
+  <!-- 通风孔A -->
+  <circle cx="42" cy="-25" r="5" fill="#504030" stroke="#3a2a1a" stroke-width="1"/>
+  <text x="52" y="-22" font-size="7" fill="#5a4030">通风孔A</text>
+  <!-- 通风孔B -->
+  <circle cx="-42" cy="-25" r="5" fill="#504030" stroke="#3a2a1a" stroke-width="1"/>
+  <text x="-58" y="-22" font-size="7" fill="#5a4030">通风孔B</text>
+
+  <!-- 密封盖（非使用时，放在一侧示意） -->
+  <ellipse cx="70" cy="-80" rx="48" ry="10" fill="#d8c8a8" stroke="#a08060" stroke-width="1.5" opacity="0.7"/>
+  <ellipse cx="70" cy="-80" rx="38" ry="7" fill="#e0d0b8" opacity="0.5"/>
+  <circle cx="70" cy="-88" r="4" fill="#a08060"/>
+  <text x="70" y="-95" text-anchor="middle" font-size="7" fill="#8b6940">密封盖</text>
+  <text x="70" y="-105" text-anchor="middle" font-size="6" fill="#a09070">（非使用时）</text>
+
+  <!-- 标注 -->
+  <text x="0" y="75" text-anchor="middle" font-size="8" fill="#5a4030">沙子隔热垫层</text>
+  <text x="65" y="10" text-anchor="start" font-size="8" fill="#8b6940">耐火贝壳容器</text>
+  <text x="0" y="-50" text-anchor="middle" font-size="8" fill="#cc3300" font-weight="bold">阴燃芯材（300-350°C）</text>
+
+  <!-- 通风率说明 -->
+  <text x="0" y="105" text-anchor="middle" font-size="7" fill="#a09070">通风孔开度控制燃烧速率：100%→快燃 4cm/h / 10%→阴燃 0.8cm/h</text>
+
+</svg>

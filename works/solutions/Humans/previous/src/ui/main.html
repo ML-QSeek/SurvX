@@ -1,0 +1,2260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>Humans · 智能体生存仿真</title>
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        :root {
+            --primary: #f6b07c;
+            --primary-dark: #d4845a;
+            --primary-light: #f5cba0;
+            --primary-transparent: rgba(246, 176, 124, 0.12);
+            --primary-glow: rgba(246, 176, 124, 0.35);
+            --bg-primary: #0e0b0a;
+            --bg-secondary: #1a1412;
+            --bg-tertiary: #221c19;
+            --bg-hover: #2a221e;
+            --text-primary: #e4d7cf;
+            --text-secondary: #d4c4b8;
+            --text-tertiary: #a28c7c;
+            --border-color: #3a2c24;
+            --error-color: #f58b7a;
+            --success-color: #eab676;
+            --warning-yellow: #eab676;
+            --card-hover: rgba(246, 176, 124, 0.05);
+            --sidebar-width: 220px;
+            --topbar-height: 36px;
+            --agent-warm: #d4c4b8;
+            --agent-amber: #f6b07c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body {
+            font-family: 'Inter', 'JetBrains Mono', 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            font-weight: 300;
+            font-size: 13px;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(246, 176, 124, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 85% 70%, rgba(212, 132, 90, 0.04) 0%, transparent 45%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(246, 176, 124, 0.2); border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(246, 176, 124, 0.4); }
+        ::-webkit-scrollbar-corner { background: transparent; }
+        * { scrollbar-width: thin; scrollbar-color: rgba(246, 176, 124, 0.2) transparent; }
+
+        [contenteditable="true"] {
+            outline: none;
+            background-color: transparent;
+            border: none;
+            color: var(--text-tertiary);
+        }
+        [contenteditable="true"]:focus { background-color: var(--primary-transparent); }
+        a:link, a:visited, a:hover { text-decoration: none; }
+        a { color: var(--primary); transition: color 0.3s; }
+        a:hover { color: var(--primary-light); text-decoration: underline; }
+
+        /* ===== 顶部栏 ===== */
+        #mq_top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--topbar-height);
+            display: flex;
+            flex-shrink: 0;
+            background: rgba(18, 14, 12, 0.94);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(246, 176, 124, 0.25);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4), 0 0 18px rgba(246,176,124,0.08);
+            align-items: center;
+            padding: 0 0 0 4px;
+            z-index: 40;
+            transform: translateY(-100%);
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        #mq_top.open {
+            transform: translateY(0);
+        }
+
+        .topbar-trigger {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            z-index: 39;
+            cursor: default;
+            background: transparent;
+        }
+
+        .logo-q-char {
+            background: linear-gradient(135deg, #e4d7cf 0%, #f5cba0 25%, #f6b07c 60%, #d4845a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 24px;
+            text-shadow: 0 0 12px rgba(246,176,124,0.5);
+            font-weight: 600;
+            letter-spacing: -1px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        input, select {
+            vertical-align: middle;
+            background: rgba(0,0,0,0.4);
+            color: var(--primary-light);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            padding: 4px 8px;
+        }
+        .main_topic {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 450;
+            cursor: pointer;
+            color: var(--primary-light);
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            height: 36px;
+            text-shadow: 0 0 8px rgba(246,176,124,0.2);
+            flex-shrink: 0;
+            padding: 0 14px;
+            line-height: 36px;
+        }
+        .main_topic:hover {
+            color: #e4d7cf;
+            background-color: var(--primary-transparent);
+            text-shadow: 0 0 12px rgba(246,176,124,0.5);
+        }
+        .main_topic::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        .main_topic:hover::after { width: 70%; }
+        .window-control {
+            width: 46px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: var(--primary-light);
+            font-size: 16px;
+            -webkit-app-region: no-drag;
+            transition: all 0.3s ease;
+            user-select: none;
+            font-weight: 350;
+            position: relative;
+            text-shadow: 0 0 8px rgba(246,176,124,0.15);
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .window-control:hover {
+            background-color: rgba(246,176,124,0.12);
+            color: #e4d7cf;
+            text-shadow: 0 0 12px rgba(246,176,124,0.4);
+        }
+        .window-control.close:hover { background-color: rgba(232,17,35,0.9); color: white; }
+        .basket-icon {
+            width: 26px; height: 26px;
+            fill: var(--primary-light);
+            filter: drop-shadow(0 0 5px rgba(246,176,124,0.4));
+            transition: all 0.3s ease;
+        }
+        #mq_top_ul_li_07:hover .basket-icon {
+            fill: #e4d7cf;
+            filter: drop-shadow(0 0 12px rgba(246,176,124,0.7));
+            transform: scale(1.1);
+        }
+        .left-group { display: flex; align-items: center; flex-shrink: 0; }
+        .flex-spacer-left { flex: 1; min-width: 30px; }
+        .right-controls {
+            display: flex;
+            align-items: stretch;
+            flex-shrink: 0;
+            gap: 0;
+            height: 36px;
+            margin-right: 0;
+        }
+        .avatar-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            height: 36px;
+            width: 36px;
+            margin: 0 4px 0 2px;
+        }
+        .avatar-wrapper img {
+            width: 30px;
+            height: 30px;
+            border-radius: 15px;
+            display: block;
+        }
+
+        #mainContainer {
+            display: flex;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ===== 侧边栏 ===== */
+        .sidebar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: rgba(26, 20, 18, 0.94);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(246, 176, 124, 0.15);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 30;
+            height: 100%;
+            overflow: hidden;
+            transform: translateX(-100%);
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 2px 0 30px rgba(0,0,0,0.5);
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 0.8rem 0 0.5rem 0;
+            overflow-y: auto;
+        }
+        .nav-section { padding: 0 0.6rem; margin-bottom: 1.2rem; }
+        .nav-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            color: var(--text-tertiary);
+            padding: 0.3rem 0.6rem 0.5rem 0.6rem;
+            font-weight: 600;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.55rem 0.7rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 2px solid transparent;
+            margin-bottom: 1px;
+            text-decoration: none;
+            border-radius: 0;
+        }
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        .nav-item.active {
+            background: var(--primary-transparent);
+            color: var(--primary-light);
+            border-left-color: var(--primary);
+            font-weight: 500;
+        }
+        .nav-item .badge {
+            margin-left: auto;
+            background: rgba(246,176,124,0.15);
+            padding: 0.05rem 0.5rem;
+            font-size: 0.6rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-secondary);
+        }
+        .nav-item .badge.active-badge {
+            background: rgba(246,176,124,0.15);
+            color: var(--success-color);
+        }
+        .sidebar-footer {
+            padding: 0.7rem 1rem 0.9rem 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+        .sidebar-footer .create-field-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.45rem 0.8rem;
+            font-size: 0.85rem;
+            color: var(--primary-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s;
+            width: 100%;
+            letter-spacing: 0.5px;
+            border-color: var(--warning-yellow);
+            color: var(--warning-yellow);
+            border-radius: 0;
+        }
+        .sidebar-footer .create-field-btn:hover {
+            background: rgba(234,182,118,0.08);
+            border-color: var(--primary);
+            text-shadow: 0 0 8px rgba(246,176,124,0.3);
+        }
+
+        .sidebar-trigger {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            z-index: 29;
+            cursor: default;
+            background: transparent;
+        }
+
+        /* ===== 侧边栏实例列表 ===== */
+        #runningInstances {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            margin-top: 2px;
+        }
+        #runningInstances .instance-item {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.85rem;
+            border-left: 2px solid transparent;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 0;
+            margin-bottom: 1px;
+        }
+        #runningInstances .instance-item:hover {
+            background: var(--bg-tertiary);
+            border-left-color: var(--primary);
+        }
+        #runningInstances .instance-item .stop-btn {
+            opacity: 0.3;
+            transition: opacity 0.2s;
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            padding: 0 4px;
+            font-size: 0.8rem;
+        }
+        #runningInstances .instance-item:hover .stop-btn {
+            opacity: 1;
+        }
+        #runningInstances .instance-item .stop-btn:hover {
+            color: var(--primary-light) !important;
+        }
+        #runningInstances .empty-instance {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            width: 100%;
+            height: 100%;
+        }
+        .content-area iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: var(--bg-primary);
+            display: block;
+            flex: 1;
+        }
+
+        /* ===== 大厅弹窗 ===== */
+        .lobby-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .lobby-overlay.active { display: flex; }
+        @keyframes fadeIn { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
+
+        .lobby-box {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(246, 176, 124, 0.2);
+            box-shadow: 0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(246,176,124,0.06) inset;
+            width: 480px;
+            max-width: 94vw;
+            max-height: 80vh;
+            border-radius: 0;
+            padding: 2rem 2rem 1.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            position: relative;
+            overflow-y: auto;
+        }
+        .lobby-box::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.5;
+        }
+        .lobby-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .lobby-title .sub {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--text-tertiary);
+            margin-left: auto;
+        }
+        .lobby-status-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .lobby-status-row .status-item {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+        }
+        .lobby-status-row .status-item .val {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .lobby-status-row .status-item .val.ready { color: var(--success-color); }
+        .lobby-status-row .status-item .val.waiting { color: var(--warning-yellow); }
+
+        .lobby-player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0 2px;
+        }
+        .lobby-player-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.7rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+        }
+        .lobby-player-item .player-name {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .lobby-player-item .player-status {
+            font-size: 0.7rem;
+            color: var(--success-color);
+        }
+        .lobby-player-item .player-kick {
+            background: transparent;
+            border: 1px solid rgba(245,139,122,0.3);
+            color: var(--error-color);
+            padding: 0.1rem 0.7rem;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-family: inherit;
+            transition: 0.2s;
+            border-radius: 0;
+        }
+        .lobby-player-item .player-kick:hover {
+            background: rgba(245,139,122,0.15);
+            border-color: var(--error-color);
+        }
+        .lobby-player-item .player-kick:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .lobby-empty {
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 1rem 0;
+            opacity: 0.6;
+        }
+
+        .lobby-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.2rem;
+            margin-top: 0.2rem;
+        }
+        .lobby-actions button {
+            padding: 0.6rem 2.2rem;
+            border-radius: 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        .lobby-actions .btn-start {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #0e0b0a;
+            font-weight: 600;
+        }
+        .lobby-actions .btn-start:hover:not(:disabled) {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 24px rgba(246,176,124,0.15);
+        }
+        .lobby-actions .btn-start:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .lobby-actions .btn-cancel:hover {
+            background: var(--bg-hover);
+            border-color: var(--text-tertiary);
+        }
+
+        /* ===== 创建实例弹窗 ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(246, 176, 124, 0.2);
+            box-shadow: 0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(246,176,124,0.06) inset;
+            width: 720px;
+            max-width: 94vw;
+            max-height: 88vh;
+            border-radius: 0;
+            padding: 2.2rem 2.4rem 1.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+            overflow-y: auto;
+        }
+        .modal-box::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.5;
+        }
+        .modal-title {
+            font-size: 1.7rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .modal-title i { color: var(--primary); font-size: 1.4rem; }
+        .modal-field { display: flex; flex-direction: column; gap: 0.5rem; }
+        .modal-field label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+        }
+        .modal-field input {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.7rem 1rem;
+            font-size: 1rem;
+            color: var(--text-primary);
+            border-radius: 0;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .modal-field input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(246,176,124,0.08);
+        }
+        .modal-field textarea {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.7rem 1rem;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            resize: vertical;
+            border-radius: 0;
+            width: 100%;
+            transition: border 0.2s;
+        }
+        .modal-field textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(246,176,124,0.08);
+        }
+        .selected-row {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            min-height: 56px;
+            padding: 0.5rem 0.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.6rem;
+            transition: border 0.2s;
+        }
+        .selected-row:focus-within { border-color: var(--primary); }
+        .selected-row .placeholder {
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+            opacity: 0.6;
+            font-style: italic;
+        }
+        .selected-tag {
+            background: rgba(246,176,124,0.10);
+            border: 1px solid rgba(246,176,124,0.15);
+            padding: 0.25rem 0.7rem 0.25rem 0.5rem;
+            border-radius: 0;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            color: var(--primary-light);
+            font-family: 'Inter', sans-serif;
+            height: 38px;
+            letter-spacing: 0.3px;
+            transition: all 0.15s;
+        }
+        .selected-tag .tag-icon { font-size: 0.8rem; opacity: 0.8; }
+        .selected-tag .remove-btn {
+            cursor: pointer;
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            padding: 0 4px;
+            line-height: 1;
+            font-weight: 700;
+        }
+        .selected-tag .remove-btn:hover { color: #e74c3c; }
+        .modal-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .modal-select-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .modal-select-group .group-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+        }
+        .modal-select-group .group-label i { margin-right: 6px; font-size: 0.8rem; }
+        .item-list {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.3rem 0;
+            transition: border 0.2s;
+        }
+        .item-list:focus-within { border-color: var(--primary); }
+        .item-row {
+            padding: 0.5rem 0.9rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.15s;
+            border-left: 2px solid transparent;
+            border-radius: 0;
+        }
+        .item-row:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .item-row .item-icon { font-size: 0.9rem; opacity: 0.7; width: 22px; text-align: center; }
+        .item-row .item-name { flex: 1; }
+        .item-row .item-hint {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            opacity: 0.4;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.3px;
+        }
+        .item-row.active-item {
+            background: rgba(246,176,124,0.06);
+            border-left-color: var(--primary);
+            color: var(--primary-light);
+        }
+        .item-row .check-mark { color: var(--primary); font-size: 0.8rem; opacity: 0; transition: opacity 0.15s; }
+        .item-row.active-item .check-mark { opacity: 1; }
+        .empty-list { color: var(--text-tertiary); font-size: 0.8rem; padding: 0.8rem 0.9rem; opacity: 0.5; font-style: italic; }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.2rem;
+        }
+        .modal-actions button {
+            padding: 0.6rem 2.2rem;
+            border-radius: 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        .modal-actions .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #0e0b0a;
+            font-weight: 600;
+        }
+        .modal-actions .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 24px rgba(246,176,124,0.15);
+        }
+        .modal-actions .btn-secondary:hover { background: var(--bg-hover); border-color: var(--text-tertiary); }
+
+        .image-picker {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.7rem;
+            cursor: pointer;
+            transition: border 0.2s;
+            border-radius: 0;
+            height: 44px;
+        }
+        .image-picker:hover {
+            border-color: var(--primary);
+        }
+        .image-picker .picker-icon {
+            font-size: 1.2rem;
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+            width: 28px;
+            text-align: center;
+        }
+        .image-picker .picker-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 0;
+        }
+        .image-picker .picker-label {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .image-picker .picker-filename {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .image-picker .picker-hint {
+            font-size: 0.6rem;
+            color: var(--text-tertiary);
+            opacity: 0.4;
+            flex-shrink: 0;
+        }
+        .row-flex {
+            display: flex;
+            gap: 0.8rem;
+            align-items: stretch;
+        }
+        .row-flex .flex-2 { flex: 2; }
+        .row-flex .flex-1 { flex: 1; }
+
+        /* ===== 关于/捐赠/商店弹窗 ===== */
+        .about-modal, .donate-modal, .shop-modal, .confirm-modal { border-radius: 0 !important; }
+        .about-modal {
+            border: 1px solid #f6b07c;
+            background: rgba(20,16,14,0.98);
+            width: 540px;
+            max-width: 92vw;
+            max-height: 80vh;
+            z-index: 9999;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-sizing: border-box;
+            box-shadow: 0 0 25px rgba(246,176,124,0.3);
+            backdrop-filter: blur(4px);
+            padding: 28px 32px 24px 32px;
+            display: none;
+            flex-direction: column;
+            color: var(--text-secondary);
+        }
+        .about-modal .about-title { font-size: 18px; font-weight: 500; color: var(--primary-light); margin-bottom: 14px; letter-spacing: 0.5px; border-bottom: 1px solid rgba(246,176,124,0.2); padding-bottom: 12px; text-align: center; }
+        .about-modal .about-body { font-size: 14px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 12px; text-align: left; padding: 0 4px; }
+        .about-modal .about-body p { margin: 8px 0; }
+        .about-modal .about-body .highlight { color: var(--primary-light); font-weight: 400; }
+        .about-modal .about-body .muted { color: var(--text-tertiary); font-size: 13px; }
+        .about-modal .about-team { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin: 10px 0 16px 0; }
+        .about-modal .about-team .member { text-align: center; background: rgba(0,0,0,0.2); padding: 10px 16px; border: 1px solid rgba(246,176,124,0.15); min-width: 70px; }
+        .about-modal .about-team .member .avatar { font-size: 32px; display: block; margin-bottom: 4px; }
+        .about-modal .about-team .member .name { font-size: 13px; color: var(--text-secondary); }
+        .about-modal .about-team .member .role { font-size: 12px; color: var(--text-tertiary); }
+        .about-modal .about-close-btn { background: transparent; border: 1px solid #f6b07c; color: #f6b07c; padding: 6px 24px; cursor: pointer; font-size: 13px; transition: 0.2s; margin-top: 8px; align-self: center; width: fit-content; border-radius: 0; }
+        .about-modal .about-close-btn:hover { background: rgba(246,176,124,0.2); color: #f5cba0; }
+        .donate-modal {
+            border: 1px solid #f6b07c;
+            background: rgba(20,16,14,0.98);
+            width: 420px;
+            max-width: 90vw;
+            max-height: 80vh;
+            z-index: 9999;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-sizing: border-box;
+            box-shadow: 0 0 25px rgba(246,176,124,0.3);
+            backdrop-filter: blur(4px);
+            padding: 24px 28px 20px 28px;
+            display: none;
+            flex-direction: column;
+            color: var(--text-secondary);
+        }
+        .donate-modal .donate-title { font-size: 16px; font-weight: 500; color: var(--primary-light); margin-bottom: 12px; letter-spacing: 0.5px; border-bottom: 1px solid rgba(246,176,124,0.2); padding-bottom: 10px; text-align: center; }
+        .donate-modal .donate-body { font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 18px; text-align: left; padding: 0 4px; }
+        .donate-modal .donate-body p { margin: 6px 0; }
+        .donate-modal .donate-body .highlight { color: var(--primary-light); }
+        .donate-modal .donate-body .muted { font-size: 12px; color: var(--text-tertiary); }
+        .donate-modal .donate-qr { display: flex; flex-direction: column; align-items: center; margin: 6px 0 14px 0; }
+        .donate-modal .donate-qr img { width: 100px; height: 100px; border: 1px solid rgba(246,176,124,0.3); background: #fff; padding: 4px; object-fit: contain; }
+        .donate-modal .donate-qr .qr-label { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+        .donate-modal .donate-contact { font-size: 12px; color: var(--text-tertiary); border-top: 1px solid rgba(246,176,124,0.15); padding-top: 12px; margin-top: 4px; text-align: center; }
+        .donate-modal .donate-contact a { color: var(--primary-light); text-decoration: none; border-bottom: 1px dotted rgba(246,176,124,0.3); }
+        .donate-modal .donate-contact a:hover { color: #e4d7cf; border-bottom-color: #e4d7cf; }
+        .donate-modal .donate-close-btn { background: transparent; border: 1px solid #f6b07c; color: #f6b07c; padding: 5px 20px; cursor: pointer; font-size: 12px; transition: 0.2s; margin-top: 10px; align-self: center; width: fit-content; border-radius: 0; }
+        .donate-modal .donate-close-btn:hover { background: rgba(246,176,124,0.2); color: #f5cba0; }
+        .shop-modal {
+            border: 1px solid #f6b07c;
+            background: rgba(20,16,14,0.98);
+            width: 560px;
+            max-width: 92vw;
+            max-height: 80vh;
+            z-index: 9999;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-sizing: border-box;
+            box-shadow: 0 0 25px rgba(246,176,124,0.3);
+            backdrop-filter: blur(4px);
+            padding: 20px 24px 18px 24px;
+            display: none;
+            flex-direction: column;
+            color: var(--text-secondary);
+            overflow-y: auto;
+        }
+        .shop-modal .shop-title { font-size: 16px; font-weight: 500; color: var(--primary-light); margin-bottom: 14px; letter-spacing: 0.5px; border-bottom: 1px solid rgba(246,176,124,0.2); padding-bottom: 10px; text-align: center; }
+        .shop-modal .shop-section { margin-bottom: 14px; }
+        .shop-modal .shop-section-title { font-size: 13px; font-weight: 500; color: var(--text-tertiary); margin-bottom: 8px; letter-spacing: 0.3px; border-left: 2px solid var(--primary); padding-left: 10px; }
+        .shop-modal .shop-items { display: flex; flex-wrap: wrap; gap: 12px; padding-left: 6px; }
+        .shop-modal .shop-item { display: flex; flex-direction: column; align-items: center; padding: 10px 14px 8px 14px; border: 1px solid rgba(246,176,124,0.2); cursor: pointer; transition: all 0.25s ease; min-width: 70px; background: rgba(0,0,0,0.2); position: relative; }
+        .shop-modal .shop-item:hover { border-color: var(--primary); background: rgba(246,176,124,0.08); box-shadow: 0 0 16px rgba(246,176,124,0.1); }
+        .shop-modal .shop-item .item-icon { font-size: 28px; margin-bottom: 4px; line-height: 1.2; }
+        .shop-modal .shop-item .item-name { font-size: 11px; color: var(--text-tertiary); text-align: center; line-height: 1.3; }
+        .shop-modal .shop-item .item-price { font-size: 11px; color: var(--primary-light); margin-top: 2px; font-weight: 400; }
+        .shop-modal .shop-exchange { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid rgba(246,176,124,0.15); background: rgba(0,0,0,0.15); flex-wrap: wrap; }
+        .shop-modal .shop-exchange label { font-size: 13px; color: var(--text-secondary); }
+        .shop-modal .shop-exchange input { width: 70px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); padding: 4px 8px; color: var(--text-primary); font-size: 13px; outline: none; border-radius: 0; }
+        .shop-modal .shop-exchange input:focus { border-color: var(--primary); }
+        .shop-modal .shop-exchange .exchange-rate { font-size: 12px; color: var(--text-tertiary); }
+        .shop-modal .shop-exchange .exchange-btn { background: transparent; border: 1px solid #f6b07c; color: #f6b07c; padding: 4px 16px; cursor: pointer; font-size: 12px; transition: 0.2s; border-radius: 0; }
+        .shop-modal .shop-exchange .exchange-btn:hover { background: rgba(246,176,124,0.2); color: #f5cba0; }
+        .shop-modal .shop-close-btn { background: transparent; border: 1px solid #f6b07c; color: #f6b07c; padding: 5px 20px; cursor: pointer; font-size: 12px; transition: 0.2s; margin-top: 12px; align-self: center; width: fit-content; border-radius: 0; }
+        .shop-modal .shop-close-btn:hover { background: rgba(246,176,124,0.2); color: #f5cba0; }
+        .confirm-modal {
+            border: 1px solid #f6b07c;
+            background: rgba(20,16,14,0.98);
+            width: 340px;
+            z-index: 10000;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(246,176,124,0.35);
+            backdrop-filter: blur(4px);
+            padding: 24px 28px 20px 28px;
+            display: none;
+            flex-direction: column;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+        .confirm-modal .confirm-title { font-size: 15px; font-weight: 500; color: var(--primary-light); margin-bottom: 8px; }
+        .confirm-modal .confirm-body { font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin: 6px 0 14px 0; }
+        .confirm-modal .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+        .confirm-modal .confirm-actions button { background: transparent; border: 1px solid #f6b07c; color: #f6b07c; padding: 5px 22px; cursor: pointer; font-size: 12px; transition: 0.2s; border-radius: 0; }
+        .confirm-modal .confirm-actions button:hover { background: rgba(246,176,124,0.2); color: #f5cba0; }
+        .confirm-modal .confirm-actions .btn-confirm { background: rgba(246,176,124,0.15); border-color: var(--primary); }
+        .confirm-modal .confirm-actions .btn-confirm:hover { background: rgba(246,176,124,0.3); }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .sidebar-trigger { display: none; }
+            .modal-select-grid { grid-template-columns: 1fr; }
+            .modal-box { padding: 1.5rem; width: 96vw; }
+            .row-flex { flex-direction: column; gap: 0.5rem; }
+            .image-picker { height: 40px; }
+            .lobby-box { width: 94vw; padding: 1.5rem; }
+        }
+        @media (max-width: 480px) {
+            .modal-box { padding: 1.2rem; }
+            .modal-title { font-size: 1.3rem; }
+            .item-list { max-height: 140px; }
+            .image-picker { height: 36px; padding: 0.2rem 0.6rem; }
+            .image-picker .picker-icon { font-size: 1rem; width: 24px; }
+            .image-picker .picker-filename { font-size: 0.7rem; }
+        }
+    </style>
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/socket.io.min.js"></script>
+</head>
+<body>
+
+<div class="topbar-trigger" id="topbarTrigger"></div>
+
+<div id="mq_top">
+    <div class="left-group">
+        <div class="logo-q-char" id="logo-q-char">Humans</div>
+    </div>
+    <div class="flex-spacer-left"></div>
+    
+    <div id="mq_top_ul_li_07" class="main_topic" style="width:36px; flex-shrink:0; cursor:pointer; padding:0 8px;" title="购物车">
+        <svg class="basket-icon" viewBox="0 0 24 24"><path d="M17 18c-1.11 0-2 .89-2 2 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-1.11-.89-2-2-2zM7 18c-1.11 0-2 .89-2 2 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-1.11-.89-2-2-2zM15.55 13c.75 0 1.41-.41 1.75-1.03l3.58-6.49C21.21 4.42 20.62 4 20 4H7.39l-.95-2H2v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45z"/></svg>
+    </div>
+    <span class="main_topic" id="donateTrigger" style="padding:0 16px; font-size:15px;">交流与捐赠</span>
+    <span class="main_topic" id="aboutTrigger" style="padding:0 16px; font-size:15px;">关于我们</span>
+    <div class="right-controls">
+        <div class="avatar-wrapper"><img src="./assets/images/Client.jpg" alt="头像"/></div>
+        <div class="window-control" id="window-minimize" title="最小化">−</div>
+        <div class="window-control" id="window-maximize" title="最大化">□</div>
+        <div class="window-control close" id="window-close" title="关闭" style="margin-right:0;">×</div>
+    </div>
+</div>
+
+<div id="mainContainer">
+    <div class="sidebar-trigger" id="sidebarTrigger"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>实例</span>
+                    <span style="font-size: 0.65rem; font-weight: 400; letter-spacing: 0px; color: var(--text-tertiary); opacity: 0.7;">
+                        <span id="runningCount">0</span>/3 运行中
+                    </span>
+                </div>
+                <div id="runningInstances">
+                    <div class="nav-item empty-instance" style="color: var(--text-tertiary); font-size: 0.8rem; opacity: 0.5; cursor: default; padding: 0.4rem 0.6rem;">
+                        <i class="fas fa-circle" style="font-size: 0.5rem; color: var(--text-tertiary);"></i> 暂无运行中的实例
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">构型</div>
+                <a href="#" class="nav-item" data-target="SInstanceList.html"><i class="fas fa-warehouse"></i> 实例仓库</a>
+                <a href="#" class="nav-item" data-target="SEgoList.html"><i class="fas fa-users"></i> 人物列表</a>
+                <a href="#" class="nav-item" data-target="SFieldList.html"><i class="fas fa-layer-group"></i> 场域列表</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">文明</div>
+                <a href="#" class="nav-item" data-target="LiteratureList.html"><i class="fas fa-book"></i> 文学成果</a>
+                <a href="#" class="nav-item" data-target="ArtList.html"><i class="fas fa-palette"></i> 艺术创作</a>
+                <a href="#" class="nav-item" data-target="InnovationList.html"><i class="fas fa-lightbulb"></i> 发明创造</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">工具</div>
+                <a href="#" class="nav-item" data-target="observation.html"><i class="fas fa-chart-pie"></i> 实例分析</a>
+                <a href="#" class="nav-item" data-target="FieldEditor.html"><i class="fas fa-edit"></i> 编辑场域</a>
+                <a href="#" class="nav-item" data-target="EgoEditor.html"><i class="fas fa-edit"></i> 编辑人物</a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="create-field-btn" id="openModalBtn"><i class="fas fa-plus"></i> 创建实例</button>
+        </div>
+    </aside>
+
+    <div class="content-area" id="contentArea">
+        <iframe src="SEgoList.html" id="mainIframe"></iframe>
+    </div>
+</div>
+
+<!-- ===== 大厅弹窗 ===== -->
+<div class="lobby-overlay" id="lobbyOverlay">
+    <div class="lobby-box">
+        <div class="lobby-title">
+            🧠 场域配置
+            <span class="sub" id="lobbyWorldName">荒岛求生</span>
+        </div>
+        <div class="lobby-status-row">
+            <span class="status-item">场域: <span class="val ready" id="lobbyFieldStatus">⏳ 未就绪</span></span>
+            <span class="status-item">EGO: <span class="val" id="lobbyPlayerCount">0</span></span>
+        </div>
+        <div class="lobby-player-list" id="lobbyPlayerList">
+            <div class="lobby-empty">⏳ 加载 EGO 列表中...</div>
+        </div>
+        <div class="lobby-actions">
+            <button class="btn-cancel" id="lobbyCancelBtn">取消</button>
+            <button class="btn-start" id="lobbyStartBtn" disabled>🚀 开始游戏</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 创建实例弹窗 ===== -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+        <div class="modal-title"><i class="fas fa-cube"></i> 创建实例</div>
+        <div class="modal-field">
+            <label>实例名称 &amp; 封面图片</label>
+            <div class="row-flex">
+                <input type="text" id="instanceName" placeholder="输入实例名称..." value="荒岛求生" class="flex-2" />
+                <div class="image-picker flex-1" id="imagePicker">
+                    <div class="picker-icon"><i class="fas fa-image"></i></div>
+                    <div class="picker-info">
+                        <span class="picker-label">封面图片</span>
+                        <span class="picker-filename" id="imagePickerText">未选择</span>
+                    </div>
+                    <div class="picker-hint"><i class="fas fa-chevron-right"></i></div>
+                </div>
+            </div>
+            <input type="file" id="imageFileInput" accept="image/*" style="display:none;" />
+        </div>
+        <div class="modal-field">
+            <label for="instanceNote">简介</label>
+            <textarea id="instanceNote" rows="2" placeholder="输入实例简介..."></textarea>
+        </div>
+        <div class="modal-field">
+            <label>已选</label>
+            <div class="selected-row" id="selectedRow"><span class="placeholder">双击下方场域/人物添加</span></div>
+        </div>
+        <div class="modal-select-grid">
+            <div class="modal-select-group">
+                <span class="group-label"><i class="fas fa-map"></i> 场域 · 双击添加</span>
+                <div class="item-list" id="fieldListContainer"></div>
+            </div>
+            <div class="modal-select-group">
+                <span class="group-label"><i class="fas fa-user"></i> 人物 · 双击添加</span>
+                <div class="item-list" id="personListContainer"></div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary" id="cancelModalBtn">取消</button>
+            <button class="btn-primary" id="confirmModalBtn"><i class="fas fa-check"></i> 确定创建</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 关于/捐赠/商店弹窗 ===== -->
+<div class="about-modal" id="aboutModal">
+    <div class="about-title">◈ 关于 Humans</div>
+    <div class="about-body">
+        <p><span class="highlight">Humans</span> 是一个智能体生存仿真平台，致力于探索多重场域下的意识交互与认知演化。</p>
+        <p>项目处于初期快速迭代中，感谢每一位参与者的支持与反馈。</p>
+        <div class="about-team">
+            <div class="member"><span class="avatar">🧠</span><div class="name">曲如意</div><div class="role">主创 / 架构</div></div>
+        </div>
+        <p class="muted">开发团队 · 2025</p>
+    </div>
+    <button class="about-close-btn" id="aboutCloseBtn">关闭</button>
+</div>
+
+<div class="donate-modal" id="donateModal">
+    <div class="donate-title">◈ 交流与捐赠</div>
+    <div class="donate-body">
+        <p>项目处于初期与快速迭代中，还有很多不完善的地方。</p>
+        <p>如果您有任何建议、想法，或愿意给予作者一些个人支持，都非常感谢。</p>
+        <p style="margin-top:8px; font-size:12px; color:var(--text-tertiary);">您的每一份反馈，都会让 Humans 走得更稳。</p>
+    </div>
+    <div class="donate-qr">
+        <img src="./assets/images/WePay.png" alt="微信支付" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+        <span class="qr-label" style="display:none;">微信二维码加载中...</span>
+        <span class="qr-label" style="margin-top:4px;">微信 · 心意通道</span>
+    </div>
+    <div class="donate-contact">
+        手机：<a href="tel:13817993656">13817993656</a> &nbsp;|&nbsp; 
+        邮箱：<a href="mailto:quruyi0909@126.com">quruyi0909@126.com</a>
+    </div>
+    <button class="donate-close-btn" id="donateCloseBtn">关闭</button>
+</div>
+
+<div class="shop-modal" id="shopModal">
+    <div class="shop-title">◈ 场域商店</div>
+    <div class="shop-section"><div class="shop-section-title">✦ 场域和人物</div><div class="shop-items" id="shopFieldsAndChars"></div></div>
+    <div class="shop-section"><div class="shop-section-title">✦ 物品和知识</div><div class="shop-items" id="shopItemsAndKnowledge"></div></div>
+    <div class="shop-section">
+        <div class="shop-section-title">✦ 兑换银币</div>
+        <div class="shop-exchange" id="shopExchange">
+            <label>金币兑换银币</label>
+            <input type="number" id="exchangeInput" value="1" min="1" step="1" />
+            <span class="exchange-rate">1 金币 = 10 银币</span>
+            <button class="exchange-btn" id="exchangeBtn">兑换</button>
+        </div>
+    </div>
+    <button class="shop-close-btn" id="shopCloseBtn">关闭</button>
+</div>
+
+<div class="confirm-modal" id="confirmModal">
+    <div class="confirm-title" id="confirmTitle">确认购买</div>
+    <div class="confirm-body" id="confirmBody">花费 10 银币，确认购买？</div>
+    <div class="confirm-actions">
+        <button id="confirmCancel">取消</button>
+        <button class="btn-confirm" id="confirmOk">确认</button>
+    </div>
+</div>
+
+<script>
+    // 获取当前页面的URL参数
+    var params = new URLSearchParams(window.location.search);
+    Q14123101 = params.get('par');
+    var wsPort = params.get('ws_port') || 8765;
+    var wsHost = params.get('ws_host') || '127.0.0.1';
+    var ws = new WebSocket('ws://' + wsHost + ':' + wsPort);
+
+    var MServer = "http://10.10.98.51/test/sys/";
+
+    // 实例名 -> channel_id 映射表
+    var instanceChannelMap = {};
+
+    // ===== 窗口控制 =====
+    document.getElementById('window-minimize').addEventListener('click', function() {
+        if (typeof pywebview !== 'undefined') pywebview.api.minimize_window();
+        else console.log('[Humans] 最小化窗口');
+    });
+    var isMaximized = false;
+    var maximizeBtn = document.getElementById('window-maximize');
+    maximizeBtn.addEventListener('click', function() {
+        if (!isMaximized) {
+            if (typeof pywebview !== 'undefined') pywebview.api.maximize_window();
+            else console.log('[Humans] 最大化');
+            maximizeBtn.innerHTML = '❐'; maximizeBtn.title = '恢复';
+        } else {
+            if (typeof pywebview !== 'undefined') pywebview.api.restore_window();
+            else console.log('[Humans] 还原');
+            maximizeBtn.innerHTML = '□'; maximizeBtn.title = '最大化';
+        }
+        isMaximized = !isMaximized;
+    });
+    document.getElementById('window-close').addEventListener('click', function() {
+        if (typeof pywebview !== 'undefined') pywebview.api.close_window();
+        else console.log('关闭窗口');
+    });
+    if (typeof pywebview !== 'undefined' && pywebview.api.on_window_state_changed) {
+        pywebview.api.on_window_state_changed(function(state) {
+            if (state === 'maximized') { isMaximized = true; maximizeBtn.innerHTML = '❐'; maximizeBtn.title = '恢复'; }
+            else { isMaximized = false; maximizeBtn.innerHTML = '□'; maximizeBtn.title = '最大化'; }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function() { console.log("Humans 智能体生存仿真 | 暖色主题已激活"); });
+
+    // ===== 关于 =====
+    (function() {
+        var trigger = document.getElementById('aboutTrigger'), modal = document.getElementById('aboutModal'), closeBtn = document.getElementById('aboutCloseBtn');
+        function open() { modal.style.display = 'flex'; }
+        function close() { modal.style.display = 'none'; }
+        trigger.addEventListener('click', function(e) { e.stopPropagation(); open(); });
+        closeBtn.addEventListener('click', close);
+        modal.addEventListener('click', function(e) { if (e.target === modal) close(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.style.display === 'flex') close(); });
+    })();
+
+    // ===== 捐赠 =====
+    (function() {
+        var trigger = document.getElementById('donateTrigger'), modal = document.getElementById('donateModal'), closeBtn = document.getElementById('donateCloseBtn');
+        function open() { modal.style.display = 'flex'; }
+        function close() { modal.style.display = 'none'; }
+        trigger.addEventListener('click', function(e) { e.stopPropagation(); open(); });
+        closeBtn.addEventListener('click', close);
+        modal.addEventListener('click', function(e) { if (e.target === modal) close(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.style.display === 'flex') close(); });
+    })();
+
+    // ===== iframe 导航 =====
+    (function() {
+        var iframe = document.getElementById('mainIframe');
+        var navItems = document.querySelectorAll('.nav-item[data-target]');
+        function setActiveItem(activeElement) { navItems.forEach(function(item) { item.classList.remove('active'); }); if (activeElement) activeElement.classList.add('active'); }
+        function navigateTo(page, navElement) {
+            if (!page) return;
+            var currentSrc = iframe.getAttribute('src');
+            if (currentSrc === page) { setActiveItem(navElement); return; }
+            iframe.setAttribute('src', page);
+            setActiveItem(navElement);
+        }
+        navItems.forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = this.getAttribute('data-target');
+                if (target) navigateTo(target, this);
+            });
+        });
+        var defaultItem = document.querySelector('.nav-item[data-target="SEgoList.html"]');
+        if (defaultItem) defaultItem.classList.add('active');
+    })();
+
+    // ===== 创建实例弹窗 =====
+    (function() {
+        var modalOverlay = document.getElementById('modalOverlay');
+        var openBtn = document.getElementById('openModalBtn');
+        var cancelBtn = document.getElementById('cancelModalBtn');
+        var confirmBtn = document.getElementById('confirmModalBtn');
+        var instanceNameInput = document.getElementById('instanceName');
+        var instanceNoteInput = document.getElementById('instanceNote');
+        var selectedRow = document.getElementById('selectedRow');
+        var fieldListContainer = document.getElementById('fieldListContainer');
+        var personListContainer = document.getElementById('personListContainer');
+
+        var fieldData = [];
+        var personData = [];
+        var selectedField = null;
+        var selectedPersons = [];
+        var selectedImageName = '';
+
+        var imagePicker = document.getElementById('imagePicker');
+        var imageFileInput = document.getElementById('imageFileInput');
+        var imagePickerText = document.getElementById('imagePickerText');
+
+        imagePicker.addEventListener('click', function() {
+            imageFileInput.click();
+        });
+
+        imageFileInput.addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (file) {
+                selectedImageName = file.name;
+                imagePickerText.textContent = file.name;
+            }
+        });
+
+        async function loadPersons() {
+            try {
+                var result = await window.pywebview.api.get_files_in_directory('../ui/data/s_ego/');
+                if (!result.success || !result.files) {
+                    console.warn('加载人物数据失败:', result.message);
+                    return;
+                }
+                var jsonFiles = result.files.filter(function(f) { return f.endsWith('.json'); });
+                personData = [];
+                for (var i = 0; i < jsonFiles.length; i++) {
+                    var jsonFile = jsonFiles[i];
+                    try {
+                        var response = await fetch('./data/s_ego/' + jsonFile);
+                        if (!response.ok) continue;
+                        var data = await response.json();
+                        var displayName = jsonFile.replace('.json', '');
+                        if (displayName.startsWith('ego_')) {
+                            displayName = displayName.substring(4);
+                        }
+                        personData.push({
+                            jsonFile: jsonFile,
+                            name: displayName,
+                            img: data.img || '',
+                            note: data.note || ''
+                        });
+                    } catch (err) {
+                        console.warn('读取 ' + jsonFile + ' 失败:', err);
+                    }
+                }
+                console.log('✅ 人物数据加载完成:', personData.length, '个');
+            } catch (err) {
+                console.error('加载人物数据失败:', err);
+            }
+        }
+
+        async function loadFields() {
+            try {
+                var result = await window.pywebview.api.get_files_in_directory('../ui/data/s_field/');
+                if (!result.success || !result.files) {
+                    console.warn('加载场域数据失败:', result.message);
+                    return;
+                }
+                var jsonFiles = result.files.filter(function(f) { return f.endsWith('.json'); });
+                fieldData = [];
+                for (var i = 0; i < jsonFiles.length; i++) {
+                    var jsonFile = jsonFiles[i];
+                    try {
+                        var response = await fetch('./data/s_field/' + jsonFile);
+                        if (!response.ok) continue;
+                        var data = await response.json();
+                        var displayName = jsonFile.replace('.json', '');
+                        if (displayName.startsWith('field_')) {
+                            displayName = displayName.substring(6);
+                        }
+                        fieldData.push({
+                            jsonFile: jsonFile,
+                            name: displayName,
+                            img: data.img || '',
+                            note: data.note || ''
+                        });
+                    } catch (err) {
+                        console.warn('读取 ' + jsonFile + ' 失败:', err);
+                    }
+                }
+                console.log('✅ 场域数据加载完成:', fieldData.length, '个');
+            } catch (err) {
+                console.error('加载场域数据失败:', err);
+            }
+        }
+
+        function renderFieldList() {
+            fieldListContainer.innerHTML = '';
+            if (fieldData.length === 0) {
+                fieldListContainer.innerHTML = '<div class="empty-list">暂无场域，请检查 ./data/s_field/</div>';
+                return;
+            }
+            fieldData.forEach(function(f) {
+                var div = document.createElement('div');
+                var isActive = selectedField && selectedField.jsonFile === f.jsonFile;
+                div.className = 'item-row' + (isActive ? ' active-item' : '');
+                div.innerHTML = '<span class="item-icon"><i class="fas fa-map"></i></span><span class="item-name">' + f.name + '</span><span class="check-mark"><i class="fas fa-check"></i></span>';
+                div.addEventListener('dblclick', function(e) {
+                    e.stopPropagation();
+                    if (selectedField && selectedField.jsonFile === f.jsonFile) {
+                        selectedField = null;
+                    } else {
+                        selectedField = f;
+                    }
+                    renderAll();
+                });
+                fieldListContainer.appendChild(div);
+            });
+        }
+
+        function renderPersonList() {
+            personListContainer.innerHTML = '';
+            if (personData.length === 0) {
+                personListContainer.innerHTML = '<div class="empty-list">暂无人物，请检查 ./data/s_ego/</div>';
+                return;
+            }
+            personData.forEach(function(p) {
+                var div = document.createElement('div');
+                var isActive = selectedPersons.some(function(sp) { return sp.jsonFile === p.jsonFile; });
+                div.className = 'item-row' + (isActive ? ' active-item' : '');
+                div.innerHTML = '<span class="item-icon"><i class="fas fa-user"></i></span><span class="item-name">' + p.name + '</span><span class="check-mark"><i class="fas fa-check"></i></span>';
+                div.addEventListener('dblclick', function(e) {
+                    e.stopPropagation();
+                    var idx = selectedPersons.findIndex(function(sp) { return sp.jsonFile === p.jsonFile; });
+                    if (idx > -1) {
+                        selectedPersons.splice(idx, 1);
+                    } else {
+                        selectedPersons.push(p);
+                    }
+                    renderAll();
+                });
+                personListContainer.appendChild(div);
+            });
+        }
+
+        function createTag(item, type) {
+            var span = document.createElement('span');
+            span.className = 'selected-tag';
+            var icon = type === 'field' ? 'fa-map' : 'fa-user';
+            span.innerHTML = '<span class="tag-icon"><i class="fas ' + icon + '"></i></span>' + item.name +
+                '<button class="remove-btn" data-type="' + type + '" data-json="' + item.jsonFile + '">✕</button>';
+            var btn = span.querySelector('.remove-btn');
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (type === 'field') {
+                    selectedField = null;
+                } else if (type === 'person') {
+                    var idx = selectedPersons.findIndex(function(p) { return p.jsonFile === item.jsonFile; });
+                    if (idx > -1) selectedPersons.splice(idx, 1);
+                }
+                renderAll();
+            });
+            return span;
+        }
+
+        function renderSelectedRow() {
+            selectedRow.innerHTML = '';
+            if (selectedField) {
+                selectedRow.appendChild(createTag(selectedField, 'field'));
+            }
+            selectedPersons.forEach(function(p) {
+                selectedRow.appendChild(createTag(p, 'person'));
+            });
+            if (selectedRow.children.length === 0) {
+                var span = document.createElement('span');
+                span.className = 'placeholder';
+                span.textContent = '双击下方场域/人物添加';
+                selectedRow.appendChild(span);
+            }
+        }
+
+        function renderAll() {
+            renderFieldList();
+            renderPersonList();
+            renderSelectedRow();
+        }
+
+        async function openModal() {
+            selectedField = null;
+            selectedPersons = [];
+            selectedImageName = '';
+            imagePickerText.textContent = '未选择';
+            await loadFields();
+            await loadPersons();
+            if (fieldData.length > 0) selectedField = fieldData[0];
+            if (personData.length > 0) selectedPersons = [personData[0]];
+            renderAll();
+            modalOverlay.classList.add('active');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+        }
+
+        async function handleConfirm() {
+            var name = instanceNameInput.value.trim() || '未命名实例';
+            var note = instanceNoteInput.value.trim();
+            if (!selectedField) {
+                alert('请选择一个场域（双击场域列表中的项）');
+                return;
+            }
+            if (selectedPersons.length === 0) {
+                alert('请至少选择一个人物（双击人物列表中的项）');
+                return;
+            }
+            var config = {
+                instance: name,
+                field: selectedField.jsonFile,
+                ego: selectedPersons.map(function(p) { return p.jsonFile; }),
+                note: note,
+                image: selectedImageName || ''
+            };
+            try {
+                var result = await window.pywebview.api.create_instance(config);
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    closeModal();
+                } else {
+                    alert('❌ ' + result.message);
+                }
+            } catch (error) {
+                console.error('创建实例失败:', error);
+                alert('❌ 创建实例失败: ' + (error.message || '网络错误或后端异常'));
+            }
+        }
+
+        openBtn.addEventListener('click', openModal);
+        cancelBtn.addEventListener('click', closeModal);
+        confirmBtn.addEventListener('click', handleConfirm);
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) closeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
+        });
+        console.log('📂 创建实例弹窗已初始化');
+    })();
+
+    // ================================================================
+    // ===== 大厅弹窗逻辑 =====
+    // ================================================================
+    (function() {
+        var overlay = document.getElementById('lobbyOverlay');
+        var playerList = document.getElementById('lobbyPlayerList');
+        var playerCount = document.getElementById('lobbyPlayerCount');
+        var fieldStatus = document.getElementById('lobbyFieldStatus');
+        var worldName = document.getElementById('lobbyWorldName');
+        var startBtn = document.getElementById('lobbyStartBtn');
+        var cancelBtn = document.getElementById('lobbyCancelBtn');
+        var iframe = document.getElementById('mainIframe');
+
+        var currentInstance = null;
+        var currentChannelId = null;
+        var isFieldOwner = false;
+        var lobbySubscribed = false;
+        var channelSubscribed = false;
+
+        function switchToDashboard(instanceName, channelId) {
+            if (iframe) {
+                var url = 'Dashboard.html?channel_id=' + channelId + '&ws_host=' + wsHost + '&ws_port=' + wsPort + '&world_name=' + encodeURIComponent(instanceName);
+                iframe.src = url;
+                console.log('[大厅] 切换到 Dashboard:', url);
+            }
+        }
+
+        function openLobby(instanceName, channelId) {
+            currentInstance = instanceName;
+            currentChannelId = channelId;
+            worldName.textContent = instanceName;
+            overlay.classList.add('active');
+            startBtn.disabled = true;
+            startBtn.textContent = '等待 EGO 就绪...';
+            playerList.innerHTML = '<div class="lobby-empty">⏳ 加载 EGO 列表中...</div>';
+            fieldStatus.textContent = '✅ 已就绪';
+            fieldStatus.className = 'val ready';
+            playerCount.textContent = '0';
+
+            // 保存到映射表
+            instanceChannelMap[instanceName] = channelId;
+
+            // 订阅频道（获取 EGO 列表）
+            if (!channelSubscribed) {
+                ws.send(JSON.stringify({
+                    action: 'subscribe',
+                    topic: '/channel/' + channelId
+                }));
+                channelSubscribed = true;
+                console.log('[大厅] 订阅频道: /channel/' + channelId);
+            }
+
+            // 保留 subscribe_lobby 用于联合仿真
+            if (!lobbySubscribed) {
+                ws.send(JSON.stringify({
+                    action: 'subscribe_lobby',
+                    instance: instanceName
+                }));
+                lobbySubscribed = true;
+                console.log('[大厅] 订阅大厅: ' + instanceName);
+            }
+
+            ws.send(JSON.stringify({
+                action: 'get_lobby_status',
+                instance: instanceName
+            }));
+            console.log('[大厅] 已打开，等待 EGO 数据');
+        }
+
+        function closeLobby() {
+            // 取消订阅频道
+            if (channelSubscribed && currentChannelId !== null) {
+                ws.send(JSON.stringify({
+                    action: 'unsubscribe',
+                    topic: '/channel/' + currentChannelId
+                }));
+                channelSubscribed = false;
+                console.log('[大厅] 取消订阅频道: /channel/' + currentChannelId);
+            }
+
+            overlay.classList.remove('active');
+            currentInstance = null;
+            currentChannelId = null;
+            lobbySubscribed = false;
+            console.log('[大厅] 已关闭');
+        }
+
+        function updateLobby(data) {
+            console.log('[大厅] updateLobby 被调用:', data);
+            if (!data) return;
+
+            var players = data.players || [];
+            var count = players.length;
+            var fieldReady = data.field_ready || false;
+            var gameStarted = data.game_started || false;
+
+            playerCount.textContent = count;
+
+            var fieldStatusEl = document.getElementById('lobbyFieldStatus');
+            if (fieldReady) {
+                fieldStatusEl.textContent = '✅ 已就绪';
+                fieldStatusEl.className = 'val ready';
+            } else {
+                fieldStatusEl.textContent = '⏳ 等待中...';
+                fieldStatusEl.className = 'val waiting';
+            }
+
+            var playerListEl = document.getElementById('lobbyPlayerList');
+            if (count === 0) {
+                playerListEl.innerHTML = '<div class="lobby-empty">⏳ 等待 EGO 连接...</div>';
+                startBtn.disabled = true;
+                startBtn.textContent = '等待 EGO...';
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < players.length; i++) {
+                var p = players[i];
+                var name = p.name || p.id || '未知';
+                var id = p.id || name;
+                html += '<div class="lobby-player-item">' +
+                    '<span class="player-name">🧠 ' + name + '</span>' +
+                    '<span class="player-status">✅ 已就绪</span>' +
+                    (isFieldOwner ? '<button class="player-kick" data-id="' + id + '">剔除</button>' : '') +
+                '</div>';
+            }
+            playerListEl.innerHTML = html;
+
+            if (isFieldOwner) {
+                var kickBtns = playerListEl.querySelectorAll('.player-kick');
+                for (var j = 0; j < kickBtns.length; j++) {
+                    kickBtns[j].addEventListener('click', function() {
+                        var charId = this.dataset.id;
+                        if (confirm('确定要剔除 ' + charId + ' 吗？')) {
+                            ws.send(JSON.stringify({
+                                action: 'kick_player',
+                                instance: currentInstance,
+                                character_id: charId
+                            }));
+                        }
+                    });
+                }
+            }
+
+            if (gameStarted) {
+                startBtn.disabled = true;
+                startBtn.textContent = '游戏已开始';
+            } else if (count > 0 && fieldReady) {
+                startBtn.disabled = false;
+                startBtn.textContent = '🚀 开始游戏';
+            } else {
+                startBtn.disabled = true;
+                startBtn.textContent = '等待就绪...';
+            }
+        }
+
+        function handleLobbyMessage(data) {
+            console.log('[大厅] 收到消息:', data);
+
+            var statusData = null;
+
+            if (data.type === 'message' && data.data && data.data.type === 'lobby_status') {
+                statusData = data.data;
+                console.log('[大厅] 从 message 中解析出 lobby_status');
+            } else if (data.type === 'lobby_status') {
+                statusData = data.data || data;
+                console.log('[大厅] 直接解析 lobby_status');
+            }
+
+            if (!statusData || !statusData.players) {
+                console.log('[大厅] 未找到有效的 lobby_status 数据，或 players 字段为空');
+                return;
+            }
+
+            console.log('[大厅] 解析后的状态数据:', statusData);
+            console.log('[大厅] EGO 列表:', statusData.players);
+            console.log('[大厅] field_ready:', statusData.field_ready);
+
+            if (statusData.field_ready === true) {
+                isFieldOwner = true;
+                console.log('[大厅] 我是房主!');
+            } else {
+                isFieldOwner = false;
+            }
+
+            updateLobby(statusData);
+        }
+
+        window.openLobby = openLobby;
+        window.closeLobby = closeLobby;
+        window.updateLobby = updateLobby;
+        window.handleLobbyMessage = handleLobbyMessage;
+
+        startBtn.addEventListener('click', function() {
+            if (this.disabled) return;
+            if (!currentInstance) return;
+
+            var count = parseInt(document.getElementById('lobbyPlayerCount').textContent) || 0;
+            if (count === 0) {
+                alert('没有 EGO，无法开始游戏');
+                return;
+            }
+
+            // 发送开始游戏前，先取消订阅频道
+            if (currentChannelId !== null && channelSubscribed) {
+                ws.send(JSON.stringify({
+                    action: 'unsubscribe',
+                    topic: '/channel/' + currentChannelId
+                }));
+                channelSubscribed = false;
+                console.log('[大厅] 开始游戏前取消订阅频道: /channel/' + currentChannelId);
+            }
+
+            ws.send(JSON.stringify({
+                action: 'start_game',
+                instance: currentInstance
+            }));
+            this.disabled = true;
+            this.textContent = '发送中...';
+        });
+
+        cancelBtn.addEventListener('click', function() {
+            if (confirm('确定要取消启动吗？将断开所有 EGO 连接。')) {
+                if (currentInstance) {
+                    // 取消订阅频道
+                    if (currentChannelId !== null && channelSubscribed) {
+                        ws.send(JSON.stringify({
+                            action: 'unsubscribe',
+                            topic: '/channel/' + currentChannelId
+                        }));
+                        channelSubscribed = false;
+                        console.log('[大厅] 取消订阅频道: /channel/' + currentChannelId);
+                    }
+                    ws.send(JSON.stringify({
+                        action: 'cancel_lobby',
+                        instance: currentInstance,
+                        channel_id: currentChannelId
+                    }));
+                }
+                closeLobby();
+            }
+        });
+
+        console.log('大厅弹窗已初始化');
+    })();
+
+    // ================================================================
+    // ===== WebSocket 消息处理 =====
+    // ================================================================
+    ws.onmessage = function(event) {
+        console.log('[main] WebSocket 收到:', event.data);
+        try {
+            var data = JSON.parse(event.data);
+            var type = data.type;
+
+            if (type === 'lobby_status' || (type === 'message' && data.data && data.data.type === 'lobby_status')) {
+                if (window.handleLobbyMessage) {
+                    window.handleLobbyMessage(data);
+                }
+                return;
+            }
+
+            if (type === 'game_started' || (type === 'message' && data.data && data.data.type === 'game_started')) {
+                if (window.handleLobbyMessage) {
+                    window.handleLobbyMessage(data);
+                }
+                return;
+            }
+
+            if (type === 'lobby_timeout' || (type === 'message' && data.data && data.data.type === 'lobby_timeout')) {
+                if (window.handleLobbyMessage) {
+                    window.handleLobbyMessage(data);
+                }
+                return;
+            }
+
+            // ===== 处理 start_game_ack =====
+            if (type === 'start_game_ack') {
+                console.log('[大厅] 游戏启动确认:', data);
+                var instanceName = data.instance;
+                var channelId = data.channel_id;
+                if (data.status === 'started') {
+                    // 确保取消订阅
+                    if (channelId !== undefined && channelId !== null) {
+                        ws.send(JSON.stringify({
+                            action: 'unsubscribe',
+                            topic: '/channel/' + channelId
+                        }));
+                        console.log('[大厅] start_game_ack 取消订阅频道: /channel/' + channelId);
+                    }
+
+                    if (window.closeLobby) {
+                        window.closeLobby();
+                    }
+
+                    if (window.renderRunningInstances) {
+                        window.renderRunningInstances();
+                    }
+
+                    var iframe = document.getElementById('mainIframe');
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage({
+                            type: 'instanceStatusChange',
+                            instanceName: instanceName,
+                            status: 'running'
+                        }, '*');
+                    }
+
+                    // 切换到 Dashboard，传入 channel_id
+                    if (iframe) {
+                        var url = 'Dashboard.html?channel_id=' + channelId + '&ws_host=' + wsHost + '&ws_port=' + wsPort + '&world_name=' + encodeURIComponent(instanceName);
+                        iframe.src = url;
+                        console.log('[大厅] 切换到 Dashboard:', url);
+                    }
+                } else {
+                    alert('游戏启动失败: ' + (data.message || '未知错误'));
+                    var startBtn = document.getElementById('lobbyStartBtn');
+                    if (startBtn) {
+                        startBtn.disabled = false;
+                        startBtn.textContent = '🚀 开始游戏';
+                    }
+                }
+                return;
+            }
+
+            // ===== 处理 stop_instance_ack =====
+            if (type === 'stop_instance_ack') {
+                console.log('[main] 停止确认:', data);
+                var instanceName = data.instance;
+                var channelId = data.channel_id;
+                if (data.status === 'stopped') {
+                    // 从映射表中移除
+                    if (instanceName in instanceChannelMap) {
+                        delete instanceChannelMap[instanceName];
+                        console.log('[main] 从映射表移除实例:', instanceName);
+                    }
+
+                    if (window.renderRunningInstances) {
+                        window.renderRunningInstances();
+                    }
+                    var iframe = document.getElementById('mainIframe');
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage({
+                            type: 'instanceStatusChange',
+                            instanceName: instanceName,
+                            status: 'stopped'
+                        }, '*');
+                    }
+                    if (iframe && iframe.src && iframe.src.includes('Dashboard.html')) {
+                        iframe.src = 'SEgoList.html';
+                    }
+                }
+                return;
+            }
+
+            // ===== 处理 cancel_lobby_ack =====
+            if (type === 'cancel_lobby_ack') {
+                console.log('[main] 取消确认:', data);
+                if (window.closeLobby) {
+                    window.closeLobby();
+                }
+                if (window.renderRunningInstances) {
+                    window.renderRunningInstances();
+                }
+                return;
+            }
+
+            // ===== 处理 channel_list（侧边栏数据源） =====
+            if (type === 'channel_list') {
+                console.log('[WebSocket] 频道列表:', data.data);
+                window.channelList = data.data || [];
+                if (window.renderRunningInstances) {
+                    window.renderRunningInstances();
+                }
+
+                // 如果有大厅开着，从 channel_list 中提取 EGO 列表更新大厅
+                var overlay = document.getElementById('lobbyOverlay');
+                if (overlay && overlay.classList.contains('active')) {
+                    var channels = data.data || [];
+                    for (var i = 0; i < channels.length; i++) {
+                        var ch = channels[i];
+                        // 检查是否匹配当前大厅的实例
+                        var worldName = ch.world ? ch.world.name : null;
+                        if (worldName && window.currentLobbyInstance && worldName === window.currentLobbyInstance) {
+                            var lobbyData = {
+                                players: ch.characters ? ch.characters.filter(function(c) { return c.role === 'ego'; }).map(function(c) {
+                                    return { id: c.id, name: c.name };
+                                }) : [],
+                                field_ready: ch.has_field || false,
+                                game_started: ch.game_started || false
+                            };
+                            if (window.updateLobby) {
+                                window.updateLobby(lobbyData);
+                            }
+                            break;
+                        }
+                    }
+                }
+                return;
+            }
+
+            // ===== 处理 instance_status =====
+            if (type === 'instance_status') {
+                console.log('[main] 实例状态:', data.data);
+                return;
+            }
+
+            // ===== 处理 all_instances_status =====
+            if (type === 'all_instances_status') {
+                console.log('[main] 所有实例状态:', data.data);
+                return;
+            }
+
+            if (type === 'message') {
+                var msgData = data.data || {};
+                var msgType = msgData.type;
+                if (msgType === 'game_start') {
+                    console.log('[WebSocket] 游戏开始:', msgData);
+                }
+                return;
+            }
+
+            console.log('[WebSocket] 收到消息:', data);
+        } catch (e) {
+            console.error('[WebSocket] 解析消息失败:', e);
+        }
+    };
+
+    // 保存当前大厅实例名，供 channel_list 处理使用
+    window.currentLobbyInstance = null;
+
+    // 覆盖 openLobby 保存实例名
+    var originalOpenLobby = window.openLobby;
+    window.openLobby = function(instanceName, channelId) {
+        window.currentLobbyInstance = instanceName;
+        if (originalOpenLobby) {
+            originalOpenLobby(instanceName, channelId);
+        }
+    };
+
+    // 覆盖 closeLobby 清除实例名
+    var originalCloseLobby = window.closeLobby;
+    window.closeLobby = function() {
+        window.currentLobbyInstance = null;
+        if (originalCloseLobby) {
+            originalCloseLobby();
+        }
+    };
+
+    // ================================================================
+    // ===== 侧边栏渲染（完全由 Server 的 channel_list 驱动） =====
+    // ================================================================
+    window.channelList = [];
+
+    function renderRunningInstances() {
+        var container = document.getElementById('runningInstances');
+        var countSpan = document.getElementById('runningCount');
+        if (!container) return;
+
+        var channels = window.channelList || [];
+        var running = channels.filter(function(ch) { return ch.has_world === true; });
+        var count = running.length;
+        
+        if (countSpan) countSpan.textContent = count;
+
+        container.innerHTML = '';
+
+        if (count === 0) {
+            container.innerHTML = '<div class="nav-item empty-instance" style="color: var(--text-tertiary); font-size: 0.8rem; opacity: 0.5; cursor: default; padding: 0.4rem 0.6rem;">' +
+                '<i class="fas fa-circle" style="font-size: 0.5rem; color: var(--text-tertiary);"></i> 暂无运行中的实例' +
+            '</div>';
+            return;
+        }
+
+        for (var i = 0; i < channels.length; i++) {
+            var ch = channels[i];
+            if (!ch.has_world) continue;
+            
+            var instanceName = ch.world ? ch.world.name : '未知';
+            var div = createInstanceNavItem(instanceName, true);
+            container.appendChild(div);
+        }
+    }
+
+    function createInstanceNavItem(instanceName, isRunning) {
+        var div = document.createElement('div');
+        div.className = 'nav-item instance-item';
+        div.dataset.instance = instanceName;
+        div.style.cursor = isRunning ? 'pointer' : 'default';
+
+        var statusColor = isRunning ? '#6fcf97' : '#f2c94a';
+        var statusText = isRunning ? '运行中' : '已停止';
+
+        div.innerHTML = '<i class="fas fa-circle" style="font-size: 0.5rem; color: ' + statusColor + ';"></i>' +
+            '<span style="flex:1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + instanceName + '</span>' +
+            '<span class="badge" style="background: ' + (isRunning ? 'rgba(111, 207, 151, 0.15)' : 'rgba(242, 201, 74, 0.15)') + '; color: ' + statusColor + ';">' +
+            statusText +
+            '</span>' +
+            '<button class="stop-btn" title="停止">' +
+            '<i class="fas fa-stop"></i>' +
+            '</button>';
+
+        var actionBtn = div.querySelector('.stop-btn');
+        actionBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (window.stopInstance) {
+                window.stopInstance(instanceName);
+            }
+        });
+
+        div.addEventListener('click', function() {
+            if (isRunning) {
+                var iframe = document.getElementById('mainIframe');
+                if (iframe) {
+                    // 查找该实例的 channel_id
+                    var channels = window.channelList || [];
+                    var found = null;
+                    for (var i = 0; i < channels.length; i++) {
+                        var ch = channels[i];
+                        if (ch.has_world && ch.world && ch.world.name === instanceName) {
+                            found = ch;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        var url = 'Dashboard.html?channel_id=' + found.channel_id + '&ws_host=' + wsHost + '&ws_port=' + wsPort + '&world_name=' + encodeURIComponent(instanceName);
+                        iframe.src = url;
+                    } else {
+                        iframe.src = 'Dashboard.html?instance=' + encodeURIComponent(instanceName);
+                    }
+                }
+            }
+        });
+
+        return div;
+    }
+
+    window.renderRunningInstances = renderRunningInstances;
+
+    // ================================================================
+    // ===== 停止实例（通过 WebSocket，带 channel_id） =====
+    // ================================================================
+    window.stopInstance = function(instanceName) {
+        var channelId = instanceChannelMap[instanceName];
+        if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+            var msg = {
+                action: 'stop_instance',
+                instance: instanceName
+            };
+            if (channelId !== undefined) {
+                msg.channel_id = channelId;
+            }
+            window.ws.send(JSON.stringify(msg));
+            console.log('[API] 发送停止消息:', instanceName, 'channel:', channelId);
+        } else {
+            console.warn('[API] WebSocket 未连接，无法停止');
+        }
+    };
+
+    // ================================================================
+    // ===== 查询实例状态（通过 WebSocket） =====
+    // ================================================================
+    window.getInstanceStatus = function(instanceName) {
+        if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+            window.ws.send(JSON.stringify({
+                action: 'get_instance_status',
+                instance: instanceName
+            }));
+            console.log('[API] 查询实例状态:', instanceName);
+        }
+    };
+
+    window.getAllInstancesStatus = function() {
+        if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+            window.ws.send(JSON.stringify({
+                action: 'get_all_instances_status'
+            }));
+            console.log('[API] 查询所有实例状态');
+        }
+    };
+
+    // ================================================================
+    // ===== 后端 API 封装 =====
+    // ================================================================
+    var InstanceAPI = {
+        start_instance: async function(instanceName) {
+            console.log('[API] 启动实例:', instanceName);
+            try {
+                var result = await window.pywebview.api.start_instance(instanceName);
+                if (result && result.success) {
+                    var channelId = result.channel_id;
+                    var ws = window.ws;
+                    // 保存到映射表
+                    instanceChannelMap[instanceName] = channelId;
+                    if (ws && ws.readyState === WebSocket.OPEN && channelId !== undefined && channelId !== null) {
+                        ws.send(JSON.stringify({
+                            action: 'ready',
+                            instance: instanceName,
+                            role: 'field',
+                            channel_id: channelId,
+                            world_name: instanceName
+                        }));
+                        console.log('[API] 发送 ready field:', instanceName, 'channel:', channelId);
+                    } else {
+                        console.warn('[API] 无法发送 ready:', ws ? 'WS未连接' : 'WS不存在', 'channel:', channelId);
+                    }
+                    // 打开大厅，传入 channel_id
+                    if (window.openLobby) {
+                        window.openLobby(instanceName, channelId);
+                    }
+                }
+                return result;
+            } catch (error) {
+                console.error('[API] 启动实例失败:', error);
+                return { success: false, message: error.message || '启动失败' };
+            }
+        }
+    };
+
+    window.startInstance = function(instanceName) {
+        return InstanceAPI.start_instance(instanceName);
+    };
+
+    window.getRunningInstances = function() {
+        var channels = window.channelList || [];
+        return channels.filter(function(ch) { return ch.has_world === true; }).map(function(ch) { return ch.world ? ch.world.name : ''; });
+    };
+
+    // ================================================================
+    // ===== 侧边栏初始渲染 =====
+    // ================================================================
+    renderRunningInstances();
+
+    // ===== 侧边栏滑入滑出 =====
+    (function() {
+        var sidebar = document.getElementById('sidebar');
+        var trigger = document.getElementById('sidebarTrigger');
+        var timeoutId = null;
+
+        function openSidebar() {
+            clearTimeout(timeoutId);
+            sidebar.classList.add('open');
+        }
+
+        function closeSidebar() {
+            timeoutId = setTimeout(function() {
+                sidebar.classList.remove('open');
+            }, 300);
+        }
+
+        trigger.addEventListener('mouseenter', openSidebar);
+        sidebar.addEventListener('mouseleave', closeSidebar);
+        sidebar.addEventListener('mouseenter', function() { clearTimeout(timeoutId); });
+
+        trigger.addEventListener('mouseleave', function(e) {
+            var related = e.relatedTarget;
+            if (related && sidebar.contains(related)) {
+                clearTimeout(timeoutId);
+                return;
+            }
+            closeSidebar();
+        });
+
+        document.getElementById('contentArea').addEventListener('click', function() {
+            if (sidebar.classList.contains('open')) {
+                closeSidebar();
+            }
+        });
+
+        openSidebar();
+    })();
+
+    // ===== 顶部栏滑入滑出 =====
+    (function() {
+        var topbar = document.getElementById('mq_top');
+        var trigger = document.getElementById('topbarTrigger');
+        var timeoutId = null;
+
+        function openTopbar() {
+            clearTimeout(timeoutId);
+            topbar.classList.add('open');
+        }
+
+        function closeTopbar() {
+            timeoutId = setTimeout(function() {
+                topbar.classList.remove('open');
+            }, 300);
+        }
+
+        trigger.addEventListener('mouseenter', openTopbar);
+        topbar.addEventListener('mouseleave', closeTopbar);
+        topbar.addEventListener('mouseenter', function() { clearTimeout(timeoutId); });
+
+        trigger.addEventListener('mouseleave', function(e) {
+            var related = e.relatedTarget;
+            if (related && topbar.contains(related)) {
+                clearTimeout(timeoutId);
+                return;
+            }
+            closeTopbar();
+        });
+
+        document.getElementById('contentArea').addEventListener('click', function() {
+            if (topbar.classList.contains('open')) {
+                closeTopbar();
+            }
+        });
+
+        openTopbar();
+    })();
+</script>
+<script src="./js/mq.js"></script>
+</body>
+</html>

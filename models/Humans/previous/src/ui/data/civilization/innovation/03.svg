@@ -1,0 +1,76 @@
+<svg viewBox="-180 -100 360 200" xmlns="http://www.w3.org/2000/svg" style="background:#f9f6f0;">
+  <defs>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c4a46c"/>
+      <stop offset="50%" stop-color="#a0784a"/>
+      <stop offset="100%" stop-color="#8b6940"/>
+    </linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a0a8b0"/>
+      <stop offset="40%" stop-color="#788290"/>
+      <stop offset="100%" stop-color="#505860"/>
+    </linearGradient>
+    <linearGradient id="vine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8b9a46"/>
+      <stop offset="100%" stop-color="#5a6b20"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="3" stdDeviation="3" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- 标题 -->
+  <text x="0" y="-80" text-anchor="middle" font-size="16" font-weight="bold" fill="#5a4030">石斧 · 结构图</text>
+  <text x="0" y="-62" text-anchor="middle" font-size="10" fill="#8b6940">原点：手握区质心</text>
+
+  <!-- 坐标轴 -->
+  <line x1="-170" y1="0" x2="170" y2="0" stroke="#d0c8b8" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <line x1="0" y1="-50" x2="0" y2="50" stroke="#d0c8b8" stroke-width="0.5" stroke-dasharray="4,4"/>
+  <circle cx="0" cy="0" r="4" fill="#e05030" stroke="#a03020" stroke-width="1.5"/>
+  <text x="8" y="4" font-size="9" fill="#e05030" font-weight="bold">原点</text>
+
+  <!-- 木棍（杆身） -->
+  <rect x="-130" y="-10" width="260" height="20" rx="10" ry="10" fill="url(#wood)" filter="url(#shadow)"/>
+  <!-- 木棍纹理 -->
+  <line x1="-110" y1="-4" x2="-110" y2="4" stroke="#b8945a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="-70" y1="-6" x2="-70" y2="6" stroke="#b8945a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="-30" y1="-4" x2="-30" y2="4" stroke="#b8945a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="20" y1="-5" x2="20" y2="5" stroke="#b8945a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="60" y1="-6" x2="60" y2="6" stroke="#b8945a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="100" y1="-4" x2="100" y2="4" stroke="#b8945a" stroke-width="0.5" opacity="0.5"/>
+
+  <!-- 石头（刃部） -->
+  <ellipse cx="145" cy="0" rx="35" ry="22" fill="url(#stone)" filter="url(#shadow)"/>
+  <ellipse cx="145" cy="0" rx="30" ry="18" fill="none" stroke="#606870" stroke-width="0.8" opacity="0.4"/>
+  <!-- 石刃亮边 -->
+  <path d="M 170 -8 Q 175 -2 172 5" fill="none" stroke="#c0c8d0" stroke-width="1.5"/>
+
+  <!-- 藤蔓绑缚A（第一层） -->
+  <ellipse cx="125" cy="0" rx="3" ry="13" fill="none" stroke="#6a7a2a" stroke-width="2.5" opacity="0.8"/>
+  <ellipse cx="120" cy="0" rx="3" ry="14" fill="none" stroke="#7a8a30" stroke-width="2.5" opacity="0.8"/>
+  <ellipse cx="115" cy="0" rx="3" ry="15" fill="none" stroke="#6a7a2a" stroke-width="2.5" opacity="0.8"/>
+
+  <!-- 藤蔓绑缚B（第二层加固） -->
+  <ellipse cx="128" cy="0" rx="2" ry="11" fill="none" stroke="#8b9a40" stroke-width="2" opacity="0.7"/>
+  <ellipse cx="123" cy="0" rx="2" ry="12" fill="none" stroke="#8b9a40" stroke-width="2" opacity="0.7"/>
+
+  <!-- 标注 -->
+  <line x1="-130" y1="-20" x2="-130" y2="-42" stroke="#5a4030" stroke-width="0.8"/>
+  <text x="-130" y="-48" text-anchor="middle" font-size="9" fill="#5a4030">木棍</text>
+  <text x="-130" y="-38" text-anchor="middle" font-size="7" fill="#8b6940">(-130~130, 0, ±10)</text>
+
+  <line x1="145" y1="-28" x2="145" y2="-42" stroke="#5a4030" stroke-width="0.8"/>
+  <text x="145" y="-48" text-anchor="middle" font-size="9" fill="#5a4030">石刃</text>
+  <text x="145" y="-38" text-anchor="middle" font-size="7" fill="#8b6940">(145, 0, 0)</text>
+
+  <line x1="120" y1="18" x2="120" y2="35" stroke="#5a4030" stroke-width="0.8"/>
+  <text x="120" y="44" text-anchor="middle" font-size="9" fill="#5a4030">藤蔓绑缚</text>
+  <text x="120" y="54" text-anchor="middle" font-size="7" fill="#8b6940">螺旋 3 圈</text>
+
+  <!-- 尺寸标注 -->
+  <line x1="-130" y1="28" x2="130" y2="28" stroke="#c0a870" stroke-width="0.6"/>
+  <line x1="-130" y1="25" x2="-130" y2="31" stroke="#c0a870" stroke-width="0.6"/>
+  <line x1="130" y1="25" x2="130" y2="31" stroke="#c0a870" stroke-width="0.6"/>
+  <text x="0" y="36" text-anchor="middle" font-size="7" fill="#c0a870">≈ 45cm（木棍全长含绑缚区）</text>
+
+</svg>

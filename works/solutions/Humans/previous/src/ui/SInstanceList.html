@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>实例卡片 · 暖色调</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --instance-primary: #7ab8d4;
+            --instance-primary-light: #a8d4e8;
+            --instance-primary-dark: #5a8ca6;
+            --instance-border: #5a7a8a;
+            --instance-glow: rgba(122, 184, 212, 0.12);
+            --bg-primary: #0e0b0a;
+            --bg-secondary: #1a1412;
+            --bg-tertiary: #221c19;
+            --bg-hover: #2a221e;
+            --border-color: #3a2c24;
+            --text-primary: #e4d7cf;
+            --text-secondary: #c4b4a8;
+            --text-tertiary: #a28c7c;
+            --success-color: #6fcf97;
+            --danger-color: #eb5757;
+            --warning-color: #f2c94a;
+            --delete-color: #e74c3c;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(122, 184, 212, 0.25);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(122, 184, 212, 0.45);
+        }
+        ::-webkit-scrollbar-corner {
+            background: var(--bg-primary);
+        }
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(122, 184, 212, 0.25) var(--bg-primary);
+        }
+
+        body {
+            font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(122, 184, 212, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(90, 140, 166, 0.03) 0%, transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .section-title i {
+            color: var(--instance-primary);
+        }
+
+        .section-title .count {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--text-tertiary);
+            margin-left: auto;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 3rem;
+            justify-items: center;
+        }
+
+        .instance-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--instance-border);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(122, 184, 212, 0.05) inset;
+            width: 100%;
+            max-width: 220px;
+            aspect-ratio: 5 / 7;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s ease;
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+            cursor: default;
+        }
+
+        .instance-card:hover {
+            border-color: var(--instance-primary);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 35px var(--instance-glow), 0 0 0 1px rgba(122, 184, 212, 0.2) inset;
+            background: var(--bg-hover);
+        }
+
+        .instance-card.long-press-active {
+            border-color: var(--delete-color);
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.2), 0 0 0 1px rgba(231, 76, 60, 0.2) inset;
+            transform: scale(1.02);
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            background: rgba(231, 76, 60, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            line-height: 1;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            animation: popIn 0.2s ease;
+        }
+
+        .delete-btn.show {
+            display: flex;
+        }
+
+        .delete-btn:hover {
+            background: rgba(192, 57, 43, 1);
+            transform: scale(1.15);
+            box-shadow: 0 4px 25px rgba(231, 76, 60, 0.6);
+        }
+
+        .delete-btn:active {
+            transform: scale(0.9);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .card-image {
+            flex: 0 0 50%;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--instance-border);
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .instance-card:hover .card-image img {
+            transform: scale(1.04);
+        }
+
+        .card-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(122, 184, 212, 0.06) 0%, rgba(14, 11, 10, 0.12) 100%);
+            pointer-events: none;
+        }
+
+        .card-image .fallback-icon {
+            font-size: 2.8rem;
+            color: var(--text-tertiary);
+            opacity: 0.5;
+            z-index: 1;
+        }
+
+        .card-info {
+            flex: 1;
+            padding: 0.6rem 0.7rem 0.4rem 0.7rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--bg-secondary);
+            gap: 0.15rem;
+        }
+
+        .instance-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+
+        .instance-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            opacity: 0.9;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.4rem 0.7rem 0.6rem 0.7rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .card-actions .btn {
+            flex: 1;
+            padding: 0.4rem 0;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            letter-spacing: 0.3px;
+        }
+
+        .card-actions .btn i {
+            font-size: 0.85rem;
+        }
+
+        .btn-run {
+            background: var(--success-color);
+            color: #0e0b0a;
+        }
+        .btn-run:hover {
+            background: #5bbf85;
+            transform: scale(1.02);
+        }
+        .btn-run.running {
+            background: var(--danger-color);
+            color: #fff;
+        }
+        .btn-run.running:hover {
+            background: #d94444;
+            transform: scale(1.02);
+        }
+
+        .btn-decouple {
+            background: var(--warning-color);
+            color: #0e0b0a;
+        }
+        .btn-decouple:hover {
+            background: #e6b83a;
+            transform: scale(1.02);
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: var(--text-tertiary);
+            padding: 3rem 0;
+            font-size: 1rem;
+        }
+
+        .empty-tip i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .confirm-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .confirm-dialog-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .confirm-dialog {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(231, 76, 60, 0.1) inset;
+            width: 420px;
+            max-width: 92vw;
+            padding: 2rem 2rem 1.8rem;
+            border-radius: 6px;
+            position: relative;
+        }
+        .confirm-dialog::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--delete-color), transparent);
+            opacity: 0.5;
+        }
+        .confirm-dialog .dialog-icon {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--delete-color);
+            margin-bottom: 0.8rem;
+        }
+        .confirm-dialog .dialog-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .confirm-dialog .dialog-message {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            padding: 0 0.5rem;
+        }
+        .confirm-dialog .dialog-message .highlight {
+            color: var(--instance-primary-light);
+            font-weight: 500;
+        }
+        .confirm-dialog .dialog-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .confirm-dialog .dialog-actions button {
+            padding: 0.6rem 2.2rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        .confirm-dialog .dialog-actions .btn-cancel:hover {
+            background: var(--bg-hover);
+            border-color: var(--text-tertiary);
+        }
+        .confirm-dialog .dialog-actions .btn-delete {
+            background: var(--delete-color);
+            border-color: var(--delete-color);
+            color: #fff;
+            font-weight: 600;
+        }
+        .confirm-dialog .dialog-actions .btn-delete:hover {
+            background: #c0392b;
+            border-color: #c0392b;
+            box-shadow: 0 0 24px rgba(231, 76, 60, 0.2);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--instance-border);
+            border-radius: 12px;
+            padding: 2rem 2.5rem;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+        .modal-box h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-primary);
+        }
+        .modal-box p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            text-align: left;
+        }
+        .modal-box .btn-close-modal {
+            padding: 0.5rem 2rem;
+            background: var(--instance-primary);
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0e0b0a;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-box .btn-close-modal:hover {
+            background: var(--instance-primary-light);
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 480px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            .instance-card {
+                max-width: 100%;
+            }
+            .instance-name {
+                font-size: 0.85rem;
+            }
+            .instance-desc {
+                font-size: 0.78rem;
+            }
+            .card-actions .btn {
+                font-size: 0.7rem;
+                padding: 0.35rem 0;
+            }
+            .card-actions .btn i {
+                font-size: 0.75rem;
+            }
+            .modal-box {
+                padding: 1.5rem;
+            }
+            .confirm-dialog {
+                padding: 1.5rem 1.2rem 1.2rem;
+            }
+            .confirm-dialog .dialog-actions button {
+                padding: 0.5rem 1.5rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .card-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.8rem;
+            }
+            .instance-name {
+                font-size: 0.75rem;
+            }
+            .instance-desc {
+                font-size: 0.7rem;
+            }
+            .card-actions .btn {
+                font-size: 0.6rem;
+                padding: 0.3rem 0;
+            }
+            .card-actions .btn i {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="instanceSection" style="display:none;">
+            <div class="section-title">
+                <i class="fas fa-cubes"></i> 实例
+                <span class="count" id="instanceCount"></span>
+            </div>
+            <div class="card-grid" id="instanceGrid"></div>
+        </div>
+
+        <div id="emptyState" style="display:none;">
+            <div class="empty-tip">
+                <i class="fas fa-folder-open"></i>
+                暂无实例
+            </div>
+        </div>
+    </div>
+
+    <div class="confirm-dialog-overlay" id="confirmDialog">
+        <div class="confirm-dialog">
+            <div class="dialog-icon">🗑️</div>
+            <div class="dialog-title">确认删除</div>
+            <div class="dialog-message" id="dialogMessage">
+                确定要删除实例 <span class="highlight" id="dialogFileName">未命名</span> 吗？<br />
+                此操作将删除整个实例文件夹及其所有内容！<br />
+                此操作不可撤销！
+            </div>
+            <div class="dialog-actions">
+                <button class="btn-cancel" id="dialogCancel">取消</button>
+                <button class="btn-delete" id="dialogConfirm">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <h2 id="modalTitle">提示</h2>
+            <p id="modalMessage">这是一个模拟弹窗</p>
+            <button class="btn-close-modal" id="modalCloseBtn">确定</button>
+        </div>
+    </div>
+
+    <script type="module">
+        var instanceGrid = document.getElementById('instanceGrid');
+        var instanceSection = document.getElementById('instanceSection');
+        var instanceCount = document.getElementById('instanceCount');
+        var emptyState = document.getElementById('emptyState');
+        var modalOverlay = document.getElementById('modalOverlay');
+        var modalTitle = document.getElementById('modalTitle');
+        var modalMessage = document.getElementById('modalMessage');
+        var modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        var confirmDialog = document.getElementById('confirmDialog');
+        var dialogMessage = document.getElementById('dialogMessage');
+        var dialogFileName = document.getElementById('dialogFileName');
+        var dialogCancel = document.getElementById('dialogCancel');
+        var dialogConfirm = document.getElementById('dialogConfirm');
+
+        var pendingDeleteCard = null;
+        var modalResolve = null;
+
+        function clearAllDeleteModes() {
+            var cards = document.querySelectorAll('.instance-card.long-press-active');
+            for (var i = 0; i < cards.length; i++) {
+                cards[i].classList.remove('long-press-active');
+                var btn = cards[i].querySelector('.delete-btn');
+                if (btn) btn.classList.remove('show');
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.instance-card')) {
+                clearAllDeleteModes();
+            }
+        });
+
+        function showModal(title, message) {
+            return new Promise(function(resolve) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modalOverlay.classList.add('active');
+                modalResolve = resolve;
+            });
+        }
+
+        modalCloseBtn.addEventListener('click', function() {
+            modalOverlay.classList.remove('active');
+            if (modalResolve) {
+                modalResolve();
+                modalResolve = null;
+            }
+        });
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('active');
+                if (modalResolve) {
+                    modalResolve();
+                    modalResolve = null;
+                }
+            }
+        });
+
+        function createCard(data, jsonFileName, instanceName) {
+            var card = document.createElement('div');
+            card.className = 'instance-card';
+            card.dataset.json = jsonFileName;
+            card.dataset.instance = instanceName;
+            card.dataset.name = data.name || instanceName;
+
+            var deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '✕';
+            deleteBtn.title = '删除实例';
+            card.appendChild(deleteBtn);
+
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var cardEl = this.closest('.instance-card');
+                var instanceName = cardEl.dataset.instance;
+                var displayName = cardEl.dataset.name || instanceName;
+                showDeleteDialog(cardEl, displayName, instanceName);
+            });
+
+            var imageDiv = document.createElement('div');
+            imageDiv.className = 'card-image';
+            var img = document.createElement('img');
+            if (data.img) {
+                img.src = './assets/images/' + data.img;
+            } else {
+                img.src = './assets/images/' + instanceName + '.jpg';
+            }
+            img.alt = data.name || '实例';
+            img.onerror = function() {
+                this.style.display = 'none';
+                var icon = document.createElement('i');
+                icon.className = 'fas fa-cube fallback-icon';
+                this.parentElement.appendChild(icon);
+            };
+            imageDiv.appendChild(img);
+            card.appendChild(imageDiv);
+
+            var info = document.createElement('div');
+            info.className = 'card-info';
+            var name = document.createElement('div');
+            name.className = 'instance-name';
+            name.textContent = data.name || '未命名';
+            var desc = document.createElement('div');
+            desc.className = 'instance-desc';
+            desc.textContent = data.note || '暂无描述';
+            info.appendChild(name);
+            info.appendChild(desc);
+            card.appendChild(info);
+
+            var actions = document.createElement('div');
+            actions.className = 'card-actions';
+
+            // ===== 运行按钮（状态由 Server 推送驱动，前端不自己改） =====
+            var runBtn = document.createElement('button');
+            runBtn.className = 'btn btn-run';
+            runBtn.innerHTML = '<i class="fas fa-play"></i> 运行';
+            runBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var isRunning = this.classList.contains('running');
+                var instanceName = card.dataset.instance;
+                var displayName = data.name || instanceName;
+
+                if (isRunning) {
+                    // 停止：调用父页面停止方法（走 WebSocket）
+                    this.classList.remove('running');
+                    this.innerHTML = '<i class="fas fa-play"></i> 运行';
+                    if (window.parent && window.parent.stopInstance) {
+                        window.parent.stopInstance(instanceName);
+                    } else {
+                        window.parent.postMessage({
+                            type: 'stopInstance',
+                            instanceName: instanceName
+                        }, '*');
+                    }
+                } else {
+                    // 启动：检查是否已达上限
+                    if (window.parent && window.parent.getRunningInstances) {
+                        var running = window.parent.getRunningInstances();
+                        if (running.length >= 3) {
+                            showModal('提示', '最多只能同时运行 3 个实例');
+                            return;
+                        }
+                    }
+
+                    // 调用父页面启动方法（按钮状态等 Server 推送）
+                    if (window.parent && window.parent.startInstance) {
+                        window.parent.startInstance(instanceName);
+                    } else {
+                        window.parent.postMessage({
+                            type: 'startInstance',
+                            instanceName: instanceName
+                        }, '*');
+                    }
+                }
+            });
+
+            var decoupleBtn = document.createElement('button');
+            decoupleBtn.className = 'btn btn-decouple';
+            decoupleBtn.innerHTML = '<i class="fas fa-link"></i> 解耦';
+            decoupleBtn.addEventListener('click', async function(e) {
+                e.stopPropagation();
+
+                var originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 处理中...';
+                this.disabled = true;
+
+                try {
+                    var result = await window.parent.pywebview.api.decouple_field_ego(instanceName);
+                    console.log('解耦结果:', result);
+
+                    if (result.success) {
+                        var detailMsg = '实例「' + (data.name || instanceName) + '」解耦成功！\n\n';
+                        detailMsg += '场域: ' + result.data.field.name + '\n';
+                        detailMsg += '   ' + result.data.field.db + '\n\n';
+                        detailMsg += '人物 (' + result.data.egos.length + ' 个):\n';
+                        for (var idx = 0; idx < result.data.egos.length; idx++) {
+                            var ego = result.data.egos[idx];
+                            detailMsg += '   ' + (idx + 1) + '. ' + ego.name + '\n';
+                            detailMsg += '      ' + ego.db + '\n';
+                        }
+                        showModal('解耦成功', detailMsg);
+                    } else {
+                        showModal('解耦失败', result.message || '未知错误');
+                    }
+                } catch (error) {
+                    console.error('解耦失败:', error);
+                    showModal('解耦失败', error.message || '网络错误或后端异常');
+                } finally {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }
+            });
+
+            actions.appendChild(runBtn);
+            actions.appendChild(decoupleBtn);
+            card.appendChild(actions);
+
+            // ===== 长按删除逻辑 =====
+            var pressTimer = null;
+            var isLongPress = false;
+            var LONG_PRESS_DURATION = 3000;
+
+            card.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return;
+                if (e.target.closest('.delete-btn')) return;
+
+                clearAllDeleteModes();
+
+                isLongPress = false;
+                pressTimer = setTimeout(function() {
+                    isLongPress = true;
+                    this.classList.add('long-press-active');
+                    var btn = this.querySelector('.delete-btn');
+                    if (btn) btn.classList.add('show');
+                    console.log('长按激活实例:', this.dataset.instance);
+                }.bind(this), LONG_PRESS_DURATION);
+            });
+
+            card.addEventListener('mouseup', function(e) {
+                if (e.button !== 0) return;
+                clearTimeout(pressTimer);
+                if (!isLongPress && !e.target.closest('.delete-btn')) {
+                    console.log('单击实例:', this.dataset.instance);
+                }
+            });
+
+            card.addEventListener('mouseleave', function() {
+                clearTimeout(pressTimer);
+            });
+
+            card.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+
+            return card;
+        }
+
+        function showDeleteDialog(card, displayName, instanceName) {
+            pendingDeleteCard = card;
+            dialogFileName.textContent = displayName;
+            dialogMessage.innerHTML = '确定要删除实例 <span class="highlight">' + displayName + '</span> 吗？<br />' +
+                '将删除整个实例文件夹：<span style="color:var(--text-tertiary);font-size:0.85rem;">' + instanceName + '</span><br />' +
+                '此操作将删除文件夹内所有内容！<br />' +
+                '此操作不可撤销！';
+            confirmDialog.classList.add('active');
+        }
+
+        function closeDeleteDialog() {
+            confirmDialog.classList.remove('active');
+            pendingDeleteCard = null;
+        }
+
+        async function executeDelete() {
+            if (!pendingDeleteCard) return;
+
+            var card = pendingDeleteCard;
+            var instanceName = card.dataset.instance;
+            var displayName = card.dataset.name || instanceName;
+
+            console.log('删除实例:', displayName, '(' + instanceName + ')');
+
+            try {
+                var result = await window.parent.pywebview.api.delete_entity(instanceName, 'instance');
+
+                if (result && result.success) {
+                    card.remove();
+                    console.log('已删除实例:', instanceName);
+
+                    var remainingCards = document.querySelectorAll('.instance-card').length;
+                    instanceCount.textContent = '共 ' + remainingCards + ' 个';
+
+                    if (remainingCards === 0) {
+                        instanceSection.style.display = 'none';
+                        emptyState.style.display = 'block';
+                    }
+
+                    closeDeleteDialog();
+                } else {
+                    alert('删除失败: ' + (result?.message || '未知错误'));
+                    closeDeleteDialog();
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                alert('删除失败: ' + (error.message || '网络错误'));
+                closeDeleteDialog();
+            }
+        }
+
+        dialogCancel.addEventListener('click', closeDeleteDialog);
+        dialogConfirm.addEventListener('click', executeDelete);
+
+        confirmDialog.addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteDialog();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (confirmDialog.classList.contains('active')) {
+                    closeDeleteDialog();
+                } else {
+                    clearAllDeleteModes();
+                }
+            }
+        });
+
+        // ================================================================
+        // ===== 监听父页面推送的状态变化（Server 驱动） =====
+        // ================================================================
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'instanceStatusChange') {
+                var instanceName = event.data.instanceName;
+                var status = event.data.status;
+                var cards = document.querySelectorAll('.instance-card');
+                for (var i = 0; i < cards.length; i++) {
+                    var card = cards[i];
+                    if (card.dataset.instance === instanceName) {
+                        var runBtn = card.querySelector('.btn-run');
+                        if (runBtn) {
+                            if (status === 'running') {
+                                runBtn.classList.add('running');
+                                runBtn.innerHTML = '<i class="fas fa-stop"></i> 停止';
+                            } else {
+                                runBtn.classList.remove('running');
+                                runBtn.innerHTML = '<i class="fas fa-play"></i> 运行';
+                            }
+                            if (modalOverlay.classList.contains('active')) {
+                                modalOverlay.classList.remove('active');
+                                if (modalResolve) {
+                                    modalResolve();
+                                    modalResolve = null;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ===== 处理 getRunningInstances 请求 =====
+            if (event.data && event.data.type === 'getRunningInstances') {
+                var runningInstances = [];
+                try {
+                    if (window.parent && window.parent.getRunningInstances) {
+                        runningInstances = window.parent.getRunningInstances();
+                    } else {
+                        // 兼容：通过 postMessage 请求父页面
+                        var parentResult = window.parent.getRunningInstancesFromParent();
+                        if (parentResult) {
+                            runningInstances = parentResult;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('[SInstanceList] 获取运行实例失败:', e);
+                }
+                // 如果 runningInstances 是数组，返回给请求方
+                if (Array.isArray(runningInstances)) {
+                    window.parent.postMessage({
+                        type: 'runningInstancesResponse',
+                        instances: runningInstances
+                    }, '*');
+                }
+            }
+        });
+
+        // ================================================================
+        // ===== 同步运行状态（从父页面获取） =====
+        // ================================================================
+        function syncRunningStatus() {
+            return new Promise(function(resolve) {
+                try {
+                    // 直接调用父页面的 getRunningInstances
+                    var running = [];
+                    if (window.parent && window.parent.getRunningInstances) {
+                        running = window.parent.getRunningInstances();
+                        resolve(running);
+                        return;
+                    }
+
+                    // 降级方案：通过 postMessage 请求
+                    window.parent.postMessage({
+                        type: 'getRunningInstances'
+                    }, '*');
+
+                    var handler = function(event) {
+                        if (event.data && event.data.type === 'runningInstancesResponse') {
+                            window.removeEventListener('message', handler);
+                            resolve(event.data.instances);
+                        }
+                    };
+                    window.addEventListener('message', handler);
+
+                    setTimeout(function() {
+                        window.removeEventListener('message', handler);
+                        resolve([]);
+                    }, 1000);
+                } catch (e) {
+                    resolve([]);
+                }
+            });
+        }
+
+        async function updateCardsRunningStatus() {
+            var runningInstances = await syncRunningStatus();
+            var cards = document.querySelectorAll('.instance-card');
+            for (var i = 0; i < cards.length; i++) {
+                var card = cards[i];
+                var instanceName = card.dataset.instance;
+                var runBtn = card.querySelector('.btn-run');
+                if (runBtn) {
+                    if (runningInstances.indexOf(instanceName) !== -1) {
+                        runBtn.classList.add('running');
+                        runBtn.innerHTML = '<i class="fas fa-stop"></i> 停止';
+                    } else {
+                        runBtn.classList.remove('running');
+                        runBtn.innerHTML = '<i class="fas fa-play"></i> 运行';
+                    }
+                }
+            }
+        }
+
+        // ================================================================
+        // ===== 初始化 =====
+        // ================================================================
+        async function init() {
+            try {
+                var result = await window.parent.pywebview.api.get_subdirectories_in_directory('../data/instance/');
+
+                if (!result.success || !result.directories || result.directories.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                var instanceNames = result.directories;
+                console.log('实例列表:', instanceNames);
+
+                var pairs = [];
+                for (var i = 0; i < instanceNames.length; i++) {
+                    var instanceName = instanceNames[i];
+                    var jsonFile = instanceName + '.json';
+                    try {
+                        var testResponse = await fetch('./data/instance/' + jsonFile);
+                        if (testResponse.ok) {
+                            pairs.push({ instance: instanceName, json: jsonFile });
+                        } else {
+                            console.warn('跳过 ' + instanceName + '：找不到对应的 ' + jsonFile);
+                        }
+                    } catch (err) {
+                        console.warn('跳过 ' + instanceName + '：加载 ' + jsonFile + ' 失败', err);
+                    }
+                }
+
+                console.log('配对:', pairs);
+
+                if (pairs.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                instanceSection.style.display = 'block';
+                instanceCount.textContent = '共 ' + pairs.length + ' 个';
+
+                for (var j = 0; j < pairs.length; j++) {
+                    var pair = pairs[j];
+                    try {
+                        var jsonResponse = await fetch('./data/instance/' + pair.json);
+                        if (!jsonResponse.ok) {
+                            console.warn('加载 ' + pair.json + ' 失败: ' + jsonResponse.status);
+                            continue;
+                        }
+                        var data = await jsonResponse.json();
+                        var card = createCard(data, pair.json, pair.instance);
+                        instanceGrid.appendChild(card);
+                    } catch (err) {
+                        console.error('加载 ' + pair.json + ' 失败:', err);
+                    }
+                }
+
+                console.log('加载完成: ' + pairs.length + ' 个实例');
+
+                // ===== 加载完成后同步运行状态 =====
+                await updateCardsRunningStatus();
+                console.log('[SInstanceList] 运行状态同步完成');
+
+            } catch (error) {
+                console.error('初始化失败:', error);
+                emptyState.style.display = 'block';
+                var tip = emptyState.querySelector('.empty-tip');
+                if (tip) {
+                    tip.innerHTML = '<i class="fas fa-exclamation-triangle"></i>加载失败: ' + error.message;
+                }
+            }
+        }
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

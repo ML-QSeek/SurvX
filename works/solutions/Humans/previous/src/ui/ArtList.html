@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>艺术卡片 · 绘画与音乐</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --art-primary: #b0807a;
+            --art-primary-light: #dbb0aa;
+            --art-primary-dark: #8a605a;
+            --art-border: #7a5a56;
+            --art-glow: rgba(176, 128, 122, 0.12);
+            --bg-primary: #0e0b0a;
+            --bg-secondary: #1a1412;
+            --bg-tertiary: #221c19;
+            --bg-hover: #2a221e;
+            --border-color: #3a2c24;
+            --text-primary: #e4d7cf;
+            --text-secondary: #c4b4a8;
+            --text-tertiary: #a28c7c;
+            --delete-color: #e74c3c;
+        }
+
+        /* ===== 滚动条样式 - 暖色主题 ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(176, 128, 122, 0.25);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(176, 128, 122, 0.45);
+        }
+        ::-webkit-scrollbar-corner {
+            background: var(--bg-primary);
+        }
+        /* Firefox 滚动条 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(176, 128, 122, 0.25) var(--bg-primary);
+        }
+
+        body {
+            font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(176, 128, 122, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(138, 96, 90, 0.03) 0%, transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .section-title i {
+            color: var(--art-primary);
+        }
+
+        .section-title .count {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--text-tertiary);
+            margin-left: auto;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 3rem;
+            justify-items: center;
+        }
+
+        .art-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--art-border);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(176, 128, 122, 0.05) inset;
+            width: 100%;
+            max-width: 200px;
+            aspect-ratio: 5 / 7;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s ease;
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+            cursor: default;
+        }
+
+        .art-card:hover {
+            border-color: var(--art-primary);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 35px var(--art-glow), 0 0 0 1px rgba(176, 128, 122, 0.2) inset;
+            background: var(--bg-hover);
+        }
+
+        /* ===== 长按激活状态 ===== */
+        .art-card.long-press-active {
+            border-color: var(--delete-color);
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.2), 0 0 0 1px rgba(231, 76, 60, 0.2) inset;
+            transform: scale(1.02);
+        }
+
+        /* ===== 删除按钮 - 右上角叉叉 ===== */
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            background: rgba(231, 76, 60, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            line-height: 1;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            animation: popIn 0.2s ease;
+        }
+
+        .delete-btn.show {
+            display: flex;
+        }
+
+        .delete-btn:hover {
+            background: rgba(192, 57, 43, 1);
+            transform: scale(1.15);
+            box-shadow: 0 4px 25px rgba(231, 76, 60, 0.6);
+        }
+
+        .delete-btn:active {
+            transform: scale(0.9);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .card-image {
+            flex: 0 0 55%;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .card-image.music-card-image {
+            cursor: default;
+        }
+
+        .art-display {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at center, rgba(26, 20, 18, 0.4) 0%, rgba(14, 11, 10, 0.7) 100%);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .art-item {
+            width: 100%;
+            height: 100%;
+            border-radius: 2px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            transition: transform 0.4s ease;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(176, 128, 122, 0.08) inset;
+        }
+
+        .art-card:hover .art-item {
+            transform: scale(1.04);
+        }
+
+        .art-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .art-item .fallback-icon {
+            font-size: 2.8rem;
+            color: var(--text-tertiary);
+            opacity: 0.5;
+        }
+
+        .card-info {
+            flex: 1;
+            padding: 0.8rem 0.7rem 0.6rem 0.7rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--bg-secondary);
+            gap: 0.2rem;
+        }
+
+        .art-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+
+        .art-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            opacity: 0.9;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .music-player {
+            padding: 0.5rem 0.7rem 0.7rem 0.7rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .play-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid var(--art-primary);
+            background: transparent;
+            color: var(--art-primary-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .play-btn:hover {
+            background: var(--art-primary);
+            color: var(--bg-primary);
+            transform: scale(1.1);
+        }
+
+        .play-btn.playing {
+            background: var(--art-primary);
+            color: var(--bg-primary);
+        }
+
+        .progress-container {
+            flex: 1;
+            height: 3px;
+            background: var(--border-color);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--art-primary);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            font-size: 0.5rem;
+            color: var(--text-tertiary);
+            font-family: 'JetBrains Mono', monospace;
+            flex-shrink: 0;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 80vw;
+            max-height: 85vh;
+            position: relative;
+            animation: scaleIn 0.3s ease;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--art-border);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--art-border);
+            color: var(--text-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--art-primary);
+            transform: rotate(90deg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* ===== 确认对话框 ===== */
+        .confirm-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .confirm-dialog-overlay.active {
+            display: flex;
+        }
+
+        .confirm-dialog {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(231, 76, 60, 0.1) inset;
+            width: 420px;
+            max-width: 92vw;
+            padding: 2rem 2rem 1.8rem;
+            border-radius: 6px;
+            position: relative;
+        }
+        .confirm-dialog::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--delete-color), transparent);
+            opacity: 0.5;
+        }
+        .confirm-dialog .dialog-icon {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--delete-color);
+            margin-bottom: 0.8rem;
+        }
+        .confirm-dialog .dialog-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .confirm-dialog .dialog-message {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            padding: 0 0.5rem;
+        }
+        .confirm-dialog .dialog-message .highlight {
+            color: var(--art-primary-light);
+            font-weight: 500;
+        }
+        .confirm-dialog .dialog-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .confirm-dialog .dialog-actions button {
+            padding: 0.6rem 2.2rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        .confirm-dialog .dialog-actions .btn-cancel:hover {
+            background: var(--bg-hover);
+            border-color: var(--text-tertiary);
+        }
+        .confirm-dialog .dialog-actions .btn-delete {
+            background: var(--delete-color);
+            border-color: var(--delete-color);
+            color: #fff;
+            font-weight: 600;
+        }
+        .confirm-dialog .dialog-actions .btn-delete:hover {
+            background: #c0392b;
+            border-color: #c0392b;
+            box-shadow: 0 0 24px rgba(231, 76, 60, 0.2);
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: var(--text-tertiary);
+            padding: 3rem 0;
+            font-size: 1rem;
+        }
+
+        .empty-tip i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 480px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            .art-card {
+                max-width: 100%;
+            }
+            .art-name {
+                font-size: 0.85rem;
+            }
+            .art-desc {
+                font-size: 0.7rem;
+            }
+            .modal-content {
+                max-width: 95vw;
+            }
+            .modal-close {
+                top: -30px;
+                right: 0;
+            }
+            .confirm-dialog {
+                padding: 1.5rem 1.2rem 1.2rem;
+            }
+            .confirm-dialog .dialog-actions button {
+                padding: 0.5rem 1.5rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .card-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.8rem;
+            }
+            .art-name {
+                font-size: 0.75rem;
+            }
+            .art-desc {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="paintingSection" style="display:none;">
+            <div class="section-title">
+                <i class="fas fa-palette"></i> 绘画作品
+                <span class="count" id="paintingCount"></span>
+            </div>
+            <div class="card-grid" id="paintingGrid"></div>
+        </div>
+
+        <div id="musicSection" style="display:none;">
+            <div class="section-title">
+                <i class="fas fa-music"></i> 音乐作品
+                <span class="count" id="musicCount"></span>
+            </div>
+            <div class="card-grid" id="musicGrid"></div>
+        </div>
+
+        <div id="emptyState" style="display:none;">
+            <div class="empty-tip">
+                <i class="fas fa-folder-open"></i>
+                暂无作品
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 删除确认对话框 ===== -->
+    <div class="confirm-dialog-overlay" id="confirmDialog">
+        <div class="confirm-dialog">
+            <div class="dialog-icon">🗑️</div>
+            <div class="dialog-title">确认删除</div>
+            <div class="dialog-message" id="dialogMessage">
+                确定要删除作品 <span class="highlight" id="dialogFileName">未命名</span> 吗？<br />
+                此操作将删除相关文件！<br />
+                此操作不可撤销！
+            </div>
+            <div class="dialog-actions">
+                <button class="btn-cancel" id="dialogCancel">取消</button>
+                <button class="btn-delete" id="dialogConfirm">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片放大弹窗 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">✕</button>
+            <img id="modalImage" src="" alt="放大查看" />
+        </div>
+    </div>
+
+    <script type="module">
+        import { Midi } from 'https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/+esm';
+
+        let currentPlayer = null;
+        let currentSynth = null;
+        let currentNotes = [];
+        let animationId = null;
+        let startTime = 0;
+        let totalDuration = 0;
+
+        const paintingGrid = document.getElementById('paintingGrid');
+        const musicGrid = document.getElementById('musicGrid');
+        const paintingSection = document.getElementById('paintingSection');
+        const musicSection = document.getElementById('musicSection');
+        const paintingCount = document.getElementById('paintingCount');
+        const musicCount = document.getElementById('musicCount');
+        const emptyState = document.getElementById('emptyState');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalImage = document.getElementById('modalImage');
+        const modalClose = document.getElementById('modalClose');
+
+        // 删除对话框
+        const confirmDialog = document.getElementById('confirmDialog');
+        const dialogMessage = document.getElementById('dialogMessage');
+        const dialogFileName = document.getElementById('dialogFileName');
+        const dialogCancel = document.getElementById('dialogCancel');
+        const dialogConfirm = document.getElementById('dialogConfirm');
+
+        let pendingDeleteCard = null;
+
+        // ===== 关闭所有卡片的删除模式 =====
+        function clearAllDeleteModes() {
+            document.querySelectorAll('.art-card.long-press-active').forEach(card => {
+                card.classList.remove('long-press-active');
+                const btn = card.querySelector('.delete-btn');
+                if (btn) btn.classList.remove('show');
+            });
+        }
+
+        // ===== 点击卡片外部关闭删除模式 =====
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.art-card')) {
+                clearAllDeleteModes();
+            }
+        });
+
+        function openModal(src) {
+            modalImage.src = src;
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+        modalClose.addEventListener('click', closeModal);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (confirmDialog.classList.contains('active')) {
+                    closeDeleteDialog();
+                } else {
+                    closeModal();
+                    clearAllDeleteModes();
+                }
+            }
+        });
+
+        function stopPlayback() {
+            if (currentSynth) {
+                currentSynth.releaseAll();
+                currentSynth.dispose();
+                currentSynth = null;
+            }
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            currentNotes = [];
+            totalDuration = 0;
+            
+            document.querySelectorAll('.play-btn').forEach(btn => {
+                btn.classList.remove('playing');
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+            });
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                bar.style.width = '0%';
+            });
+            document.querySelectorAll('.time-display').forEach(el => {
+                el.textContent = '0:00';
+            });
+            
+            currentPlayer = null;
+        }
+
+        async function playMidi(cardId, midiPath, progressBar, timeDisplay, playBtn) {
+            if (currentPlayer === cardId) {
+                stopPlayback();
+                return;
+            }
+            
+            stopPlayback();
+            currentPlayer = cardId;
+
+            try {
+                const response = await fetch(midiPath);
+                const arrayBuffer = await response.arrayBuffer();
+                const midi = new Midi(arrayBuffer);
+
+                const allNotes = [];
+                let maxEndTime = 0;
+                midi.tracks.forEach(track => {
+                    track.notes.forEach(note => {
+                        allNotes.push({
+                            name: note.name,
+                            duration: note.duration,
+                            time: note.time,
+                            velocity: note.velocity || 0.8
+                        });
+                        maxEndTime = Math.max(maxEndTime, note.time + note.duration);
+                    });
+                });
+
+                if (allNotes.length === 0) {
+                    console.warn('MIDI 文件没有音符');
+                    return;
+                }
+
+                currentNotes = allNotes;
+                totalDuration = maxEndTime || 1;
+
+                const synth = new Tone.PolySynth().toDestination();
+                currentSynth = synth;
+
+                playBtn.classList.add('playing');
+                playBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                timeDisplay.textContent = '0:00';
+                progressBar.style.width = '0%';
+
+                const now = Tone.now();
+
+                allNotes.forEach(note => {
+                    synth.triggerAttackRelease(
+                        note.name,
+                        note.duration,
+                        now + note.time,
+                        note.velocity * 0.5
+                    );
+                });
+
+                startTime = performance.now();
+
+                function updateProgress() {
+                    if (!currentPlayer || currentPlayer !== cardId) return;
+                    
+                    const elapsed = (performance.now() - startTime) / 1000;
+                    const progress = Math.min(elapsed / totalDuration, 1);
+                    
+                    progressBar.style.width = (progress * 100) + '%';
+                    
+                    const remaining = Math.max(0, totalDuration - elapsed);
+                    const mins = Math.floor(remaining / 60);
+                    const secs = Math.floor(remaining % 60);
+                    timeDisplay.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                    
+                    if (progress < 1) {
+                        animationId = requestAnimationFrame(updateProgress);
+                    } else {
+                        progressBar.style.width = '100%';
+                        timeDisplay.textContent = '0:00';
+                        playBtn.classList.remove('playing');
+                        playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                        currentPlayer = null;
+                        if (currentSynth) {
+                            currentSynth.releaseAll();
+                            currentSynth.dispose();
+                            currentSynth = null;
+                        }
+                    }
+                }
+
+                animationId = requestAnimationFrame(updateProgress);
+
+            } catch (error) {
+                console.error('播放 MIDI 失败:', error);
+                playBtn.classList.remove('playing');
+                playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                currentPlayer = null;
+                if (currentSynth) {
+                    currentSynth.dispose();
+                    currentSynth = null;
+                }
+            }
+        }
+
+        // ===== 显示删除确认对话框 =====
+        function showDeleteDialog(card, displayName, fileName, fileType) {
+            pendingDeleteCard = card;
+            dialogFileName.textContent = displayName;
+            const typeLabel = fileType === 'painting' ? '绘画' : '音乐';
+            dialogMessage.innerHTML = `
+                确定要删除${typeLabel}作品 <span class="highlight">${displayName}</span> 吗？<br />
+                将删除文件：<span style="color:var(--text-tertiary);font-size:0.85rem;">${fileName}</span><br />
+                此操作不可撤销！
+            `;
+            confirmDialog.classList.add('active');
+        }
+
+        // ===== 关闭删除对话框 =====
+        function closeDeleteDialog() {
+            confirmDialog.classList.remove('active');
+            pendingDeleteCard = null;
+        }
+
+        // ===== 执行删除 =====
+        async function executeDelete() {
+            if (!pendingDeleteCard) return;
+
+            const card = pendingDeleteCard;
+            const fileName = card.dataset.file;
+            const displayName = card.dataset.name || fileName;
+            const fileType = card.dataset.type;
+
+            console.log(`🗑️ 删除${fileType}作品: ${displayName} (${fileName})`);
+
+            try {
+                // 获取文件名（不含扩展名）
+                const baseName = fileName.replace(/\.(png|mid)$/, '');
+                const result = await window.parent.pywebview.api.delete_entity(baseName, 'art');
+
+                if (result && result.success) {
+                    card.remove();
+                    console.log(`✅ 已删除: ${baseName}`);
+
+                    // 更新对应区域的计数
+                    const section = fileType === 'painting' ? paintingSection : musicSection;
+                    const grid = fileType === 'painting' ? paintingGrid : musicGrid;
+                    const countEl = fileType === 'painting' ? paintingCount : musicCount;
+                    
+                    const remainingCards = grid.querySelectorAll('.art-card').length;
+                    if (remainingCards === 0) {
+                        section.style.display = 'none';
+                    } else {
+                        countEl.textContent = `共 ${remainingCards} 件`;
+                    }
+
+                    // 检查是否全部为空
+                    if (paintingGrid.querySelectorAll('.art-card').length === 0 && 
+                        musicGrid.querySelectorAll('.art-card').length === 0) {
+                        paintingSection.style.display = 'none';
+                        musicSection.style.display = 'none';
+                        emptyState.style.display = 'block';
+                    }
+
+                    closeDeleteDialog();
+                } else {
+                    alert(`删除失败: ${result?.message || '未知错误'}`);
+                    closeDeleteDialog();
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                alert(`删除失败: ${error.message || '网络错误'}`);
+                closeDeleteDialog();
+            }
+        }
+
+        // ===== 对话框事件绑定 =====
+        dialogCancel.addEventListener('click', closeDeleteDialog);
+        dialogConfirm.addEventListener('click', executeDelete);
+
+        confirmDialog.addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteDialog();
+        });
+
+        function createCard(data, type, fileName) {
+            const card = document.createElement('div');
+            card.className = 'art-card';
+            card.dataset.file = fileName;
+            card.dataset.name = data.name || '未命名';
+            card.dataset.type = type;
+
+            // ---- 删除按钮 ----
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '✕';
+            deleteBtn.title = '删除作品';
+            card.appendChild(deleteBtn);
+
+            // 删除按钮点击事件
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const cardEl = this.closest('.art-card');
+                const fileName = cardEl.dataset.file;
+                const displayName = cardEl.dataset.name || fileName;
+                const fileType = cardEl.dataset.type;
+                showDeleteDialog(cardEl, displayName, fileName, fileType);
+            });
+
+            const imageDiv = document.createElement('div');
+            imageDiv.className = `card-image${type === 'music' ? ' music-card-image' : ''}`;
+            
+            const display = document.createElement('div');
+            display.className = 'art-display';
+            
+            const item = document.createElement('div');
+            item.className = 'art-item';
+            
+            const img = document.createElement('img');
+            img.src = `./data/civilization/art/${fileName}`;
+            img.alt = data.name || '作品';
+            img.onerror = function() {
+                this.style.display = 'none';
+                const icon = document.createElement('i');
+                icon.className = type === 'music' ? 'fas fa-music fallback-icon' : 'fas fa-image fallback-icon';
+                this.parentElement.appendChild(icon);
+            };
+            
+            item.appendChild(img);
+            display.appendChild(item);
+            imageDiv.appendChild(display);
+
+            if (type === 'painting') {
+                imageDiv.addEventListener('click', () => {
+                    openModal(img.src);
+                });
+            }
+
+            card.appendChild(imageDiv);
+
+            const info = document.createElement('div');
+            info.className = 'card-info';
+            
+            const name = document.createElement('div');
+            name.className = 'art-name';
+            name.textContent = data.name || '未命名';
+            
+            const desc = document.createElement('div');
+            desc.className = 'art-desc';
+            desc.textContent = data.note || '暂无描述';
+            
+            info.appendChild(name);
+            info.appendChild(desc);
+            card.appendChild(info);
+
+            if (type === 'music') {
+                const player = document.createElement('div');
+                player.className = 'music-player';
+                
+                const controls = document.createElement('div');
+                controls.className = 'player-controls';
+                
+                const playBtn = document.createElement('button');
+                playBtn.className = 'play-btn';
+                playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                
+                const progressContainer = document.createElement('div');
+                progressContainer.className = 'progress-container';
+                
+                const progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar';
+                
+                const timeDisplay = document.createElement('span');
+                timeDisplay.className = 'time-display';
+                timeDisplay.textContent = '0:00';
+                
+                progressContainer.appendChild(progressBar);
+                controls.appendChild(playBtn);
+                controls.appendChild(progressContainer);
+                controls.appendChild(timeDisplay);
+                player.appendChild(controls);
+                card.appendChild(player);
+
+                const cardId = `card_${fileName}`;
+                card.dataset.cardId = cardId;
+                
+                playBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const midiPath = `./data/civilization/art/${fileName}`;
+                    playMidi(cardId, midiPath, progressBar, timeDisplay, playBtn);
+                });
+            }
+
+            // ============================================================
+            // 长按逻辑：长按 3 秒显示删除按钮
+            // ============================================================
+            let pressTimer = null;
+            let isLongPress = false;
+            const LONG_PRESS_DURATION = 3000;
+
+            card.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return;
+                if (e.target.closest('.delete-btn')) return;
+                if (e.target.closest('.play-btn')) return;
+
+                clearAllDeleteModes();
+
+                isLongPress = false;
+                pressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    this.classList.add('long-press-active');
+                    const btn = this.querySelector('.delete-btn');
+                    if (btn) btn.classList.add('show');
+                    console.log('🔨 长按激活作品:', this.dataset.file);
+                }, LONG_PRESS_DURATION);
+            });
+
+            card.addEventListener('mouseup', function(e) {
+                if (e.button !== 0) return;
+                clearTimeout(pressTimer);
+                if (!isLongPress && !e.target.closest('.delete-btn') && !e.target.closest('.play-btn')) {
+                    console.log('👆 单击作品:', this.dataset.file);
+                }
+            });
+
+            card.addEventListener('mouseleave', function() {
+                clearTimeout(pressTimer);
+            });
+
+            card.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+
+            return card;
+        }
+
+        async function init() {
+            try {
+                const result = await window.parent.pywebview.api.get_files_in_directory('../ui/data/civilization/art/');
+                
+                if (!result.success || !result.files || result.files.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                const files = result.files;
+                console.log('文件列表:', files);
+                
+                const jsonMap = {};
+                const pngFiles = [];
+                const midFiles = [];
+
+                files.forEach(file => {
+                    if (file.endsWith('.json')) {
+                        jsonMap[file] = file;
+                    } else if (file.endsWith('.png')) {
+                        pngFiles.push(file);
+                    } else if (file.endsWith('.mid')) {
+                        midFiles.push(file);
+                    }
+                });
+
+                const paintingPairs = [];
+                const musicPairs = [];
+
+                pngFiles.forEach(pngFile => {
+                    const baseName = pngFile.replace('.png', '');
+                    const jsonFile = `${baseName}.json`;
+                    if (jsonMap[jsonFile]) {
+                        paintingPairs.push({
+                            png: pngFile,
+                            json: jsonFile
+                        });
+                    }
+                });
+
+                midFiles.forEach(midFile => {
+                    const baseName = midFile.replace('.mid', '');
+                    const jsonFile = `${baseName}.json`;
+                    if (jsonMap[jsonFile]) {
+                        musicPairs.push({
+                            mid: midFile,
+                            json: jsonFile
+                        });
+                    }
+                });
+
+                console.log('图画配对:', paintingPairs);
+                console.log('音乐配对:', musicPairs);
+
+                if (paintingPairs.length > 0) {
+                    paintingSection.style.display = 'block';
+                    paintingCount.textContent = `共 ${paintingPairs.length} 件`;
+                    
+                    for (const pair of paintingPairs) {
+                        try {
+                            const jsonResponse = await fetch(`./data/civilization/art/${pair.json}`);
+                            if (!jsonResponse.ok) {
+                                console.warn(`加载 ${pair.json} 失败: ${jsonResponse.status}`);
+                                continue;
+                            }
+                            const data = await jsonResponse.json();
+                            const card = createCard(data, 'painting', pair.png);
+                            paintingGrid.appendChild(card);
+                        } catch (err) {
+                            console.error(`加载 ${pair.json} 失败:`, err);
+                        }
+                    }
+                }
+
+                if (musicPairs.length > 0) {
+                    musicSection.style.display = 'block';
+                    musicCount.textContent = `共 ${musicPairs.length} 件`;
+                    
+                    for (const pair of musicPairs) {
+                        try {
+                            const jsonResponse = await fetch(`./data/civilization/art/${pair.json}`);
+                            if (!jsonResponse.ok) {
+                                console.warn(`加载 ${pair.json} 失败: ${jsonResponse.status}`);
+                                continue;
+                            }
+                            const data = await jsonResponse.json();
+                            const card = createCard(data, 'music', pair.mid);
+                            musicGrid.appendChild(card);
+                        } catch (err) {
+                            console.error(`加载 ${pair.json} 失败:`, err);
+                        }
+                    }
+                }
+
+                if (paintingPairs.length === 0 && musicPairs.length === 0) {
+                    emptyState.style.display = 'block';
+                }
+
+                console.log(`✅ 加载完成: ${paintingPairs.length} 幅图画, ${musicPairs.length} 首音乐`);
+
+            } catch (error) {
+                console.error('初始化失败:', error);
+                emptyState.style.display = 'block';
+                const tip = emptyState.querySelector('.empty-tip');
+                if (tip) {
+                    tip.innerHTML = `<i class="fas fa-exclamation-triangle"></i>加载失败: ${error.message}`;
+                }
+            }
+        }
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

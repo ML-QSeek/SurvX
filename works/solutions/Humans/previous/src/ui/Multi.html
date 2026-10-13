@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SurvX · 联合仿真</title>
+    <style>
+        :root {
+            --bg: #0e0b0a;
+            --bg-card: #1a1412;
+            --bg-modal: #221c19;
+            --border: #3a2c24;
+            --text: #e4d7cf;
+            --text-secondary: #c4b4a8;
+            --text-muted: #a28c7c;
+            --primary: #f6b07c;
+            --primary-dark: #d4845a;
+            --primary-light: #f5cba0;
+            --primary-transparent: rgba(246, 176, 124, 0.15);
+            --input-bg: #0c0a09;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+            --radius: 2px;
+            --error-color: #f58b7a;
+            --success-color: #eab676;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 0;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        body {
+            font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 0 1.5rem 0;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #e4d7cf 0%, #f5cba0 50%, #f6b07c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-left .sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .header-right .status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .header-right .status .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #7cdf7c;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: var(--radius);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background: var(--primary-transparent);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #1a1412;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: #1a1412;
+        }
+
+        .btn-danger {
+            border-color: rgba(245, 139, 122, 0.3);
+            color: var(--error-color);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            border-color: var(--error-color);
+            background: rgba(245, 139, 122, 0.08);
+        }
+
+        .btn-success {
+            border-color: rgba(234, 182, 118, 0.3);
+            color: var(--success-color);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            border-color: var(--success-color);
+            background: rgba(234, 182, 118, 0.08);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.7rem;
+            font-size: 0.7rem;
+        }
+
+        .search-area {
+            padding: 1.5rem 0;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            max-width: 480px;
+            transition: all 0.25s ease;
+            border-radius: var(--radius);
+        }
+
+        .search-box:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(246, 176, 124, 0.12);
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 0.7rem 1rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text);
+            background: transparent;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-box .icon {
+            padding: 0 1rem;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            padding: 0.8rem 0 1.5rem 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+            border-bottom: 0.5px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-bar span strong {
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .channel-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.2rem 1.3rem;
+            transition: all 0.2s ease;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .channel-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 28px rgba(246, 176, 124, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .channel-card .card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .channel-card .channel-name {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .channel-card .channel-status {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 12px;
+            flex-shrink: 0;
+            margin-top: 0.15rem;
+        }
+
+        .channel-status.running {
+            background: rgba(124, 223, 124, 0.12);
+            color: #7cdf7c;
+        }
+
+        .channel-status.waiting {
+            background: rgba(245, 203, 160, 0.08);
+            color: #f5cba0;
+        }
+
+        .channel-status.stopped {
+            background: rgba(245, 139, 122, 0.08);
+            color: #f58b7a;
+        }
+
+        .channel-card .channel-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .channel-card .channel-meta {
+            display: flex;
+            gap: 1.2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            padding-top: 0.4rem;
+            border-top: 0.5px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .channel-card .channel-meta span strong {
+            color: var(--primary-light);
+            font-weight: 500;
+        }
+
+        .channel-card .card-actions {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .channel-card .card-actions .btn {
+            flex: 1;
+            justify-content: center;
+            min-width: 60px;
+        }
+
+        .channel-card .player-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            padding-top: 0.3rem;
+        }
+
+        .channel-card .player-tag {
+            font-size: 0.7rem;
+            background: var(--bg-tertiary);
+            padding: 0.1rem 0.5rem;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: var(--radius);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        .channel-card .player-tag .kick-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.6rem;
+            padding: 0 2px;
+        }
+
+        .channel-card .player-tag .kick-btn:hover {
+            color: var(--error-color);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            border-radius: var(--radius);
+        }
+
+        .empty-state .big-icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-panel {
+            background: var(--bg-modal);
+            width: 90%;
+            max-width: 480px;
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.7);
+            border-radius: var(--radius);
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-light);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .modal-body .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .modal-body .form-group label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .modal-body .form-group input,
+        .modal-body .form-group select {
+            padding: 0.6rem 0.9rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+            transition: 0.15s;
+            border-radius: var(--radius);
+        }
+
+        .modal-body .form-group input:focus,
+        .modal-body .form-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(246, 176, 124, 0.12);
+        }
+
+        .modal-body .form-group select option {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .modal-body .form-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: -0.3rem;
+        }
+
+        .modal-body .ego-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            padding: 0.3rem;
+            background: var(--input-bg);
+        }
+
+        .modal-body .ego-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.4rem 0.6rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: 0.15s;
+            border-radius: var(--radius);
+        }
+
+        .modal-body .ego-item:hover {
+            background: var(--bg-card);
+            border-color: var(--border);
+        }
+
+        .modal-body .ego-item.selected {
+            border-color: var(--primary);
+            background: var(--primary-transparent);
+        }
+
+        .modal-body .ego-item .ego-icon {
+            font-size: 1.2rem;
+        }
+
+        .modal-body .ego-item .ego-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .modal-body .ego-item .ego-status {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.8rem;
+            justify-content: flex-end;
+        }
+
+        .modal-footer .btn {
+            padding: 0.5rem 1.8rem;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--bg-modal);
+            border: 1px solid var(--border);
+            padding: 0.6rem 1.5rem;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            box-shadow: var(--shadow);
+            pointer-events: auto;
+            animation: toastIn 0.3s ease;
+            max-width: 90vw;
+        }
+
+        .toast.success {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .toast.error {
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .toast-out {
+            animation: toastOut 0.3s ease forwards;
+        }
+
+        @keyframes toastOut {
+            from { opacity: 0; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-right {
+                width: 100%;
+            }
+            .channels-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-bar {
+                gap: 1rem;
+            }
+            .modal-panel {
+                width: 96%;
+            }
+            .modal-footer {
+                flex-wrap: wrap;
+            }
+            .modal-footer .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <div class="header-left">
+                <h1>SurvX · 联合仿真</h1>
+                <div class="sub">多重场域 · 自由连接</div>
+            </div>
+            <div class="header-right">
+                <span class="status">
+                    <span class="dot"></span>
+                    <span id="connectionStatus">已连接</span>
+                </span>
+                <button class="btn btn-sm" id="refreshBtn" title="刷新列表">⟳ 刷新</button>
+            </div>
+        </div>
+
+        <div class="search-area">
+            <div class="search-box">
+                <span class="icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="搜索场域...">
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <span>总场域 <strong id="totalChannels">0</strong></span>
+            <span>运行中 <strong id="runningChannels">0</strong></span>
+            <span>在线人数 <strong id="totalPlayers">0</strong></span>
+        </div>
+
+        <div class="section-header">
+            <span class="section-title">📡 开放场域</span>
+            <button class="btn btn-primary" id="createBtn">+ 创建场域</button>
+        </div>
+
+        <div class="channels-grid" id="channelsGrid">
+            <div class="empty-state">
+                <span class="big-icon">🌐</span>
+                暂无开放的场域，点击「创建场域」开启新的联合仿真
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== 创建场域弹窗 ===== -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3>🌱 创建新场域</h3>
+                <button class="modal-close" id="closeCreateModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>场域名称</label>
+                    <input type="text" id="channelNameInput" placeholder="例如：荒岛求生" maxlength="20">
+                    <span class="form-hint">2-20 个字符，不能与其他场域重名</span>
+                </div>
+                <div class="form-group">
+                    <label>模板</label>
+                    <select id="templateSelect">
+                        <option value="island">🏝️ 荒岛</option>
+                        <option value="forest">🌲 森林</option>
+                        <option value="desert">🏜️ 沙漠</option>
+                        <option value="snow">❄️ 雪山</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>最大人数</label>
+                    <select id="maxPlayersSelect">
+                        <option value="3">3 人</option>
+                        <option value="5" selected>5 人</option>
+                        <option value="8">8 人</option>
+                        <option value="10">10 人</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>我的角色</label>
+                    <div class="ego-list" id="createEgoList">
+                        <div style="color:var(--text-muted);font-size:0.8rem;padding:0.5rem;">加载中...</div>
+                    </div>
+                    <span class="form-hint">选择你要使用的角色</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelCreateBtn">取消</button>
+                <button class="btn btn-primary" id="confirmCreateBtn">创建并等待</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 加入场域弹窗 ===== -->
+    <div class="modal-overlay" id="joinModal">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3 id="joinModalTitle">🚪 加入场域</h3>
+                <button class="modal-close" id="closeJoinModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="font-size:0.85rem;color:var(--text-secondary);">
+                    选择角色加入 <strong id="joinWorldName">场域名称</strong>
+                </div>
+                <div class="form-group">
+                    <label>选择角色</label>
+                    <div class="ego-list" id="joinEgoList">
+                        <div style="color:var(--text-muted);font-size:0.8rem;padding:0.5rem;">加载中...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelJoinBtn">取消</button>
+                <button class="btn btn-success" id="confirmJoinBtn" disabled>加入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Toast 容器 ===== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ============================================================
+        // 配置
+        // ============================================================
+
+        const WS_HOST = '127.0.0.1';
+        const WS_PORT = 8765;
+        const WS_URL = `ws://${WS_HOST}:${WS_PORT}`;
+
+        // ============================================================
+        // 状态
+        // ============================================================
+
+        let ws = null;
+        let connected = false;
+        let channels = [];
+        let searchKeyword = '';
+        let myChannelId = null;
+        let myCharacterId = null;
+
+        let selectedEgoForCreate = null;
+        let selectedEgoForJoin = null;
+        let pendingJoinChannelId = null;
+
+        let localEgos = [];
+
+        // ============================================================
+        // DOM 引用
+        // ============================================================
+
+        const $ = (s) => document.querySelector(s);
+        const $$ = (s) => document.querySelectorAll(s);
+
+        const grid = $('#channelsGrid');
+        const searchInput = $('#searchInput');
+        const totalChannels = $('#totalChannels');
+        const runningChannels = $('#runningChannels');
+        const totalPlayers = $('#totalPlayers');
+        const refreshBtn = $('#refreshBtn');
+        const createBtn = $('#createBtn');
+        const connectionStatus = $('#connectionStatus');
+
+        const createModal = $('#createModal');
+        const closeCreateModal = $('#closeCreateModal');
+        const cancelCreateBtn = $('#cancelCreateBtn');
+        const confirmCreateBtn = $('#confirmCreateBtn');
+        const channelNameInput = $('#channelNameInput');
+        const templateSelect = $('#templateSelect');
+        const maxPlayersSelect = $('#maxPlayersSelect');
+        const createEgoList = $('#createEgoList');
+
+        const joinModal = $('#joinModal');
+        const closeJoinModal = $('#closeJoinModal');
+        const cancelJoinBtn = $('#cancelJoinBtn');
+        const confirmJoinBtn = $('#confirmJoinBtn');
+        const joinEgoList = $('#joinEgoList');
+        const joinWorldName = $('#joinWorldName');
+
+        const toastContainer = $('#toastContainer');
+
+        // ============================================================
+        // Toast
+        // ============================================================
+
+        function showToast(message, type = '') {
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            el.textContent = message;
+            toastContainer.appendChild(el);
+            setTimeout(() => {
+                el.classList.add('toast-out');
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        }
+
+        // ============================================================
+        // 加载本地 Ego 列表 (虚函数)
+        // ============================================================
+
+        function loadLocalEgos() {
+            // 虚函数：后续从后端获取
+            localEgos = [
+                { id: 'ego_robinson', name: '鲁滨逊', icon: '🧒', db: 'ego_robinson.db' },
+                { id: 'ego_friday', name: '星期五', icon: '🧑', db: 'ego_friday.db' },
+                { id: 'ego_alice', name: '爱丽丝', icon: '👩', db: 'ego_alice.db' },
+                { id: 'ego_bob', name: '鲍勃', icon: '🧔', db: 'ego_bob.db' },
+            ];
+            return localEgos;
+        }
+
+        // ============================================================
+        // 渲染 Ego 列表
+        // ============================================================
+
+        function renderCreateEgoList() {
+            const egos = loadLocalEgos();
+            if (egos.length === 0) {
+                createEgoList.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;padding:0.5rem;">暂无角色，请先在「人物列表」中创建角色</div>';
+                return;
+            }
+
+            createEgoList.innerHTML = egos.map(function(ego) {
+                return '<div class="ego-item" data-ego-id="' + ego.id + '" onclick="selectEgoForCreate(\'' + ego.id + '\')">' +
+                    '<span class="ego-icon">' + (ego.icon || '🧑') + '</span>' +
+                    '<span class="ego-name">' + ego.name + '</span>' +
+                    '<span class="ego-status">' + ego.db + '</span>' +
+                '</div>';
+            }).join('');
+
+            if (egos.length > 0 && !selectedEgoForCreate) {
+                selectedEgoForCreate = egos[0].id;
+                var first = createEgoList.querySelector('.ego-item');
+                if (first) first.classList.add('selected');
+            }
+        }
+
+        function selectEgoForCreate(egoId) {
+            selectedEgoForCreate = egoId;
+            var items = createEgoList.querySelectorAll('.ego-item');
+            for (var i = 0; i < items.length; i++) {
+                items[i].classList.toggle('selected', items[i].dataset.egoId === egoId);
+            }
+        }
+
+        function renderJoinEgoList() {
+            var egos = loadLocalEgos();
+            if (egos.length === 0) {
+                joinEgoList.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;padding:0.5rem;">暂无角色，请先在「人物列表」中创建角色</div>';
+                confirmJoinBtn.disabled = true;
+                return;
+            }
+
+            joinEgoList.innerHTML = egos.map(function(ego) {
+                return '<div class="ego-item" data-ego-id="' + ego.id + '" onclick="selectEgoForJoin(\'' + ego.id + '\')">' +
+                    '<span class="ego-icon">' + (ego.icon || '🧑') + '</span>' +
+                    '<span class="ego-name">' + ego.name + '</span>' +
+                    '<span class="ego-status">' + ego.db + '</span>' +
+                '</div>';
+            }).join('');
+
+            if (egos.length > 0 && !selectedEgoForJoin) {
+                selectedEgoForJoin = egos[0].id;
+                var first = joinEgoList.querySelector('.ego-item');
+                if (first) first.classList.add('selected');
+                confirmJoinBtn.disabled = false;
+            }
+        }
+
+        function selectEgoForJoin(egoId) {
+            selectedEgoForJoin = egoId;
+            var items = joinEgoList.querySelectorAll('.ego-item');
+            for (var i = 0; i < items.length; i++) {
+                items[i].classList.toggle('selected', items[i].dataset.egoId === egoId);
+            }
+            confirmJoinBtn.disabled = false;
+        }
+
+        // ============================================================
+        // WebSocket
+        // ============================================================
+
+        function connectWebSocket() {
+            try {
+                ws = new WebSocket(WS_URL);
+
+                ws.onopen = function() {
+                    connected = true;
+                    connectionStatus.textContent = '已连接';
+                    connectionStatus.style.color = '#7cdf7c';
+                    showToast('已连接到服务器', 'success');
+                    sendMessage({ action: 'get_channel_list' });
+                };
+
+                ws.onmessage = function(event) {
+                    try {
+                        var data = JSON.parse(event.data);
+                        handleMessage(data);
+                    } catch (e) {
+                        console.warn('解析消息失败:', e);
+                    }
+                };
+
+                ws.onerror = function(error) {
+                    console.error('WebSocket 错误:', error);
+                    connectionStatus.textContent = '连接错误';
+                    connectionStatus.style.color = '#f58b7a';
+                };
+
+                ws.onclose = function() {
+                    connected = false;
+                    connectionStatus.textContent = '已断开';
+                    connectionStatus.style.color = '#f58b7a';
+                    showToast('与服务器断开连接', 'error');
+                    setTimeout(connectWebSocket, 5000);
+                };
+
+            } catch (e) {
+                console.error('WebSocket 连接失败:', e);
+                setTimeout(connectWebSocket, 5000);
+            }
+        }
+
+        function sendMessage(data) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(data));
+            } else {
+                console.warn('WebSocket 未连接');
+            }
+        }
+
+        // ============================================================
+        // 消息处理
+        // ============================================================
+
+        function handleMessage(data) {
+            var type = data.type;
+
+            switch (type) {
+                case 'channel_list':
+                    channels = data.data || [];
+                    renderChannels();
+                    updateStats();
+                    break;
+
+                case 'world_created':
+                    showToast('场域 "' + (data.data?.world?.name || '新场域') + '" 创建成功', 'success');
+                    closeCreateModalFn();
+                    sendMessage({ action: 'get_channel_list' });
+                    break;
+
+                case 'world_state':
+                    sendMessage({ action: 'get_channel_list' });
+                    break;
+
+                case 'character_joined':
+                    showToast('有人加入', '');
+                    sendMessage({ action: 'get_channel_list' });
+                    break;
+
+                case 'character_left':
+                    sendMessage({ action: 'get_channel_list' });
+                    break;
+
+                case 'game_start':
+                    showToast('游戏已开始！', 'success');
+                    break;
+
+                case 'error':
+                    showToast(data.message, 'error');
+                    break;
+
+                default:
+                    console.log('收到消息:', data);
+                    break;
+            }
+        }
+
+        // ============================================================
+        // 渲染 - 完整版
+        // ============================================================
+
+        function renderChannels() {
+            var keyword = searchKeyword.trim().toLowerCase();
+
+            var openChannels = channels.filter(function(ch) {
+                return ch.has_world && ch.world && ch.world.status === 'running';
+            });
+
+            if (keyword) {
+                openChannels = openChannels.filter(function(ch) {
+                    var name = (ch.world && ch.world.name) || ('场域 ' + ch.channel_id);
+                    return name.toLowerCase().includes(keyword);
+                });
+            }
+
+            if (openChannels.length === 0) {
+                grid.innerHTML = '<div class="empty-state">' +
+                    '<span class="big-icon">🌐</span>' +
+                    (keyword ? '没有匹配的开放场域' : '暂无开放的场域，点击「创建场域」开启新的联合仿真') +
+                '</div>';
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < openChannels.length; i++) {
+                var ch = openChannels[i];
+                var world = ch.world || {};
+                var players = ch.characters || [];
+                var max = ch.max_characters || 5;
+                var channelId = ch.channel_id;
+
+                var isIn = (myChannelId === channelId);
+                var isFull = players.length >= max;
+                var isOwner = isIn && players.length > 0 && players[0] && players[0].id === myCharacterId;
+
+                var playerTags = '';
+                for (var p = 0; p < players.length; p++) {
+                    var player = players[p];
+                    var kickBtn = '';
+                    if (isOwner && player.id !== myCharacterId) {
+                        kickBtn = '<button class="kick-btn" onclick="kickPlayer(' + channelId + ', \'' + player.id + '\')" title="踢出">✕</button>';
+                    }
+                    playerTags += '<span class="player-tag">' + (player.icon || '🧑') + ' ' + (player.name || player.id) + kickBtn + '</span>';
+                }
+                if (players.length === 0) {
+                    playerTags = '<span style="font-size:0.7rem;color:var(--text-muted);">等待玩家加入...</span>';
+                }
+
+                var actionsHtml = '';
+                if (isIn) {
+                    if (isOwner) {
+                        actionsHtml = '<button class="btn btn-primary btn-sm" onclick="startGame(' + channelId + ')">🚀 开始</button>' +
+                            '<button class="btn btn-danger btn-sm" onclick="leaveChannel(' + channelId + ')">离开</button>';
+                    } else {
+                        actionsHtml = '<span style="font-size:0.8rem;color:var(--text-muted);">已加入，等待房主开始...</span>' +
+                            '<button class="btn btn-danger btn-sm" onclick="leaveChannel(' + channelId + ')">离开</button>';
+                    }
+                } else {
+                    if (isFull) {
+                        actionsHtml = '<button class="btn btn-sm" disabled style="opacity:0.4;">已满</button>';
+                    } else {
+                        actionsHtml = '<button class="btn btn-success btn-sm" onclick="openJoinModal(' + channelId + ')">加入</button>';
+                    }
+                }
+
+                html += '<div class="channel-card" data-channel="' + channelId + '">' +
+                    '<div class="card-top">' +
+                        '<span class="channel-name">' + (world.name || ('场域 ' + channelId)) + '</span>' +
+                        '<span class="channel-status running">' + (isIn ? '已加入' : '运行中') + '</span>' +
+                    '</div>' +
+                    '<div class="channel-desc">' + (world.template || '荒岛') + ' · ' + players.length + '/' + max + ' 人</div>' +
+                    '<div class="player-list">' + playerTags + '</div>' +
+                    '<div class="card-actions">' + actionsHtml + '</div>' +
+                '</div>';
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function updateStats() {
+            var openChannels = channels.filter(function(c) {
+                return c.has_world && c.world && c.world.status === 'running';
+            });
+            var total = openChannels.length;
+            var running = openChannels.filter(function(c) { return c.world && c.world.status === 'running'; }).length;
+            var players = 0;
+            for (var i = 0; i < openChannels.length; i++) {
+                players += (openChannels[i].characters || []).length;
+            }
+
+            totalChannels.textContent = total;
+            runningChannels.textContent = running;
+            totalPlayers.textContent = players;
+        }
+
+        // ============================================================
+        // 操作函数
+        // ============================================================
+
+        function confirmCreate() {
+            var name = channelNameInput.value.trim();
+            if (!name) {
+                showToast('请输入场域名称', 'error');
+                channelNameInput.focus();
+                return;
+            }
+            if (name.length < 2 || name.length > 20) {
+                showToast('名称长度需在 2-20 个字符之间', 'error');
+                return;
+            }
+
+            var exists = false;
+            for (var i = 0; i < channels.length; i++) {
+                if (channels[i].has_world && channels[i].world && channels[i].world.name === name) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (exists) {
+                showToast('场域 "' + name + '" 已存在', 'error');
+                return;
+            }
+
+            if (!selectedEgoForCreate) {
+                showToast('请选择一个角色', 'error');
+                return;
+            }
+
+            var emptyChannel = null;
+            for (var j = 0; j < channels.length; j++) {
+                if (!channels[j].has_world) {
+                    emptyChannel = channels[j];
+                    break;
+                }
+            }
+            if (!emptyChannel) {
+                showToast('所有场域已满，无法创建', 'error');
+                return;
+            }
+
+            var egos = loadLocalEgos();
+            var ego = null;
+            for (var k = 0; k < egos.length; k++) {
+                if (egos[k].id === selectedEgoForCreate) {
+                    ego = egos[k];
+                    break;
+                }
+            }
+            if (!ego) {
+                showToast('角色不存在', 'error');
+                return;
+            }
+
+            myCharacterId = ego.id;
+
+            sendMessage({
+                action: 'join_world',
+                world_name: name,
+                character_id: ego.id,
+                character_name: ego.name,
+                icon: ego.icon || '🧑'
+            });
+
+            var channelId = emptyChannel.channel_id;
+            setTimeout(function() {
+                sendMessage({
+                    action: 'create_world',
+                    channel_id: channelId,
+                    name: name,
+                    template: templateSelect.value
+                });
+                myChannelId = channelId;
+            }, 300);
+
+            showToast('创建场域 "' + name + '" 并等待玩家加入...', 'success');
+            closeCreateModalFn();
+        }
+
+        function openJoinModal(channelId) {
+            pendingJoinChannelId = channelId;
+            var channel = null;
+            for (var i = 0; i < channels.length; i++) {
+                if (channels[i].channel_id === channelId) {
+                    channel = channels[i];
+                    break;
+                }
+            }
+            var worldName = (channel && channel.world && channel.world.name) || ('场域 ' + channelId);
+            joinWorldName.textContent = worldName;
+            selectedEgoForJoin = null;
+            renderJoinEgoList();
+            joinModal.classList.add('active');
+        }
+
+        function confirmJoin() {
+            if (pendingJoinChannelId === null) {
+                showToast('场域信息错误', 'error');
+                return;
+            }
+
+            if (!selectedEgoForJoin) {
+                showToast('请选择一个角色', 'error');
+                return;
+            }
+
+            var channel = null;
+            for (var i = 0; i < channels.length; i++) {
+                if (channels[i].channel_id === pendingJoinChannelId) {
+                    channel = channels[i];
+                    break;
+                }
+            }
+            if (!channel) {
+                showToast('场域不存在', 'error');
+                return;
+            }
+
+            var egos = loadLocalEgos();
+            var ego = null;
+            for (var j = 0; j < egos.length; j++) {
+                if (egos[j].id === selectedEgoForJoin) {
+                    ego = egos[j];
+                    break;
+                }
+            }
+            if (!ego) {
+                showToast('角色不存在', 'error');
+                return;
+            }
+
+            myCharacterId = ego.id;
+            myChannelId = pendingJoinChannelId;
+
+            sendMessage({
+                action: 'join_world',
+                world_name: channel.world ? channel.world.name : undefined,
+                character_id: ego.id,
+                character_name: ego.name,
+                icon: ego.icon || '🧑'
+            });
+
+            showToast('加入场域成功', 'success');
+            closeJoinModalFn();
+            setTimeout(function() { sendMessage({ action: 'get_channel_list' }); }, 500);
+        }
+
+        function leaveChannel(channelId) {
+            if (myChannelId !== channelId) return;
+
+            sendMessage({
+                action: 'leave_world',
+                character_id: myCharacterId || 'temp'
+            });
+
+            myChannelId = null;
+            myCharacterId = null;
+            showToast('已离开场域', '');
+            setTimeout(function() { sendMessage({ action: 'get_channel_list' }); }, 500);
+        }
+
+        function kickPlayer(channelId, characterId) {
+            showToast('踢出 ' + characterId, '');
+            console.log('[虚函数] 踢出玩家:', characterId, 'from channel', channelId);
+            // TODO: sendMessage({ action: 'kick_player', channel_id: channelId, character_id: characterId });
+        }
+
+        function startGame(channelId) {
+            showToast('开始游戏！', 'success');
+            console.log('[虚函数] 开始游戏: channel', channelId);
+            // TODO: sendMessage({ action: 'start_game', channel_id: channelId });
+        }
+
+        // ============================================================
+        // 弹窗控制
+        // ============================================================
+
+        function openCreateModalFn() {
+            selectedEgoForCreate = null;
+            renderCreateEgoList();
+            channelNameInput.value = '';
+            templateSelect.value = 'island';
+            maxPlayersSelect.value = '5';
+            createModal.classList.add('active');
+            setTimeout(function() { channelNameInput.focus(); }, 100);
+        }
+
+        function closeCreateModalFn() {
+            createModal.classList.remove('active');
+        }
+
+        function closeJoinModalFn() {
+            joinModal.classList.remove('active');
+            pendingJoinChannelId = null;
+        }
+
+        // ============================================================
+        // 事件绑定
+        // ============================================================
+
+        function bindEvents() {
+            refreshBtn.addEventListener('click', function() {
+                sendMessage({ action: 'get_channel_list' });
+                showToast('已刷新', '');
+            });
+
+            createBtn.addEventListener('click', openCreateModalFn);
+
+            closeCreateModal.addEventListener('click', closeCreateModalFn);
+            cancelCreateBtn.addEventListener('click', closeCreateModalFn);
+            createModal.addEventListener('click', function(e) {
+                if (e.target === createModal) closeCreateModalFn();
+            });
+
+            confirmCreateBtn.addEventListener('click', confirmCreate);
+
+            channelNameInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') confirmCreate();
+            });
+
+            closeJoinModal.addEventListener('click', closeJoinModalFn);
+            cancelJoinBtn.addEventListener('click', closeJoinModalFn);
+            joinModal.addEventListener('click', function(e) {
+                if (e.target === joinModal) closeJoinModalFn();
+            });
+
+            confirmJoinBtn.addEventListener('click', confirmJoin);
+
+            searchInput.addEventListener('input', function() {
+                searchKeyword = searchInput.value;
+                renderChannels();
+            });
+        }
+
+        // ============================================================
+        // 暴露全局
+        // ============================================================
+
+        window.selectEgoForCreate = selectEgoForCreate;
+        window.selectEgoForJoin = selectEgoForJoin;
+        window.openJoinModal = openJoinModal;
+        window.kickPlayer = kickPlayer;
+        window.startGame = startGame;
+        window.leaveChannel = leaveChannel;
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+
+        function init() {
+            bindEvents();
+            connectWebSocket();
+
+            setInterval(function() {
+                if (connected) {
+                    sendMessage({ action: 'get_channel_list' });
+                }
+            }, 10000);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+</html>

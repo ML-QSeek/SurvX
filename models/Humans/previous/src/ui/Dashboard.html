@@ -1,0 +1,2813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SurvX · 生存世界</title>
+    <style>
+        /* ===== 全局暖色调 ===== */
+        :root {
+            --primary: #f6b07c;
+            --primary-dark: #d4845a;
+            --primary-light: #f5cba0;
+            --primary-transparent: rgba(246, 176, 124, 0.15);
+            --bg-primary: #0e0b0a;
+            --bg-secondary: #1a1412;
+            --bg-tertiary: #221c19;
+            --text-primary: #e4d7cf;
+            --text-secondary: #d4c4b8;
+            --text-tertiary: #a28c7c;
+            --border-color: #3a2c24;
+            --error-color: #f58b7a;
+            --success-color: #eab676;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            font-size: 18px;
+            font-weight: 300;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(246, 176, 124, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 85% 70%, rgba(212, 132, 90, 0.04) 0%, transparent 45%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        ::-webkit-scrollbar {
+            width: 3px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 6px;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        .map-container {
+            flex: 1;
+            min-width: 420px;
+            position: relative;
+            background: #0a0807;
+            overflow: hidden;
+        }
+        .map-container.controlling {
+            cursor: none;
+        }
+        .map-container:not(.controlling) {
+            cursor: grab;
+        }
+        .map-container:not(.controlling):active {
+            cursor: grabbing;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .title-block {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 15;
+            pointer-events: none;
+            user-select: none;
+        }
+        .title-block h1 {
+            font-size: 2.0rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #f5cba0 0%, #f6b07c 40%, #d4845a 80%, #c07a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(246, 176, 124, 0.15);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        .title-block .instance-name {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin-top: 2px;
+            opacity: 0.7;
+        }
+
+        /* ===== 状态面板 ===== */
+        .status-panel {
+            position: absolute;
+            top: 76px;
+            left: 16px;
+            z-index: 14;
+            background: rgba(14, 11, 10, 0.82);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(246, 176, 124, 0.15);
+            border-radius: 10px;
+            padding: 18px 24px 16px 24px;
+            min-width: 220px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            display: none;
+            pointer-events: none;
+            user-select: none;
+        }
+        .status-panel.show {
+            display: block;
+        }
+        .status-panel .panel-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(246, 176, 124, 0.08);
+            padding-bottom: 8px;
+        }
+        .status-panel .stat-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .status-panel .stat-row .stat-label {
+            min-width: 36px;
+            color: var(--text-tertiary);
+            font-size: 1.0rem;
+            flex-shrink: 0;
+        }
+        .status-panel .stat-row .stat-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            min-width: 80px;
+        }
+        .status-panel .stat-row .stat-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .status-panel .stat-row .stat-value {
+            min-width: 36px;
+            text-align: right;
+            font-size: 0.95rem;
+            color: var(--text-tertiary);
+        }
+        .fill-health {
+            background: linear-gradient(90deg, #f58b7a, #f6b07c);
+        }
+        .fill-energy {
+            background: linear-gradient(90deg, #eab676, #f5cba0);
+        }
+        .fill-mood {
+            background: linear-gradient(90deg, #7ec8c8, #a8e0e0);
+        }
+        .fill-hunger {
+            background: linear-gradient(90deg, #eab676, #f6b07c);
+        }
+
+        /* ===== 右下角图标 ===== */
+        .right-actions {
+            position: absolute;
+            bottom: 20px;
+            right: 12px;
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            pointer-events: none;
+        }
+        .right-actions .action-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            border: 1px solid rgba(246, 176, 124, 0.25);
+            background: rgba(14, 11, 10, 0.7);
+            backdrop-filter: blur(8px);
+            color: var(--text-secondary);
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            user-select: none;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        .right-actions .action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background: rgba(246, 176, 124, 0.12);
+            box-shadow: 0 0 20px rgba(246, 176, 124, 0.08);
+            transform: scale(1.05);
+        }
+        .right-actions .action-btn .icon {
+            font-size: 22px;
+            line-height: 1;
+        }
+        .right-actions .action-btn .label {
+            font-size: 0.7rem;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+        .right-actions .action-btn.active-btn {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background: rgba(246, 176, 124, 0.12);
+        }
+
+        .minimap {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 180px;
+            height: 150px;
+            border: 1px solid rgba(246, 176, 124, 0.3);
+            border-radius: 6px;
+            background: rgba(14, 11, 10, 0.8);
+            z-index: 10;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+        .minimap canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .control-cursor {
+            position: absolute;
+            pointer-events: none;
+            z-index: 20;
+            font-size: 36px;
+            transform: translate(-50%, -50%);
+            display: none;
+            text-shadow: 0 0 20px rgba(255, 152, 0, 0.6);
+        }
+        .control-cursor.show {
+            display: block;
+        }
+
+        /* ===== 弹窗 ===== */
+        .float-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-secondary);
+            border: 1px solid rgba(246, 176, 124, 0.25);
+            border-radius: 12px;
+            padding: 32px 36px 28px 36px;
+            min-width: 420px;
+            max-width: 600px;
+            width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(246, 176, 124, 0.05);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: none;
+            pointer-events: auto;
+            animation: modalFadeIn 0.2s ease;
+        }
+        .float-modal.show {
+            display: block;
+        }
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+        .float-modal .modal-title {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(246, 176, 124, 0.1);
+            padding-bottom: 14px;
+            text-align: center;
+        }
+        .float-modal .modal-body {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.9;
+            margin-bottom: 22px;
+        }
+        .float-modal .modal-body .option-group {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .float-modal .modal-body .option-group label {
+            min-width: 80px;
+            color: var(--text-tertiary);
+            font-size: 1.0rem;
+            flex-shrink: 0;
+        }
+        .float-modal .modal-body .option-group select,
+        .float-modal .modal-body .option-group input,
+        .float-modal .modal-body .option-group textarea {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(246, 176, 124, 0.2);
+            border-radius: 4px;
+            padding: 8px 14px;
+            color: var(--text-primary);
+            font-size: 1.0rem;
+            outline: none;
+            font-family: inherit;
+            flex: 1;
+            min-width: 100px;
+        }
+        .float-modal .modal-body .option-group textarea {
+            resize: vertical;
+            min-height: 60px;
+            line-height: 1.4;
+        }
+        .float-modal .modal-body .option-group select:focus,
+        .float-modal .modal-body .option-group input:focus,
+        .float-modal .modal-body .option-group textarea:focus {
+            border-color: var(--primary);
+        }
+        .float-modal .modal-body .option-group select option {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        .float-modal .modal-body .option-group .coord-display {
+            font-size: 0.95rem;
+            color: var(--primary-light);
+            background: rgba(246, 176, 124, 0.06);
+            padding: 4px 14px;
+            border-radius: 4px;
+            border: 1px dashed rgba(246, 176, 124, 0.2);
+            min-width: 100px;
+            text-align: center;
+        }
+        .float-modal .modal-body .option-group .hint-text {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            font-style: italic;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 4px 10px;
+            border-radius: 3px;
+            user-select: none;
+        }
+        .float-modal .modal-body .option-group .hint-text:hover {
+            color: var(--primary-light);
+            background: rgba(246, 176, 124, 0.06);
+        }
+        .float-modal .modal-body .option-group .hint-text.active {
+            color: var(--primary-light);
+            background: rgba(246, 176, 124, 0.12);
+        }
+        .float-modal .modal-body .instance-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .float-modal .modal-body .instance-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border: 1px solid rgba(246, 176, 124, 0.08);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            background: rgba(0, 0, 0, 0.2);
+            transition: 0.2s;
+        }
+        .float-modal .modal-body .instance-item:hover {
+            border-color: rgba(246, 176, 124, 0.2);
+        }
+        .float-modal .modal-body .instance-item .inst-name {
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+        .float-modal .modal-body .instance-item .inst-status {
+            font-size: 0.8rem;
+            padding: 2px 12px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-tertiary);
+        }
+        .float-modal .modal-body .instance-item .inst-status.running {
+            color: #7cdf7c;
+            background: rgba(124, 223, 124, 0.12);
+        }
+        .float-modal .modal-body .instance-item .inst-status.created {
+            color: #f5cba0;
+            background: rgba(245, 203, 160, 0.08);
+        }
+        .float-modal .modal-body .instance-item .inst-status.stopped {
+            color: #f58b7a;
+            background: rgba(245, 139, 122, 0.08);
+        }
+        .float-modal .modal-body .instance-item .inst-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .float-modal .modal-body .instance-item .inst-actions button {
+            background: transparent;
+            border: 1px solid rgba(246, 176, 124, 0.15);
+            color: var(--text-tertiary);
+            padding: 2px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+        .float-modal .modal-body .instance-item .inst-actions button:hover {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background: var(--primary-transparent);
+        }
+        .float-modal .modal-body .instance-item .inst-actions button.btn-connect {
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+        .float-modal .modal-body .instance-item .inst-actions button.btn-connect:hover {
+            background: rgba(246, 176, 124, 0.15);
+        }
+
+        .float-modal .modal-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: flex-end;
+            border-top: 1px solid rgba(246, 176, 124, 0.08);
+            padding-top: 18px;
+        }
+        .float-modal .modal-actions button {
+            background: transparent;
+            border: 1px solid rgba(246, 176, 124, 0.25);
+            color: var(--text-secondary);
+            padding: 8px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.0rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .float-modal .modal-actions button:hover {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background: var(--primary-transparent);
+        }
+        .float-modal .modal-actions .btn-confirm {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background: rgba(246, 176, 124, 0.06);
+        }
+        .float-modal .modal-actions .btn-confirm:hover {
+            background: rgba(246, 176, 124, 0.15);
+        }
+
+        .func-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid rgba(246, 176, 124, 0.08);
+            padding-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .func-tabs .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            padding: 8px 20px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+        .func-tabs .tab-btn:hover {
+            color: var(--text-secondary);
+            background: rgba(246, 176, 124, 0.05);
+        }
+        .func-tabs .tab-btn.active {
+            color: var(--primary-light);
+            background: rgba(246, 176, 124, 0.1);
+        }
+        .func-panel-content {
+            min-height: 140px;
+        }
+        .func-panel-content .option-group {
+            margin: 12px 0;
+        }
+
+        /* ===== 日志面板 ===== */
+        .log-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 33.33%;
+            height: 280px;
+            background: rgba(10, 8, 7, 0.55);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(246, 176, 124, 0.08);
+            border-right: 1px solid rgba(246, 176, 124, 0.08);
+            z-index: 15;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            pointer-events: auto;
+            padding: 12px 18px 14px 18px;
+        }
+        .log-panel.show {
+            display: flex;
+        }
+        .log-panel .log-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex-shrink: 0;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+        .log-panel .log-header .close-log {
+            cursor: pointer;
+            color: var(--text-tertiary);
+            font-size: 24px;
+            line-height: 1;
+            transition: 0.2s;
+            padding: 0 4px;
+        }
+        .log-panel .log-header .close-log:hover {
+            color: var(--primary-light);
+        }
+        .log-panel .log-body {
+            flex: 1;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            padding-right: 4px;
+        }
+        .log-panel .log-body .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(246, 176, 124, 0.03);
+            display: flex;
+            gap: 14px;
+            align-items: baseline;
+        }
+        .log-panel .log-body .log-entry .log-time {
+            color: var(--primary-light);
+            font-weight: 400;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+            min-width: 56px;
+            opacity: 0.8;
+        }
+        .log-panel .log-body .log-entry .log-msg {
+            color: var(--text-secondary);
+            word-break: break-word;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .map-container.pick-coord {
+            cursor: crosshair !important;
+        }
+        .map-container.pick-coord canvas {
+            cursor: crosshair !important;
+        }
+
+        /* ===== 气泡 ===== */
+        .bubble-container {
+            position: absolute;
+            pointer-events: none;
+            z-index: 25;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .bubble-container.show {
+            opacity: 1;
+        }
+        .bubble-container.fading {
+            opacity: 0;
+        }
+
+        .bubble-body {
+            padding: 16px 24px;
+            border-radius: 22px;
+            min-width: 100px;
+            max-width: 360px;
+            max-height: 180px;
+            overflow-y: auto;
+            font-size: 1.15rem;
+            line-height: 1.8;
+            font-weight: 400;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+            scrollbar-width: thin;
+            word-break: break-word;
+            position: relative;
+            z-index: 2;
+            border-width: 2px;
+            border-style: solid;
+        }
+        .bubble-body::-webkit-scrollbar {
+            width: 3px;
+        }
+        .bubble-body::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 2px;
+        }
+
+        .bubble-thought .bubble-body {
+            background: #fdf6ee;
+            border-color: #3d2b1f;
+            color: #2d1f14;
+        }
+        .bubble-speech .bubble-body {
+            background: #e8f4f8;
+            border-color: #4a7c8c;
+            color: #1a3a44;
+        }
+
+        #weatherCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            display: block;
+        }
+
+        .weather-indicator {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 12;
+            background: rgba(14, 11, 10, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(246, 176, 124, 0.12);
+            border-radius: 20px;
+            padding: 4px 16px;
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            pointer-events: none;
+            user-select: none;
+            letter-spacing: 0.5px;
+            font-weight: 400;
+            transition: opacity 0.5s ease;
+            opacity: 0;
+        }
+        .weather-indicator.show {
+            opacity: 0.7;
+        }
+        .weather-indicator .env-icon {
+            margin-right: 6px;
+        }
+
+        @media (max-width: 800px) {
+            .main {
+                flex-direction: column;
+            }
+            .map-container {
+                min-width: auto;
+                height: 100vh;
+            }
+            .minimap {
+                width: 140px;
+                height: 110px;
+                top: 8px;
+                right: 8px;
+            }
+            .title-block h1 {
+                font-size: 1.6rem;
+            }
+            .status-panel {
+                top: 64px;
+                left: 10px;
+                padding: 14px 18px 14px 18px;
+                min-width: 180px;
+            }
+            .status-panel .panel-name {
+                font-size: 1.0rem;
+            }
+            .status-panel .stat-row .stat-label {
+                font-size: 0.9rem;
+                min-width: 30px;
+            }
+            .status-panel .stat-row .stat-value {
+                font-size: 0.9rem;
+                min-width: 30px;
+            }
+            .right-actions {
+                bottom: 14px;
+                right: 8px;
+                gap: 10px;
+            }
+            .right-actions .action-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 20px;
+            }
+            .right-actions .action-btn .label {
+                font-size: 0.6rem;
+            }
+            .log-panel {
+                width: 50%;
+                height: 220px;
+                padding: 8px 14px 10px 14px;
+            }
+            .log-panel .log-body {
+                font-size: 0.85rem;
+            }
+            .float-modal {
+                min-width: 300px;
+                padding: 22px 24px;
+                max-width: 95vw;
+            }
+            .func-tabs .tab-btn {
+                font-size: 0.85rem;
+                padding: 6px 14px;
+            }
+            .float-modal .modal-body .option-group label {
+                min-width: 70px;
+                font-size: 0.9rem;
+            }
+            .bubble-body {
+                max-width: 220px !important;
+                max-height: 120px !important;
+                font-size: 1.0rem !important;
+                padding: 12px 18px !important;
+            }
+            .weather-indicator {
+                font-size: 0.65rem;
+                padding: 3px 12px;
+                top: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main">
+        <div class="map-container" id="mapContainer">
+            <!-- 地图 -->
+            <canvas id="mapCanvas"></canvas>
+            <!-- 天气层 -->
+            <canvas id="weatherCanvas"></canvas>
+
+            <div class="title-block">
+                <h1 id="mapTitle">加载中...</h1>
+                <div class="instance-name" id="instanceName">未连接</div>
+            </div>
+
+            <!-- 状态面板 -->
+            <div class="status-panel" id="statusPanel">
+                <div class="panel-name" id="panelName">🧒 鲁滨逊</div>
+                <div class="stat-row"><span class="stat-label">❤️</span><div class="stat-bar"><div class="stat-fill fill-health" id="pHealth" style="width:80%"></div></div><span class="stat-value" id="pHealthVal">80</span></div>
+                <div class="stat-row"><span class="stat-label">⚡</span><div class="stat-bar"><div class="stat-fill fill-energy" id="pEnergy" style="width:70%"></div></div><span class="stat-value" id="pEnergyVal">70</span></div>
+                <div class="stat-row"><span class="stat-label">😊</span><div class="stat-bar"><div class="stat-fill fill-mood" id="pMood" style="width:60%"></div></div><span class="stat-value" id="pMoodVal">60</span></div>
+                <div class="stat-row"><span class="stat-label">🍗</span><div class="stat-bar"><div class="stat-fill fill-hunger" id="pHunger" style="width:50%"></div></div><span class="stat-value" id="pHungerVal">50</span></div>
+            </div>
+
+            <!-- 天气指示器 -->
+            <div class="weather-indicator" id="weatherIndicator">
+                <span class="env-icon" id="weatherIcon">☀️</span>
+                <span id="weatherLabel">晴天</span>
+                <span style="margin:0 6px;opacity:0.3;">·</span>
+                <span id="timeLabel">白天</span>
+            </div>
+
+            <div class="minimap" id="minimap"><canvas id="minimapCanvas"></canvas></div>
+            <div class="control-cursor" id="controlCursor">🎯</div>
+
+            <!-- 右下角图标 -->
+            <div class="right-actions" id="rightActions">
+                <div class="action-btn" id="btnPanel" title="功能面板"><span class="icon">📋</span></div>
+                <div class="action-btn" id="btnLog" title="日志"><span class="icon">📜</span></div>
+                <div class="action-btn" id="btnStatus" title="状态"><span class="icon">📊</span></div>
+            </div>
+
+            <div class="log-panel" id="logPanel">
+                <div class="log-header"><span class="close-log" id="closeLog">✕</span></div>
+                <div class="log-body" id="logBody">
+                    <div class="log-entry"><span class="log-time">[系统]</span><span class="log-msg">初始化完成，等待连接...</span></div>
+                </div>
+            </div>
+
+            <!-- 气泡 -->
+            <div class="bubble-container bubble-thought" id="thoughtBubble">
+                <div class="bubble-body" id="thoughtText">💭 想法内容</div>
+            </div>
+            <div class="bubble-container bubble-speech" id="speechBubble">
+                <div class="bubble-body" id="speechText">🗣️ 说话内容</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== 功能面板弹窗 ===== -->
+    <div class="float-modal" id="funcModal">
+        <div class="modal-title">📋 功能面板</div>
+        <div class="modal-body">
+            <div class="func-tabs" id="funcTabs">
+                <button class="tab-btn active" data-tab="oracle">🔮 神谕</button>
+                <button class="tab-btn" data-tab="communicate">💬 交流</button>
+                <button class="tab-btn" data-tab="teach">📚 传授</button>
+                <button class="tab-btn" data-tab="improve">⬆️ 提升</button>
+                <button class="tab-btn" data-tab="control">🎮 操控</button>
+            </div>
+            <div class="func-panel-content" id="funcContent">
+                <div class="func-tab-content" id="tab-oracle">
+                    <div class="option-group">
+                        <label>坐标</label>
+                        <span class="coord-display" id="oracleCoord">未选择</span>
+                        <span class="hint-text" id="oraclePickHint">点击地图选点</span>
+                    </div>
+                    <div class="option-group">
+                        <label>内容</label>
+                        <textarea id="oracleInput" placeholder="输入神谕内容..."></textarea>
+                    </div>
+                </div>
+                <div class="func-tab-content" id="tab-communicate" style="display:none;">
+                    <div class="option-group">
+                        <label>人物</label>
+                        <select id="communicateTarget"></select>
+                    </div>
+                    <div class="option-group">
+                        <label>内容</label>
+                        <textarea id="communicateInput" placeholder="输入交流内容..."></textarea>
+                    </div>
+                </div>
+                <div class="func-tab-content" id="tab-teach" style="display:none;">
+                    <div class="option-group">
+                        <label>人物</label>
+                        <select id="teachTarget"></select>
+                    </div>
+                    <div class="option-group">
+                        <label>知识</label>
+                        <select id="teachKnowledge">
+                            <option value="狩猎技能">狩猎技能</option>
+                            <option value="生火技能">生火技能</option>
+                            <option value="捕鱼技能">捕鱼技能</option>
+                            <option value="搭建技能">搭建技能</option>
+                            <option value="医药知识">医药知识</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="func-tab-content" id="tab-improve" style="display:none;">
+                    <div class="option-group">
+                        <label>人物</label>
+                        <select id="improveTarget"></select>
+                    </div>
+                    <div class="option-group">
+                        <label>提升</label>
+                        <select id="improveAttr">
+                            <option value="反思能力">反思能力</option>
+                            <option value="智商">智商</option>
+                            <option value="反应速度">反应速度</option>
+                            <option value="感知力">感知力</option>
+                            <option value="忍耐力">忍耐力</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="func-tab-content" id="tab-control" style="display:none;">
+                    <div class="option-group">
+                        <label>人物</label>
+                        <select id="controlTarget"></select>
+                    </div>
+                    <div class="option-group" style="margin-top:4px; border-top: 1px solid rgba(246,176,124,0.08); padding-top: 10px;">
+                        <div style="font-size:0.95rem;color:var(--primary-light);width:100%;text-align:center;">🖱️ 点击「开始操控」后，点击地图人物即跟随移动</div>
+                    </div>
+                    <div class="option-group" style="justify-content:center; margin-top:6px;">
+                        <button id="btnStartControl" style="background:rgba(246,176,124,0.12);border:1px solid var(--primary);color:var(--primary-light);padding:8px 36px;border-radius:4px;cursor:pointer;font-size:1.0rem;font-family:inherit;transition:0.2s;">▶ 开始操控</button>
+                        <button id="btnStopControl" style="background:transparent;border:1px solid rgba(246,176,124,0.2);color:var(--text-tertiary);padding:8px 36px;border-radius:4px;cursor:pointer;font-size:1.0rem;font-family:inherit;transition:0.2s;display:none;">⏹ 停止操控</button>
+                    </div>
+                    <div class="option-group" style="justify-content:center;margin-top:4px;">
+                        <span id="controlStatus" style="font-size:0.95rem;color:var(--text-tertiary);">⚪ 未激活</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button id="funcCancel">取消</button>
+            <button class="btn-confirm" id="funcConfirm">确认</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // URL 参数解析
+        // ============================================================
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const CHANNEL_ID = parseInt(urlParams.get('channel_id') ?? '-1');
+        if (isNaN(CHANNEL_ID)) CHANNEL_ID = -1;
+        
+        const WS_HOST = urlParams.get('ws_host') || '127.0.0.1';
+        const WS_PORT = parseInt(urlParams.get('ws_port')) || 8765;
+        const WORLD_NAME = urlParams.get('world_name') || '未知世界';
+
+        const WS_URL = `ws://${WS_HOST}:${WS_PORT}`;
+
+        console.log('[Dashboard] URL 参数:', { CHANNEL_ID, WS_HOST, WS_PORT, WORLD_NAME, WS_URL });
+
+        // ============================================================
+        // 加载地形数据 (HTTP)
+        // ============================================================
+
+        let FIELD_CONFIG = null;
+        let fieldConfigLoading = false;
+        let fieldConfigLoaded = false;
+
+        function loadFieldConfig() {
+            if (fieldConfigLoaded) {
+                return Promise.resolve(FIELD_CONFIG);
+            }
+            
+            if (fieldConfigLoading) {
+                return new Promise((resolve) => {
+                    const checkLoaded = setInterval(() => {
+                        if (fieldConfigLoaded) {
+                            clearInterval(checkLoaded);
+                            resolve(FIELD_CONFIG);
+                        }
+                    }, 50);
+                });
+            }
+
+            fieldConfigLoading = true;
+            
+            return new Promise(async (resolve) => {
+                try {
+                    // 构建 HTTP 请求 URL
+                    const httpHost = WS_HOST || '127.0.0.1';
+                    const httpPort = (WS_PORT ? parseInt(WS_PORT) : 8765) + 1;
+                    const encodedWorldName = encodeURIComponent(WORLD_NAME);
+                    //alert(encodedWorldName);
+                    const url = `http://${httpHost}:${httpPort}/api/terrain/${encodedWorldName}`;
+                    
+                    console.log('[Dashboard] 请求地形数据:', url);
+                    
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const config = await response.json();
+                    
+                    // 检查是否返回了错误
+                    if (config.error) {
+                        throw new Error(config.error);
+                    }
+                    
+                    FIELD_CONFIG = config;
+                    fieldConfigLoaded = true;
+                    fieldConfigLoading = false;
+                    console.log('[Dashboard] 地形数据加载完成:', config.field?.name);
+                    resolve(FIELD_CONFIG);
+                    
+                } catch (error) {
+                    console.error('[Dashboard] 加载地形失败:', error);
+                    fieldConfigLoading = false;
+                    
+                    // 降级：使用默认配置
+                    const defaultConfig = {
+                        field: { 
+                            name: WORLD_NAME || '默认世界', 
+                            width: 1000, 
+                            height: 800, 
+                            zMin: -60, 
+                            zMax: 150 
+                        },
+                        terrains: [
+                            {
+                                id: 'default_ground',
+                                name: '🌍 地面（加载失败，使用默认配置）',
+                                color: '#4a7c59',
+                                points: [
+                                    { x: 0, y: 0, z: 0 },
+                                    { x: 1000, y: 0, z: 0 },
+                                    { x: 1000, y: 800, z: 0 },
+                                    { x: 0, y: 800, z: 0 }
+                                ]
+                            }
+                        ],
+                        items: []
+                    };
+                    FIELD_CONFIG = defaultConfig;
+                    fieldConfigLoaded = true;
+                    resolve(FIELD_CONFIG);
+                }
+            });
+        }
+
+        // ============================================================
+        // 全局状态
+        // ============================================================
+
+        const state = {
+            config: null,
+            sego: null,
+            world: {
+                timeOfDay: 'day',
+                weather: 'clear',
+                intensity: 0,
+                temperature: 25,
+                items: new Map(),
+                trees: new Map(),
+                buildings: new Map(),
+            },
+            characters: new Map(),
+            currentInstanceId: CHANNEL_ID,
+            currentInstanceName: WORLD_NAME,
+            currentInstanceStatus: 'created',
+            isConnected: false,
+            mainCharacterId: null,
+            mainCharacterStats: { health: 85, energy: 70, mood: 60, hunger: 50 },
+            viewX: 0,
+            viewY: 0,
+            zoom: 2.5,
+            followCharacter: true,
+            isDragging: false,
+            dragStartX: 0,
+            dragStartY: 0,
+            dragViewX: 0,
+            dragViewY: 0,
+            selectedCoord: null,
+            coordPickMode: false,
+            clickControlActive: false,
+            clickControlTarget: null,
+            isClickControlling: false,
+            clickTargetX: 0,
+            clickTargetY: 0,
+            clickControlInterval: null,
+            logEntries: [{ time: '系统', msg: '页面加载完成，等待连接...' }],
+            ws: null,
+            wsConnected: false,
+            wsSubscribed: false,
+            currentTick: -1,
+            lastMessageTime: 0,
+            lobbyStatusReceived: false,
+        };
+
+        // ============================================================
+        // 工具函数
+        // ============================================================
+
+        const WORLD_W = 1000;
+        const WORLD_H = 800;
+
+        function getWorldSize() {
+            if (state.config && state.config.field) {
+                return { w: state.config.field.width || 1000, h: state.config.field.height || 800 };
+            }
+            return { w: 1000, h: 800 };
+        }
+
+        function wx2sx(wx) {
+            const { w, h } = getWorldSize();
+            return (wx - state.viewX) * state.zoom;
+        }
+
+        function wy2sy(wy) {
+            const { w, h } = getWorldSize();
+            return (wy - state.viewY) * state.zoom;
+        }
+
+        function clampView() {
+            const { w, h } = getWorldSize();
+            const vw = w / state.zoom;
+            const vh = h / state.zoom;
+            state.viewX = Math.max(0, Math.min(w - vw, state.viewX));
+            state.viewY = Math.max(0, Math.min(h - vh, state.viewY));
+        }
+
+        function updateViewFollow() {
+            if (!state.followCharacter) return;
+            const mainChar = state.characters.get(state.mainCharacterId);
+            if (!mainChar) return;
+            
+            const { w, h } = getWorldSize();
+            const cw = window.innerWidth;
+            const ch = window.innerHeight;
+            
+            // 视野大小（世界坐标）
+            const vw = cw / state.zoom;
+            const vh = ch / state.zoom;
+            
+            // 小人的世界坐标
+            const px = mainChar.x || 500;
+            const py = mainChar.y || 400;
+            
+            // 边缘阈值：小人在视野边缘多少比例时开始滚动
+            const edgeThreshold = 0.25;  // 25%，可调
+            
+            // 计算小人相对于视野的位置 (0~1)
+            const relX = (px - state.viewX) / vw;
+            const relY = (py - state.viewY) / vh;
+            
+            // 目标视野位置（默认不变）
+            let targetViewX = state.viewX;
+            let targetViewY = state.viewY;
+            
+            // 如果小人太靠左 (< edgeThreshold)
+            if (relX < edgeThreshold) {
+                targetViewX = px - vw * edgeThreshold;
+            }
+            // 如果小人太靠右 (> 1 - edgeThreshold)
+            else if (relX > 1 - edgeThreshold) {
+                targetViewX = px - vw * (1 - edgeThreshold);
+            }
+            
+            // 如果小人太靠上
+            if (relY < edgeThreshold) {
+                targetViewY = py - vh * edgeThreshold;
+            }
+            // 如果小人太靠下
+            else if (relY > 1 - edgeThreshold) {
+                targetViewY = py - vh * (1 - edgeThreshold);
+            }
+            
+            // 平滑移动（可选）
+            const smoothFactor = 0.1;
+            state.viewX += (targetViewX - state.viewX) * smoothFactor;
+            state.viewY += (targetViewY - state.viewY) * smoothFactor;
+            
+            clampView();
+        }
+
+        function pointInPolygon(px, py, polygon) {
+            let inside = false;
+            for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+                const xi = polygon[i].x,
+                    yi = polygon[i].y;
+                const xj = polygon[j].x,
+                    yj = polygon[j].y;
+                if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi) inside = !inside;
+            }
+            return inside;
+        }
+
+        function getTerrainZ(wx, wy) {
+            const terrains = state.config ? state.config.terrains : [];
+            for (const t of terrains) {
+                if (pointInPolygon(wx, wy, t.points)) {
+                    let minDist = Infinity,
+                        closestZ = 0;
+                    for (const p of t.points) {
+                        const dx = p.x - wx,
+                            dy = p.y - wy;
+                        const dist = dx * dx + dy * dy;
+                        if (dist < minDist) { minDist = dist;
+                            closestZ = p.z; }
+                    }
+                    return closestZ;
+                }
+            }
+            return 0;
+        }
+
+        // ============================================================
+        // 日志
+        // ============================================================
+
+        function addLogEntry(time, msg) {
+            state.logEntries.push({ time, msg });
+            if (state.logEntries.length > 100) state.logEntries.shift();
+            renderLogPanel();
+        }
+
+        function renderLogPanel() {
+            const body = document.getElementById('logBody');
+            if (!body) return;
+            body.innerHTML = state.logEntries.map(e =>
+                `<div class="log-entry"><span class="log-time">[${e.time}]</span><span class="log-msg">${e.msg}</span></div>`
+            ).join('');
+            body.scrollTop = body.scrollHeight;
+        }
+
+        // ============================================================
+        // WebSocket 通信
+        // ============================================================
+
+        function connectWebSocket() {
+            if (CHANNEL_ID < 0) {
+                console.error('[Dashboard] 缺少 channel_id 参数');
+                addLogEntry('系统', '❌ 缺少 channel_id 参数');
+                return;
+            }
+
+            console.log('[Dashboard] 连接 WebSocket:', WS_URL);
+            addLogEntry('系统', `🔗 连接 WebSocket: ${WS_URL}`);
+
+            const ws = new WebSocket(WS_URL);
+            state.ws = ws;
+
+            ws.onopen = function() {
+                state.wsConnected = true;
+                console.log('[Dashboard] WebSocket 已连接');
+                addLogEntry('系统', '✅ WebSocket 已连接');
+
+                const registerMsg = {
+                    action: 'register',
+                    role: 'dashboard',
+                    character_id: `dashboard_${CHANNEL_ID}`,
+                    character_name: `仪表盘_${WORLD_NAME}`
+                };
+                ws.send(JSON.stringify(registerMsg));
+                console.log('[Dashboard] 发送注册:', registerMsg);
+                addLogEntry('系统', `📝 注册为 dashboard (频道 ${CHANNEL_ID})`);
+
+                const subscribeMsg = {
+                    action: 'subscribe',
+                    topic: `/channel/${CHANNEL_ID}`
+                };
+                ws.send(JSON.stringify(subscribeMsg));
+                console.log('[Dashboard] 发送订阅:', subscribeMsg);
+                addLogEntry('系统', `📡 订阅频道 /channel/${CHANNEL_ID}`);
+            };
+
+            ws.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    state.lastMessageTime = Date.now();
+                    handleWebSocketMessage(data);
+                } catch (e) {
+                    console.error('[Dashboard] 解析消息失败:', e, event.data);
+                }
+            };
+
+            ws.onerror = function(error) {
+                console.error('[Dashboard] WebSocket 错误:', error);
+                addLogEntry('系统', '❌ WebSocket 错误');
+            };
+
+            ws.onclose = function() {
+                state.wsConnected = false;
+                state.wsSubscribed = false;
+                console.log('[Dashboard] WebSocket 连接关闭');
+                addLogEntry('系统', '🔌 WebSocket 连接关闭');
+            };
+        }
+
+        function handleWebSocketMessage(data) {
+            console.log('[WS] 收到消息:', JSON.stringify(data, null, 2));
+
+            const type = data.type;
+
+            if (type === 'registered') {
+                console.log('[Dashboard] 注册成功:', data);
+                addLogEntry('系统', `✅ 注册成功: ${data.role} (${data.character_id})`);
+                return;
+            }
+
+            if (type === 'subscribed') {
+                state.wsSubscribed = true;
+                console.log('[Dashboard] 订阅成功:', data.topic);
+                addLogEntry('系统', `✅ 订阅成功: ${data.topic}`);
+                if (state.ws && state.wsConnected) {
+                    state.ws.send(JSON.stringify({
+                        action: 'get_lobby_status',
+                        instance: WORLD_NAME
+                    }));
+                    console.log('[Dashboard] 请求 lobby_status');
+                }
+                return;
+            }
+
+            if (type === 'error') {
+                console.error('[Dashboard] 服务器错误:', data.message);
+                addLogEntry('系统', `❌ 服务器错误: ${data.message}`);
+                return;
+            }
+
+            if (type === 'message') {
+                const msgData = data.data || {};
+                const msgType = msgData.type;
+                console.log('[Dashboard] 收到嵌套消息:', msgType, msgData);
+
+                if (msgType === 'world_state') {
+                    handleWorldState(msgData.data || msgData);
+                } else if (msgType === 'tick_start') {
+                    handleTickStart(msgData.data || msgData);
+                } else if (msgType === 'character_joined') {
+                    handleCharacterJoined(msgData);
+                } else if (msgType === 'character_left') {
+                    handleCharacterLeft(msgData);
+                } else if (msgType === 'game_start') {
+                    handleGameStart(msgData);
+                } else if (msgType === 'stop') {
+                    handleStop(msgData);
+                } else if (msgType === 'lobby_cancelled') {
+                    handleLobbyCancelled(msgData);
+                } else if (msgType === 'lobby_status') {
+                    handleLobbyStatus(msgData);
+                } else if (msgType === 'action_submitted') {
+                    // 从 action_submitted 直接读取 thought 和 speech
+                    const charName = msgData.character_name || msgData.character_id || '未知';
+                    const action = msgData.action || {};
+                    console.log('[Dashboard] action_submitted:', charName, action);
+                    if (action.thought && action.thought.trim()) {
+                        showThought(action.thought);
+                    }
+                    if (action.speech && action.speech.trim()) {
+                        showSpeech(action.speech);
+                    }
+                } else {
+                    console.log('[Dashboard] 未知消息类型:', msgType, msgData);
+                }
+                return;
+            }
+
+            if (type === 'lobby_status') {
+                handleLobbyStatus(data.data || data);
+                return;
+            }
+
+            if (type === 'instance_status') {
+                console.log('[Dashboard] 实例状态:', data.data);
+                return;
+            }
+
+            console.log('[Dashboard] 未处理的消息类型:', type, data);
+        }
+
+        // ============================================================
+        // 消息处理器
+        // ============================================================
+
+        function handleWorldState(data) {
+            console.log('[Dashboard] 处理 world_state:', data);
+            addLogEntry('系统', `🌍 收到世界状态 (tick: ${data.tick || '?'})`);
+
+            state.isConnected = true;
+
+            if (data.timeOfDay !== undefined) state.world.timeOfDay = data.timeOfDay;
+            if (data.weather !== undefined) state.world.weather = data.weather;
+            if (data.intensity !== undefined) state.world.intensity = data.intensity;
+            if (data.temperature !== undefined) state.world.temperature = data.temperature;
+            if (data.tick !== undefined) state.currentTick = data.tick;
+
+            if (data.characters) {
+                Object.keys(data.characters).forEach(id => {
+                    const charData = data.characters[id];
+                    // 不存储 thought/speech 到 characters（它们只从 action_submitted 读取）
+                    const { thought, speech, ...cleanCharData } = charData;
+                    const existing = state.characters.get(id) || {};
+                    state.characters.set(id, { ...existing, ...cleanCharData, id });
+                });
+
+                if (state.mainCharacterId === null && state.characters.size > 0) {
+                    const first = state.characters.keys().next().value;
+                    state.mainCharacterId = first;
+                    const mainChar = state.characters.get(first);
+                    if (mainChar) syncMainCharacter(mainChar);
+                }
+            }
+
+            updateWeatherIndicator();
+            updateStatusPanel();
+            updateViewFollow();
+            drawMap();
+            populateCharacterSelects();
+        }
+
+        function handleTickStart(data) {
+            console.log('[Dashboard] 处理 tick_start:', data);
+            addLogEntry('系统', `⏱️ Tick ${data.tick || '?'} 开始`);
+
+            if (data.tick !== undefined) state.currentTick = data.tick;
+            if (data.players) {
+                console.log('[Dashboard] 活跃玩家:', data.players);
+            }
+        }
+
+        function handleCharacterJoined(data) {
+            console.log('[Dashboard] 人物加入:', data);
+            const id = data.character_id;
+            const name = data.character_name || id;
+            const icon = data.icon || '🧒';
+
+            const existing = state.characters.get(id) || {};
+            const newChar = {
+                id: id,
+                name: name,
+                icon: icon,
+                x: data.x || existing.x || 500,
+                y: data.y || existing.y || 400,
+                z: data.z || existing.z || 0,
+                health: data.health || existing.health || 85,
+                energy: data.energy || existing.energy || 70,
+                mood: data.mood || existing.mood || 60,
+                hunger: data.hunger || existing.hunger || 50,
+            };
+            state.characters.set(id, newChar);
+
+            if (state.mainCharacterId === null) {
+                state.mainCharacterId = id;
+                syncMainCharacter(newChar);
+            }
+
+            addLogEntry('系统', `👤 人物加入: ${name} (${id})`);
+            populateCharacterSelects();
+            drawMap();
+        }
+
+        function handleCharacterLeft(data) {
+            console.log('[Dashboard] 人物离开:', data);
+            const id = data.character_id;
+            const name = data.character_name || id;
+
+            state.characters.delete(id);
+            if (state.mainCharacterId === id) {
+                const first = state.characters.keys().next().value;
+                state.mainCharacterId = first || null;
+                if (first) {
+                    const mainChar = state.characters.get(first);
+                    if (mainChar) syncMainCharacter(mainChar);
+                }
+            }
+
+            addLogEntry('系统', `👤 人物离开: ${name} (${id})`);
+            populateCharacterSelects();
+            drawMap();
+        }
+
+        function handleGameStart(data) {
+            console.log('[Dashboard] 游戏开始:', data);
+            state.currentInstanceStatus = 'running';
+            state.isConnected = true;
+            addLogEntry('系统', `🚀 游戏开始! 玩家: ${(data.players || []).join(', ')}`);
+            updateStatusPanel();
+        }
+
+        function handleStop(data) {
+            console.log('[Dashboard] 停止:', data);
+            state.currentInstanceStatus = 'stopped';
+            addLogEntry('系统', `⏹️ 实例已停止: ${data.message || ''}`);
+            updateStatusPanel();
+        }
+
+        function handleLobbyCancelled(data) {
+            console.log('[Dashboard] 大厅取消:', data);
+            addLogEntry('系统', `🚫 大厅已取消: ${data.message || ''}`);
+            state.currentInstanceStatus = 'created';
+        }
+
+        function handleLobbyStatus(data) {
+            console.log('[Dashboard] 大厅状态:', data);
+            state.lobbyStatusReceived = true;
+
+            if (data.players) {
+                console.log('[Dashboard] 当前玩家:', data.players);
+                data.players.forEach(p => {
+                    if (!state.characters.has(p.id)) {
+                        const charData = {
+                            id: p.id,
+                            name: p.name || p.id,
+                            icon: '🧒',
+                            x: 500,
+                            y: 400,
+                            z: 0,
+                            health: 85,
+                            energy: 70,
+                            mood: 60,
+                            hunger: 50,
+                        };
+                        state.characters.set(p.id, charData);
+                        if (state.mainCharacterId === null) {
+                            state.mainCharacterId = p.id;
+                            syncMainCharacter(charData);
+                        }
+                    }
+                });
+                populateCharacterSelects();
+                drawMap();
+            }
+            if (data.game_started !== undefined) {
+                state.currentInstanceStatus = data.game_started ? 'running' : 'created';
+                if (data.game_started) {
+                    state.isConnected = true;
+                }
+            }
+            if (data.world_name) {
+                state.currentInstanceName = data.world_name;
+                document.getElementById('instanceName').textContent = data.world_name;
+            }
+
+            if (data.game_started && !state.currentTick) {
+                console.log('[Dashboard] 游戏已开始，但尚未收到 world_state，等待...');
+            }
+        }
+
+        // ============================================================
+        // 同步主控人物
+        // ============================================================
+
+        function syncMainCharacter(data) {
+            if (!data) return;
+            if (data.x !== undefined) state.mainCharacterStats.x = data.x;
+            if (data.y !== undefined) state.mainCharacterStats.y = data.y;
+            if (data.z !== undefined) state.mainCharacterStats.z = data.z;
+            if (data.health !== undefined) state.mainCharacterStats.health = data.health;
+            if (data.energy !== undefined) state.mainCharacterStats.energy = data.energy;
+            if (data.mood !== undefined) state.mainCharacterStats.mood = data.mood;
+            if (data.hunger !== undefined) state.mainCharacterStats.hunger = data.hunger;
+            updateViewFollow();
+            updateStatusPanel();
+        }
+
+        // ============================================================
+        // 更新 UI
+        // ============================================================
+
+        function updateStatusPanel() {
+            const stats = state.mainCharacterStats;
+            const health = stats.health || 85;
+            const energy = stats.energy || 70;
+            const mood = stats.mood || 60;
+            const hunger = stats.hunger || 50;
+
+            document.getElementById('pHealth').style.width = Math.min(100, health) + '%';
+            document.getElementById('pHealthVal').textContent = Math.round(health);
+            document.getElementById('pEnergy').style.width = Math.min(100, energy) + '%';
+            document.getElementById('pEnergyVal').textContent = Math.round(energy);
+            document.getElementById('pMood').style.width = Math.min(100, mood) + '%';
+            document.getElementById('pMoodVal').textContent = Math.round(mood);
+            document.getElementById('pHunger').style.width = Math.min(100, hunger) + '%';
+            document.getElementById('pHungerVal').textContent = Math.round(hunger);
+
+            const mainChar = state.characters.get(state.mainCharacterId);
+            const name = mainChar ? mainChar.name || '鲁滨逊' : '鲁滨逊';
+            const icon = mainChar ? mainChar.icon || '🧒' : '🧒';
+            document.getElementById('panelName').textContent = icon + ' ' + name;
+        }
+
+        function updateWeatherIndicator() {
+            const indicator = document.getElementById('weatherIndicator');
+            const icon = document.getElementById('weatherIcon');
+            const label = document.getElementById('weatherLabel');
+            const timeLabel = document.getElementById('timeLabel');
+
+            const isDefault = state.world.weather === 'clear' && state.world.timeOfDay === 'day';
+            if (isDefault || !state.isConnected) {
+                indicator.classList.remove('show');
+                return;
+            }
+
+            const icons = { clear: '☀️', rain: '🌧️', snow: '❄️', storm: '⛈️', fog: '🌫️', windy: '💨' };
+            const labels = { clear: '晴天', rain: '下雨', snow: '下雪', storm: '暴风雨', fog: '起雾', windy: '大风' };
+            const timeLabels = { day: '白天', night: '夜晚', dawn: '黎明', dusk: '黄昏' };
+
+            icon.textContent = icons[state.world.weather] || '☀️';
+            label.textContent = labels[state.world.weather] || '晴天';
+            timeLabel.textContent = timeLabels[state.world.timeOfDay] || '白天';
+            indicator.classList.add('show');
+        }
+
+        function populateCharacterSelects() {
+            const chars = state.characters;
+            const ids = Array.from(chars.keys());
+            ['communicateTarget', 'teachTarget', 'improveTarget', 'controlTarget'].forEach(selectorId => {
+                const select = document.getElementById(selectorId);
+                if (!select) return;
+                select.innerHTML = '';
+                ids.forEach(id => {
+                    const c = chars.get(id);
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = `${c.icon || '👤'} ${c.name || id}`;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // ============================================================
+        // 天气系统
+        // ============================================================
+
+        let rainParticles = [];
+        let snowParticles = [];
+        let starParticles = [];
+        let flashTimer = 0;
+        let isFlashing = false;
+        let flashAlpha = 0;
+
+        const MAX_RAIN = 120;
+        const MAX_SNOW = 80;
+        const MAX_STARS = 60;
+
+        function initRainParticles(count) {
+            const { w, h } = getWorldSize();
+            rainParticles = [];
+            for (let i = 0; i < count; i++) {
+                rainParticles.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    speed: 4 + Math.random() * 4,
+                    length: 8 + Math.random() * 8,
+                    opacity: 0.2 + Math.random() * 0.3,
+                    windOffset: (Math.random() - 0.5) * 0.5
+                });
+            }
+        }
+
+        function initSnowParticles(count) {
+            const { w, h } = getWorldSize();
+            snowParticles = [];
+            for (let i = 0; i < count; i++) {
+                snowParticles.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    speed: 0.8 + Math.random() * 1.5,
+                    size: 2 + Math.random() * 3,
+                    phase: Math.random() * Math.PI * 2,
+                    wobbleSpeed: 0.01 + Math.random() * 0.02,
+                    wobbleAmount: 0.5 + Math.random() * 1.5,
+                    opacity: 0.5 + Math.random() * 0.4
+                });
+            }
+        }
+
+        function initStarParticles(count) {
+            const { w, h } = getWorldSize();
+            starParticles = [];
+            for (let i = 0; i < count; i++) {
+                starParticles.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h * 0.7,
+                    size: 1 + Math.random() * 2,
+                    twinkleSpeed: 0.02 + Math.random() * 0.04,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+        }
+
+        function updateWeatherParticles() {
+            const weather = state.world.weather;
+            const intensity = state.world.intensity || 0;
+
+            if (weather === 'rain' || weather === 'storm') {
+                const count = weather === 'storm' ? MAX_RAIN : Math.floor(MAX_RAIN * (0.3 + intensity * 0.7));
+                if (rainParticles.length !== Math.max(20, count)) {
+                    initRainParticles(Math.max(20, count));
+                }
+            } else {
+                rainParticles = [];
+            }
+
+            if (weather === 'snow') {
+                const count = Math.floor(MAX_SNOW * (0.3 + intensity * 0.7));
+                if (snowParticles.length !== Math.max(15, count)) {
+                    initSnowParticles(Math.max(15, count));
+                }
+            } else {
+                snowParticles = [];
+            }
+
+            if (state.world.timeOfDay === 'night' && weather !== 'storm') {
+                if (starParticles.length === 0) initStarParticles(MAX_STARS);
+            } else {
+                starParticles = [];
+            }
+
+            if (weather === 'storm') {
+                flashTimer = 0;
+                isFlashing = false;
+            }
+        }
+
+        function drawWeather() {
+            const canvas = document.getElementById('weatherCanvas');
+            const container = document.getElementById('mapContainer');
+            if (!canvas || !container) return;
+
+            const ctx = canvas.getContext('2d');
+            const cw = canvas.width = container.clientWidth;
+            const ch = canvas.height = container.clientHeight;
+
+            const isDefault = state.world.weather === 'clear' && state.world.timeOfDay === 'day';
+            if (isDefault || !state.isConnected) {
+                ctx.clearRect(0, 0, cw, ch);
+                return;
+            }
+
+            ctx.clearRect(0, 0, cw, ch);
+            updateWeatherParticles();
+
+            drawTimeOverlay(ctx, cw, ch);
+
+            if (state.world.weather === 'rain' || state.world.weather === 'storm') {
+                drawRain(ctx, cw, ch);
+            } else if (state.world.weather === 'snow') {
+                drawSnow(ctx, cw, ch);
+            } else if (state.world.weather === 'fog') {
+                drawFog(ctx, cw, ch);
+            }
+
+            if (state.world.timeOfDay === 'night' && state.world.weather !== 'storm') {
+                drawStars(ctx, cw, ch);
+            }
+
+            if (state.world.weather === 'storm') {
+                drawStormFlash(ctx, cw, ch);
+            }
+        }
+
+        function drawTimeOverlay(ctx, cw, ch) {
+            let alpha = 0;
+            let color = '';
+
+            switch (state.world.timeOfDay) {
+                case 'day':
+                    return;
+                case 'dawn':
+                    alpha = 0.08 + state.world.intensity * 0.08;
+                    color = 'rgba(255, 180, 80, ';
+                    break;
+                case 'dusk':
+                    alpha = 0.12 + state.world.intensity * 0.12;
+                    color = 'rgba(200, 100, 60, ';
+                    break;
+                case 'night':
+                    alpha = 0.45 + state.world.intensity * 0.25;
+                    color = 'rgba(10, 15, 40, ';
+                    break;
+                default:
+                    return;
+            }
+
+            if (state.world.timeOfDay === 'night' && state.world.weather === 'storm') {
+                alpha = Math.min(0.85, alpha + 0.2);
+            }
+
+            ctx.fillStyle = color + alpha + ')';
+            ctx.fillRect(0, 0, cw, ch);
+
+            if (state.world.timeOfDay === 'dawn' || state.world.timeOfDay === 'dusk') {
+                const grad = ctx.createRadialGradient(
+                    cw * (state.world.timeOfDay === 'dawn' ? 0.2 : 0.8), ch * 0.85, 50,
+                    cw * (state.world.timeOfDay === 'dawn' ? 0.2 : 0.8), ch * 0.85, cw * 0.8
+                );
+                if (state.world.timeOfDay === 'dawn') {
+                    grad.addColorStop(0, 'rgba(255, 200, 120, 0.12)');
+                    grad.addColorStop(1, 'rgba(255, 200, 120, 0)');
+                } else {
+                    grad.addColorStop(0, 'rgba(200, 100, 60, 0.15)');
+                    grad.addColorStop(1, 'rgba(200, 100, 60, 0)');
+                }
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, cw, ch);
+            }
+        }
+
+        function drawRain(ctx, cw, ch) {
+            const count = rainParticles.length;
+            if (count === 0) return;
+
+            const isStorm = state.world.weather === 'storm';
+            const intensity = state.world.intensity || 0;
+            const wind = isStorm ? 0.6 + intensity * 0.4 : 0.2 + intensity * 0.3;
+            const speedMul = isStorm ? 1.4 : 0.8 + intensity * 0.6;
+            const alphaMul = isStorm ? 0.8 + intensity * 0.2 : 0.5 + intensity * 0.4;
+
+            ctx.strokeStyle = 'rgba(180, 200, 220, ';
+            ctx.lineWidth = isStorm ? 1.5 : 1.2;
+
+            const { w, h } = getWorldSize();
+
+            for (const p of rainParticles) {
+                const sx = (p.x - state.viewX) * state.zoom;
+                const sy = (p.y - state.viewY) * state.zoom;
+
+                if (sx < -20 || sx > cw + 20 || sy < -20 || sy > ch + 20) {
+                    p.y -= 20;
+                    p.x = Math.random() * w;
+                    continue;
+                }
+
+                const len = p.length * (0.8 + intensity * 0.4);
+                const alpha = p.opacity * alphaMul;
+
+                ctx.globalAlpha = Math.min(0.7, alpha);
+                ctx.beginPath();
+                ctx.moveTo(sx, sy);
+                ctx.lineTo(
+                    sx - wind * len * 0.6,
+                    sy + len * speedMul * 0.8
+                );
+                ctx.stroke();
+
+                p.x -= wind * 0.6;
+                p.y += p.speed * speedMul * 0.7;
+
+                if (p.y > h + 20) {
+                    p.y = -20;
+                    p.x = Math.random() * w;
+                }
+                if (p.x < -20) p.x = w + 20;
+                if (p.x > w + 20) p.x = -20;
+            }
+
+            ctx.globalAlpha = 1;
+        }
+
+        function drawSnow(ctx, cw, ch) {
+            const count = snowParticles.length;
+            if (count === 0) return;
+
+            const time = Date.now() / 1000;
+            const intensity = state.world.intensity || 0;
+            const wind = 0.1 + intensity * 0.3;
+            const { w, h } = getWorldSize();
+
+            for (const p of snowParticles) {
+                const sx = (p.x - state.viewX) * state.zoom;
+                const sy = (p.y - state.viewY) * state.zoom;
+
+                if (sx < -20 || sx > cw + 20 || sy < -20 || sy > ch + 20) {
+                    p.y = -10;
+                    p.x = Math.random() * w;
+                    continue;
+                }
+
+                const size = p.size * (0.8 + intensity * 0.4);
+                const alpha = p.opacity * (0.6 + intensity * 0.3);
+
+                ctx.globalAlpha = Math.min(0.8, alpha);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.beginPath();
+                ctx.arc(sx, sy, Math.max(1, size), 0, Math.PI * 2);
+                ctx.fill();
+
+                p.x += Math.sin(time * p.wobbleSpeed + p.phase) * p.wobbleAmount * 0.15 + wind * 0.2;
+                p.y += p.speed * (0.6 + intensity * 0.4);
+
+                if (p.y > h + 20) {
+                    p.y = -10;
+                    p.x = Math.random() * w;
+                }
+                if (p.x < -20) p.x = w + 20;
+                if (p.x > w + 20) p.x = -20;
+            }
+
+            ctx.globalAlpha = 1;
+        }
+
+        function drawFog(ctx, cw, ch) {
+            const intensity = state.world.intensity || 0;
+            const alpha = 0.08 + intensity * 0.25;
+            const time = Date.now() / 10000;
+
+            for (let layer = 0; layer < 3; layer++) {
+                const offset = layer * 0.3 + time * (0.2 + layer * 0.1);
+                const cx = cw * (0.3 + Math.sin(offset) * 0.3);
+                const cy = ch * (0.4 + Math.cos(offset * 0.7) * 0.3);
+                const radius = Math.max(cw, ch) * (0.6 + layer * 0.2);
+
+                const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+                grad.addColorStop(0, `rgba(200, 210, 220, ${alpha * (0.6 + layer * 0.2)})`);
+                grad.addColorStop(0.5, `rgba(180, 190, 200, ${alpha * (0.3 + layer * 0.15)})`);
+                grad.addColorStop(1, 'rgba(180, 190, 200, 0)');
+
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, cw, ch);
+            }
+        }
+
+        function drawStars(ctx, cw, ch) {
+            const time = Date.now() / 1000;
+
+            for (const star of starParticles) {
+                const sx = (star.x - state.viewX) * state.zoom;
+                const sy = (star.y - state.viewY) * state.zoom;
+
+                if (sx < -5 || sx > cw + 5 || sy < -5 || sy > ch + 5) continue;
+
+                const twinkle = 0.5 + 0.5 * Math.sin(time * star.twinkleSpeed + star.phase);
+                const size = star.size * (0.5 + twinkle * 0.5);
+                const alpha = 0.4 + twinkle * 0.5;
+
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = 'rgba(255, 255, 240, 0.9)';
+                ctx.beginPath();
+                ctx.arc(sx, sy, Math.max(0.5, size), 0, Math.PI * 2);
+                ctx.fill();
+
+                if (star.size > 1.8 && twinkle > 0.7) {
+                    ctx.globalAlpha = alpha * 0.3;
+                    ctx.fillStyle = 'rgba(255, 255, 240, 0.8)';
+                    ctx.fillRect(sx - 1, sy - 4, 2, 8);
+                    ctx.fillRect(sx - 4, sy - 1, 8, 2);
+                }
+            }
+
+            ctx.globalAlpha = 1;
+        }
+
+        function drawStormFlash(ctx, cw, ch) {
+            flashTimer += 0.016;
+
+            if (!isFlashing) {
+                if (flashTimer > 3 + Math.random() * 5) {
+                    isFlashing = true;
+                    flashAlpha = 0.6 + Math.random() * 0.3;
+                    flashTimer = 0;
+                    const flashX = (Math.random() - 0.5) * cw * 0.4 + cw * 0.5;
+                    const flashY = (Math.random() - 0.5) * ch * 0.3 + ch * 0.2;
+
+                    ctx.save();
+                    ctx.globalAlpha = flashAlpha * 0.9;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                    ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+                    ctx.shadowBlur = 30;
+                    ctx.beginPath();
+                    ctx.arc(flashX, flashY, 8 + Math.random() * 12, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.globalAlpha = flashAlpha * 0.6;
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.lineWidth = 2 + Math.random() * 2;
+                    ctx.shadowBlur = 20;
+                    for (let i = 0; i < 3 + Math.random() * 4; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const len = 20 + Math.random() * 50;
+                        ctx.beginPath();
+                        ctx.moveTo(flashX, flashY);
+                        ctx.lineTo(
+                            flashX + Math.cos(angle) * len,
+                            flashY + Math.sin(angle) * len * (0.5 + Math.random() * 0.5)
+                        );
+                        ctx.stroke();
+                    }
+
+                    ctx.restore();
+
+                    setTimeout(() => {
+                        isFlashing = false;
+                        flashAlpha = 0;
+                    }, 80 + Math.random() * 120);
+                }
+            } else {
+                flashAlpha *= 0.95;
+                if (flashAlpha < 0.01) {
+                    isFlashing = false;
+                    flashAlpha = 0;
+                }
+            }
+
+            if (isFlashing && flashAlpha > 0.3) {
+                ctx.globalAlpha = flashAlpha * 0.15;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.fillRect(0, 0, cw, ch);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // ============================================================
+        // 地图绘制
+        // ============================================================
+
+        function drawMap() {
+            const canvas = document.getElementById('mapCanvas');
+            const container = document.getElementById('mapContainer');
+            if (!canvas || !container) return;
+
+            const ctx = canvas.getContext('2d');
+            const cw = canvas.width = container.clientWidth;
+            const ch = canvas.height = container.clientHeight;
+
+            ctx.fillStyle = '#1a1412';
+            ctx.fillRect(0, 0, cw, ch);
+
+            if (!state.config) {
+                ctx.fillStyle = 'rgba(228,215,207,0.3)';
+                ctx.font = '20px "Inter","Segoe UI",sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🌐 加载配置中...', cw / 2, ch / 2);
+                drawMinimap();
+                return;
+            }
+
+            const terrains = state.config.terrains || [];
+
+            terrains.forEach(t => {
+                ctx.fillStyle = t.color;
+                ctx.globalAlpha = 0.35;
+                ctx.beginPath();
+                t.points.forEach((p, i) => {
+                    const sx = wx2sx(p.x),
+                        sy = wy2sy(p.y);
+                    if (i === 0) ctx.moveTo(sx, sy);
+                    else ctx.lineTo(sx, sy);
+                });
+                ctx.closePath();
+                ctx.fill();
+                ctx.globalAlpha = 1;
+
+                const avgZ = t.points.reduce((sum, p) => sum + (p.z || 0), 0) / t.points.length;
+                ctx.strokeStyle = avgZ < 0 ? 'rgba(52,152,219,0.4)' : 'rgba(246,176,124,0.25)';
+                ctx.lineWidth = avgZ < 0 ? 2 : 1;
+                ctx.setLineDash(avgZ < 0 ? [4, 3] : []);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const cx = t.points.reduce((s, p) => s + p.x, 0) / t.points.length;
+                const cy = t.points.reduce((s, p) => s + p.y, 0) / t.points.length;
+                const lsx = wx2sx(cx),
+                    lsy = wy2sy(cy);
+                if (lsx > -100 && lsx < cw + 100 && lsy > -100 && lsy < ch + 100) {
+                    const fs = Math.max(14, Math.min(19, state.zoom * 8));
+                    ctx.font = `500 ${fs}px "Inter","Segoe UI",monospace`;
+                    const label = t.name + ' z:' + Math.round(avgZ);
+                    const lw = ctx.measureText(label).width;
+                    ctx.fillStyle = 'rgba(14,11,10,0.7)';
+                    ctx.fillRect(lsx - lw / 2 - 8, lsy - fs - 4, lw + 16, fs + 8);
+                    ctx.fillStyle = '#d4c4b8';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(label, lsx, lsy - fs / 2);
+                }
+            });
+
+            const configItems = state.config.items || [];
+            configItems.forEach(item => {
+                const sx = wx2sx(item.x),
+                    sy = wy2sy(item.y);
+                if (sx < -30 || sx > cw + 30 || sy < -30 || sy > ch + 30) return;
+                const isz = Math.max(16, Math.min(26, state.zoom * 14));
+                ctx.font = `${isz}px "Segoe UI",sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(item.icon || '📦', sx, sy);
+            });
+
+            state.world.items.forEach((item, id) => {
+                const sx = wx2sx(item.x),
+                    sy = wy2sy(item.y);
+                if (sx < -30 || sx > cw + 30 || sy < -30 || sy > ch + 30) return;
+                const isz = Math.max(16, Math.min(26, state.zoom * 14));
+                ctx.font = `${isz}px "Segoe UI",sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(item.icon || '📦', sx, sy);
+            });
+
+            state.world.trees.forEach((tree, id) => {
+                if (tree.status === 'cut') return;
+                const sx = wx2sx(tree.x),
+                    sy = wy2sy(tree.y);
+                if (sx < -30 || sx > cw + 30 || sy < -30 || sy > ch + 30) return;
+                const isz = Math.max(16, Math.min(26, state.zoom * 14));
+                ctx.font = `${isz}px "Segoe UI",sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🌲', sx, sy);
+            });
+
+            state.world.buildings.forEach((b, id) => {
+                const sx = wx2sx(b.x),
+                    sy = wy2sy(b.y);
+                if (sx < -30 || sx > cw + 30 || sy < -30 || sy > ch + 30) return;
+                const isz = Math.max(20, Math.min(32, state.zoom * 16));
+                ctx.font = `${isz}px "Segoe UI",sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(b.icon || '🏠', sx, sy);
+            });
+
+            state.characters.forEach((char, id) => {
+                const sx = wx2sx(char.x || 500),
+                    sy = wy2sy(char.y || 400);
+                const isMain = (id === state.mainCharacterId);
+                
+                // 固定圆点大小，不随缩放变化
+                const rSize = isMain ? 6 : 4;
+
+                ctx.fillStyle = isMain ? '#E57324' : '#C28A5C';
+                ctx.beginPath();
+                ctx.arc(sx, sy, rSize, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                const icon = char.icon || '🧒';
+                ctx.font = `bold ${rSize * 1.5}px "Segoe UI",monospace`;
+                ctx.fillStyle = isMain ? '#2D2E1C' : '#2C221A';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(icon, sx, sy - rSize * 2.2);
+
+                const nameSize = isMain ? Math.max(14, rSize * 0.9) : Math.max(12, rSize * 0.8);
+                ctx.font = `500 ${nameSize}px "Inter","Segoe UI",monospace`;
+                ctx.fillStyle = isMain ? 'rgba(228,215,207,0.9)' : 'rgba(228,215,207,0.7)';
+                ctx.textAlign = 'center';
+                ctx.fillText(char.name || id, sx, sy - rSize * 4.2);
+            });
+
+            drawMinimap();
+            updateBubblePositions();
+        }
+
+        function drawMinimap() {
+            const mm = document.getElementById('minimapCanvas');
+            if (!mm) return;
+            const ctx = mm.getContext('2d');
+            const mw = 180,
+                mh = 150;
+            mm.width = mw;
+            mm.height = mh;
+            ctx.fillStyle = 'rgba(14,11,10,0.9)';
+            ctx.fillRect(0, 0, mw, mh);
+
+            const terrains = state.config ? state.config.terrains : [];
+            const { w, h } = getWorldSize();
+
+            terrains.forEach(t => {
+                ctx.fillStyle = t.color;
+                ctx.globalAlpha = 0.4;
+                ctx.beginPath();
+                t.points.forEach((p, i) => {
+                    const sx = p.x / w * mw;
+                    const sy = p.y / h * mh;
+                    if (i === 0) ctx.moveTo(sx, sy);
+                    else ctx.lineTo(sx, sy);
+                });
+                ctx.closePath();
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+
+            state.characters.forEach((char) => {
+                const sx = (char.x || 500) / w * mw;
+                const sy = (char.y || 400) / h * mh;
+                const isMain = (char.id === state.mainCharacterId);
+                ctx.fillStyle = isMain ? '#E57324' : '#C28A5C';
+                ctx.beginPath();
+                ctx.arc(sx, sy, isMain ? 6 : 5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            const vw = w / state.zoom,
+                vh = h / state.zoom;
+            ctx.strokeStyle = 'rgba(246,176,124,0.4)';
+            ctx.lineWidth = 1.2;
+            ctx.strokeRect(state.viewX / w * mw, state.viewY / h * mh, vw / w * mw, vh / h * mh);
+        }
+
+        // ============================================================
+        // 气泡系统
+        // ============================================================
+
+        let thoughtState = { active: false, text: '', timer: null, fadeTimer: null, showing: false };
+        let speechState = { active: false, text: '', timer: null, fadeTimer: null, showing: false };
+
+        const BUBBLE_DISPLAY_MS = 5000;
+
+        const thoughtBubble = document.getElementById('thoughtBubble');
+        const thoughtText = document.getElementById('thoughtText');
+        const speechBubble = document.getElementById('speechBubble');
+        const speechText = document.getElementById('speechText');
+
+        function clearThoughtImmediate() {
+            if (thoughtState.timer) { clearTimeout(thoughtState.timer);
+                thoughtState.timer = null; }
+            if (thoughtState.fadeTimer) { clearTimeout(thoughtState.fadeTimer);
+                thoughtState.fadeTimer = null; }
+            thoughtBubble.classList.remove('show', 'fading');
+            thoughtState.active = false;
+            thoughtState.showing = false;
+            thoughtState.text = '';
+        }
+
+        function showThought(text) {
+            if (speechState.showing || speechState.active) {
+                addLogEntry('💭 想法(被覆盖)', text + ' (说话优先)');
+                return;
+            }
+            clearThoughtImmediate();
+            thoughtText.textContent = text;
+            thoughtState.text = text;
+            thoughtState.active = true;
+            thoughtState.showing = true;
+            requestAnimationFrame(() => { thoughtBubble.classList.add('show'); });
+            updateBubblePositions();
+            addLogEntry('💭 想法', text);
+            thoughtState.timer = setTimeout(() => { fadeOutThought(); }, BUBBLE_DISPLAY_MS);
+        }
+
+        function fadeOutThought() {
+            if (!thoughtState.showing) return;
+            thoughtBubble.classList.remove('show');
+            thoughtBubble.classList.add('fading');
+            thoughtState.showing = false;
+            thoughtState.fadeTimer = setTimeout(() => {
+                thoughtBubble.classList.remove('fading');
+                thoughtState.active = false;
+                thoughtState.text = '';
+                thoughtState.fadeTimer = null;
+            }, 350);
+        }
+
+        function showSpeech(text) {
+            if (thoughtState.showing || thoughtState.active) {
+                clearThoughtImmediate();
+                addLogEntry('💬 说话', '💭 想法被说话覆盖');
+            }
+            if (speechState.timer) { clearTimeout(speechState.timer);
+                speechState.timer = null; }
+            if (speechState.fadeTimer) { clearTimeout(speechState.fadeTimer);
+                speechState.fadeTimer = null; }
+            speechBubble.classList.remove('show', 'fading');
+            speechText.textContent = text;
+            speechState.text = text;
+            speechState.active = true;
+            speechState.showing = true;
+            requestAnimationFrame(() => { speechBubble.classList.add('show'); });
+            updateBubblePositions();
+            addLogEntry('💬 说话', text);
+            speechState.timer = setTimeout(() => { fadeOutSpeech(); }, BUBBLE_DISPLAY_MS);
+        }
+
+        function fadeOutSpeech() {
+            if (!speechState.showing) return;
+            speechBubble.classList.remove('show');
+            speechBubble.classList.add('fading');
+            speechState.showing = false;
+            speechState.fadeTimer = setTimeout(() => {
+                speechBubble.classList.remove('fading');
+                speechState.active = false;
+                speechState.text = '';
+                speechState.fadeTimer = null;
+            }, 350);
+        }
+
+        function updateBubblePositions() {
+            const canvas = document.getElementById('mapCanvas');
+            if (!canvas) return;
+            const cw = canvas.width,
+                ch = canvas.height;
+            const mainChar = state.characters.get(state.mainCharacterId);
+            if (!mainChar) return;
+            const sx = ((mainChar.x || 500) - state.viewX) * state.zoom;
+            const sy = ((mainChar.y || 400) - state.viewY) * state.zoom;
+
+            if (thoughtState.active || thoughtState.showing) {
+                const left = sx - 140;
+                const bottom = ch - sy + 25;
+                thoughtBubble.style.left = left + 'px';
+                thoughtBubble.style.bottom = bottom + 'px';
+            }
+            if (speechState.active || speechState.showing) {
+                const right = cw - sx - 140;
+                const bottom = ch - sy + 25;
+                speechBubble.style.right = right + 'px';
+                speechBubble.style.bottom = bottom + 'px';
+            }
+        }
+
+        // ============================================================
+        // 鼠标交互
+        // ============================================================
+
+        function setupMouse() {
+            const container = document.getElementById('mapContainer');
+            const canvas = document.getElementById('mapCanvas');
+            if (!container || !canvas) return;
+
+            canvas.addEventListener('wheel', e => {
+                e.preventDefault();
+                state.followCharacter = false;
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                const wx = mx / state.zoom + state.viewX;
+                const wy = my / state.zoom + state.viewY;
+                const newZoom = Math.max(0.8, Math.min(4, state.zoom * (e.deltaY > 0 ? 0.9 : 1.1)));
+                state.viewX = wx - (mx / newZoom);
+                state.viewY = wy - (my / newZoom);
+                state.zoom = newZoom;
+                clampView();
+                drawMap();
+                updateBubblePositions();
+            }, { passive: false });
+
+            canvas.addEventListener('mousedown', e => {
+                if (e.button === 0) {
+                    if (state.coordPickMode || state.clickControlActive) return;
+                    state.isDragging = true;
+                    state.followCharacter = false;
+                    state.dragStartX = e.clientX;
+                    state.dragStartY = e.clientY;
+                    state.dragViewX = state.viewX;
+                    state.dragViewY = state.viewY;
+                }
+            });
+
+            window.addEventListener('mousemove', e => {
+                if (state.isDragging && !state.coordPickMode && !state.clickControlActive) {
+                    const dx = (e.clientX - state.dragStartX) / state.zoom;
+                    const dy = (e.clientY - state.dragStartY) / state.zoom;
+                    state.viewX = state.dragViewX - dx;
+                    state.viewY = state.dragViewY - dy;
+                    clampView();
+                    drawMap();
+                    updateBubblePositions();
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (state.isDragging) { state.isDragging = false;
+                    drawMap();
+                    updateBubblePositions(); }
+            });
+
+            canvas.addEventListener('dblclick', () => {
+                if (!state.coordPickMode && !state.clickControlActive) {
+                    state.followCharacter = true;
+                    updateViewFollow();
+                    drawMap();
+                    updateBubblePositions();
+                }
+            });
+
+            canvas.addEventListener('touchstart', e => {
+                if (state.coordPickMode || state.clickControlActive) return;
+                if (e.touches.length === 1) {
+                    state.isDragging = true;
+                    state.followCharacter = false;
+                    state.dragStartX = e.touches[0].clientX;
+                    state.dragStartY = e.touches[0].clientY;
+                    state.dragViewX = state.viewX;
+                    state.dragViewY = state.viewY;
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', e => {
+                e.preventDefault();
+                if (state.coordPickMode || state.clickControlActive) return;
+                if (e.touches.length === 1 && state.isDragging) {
+                    const dx = (e.touches[0].clientX - state.dragStartX) / state.zoom;
+                    const dy = (e.touches[0].clientY - state.dragStartY) / state.zoom;
+                    state.viewX = state.dragViewX - dx;
+                    state.viewY = state.dragViewY - dy;
+                    clampView();
+                    drawMap();
+                    updateBubblePositions();
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', () => { state.isDragging = false; });
+
+            setupMapClick();
+        }
+
+        function setupMapClick() {
+            const canvas = document.getElementById('mapCanvas');
+            const container = document.getElementById('mapContainer');
+            if (!canvas) return;
+
+            canvas.addEventListener('click', function(e) {
+                if (state.coordPickMode) {
+                    e.stopPropagation();
+                    const rect = canvas.getBoundingClientRect();
+                    const mx = e.clientX - rect.left;
+                    const my = e.clientY - rect.top;
+                    const wx = Math.round(mx / state.zoom + state.viewX);
+                    const wy = Math.round(my / state.zoom + state.viewY);
+                    const { w, h } = getWorldSize();
+                    const clampedX = Math.max(0, Math.min(w, wx));
+                    const clampedY = Math.max(0, Math.min(h, wy));
+                    state.selectedCoord = { x: clampedX, y: clampedY };
+                    const display = document.getElementById('oracleCoord');
+                    if (display) {
+                        display.textContent = `📍 (${clampedX}, ${clampedY})`;
+                        display.style.borderColor = 'var(--primary)';
+                    }
+                    state.coordPickMode = false;
+                    container.classList.remove('pick-coord');
+                    document.getElementById('oraclePickHint').classList.remove('active');
+                    addLogEntry('坐标', `选择坐标 (${clampedX}, ${clampedY})`);
+                    return;
+                }
+
+                if (state.clickControlActive) {
+                    e.stopPropagation();
+                    const rect = canvas.getBoundingClientRect();
+                    const mx = e.clientX - rect.left;
+                    const my = e.clientY - rect.top;
+                    const wx = mx / state.zoom + state.viewX;
+                    const wy = my / state.zoom + state.viewY;
+                    const { w, h } = getWorldSize();
+                    const clampedX = Math.max(5, Math.min(w - 5, wx));
+                    const clampedY = Math.max(5, Math.min(h - 5, wy));
+                    state.clickTargetX = clampedX;
+                    state.clickTargetY = clampedY;
+                    state.isClickControlling = true;
+                    const targetName = state.characters.get(state.clickControlTarget)?.name || state.clickControlTarget;
+                    addLogEntry('操控', `${targetName} 前往 (${Math.round(clampedX)}, ${Math.round(clampedY)})`);
+                    executeClickControlMove();
+                    return;
+                }
+            });
+        }
+
+        function executeClickControlMove() {
+            if (!state.isClickControlling || !state.clickControlActive) return;
+            const targetId = state.clickControlTarget;
+            const char = state.characters.get(targetId);
+            if (!char) { state.isClickControlling = false; return; }
+
+            const tx = state.clickTargetX,
+                ty = state.clickTargetY;
+            const dist = Math.sqrt((tx - char.x) ** 2 + (ty - char.y) ** 2);
+
+            if (dist < 2) {
+                state.isClickControlling = false;
+                if (state.clickControlInterval) { clearInterval(state.clickControlInterval);
+                    state.clickControlInterval = null; }
+                document.getElementById('controlStatus').textContent = '✅ 已到达目标';
+                document.getElementById('controlStatus').style.color = 'var(--success-color)';
+                return;
+            }
+
+            const speed = Math.min(8, Math.max(2, dist * 0.12));
+            const dx = (tx - char.x) / dist * speed;
+            const dy = (ty - char.y) / dist * speed;
+
+            char.x += dx;
+            char.y += dy;
+            char.z = getTerrainZ(char.x, char.y);
+            state.characters.set(targetId, char);
+
+            if (targetId === state.mainCharacterId) {
+                syncMainCharacter(char);
+                updateViewFollow();
+            }
+
+            drawMap();
+            updateBubblePositions();
+
+            if (state.ws && state.wsConnected) {
+                state.ws.send(JSON.stringify({
+                    action: 'publish',
+                    topic: `/channel/${CHANNEL_ID}`,
+                    data: {
+                        type: 'action_submitted',
+                        character_id: targetId,
+                        action: {
+                            x: Math.round(char.x),
+                            y: Math.round(char.y),
+                            z: char.z,
+                            decision: 'move',
+                            target_x: Math.round(tx),
+                            target_y: Math.round(ty)
+                        }
+                    }
+                }));
+            }
+        }
+
+        function startClickControl() {
+            const targetId = document.getElementById('controlTarget').value;
+            state.clickControlTarget = targetId;
+            state.clickControlActive = true;
+            state.isClickControlling = false;
+
+            document.getElementById('btnStartControl').style.display = 'none';
+            document.getElementById('btnStopControl').style.display = 'inline-block';
+
+            const targetName = state.characters.get(targetId)?.name || targetId;
+            document.getElementById('controlStatus').textContent = `🟢 操控中: ${targetName} · 点击地图移动`;
+            document.getElementById('controlStatus').style.color = 'var(--primary-light)';
+            document.getElementById('mapContainer').style.cursor = 'pointer';
+
+            addLogEntry('操控', `开始操控 ${targetName}，点击地图移动`);
+
+            if (state.clickControlInterval) clearInterval(state.clickControlInterval);
+            state.clickControlInterval = setInterval(() => {
+                if (state.clickControlActive && state.isClickControlling) { executeClickControlMove(); }
+            }, 50);
+        }
+
+        function stopClickControl() {
+            state.clickControlActive = false;
+            state.isClickControlling = false;
+            if (state.clickControlInterval) { clearInterval(state.clickControlInterval);
+                state.clickControlInterval = null; }
+
+            document.getElementById('btnStartControl').style.display = 'inline-block';
+            document.getElementById('btnStopControl').style.display = 'none';
+            document.getElementById('controlStatus').textContent = '⚪ 已停止';
+            document.getElementById('controlStatus').style.color = 'var(--text-tertiary)';
+            document.getElementById('mapContainer').style.cursor = '';
+
+            addLogEntry('操控', '停止操控');
+        }
+
+        // ============================================================
+        // 窗口自适应
+        // ============================================================
+
+        function handleResize() {
+            drawMap();
+            updateBubblePositions();
+        }
+
+        // ============================================================
+        // UI 事件绑定
+        // ============================================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('mapTitle').textContent = '🌍 SurvX';
+            document.title = 'SurvX · 生存世界';
+
+            document.getElementById('instanceName').textContent = WORLD_NAME;
+
+            // ---- 功能面板 ----
+            const funcModal = document.getElementById('funcModal');
+            document.getElementById('btnPanel').addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('logPanel').classList.remove('show');
+                funcModal.classList.toggle('show');
+                state.selectedCoord = null;
+                state.coordPickMode = false;
+                document.getElementById('mapContainer').classList.remove('pick-coord');
+                document.getElementById('oraclePickHint').classList.remove('active');
+                const oracleDisplay = document.getElementById('oracleCoord');
+                if (oracleDisplay) {
+                    oracleDisplay.textContent = '未选择';
+                    oracleDisplay.style.borderColor = 'rgba(246,176,124,0.2)';
+                }
+            });
+
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = {
+                oracle: document.getElementById('tab-oracle'),
+                communicate: document.getElementById('tab-communicate'),
+                teach: document.getElementById('tab-teach'),
+                improve: document.getElementById('tab-improve'),
+                control: document.getElementById('tab-control')
+            };
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const tab = btn.dataset.tab;
+                    Object.keys(tabContents).forEach(key => {
+                        tabContents[key].style.display = key === tab ? 'block' : 'none';
+                    });
+                    if (tab === 'oracle') {
+                        state.coordPickMode = false;
+                        document.getElementById('mapContainer').classList.remove('pick-coord');
+                        document.getElementById('oraclePickHint').classList.remove('active');
+                    }
+                });
+            });
+
+            document.getElementById('oraclePickHint').addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (state.clickControlActive) stopClickControl();
+                state.coordPickMode = !state.coordPickMode;
+                if (state.coordPickMode) {
+                    document.getElementById('mapContainer').classList.add('pick-coord');
+                    document.getElementById('oraclePickHint').classList.add('active');
+                    addLogEntry('坐标', '点击地图选择坐标...');
+                } else {
+                    document.getElementById('mapContainer').classList.remove('pick-coord');
+                    document.getElementById('oraclePickHint').classList.remove('active');
+                }
+            });
+
+            document.getElementById('btnStartControl').addEventListener('click', () => {
+                if (state.coordPickMode) {
+                    state.coordPickMode = false;
+                    document.getElementById('mapContainer').classList.remove('pick-coord');
+                    document.getElementById('oraclePickHint').classList.remove('active');
+                }
+                startClickControl();
+            });
+            document.getElementById('btnStopControl').addEventListener('click', stopClickControl);
+            document.getElementById('controlTarget').addEventListener('change', () => {
+                if (state.clickControlActive) {
+                    state.clickControlTarget = document.getElementById('controlTarget').value;
+                    const targetName = state.characters.get(state.clickControlTarget)?.name || state.clickControlTarget;
+                    document.getElementById('controlStatus').textContent =
+                        `🟢 操控中: ${targetName} · 点击地图移动`;
+                }
+            });
+
+            document.getElementById('funcCancel').addEventListener('click', () => {
+                if (state.clickControlActive) stopClickControl();
+                funcModal.classList.remove('show');
+                state.coordPickMode = false;
+                document.getElementById('mapContainer').classList.remove('pick-coord');
+                document.getElementById('oraclePickHint').classList.remove('active');
+            });
+            document.getElementById('funcConfirm').addEventListener('click', () => {
+                const activeTab = document.querySelector('.tab-btn.active');
+                const tab = activeTab ? activeTab.dataset.tab : 'oracle';
+                if (tab !== 'control') {
+                    const coord = state.selectedCoord ? `(${state.selectedCoord.x}, ${state.selectedCoord.y})` :
+                        '未选择';
+                    const text = document.getElementById('oracleInput').value.trim() || '(空)';
+                    addLogEntry('功能', `神谕 · 坐标 ${coord} · 内容: ${text}`);
+                    document.getElementById('oracleInput').value = '';
+                    document.getElementById('communicateInput').value = '';
+                    state.selectedCoord = null;
+                    const oracleDisplay = document.getElementById('oracleCoord');
+                    if (oracleDisplay) {
+                        oracleDisplay.textContent = '未选择';
+                        oracleDisplay.style.borderColor = 'rgba(246,176,124,0.2)';
+                    }
+                    state.coordPickMode = false;
+                    document.getElementById('mapContainer').classList.remove('pick-coord');
+                    document.getElementById('oraclePickHint').classList.remove('active');
+                    funcModal.classList.remove('show');
+
+                    if (state.ws && state.wsConnected) {
+                        state.ws.send(JSON.stringify({
+                            action: 'publish',
+                            topic: `/channel/${CHANNEL_ID}`,
+                            data: {
+                                type: 'dashboard_command',
+                                target: 'oracle',
+                                command: 'oracle',
+                                payload: { coord: state.selectedCoord, text: text }
+                            }
+                        }));
+                    }
+                } else {
+                    funcModal.classList.remove('show');
+                    state.coordPickMode = false;
+                    document.getElementById('mapContainer').classList.remove('pick-coord');
+                    document.getElementById('oraclePickHint').classList.remove('active');
+                }
+            });
+
+            // ---- 日志面板 ----
+            document.getElementById('btnLog').addEventListener('click', (e) => {
+                e.stopPropagation();
+                funcModal.classList.remove('show');
+                document.getElementById('logPanel').classList.toggle('show');
+                renderLogPanel();
+            });
+            document.getElementById('closeLog').addEventListener('click', () => {
+                document.getElementById('logPanel').classList.remove('show');
+            });
+
+            // ---- 状态面板 ----
+            const statusPanel = document.getElementById('statusPanel');
+            const btnStatus = document.getElementById('btnStatus');
+            let statusVisible = false;
+
+            btnStatus.addEventListener('click', (e) => {
+                e.stopPropagation();
+                statusVisible = !statusVisible;
+                if (statusVisible) {
+                    statusPanel.classList.add('show');
+                    btnStatus.classList.add('active-btn');
+                    updateStatusPanel();
+                } else {
+                    statusPanel.classList.remove('show');
+                    btnStatus.classList.remove('active-btn');
+                }
+            });
+
+            addLogEntry('系统', '🌍 SurvX 已加载');
+            addLogEntry('系统', `📡 频道: ${CHANNEL_ID}, 世界: ${WORLD_NAME}`);
+            addLogEntry('系统', '📊 点击右下角 📊 查看状态');
+        });
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+
+        async function init() {
+            const config = await loadFieldConfig();
+            if (config) {
+                FIELD_CONFIG = config;
+                state.config = config;
+                state.sego = { characters: {}, defaultCharacter: null };
+                document.getElementById('mapTitle').textContent = config.field?.name || 'SurvX';
+                console.log('[Dashboard] 地图配置已加载:', config.field?.name);
+                addLogEntry('系统', `🗺️ 地图加载完成: ${config.field?.name || '未知'}`);
+            } else {
+                state.config = {
+                    field: { name: WORLD_NAME, width: 1000, height: 800, zMin: -60, zMax: 150 },
+                    terrains: [],
+                    items: []
+                };
+                console.warn('[Dashboard] 使用默认地图配置');
+                addLogEntry('系统', '⚠️ 使用默认地图配置');
+            }
+
+            document.getElementById('instanceName').textContent = WORLD_NAME;
+
+            setupMouse();
+
+            const { w, h } = getWorldSize();
+            state.viewX = w / 2 - (window.innerWidth / state.zoom) / 2;
+            state.viewY = h / 2 - (window.innerHeight / state.zoom) / 2;
+            clampView();
+
+            drawMap();
+
+            window.addEventListener('resize', handleResize);
+
+            function weatherLoop() {
+                drawWeather();
+                requestAnimationFrame(weatherLoop);
+            }
+            weatherLoop();
+
+            function bubbleLoop() {
+                if (thoughtState.active || thoughtState.showing ||
+                    speechState.active || speechState.showing) {
+                    updateBubblePositions();
+                }
+                requestAnimationFrame(bubbleLoop);
+            }
+            bubbleLoop();
+
+            function followLoop() {
+                if (state.followCharacter && state.isConnected) {
+                    updateViewFollow();
+                    drawMap();
+                }
+                setTimeout(followLoop, 100);
+            }
+            followLoop();
+
+            if (CHANNEL_ID >= 0) {
+                connectWebSocket();
+                state.isConnected = true;
+            } else {
+                addLogEntry('系统', '❌ 缺少 channel_id 参数，请在 URL 中添加 ?channel_id=0');
+                console.error('[Dashboard] 缺少 channel_id 参数');
+            }
+
+            addLogEntry('系统', '✅ 初始化完成');
+            addLogEntry('系统', `🔌 连接 WebSocket: ${WS_URL}`);
+        }
+
+        init().catch(console.error);
+
+        window.__dashboard = {
+            state: state,
+            drawMap: drawMap,
+            drawWeather: drawWeather,
+            addLogEntry: addLogEntry,
+            connectWebSocket: connectWebSocket,
+        };
+
+        console.log('🌍 SurvX Dashboard 已加载');
+        console.log('📡 调试接口: window.__dashboard');
+        console.log(`📡 频道: ${CHANNEL_ID}, 世界: ${WORLD_NAME}`);
+    </script>
+</body>
+</html>

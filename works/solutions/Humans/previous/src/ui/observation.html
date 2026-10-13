@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>数据观测台</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js">
+    </script>
+    <style>
+        /* ===== 与主站统一：无圆角 + 放大字号 + 现代宽松 ===== */
+        :root {
+            --bg: #0e0b0a;
+            --surface: #1a1412;
+            --border: #3a2c24;
+            --text: #e4d7cf;
+            --text-dim: #a28c7c;
+            --accent: #f6b07c;
+            --accent-glow: #d4845a;
+            --danger: #f58b7a;
+            --warning: #eab676;
+            --info: #b8a0e0;
+            font-family: 'Inter', 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* ===== 无圆角全局 ===== */
+        .topbar select,
+        .topbar input,
+        .topbar button,
+        .sidebar .item-list,
+        .panel,
+        .snap-card,
+        .data-table-wrap table,
+        .tag,
+        input,
+        button {
+            border-radius: 0 !important;
+        }
+
+        /* ===== 顶栏 ===== */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 28px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+        }
+        .topbar h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 2px;
+            white-space: nowrap;
+            text-shadow: 0 0 6px rgba(246, 176, 124, 0.2);
+        }
+        .topbar select,
+        .topbar input,
+        .topbar button {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 18px;
+            font-size: 16px;
+            outline: none;
+        }
+        .topbar select:focus,
+        .topbar input:focus {
+            border-color: var(--accent);
+        }
+        .topbar input[type="number"] {
+            width: 110px;
+        }
+        .topbar button {
+            cursor: pointer;
+            font-weight: 600;
+            padding: 10px 22px;
+            border: none;
+            background: var(--accent);
+            color: #1a1412;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        .topbar button:hover {
+            opacity: 0.85;
+            background: var(--accent-glow);
+        }
+        .topbar button.ghost {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .topbar .spacer {
+            flex: 1;
+        }
+        .topbar .tick-info {
+            color: var(--text-dim);
+            font-size: 15px;
+            white-space: nowrap;
+        }
+        .topbar .db-select {
+            min-width: 150px;
+        }
+
+        /* ===== 主体 ===== */
+        .main {
+            display: flex;
+            height: calc(100vh - 68px);
+        }
+
+        /* ===== 侧边栏 ===== */
+        .sidebar {
+            width: 320px;
+            min-width: 320px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 20px 18px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .sidebar .sec-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            margin: 8px 0 4px;
+            padding: 0 4px;
+            font-weight: 600;
+        }
+        .sidebar .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: var(--bg);
+            padding: 4px 2px;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+        }
+        .sidebar .item-list button {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            text-align: left;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: 0.15s;
+        }
+        .sidebar .item-list button:hover {
+            background: #2c211d;
+        }
+        .sidebar .item-list button.active {
+            background: #3a2a22;
+            color: var(--accent);
+        }
+        .sidebar #current-db-info {
+            padding: 10px 4px;
+            color: var(--text-dim);
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 4px;
+        }
+
+        /* ===== 内容 ===== */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 0 28px 28px 28px;
+        }
+
+        /* ===== 标签栏 ===== */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            padding: 0 0 0 0;
+            background: transparent;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 18px;
+        }
+        .tab-bar button {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            padding: 14px 24px;
+            cursor: pointer;
+            font-size: 16px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+        .tab-bar button:hover {
+            color: var(--text);
+        }
+        .tab-bar button.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            text-shadow: 0 0 6px rgba(246, 176, 124, 0.15);
+        }
+
+        /* ===== 标签内容 ===== */
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            display: none;
+        }
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* ===== 面板 ===== */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 20px 24px;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .panel-header h3 {
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        .panel-header .badge {
+            font-size: 14px;
+            color: var(--text-dim);
+            background: var(--bg);
+            padding: 4px 16px;
+            border: 1px solid var(--border);
+        }
+
+        /* ===== 图表 ===== */
+        .chart-box {
+            width: 100%;
+            height: 460px;
+        }
+
+        /* ===== 曲线标签 ===== */
+        .series-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            background: var(--bg);
+            padding: 6px 16px;
+            border: 1px solid var(--border);
+        }
+        .tag .dot {
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+        }
+        .tag button {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0 4px;
+            line-height: 1;
+        }
+        .tag button:hover {
+            color: var(--danger);
+        }
+
+        /* ===== 快照网格 ===== */
+        .snapshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 16px;
+        }
+        .snap-card {
+            background: var(--bg);
+            padding: 16px 20px;
+            border: 1px solid var(--border);
+        }
+        .snap-card h4 {
+            font-size: 16px;
+            color: var(--info);
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+        }
+        .snap-card .kv-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 20px;
+            font-size: 15px;
+        }
+        .snap-card .k {
+            color: var(--text-dim);
+        }
+        .snap-card .v {
+            font-weight: 600;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ===== 原始数据表 ===== */
+        .data-table-wrap {
+            overflow-x: auto;
+            max-height: 600px;
+        }
+        .data-table-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            border: 1px solid var(--border);
+        }
+        .data-table-wrap th {
+            text-align: left;
+            color: var(--text-dim);
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 1;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .data-table-wrap td {
+            padding: 8px 14px;
+            border-bottom: 1px solid #1f1714;
+            white-space: nowrap;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 15px;
+        }
+        .data-table-wrap tr:hover td {
+            background: #2c211d;
+        }
+
+        /* ===== 空状态 ===== */
+        .empty-state {
+            color: var(--text-dim);
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .empty-state .icon {
+            font-size: 52px;
+            margin-bottom: 16px;
+        }
+        .empty-state div {
+            font-size: 16px;
+        }
+
+        /* ===== 滚动条 ===== */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3a2c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <select id="inst-select">
+            <option value="">选择实例...</option>
+        </select>
+        <select id="db-select" class="db-select" style="display:none;">
+            <option value="">选择数据库...</option>
+        </select>
+        <select id="source-type">
+            <option value="entity">Entity 状态</option>
+            <option value="table">数据表</option>
+        </select>
+        <input type="number" id="tick-min" placeholder="tick 起" style="width:110px;">
+        <span style="color:var(--text-dim);">~</span>
+        <input type="number" id="tick-max" placeholder="tick 止" style="width:110px;">
+        <button onclick="应用Tick过滤()">过滤</button>
+        <span class="spacer"></span>
+        <span class="tick-info" id="tick-range-label">tick: -</span>
+        <button class="ghost" onclick="清除所有曲线()">清空曲线</button>
+    </div>
+
+    <div class="main">
+        <div class="sidebar" id="sidebar">
+            <div id="current-db-info">未选择数据库</div>
+            <div id="entity-panel" style="display:none;">
+                <div class="sec-title">实体</div>
+                <div class="item-list" id="entity-list"></div>
+                <div class="sec-title">字段 <span style="font-weight:400;font-size:13px;text-transform:none;">点击添加曲线</span></div>
+                <div class="item-list" id="field-list"></div>
+            </div>
+            <div id="table-panel" style="display:none;">
+                <div class="sec-title">数据表</div>
+                <div class="item-list" id="table-list"></div>
+                <div class="sec-title">数值列 <span style="font-weight:400;font-size:13px;text-transform:none;">点击添加曲线</span></div>
+                <div class="item-list" id="table-col-list"></div>
+                <button class="ghost" id="btn-view-table" style="width:100%;margin-top:12px;padding:12px;font-size:15px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;"
+                onclick="查看原始表()">查看原始数据</button>
+            </div>
+            <div id="no-inst-msg" class="empty-state" style="padding:30px 10px;">
+                <div class="icon">◈</div>
+                <div>选择实例和数据库开始探索</div>
+            </div>
+        </div>
+
+        <div class="content" id="content-area">
+            <div class="tab-bar">
+                <button class="active" data-tab="chart">时序图表</button>
+                <button data-tab="snapshot">Tick 快照</button>
+                <button data-tab="table-view">原始数据</button>
+            </div>
+
+            <div class="tab-content active" id="tab-chart">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 id="chart-title">时序数据</h3>
+                        <span class="badge" id="datapoint-count">0 数据点</span>
+                    </div>
+                    <div class="chart-box" id="main-chart"></div>
+                    <div class="series-tags" id="series-tags"></div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-snapshot">
+                <div class="empty-state" id="snapshot-empty">
+                    <div class="icon">📸</div>
+                    <div>在图表中点击数据点，或输入 tick 号查看快照</div>
+                    <div style="margin-top:16px;display:flex;gap:12px;justify-content:center;align-items:center;">
+                        <input type="number" id="snapshot-tick-input" placeholder="tick 号"
+                        style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:10px 16px;width:140px;font-size:16px;">
+                        <button onclick="查看快照(parseInt(document.getElementById('snapshot-tick-input').value))"
+                        style="background:var(--accent);color:#1a1412;border:none;padding:10px 24px;font-size:16px;font-weight:600;cursor:pointer;">查看</button>
+                    </div>
+                </div>
+                <div class="snapshot-grid" id="snapshot-grid"></div>
+            </div>
+
+            <div class="tab-content" id="tab-table-view">
+                <div class="empty-state" id="table-empty">
+                    <div class="icon">📋</div>
+                    <div>在左侧选择数据表后点击"查看原始数据"</div>
+                </div>
+                <div class="data-table-wrap" id="raw-table-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== API 调用封装 =====
+        function callApi(method, ...args) {
+            return new Promise((resolve, reject) => {
+                try {
+                    if (window.parent && window.parent.pywebview && window.parent.pywebview.api) {
+                        const api = window.parent.pywebview.api;
+                        if (typeof api[method] === 'function') {
+                            // 直接调用
+                            const result = api[method](...args);
+                            resolve(result);
+                        } else {
+                            // 尝试通过 evaluate 调用
+                            const script = `pywebview.api.${method}(${args.map(a => JSON.stringify(a)).join(',')})`;
+                            window.parent.pywebview.evaluate(script, resolve);
+                        }
+                    } else {
+                        reject(new Error('无法访问父窗口的 pywebview API'));
+                    }
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }
+
+        // ===== 暖色AI调色盘 =====
+        const 调色盘 = [
+            '#f6b07c', '#e89f6e', '#d4845a', '#f5cba0', '#eab676',
+            '#f0b27a', '#d4a373', '#c38d6b', '#f8c8a0', '#e5b68a',
+            '#dba57a', '#c9976a', '#f7d0b0', '#ecc59a', '#dbb58a'
+        ];
+
+        let 当前实例 = null;
+        let 当前数据库 = null;
+        let 当前数据库文件名 = null;
+        let 实例元信息 = null;
+        let 曲线列表 = [];
+        let 当前活跃表 = null;
+        let 图表实例 = null;
+        let 所有实例数据 = [];
+
+        // ===== 数据库工具函数 =====
+        function 获取数据库类型(filename) {
+            if (filename.startsWith('field_')) return '环境';
+            if (filename.startsWith('ego_')) return '人物';
+            return '未知';
+        }
+
+        function 获取数据库显示名(filename) {
+            if (filename.startsWith('field_')) {
+                return filename.replace('field_', '').replace('.db', '');
+            }
+            if (filename.startsWith('ego_')) {
+                return filename.replace('ego_', '').replace('.db', '');
+            }
+            return filename.replace('.db', '');
+        }
+
+        // ===== 初始化 =====
+        async function init() {
+            await 加载实例列表();
+
+            document.getElementById('inst-select').onchange = async function() {
+                if (this.value) {
+                    await 选择实例(this.value);
+                } else {
+                    重置界面();
+                }
+            };
+
+            document.getElementById('db-select').onchange = function() {
+                if (this.value) {
+                    选择数据库(this.value);
+                }
+            };
+
+            document.getElementById('source-type').onchange = function() {
+                渲染侧边栏();
+            };
+
+            document.querySelectorAll('.tab-bar button').forEach(btn => {
+                btn.onclick = function() {
+                    document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+                    if (this.dataset.tab === 'chart') 调整图表大小();
+                };
+            });
+
+            window.onresize = () => { if (图表实例) 图表实例.resize(); };
+        }
+
+        function 重置界面() {
+            当前实例 = null;
+            当前数据库 = null;
+            当前数据库文件名 = null;
+            曲线列表 = [];
+            document.getElementById('db-select').style.display = 'none';
+            document.getElementById('db-select').innerHTML = '<option value="">选择数据库...</option>';
+            document.getElementById('current-db-info').textContent = '未选择数据库';
+            document.getElementById('tick-range-label').textContent = 'tick: -';
+            document.getElementById('no-inst-msg').style.display = 'block';
+            document.getElementById('entity-panel').style.display = 'none';
+            document.getElementById('table-panel').style.display = 'none';
+            document.getElementById('chart-title').textContent = '时序数据';
+            刷新图表();
+        }
+
+        // ===== 加载实例 =====
+        async function 加载实例列表() {
+            try {
+                const result = await callApi('get_instances');
+                if (result && result.success) {
+                    所有实例数据 = result.data;
+                    const sel = document.getElementById('inst-select');
+                    sel.innerHTML = '<option value="">选择实例...</option>';
+                    所有实例数据.forEach(inst => {
+                        const opt = document.createElement('option');
+                        opt.value = inst.name;
+                        const envCount = inst.databases.filter(d => d.type === '环境').length;
+                        const egoCount = inst.databases.filter(d => d.type === '人物').length;
+                        opt.textContent = `${inst.name} (环境:${envCount} 人物:${egoCount})`;
+                        sel.appendChild(opt);
+                    });
+                } else {
+                    console.error('加载实例列表失败:', result);
+                }
+            } catch (e) {
+                console.error('加载实例列表异常:', e);
+            }
+        }
+
+        async function 选择实例(name) {
+            当前实例 = name;
+            曲线列表 = [];
+            当前数据库 = null;
+            当前数据库文件名 = null;
+
+            // 从本地数据中获取该实例的数据库列表
+            const instData = 所有实例数据.find(d => d.name === name);
+            if (!instData) {
+                console.error('实例不存在:', name);
+                return;
+            }
+
+            const dbs = instData.databases;
+
+            const dbSel = document.getElementById('db-select');
+            dbSel.style.display = 'block';
+            dbSel.innerHTML = '<option value="">选择数据库...</option>';
+            
+            const envDbs = dbs.filter(d => d.type === '环境');
+            const egoDbs = dbs.filter(d => d.type === '人物');
+            
+            if (envDbs.length > 0) {
+                const group = document.createElement('optgroup');
+                group.label = '环境 (field_*)';
+                envDbs.forEach(db => {
+                    const opt = document.createElement('option');
+                    opt.value = db.filename;
+                    opt.textContent = `${db.display_name} (tick ${db.tick_min}~${db.tick_max})`;
+                    group.appendChild(opt);
+                });
+                dbSel.appendChild(group);
+            }
+            
+            if (egoDbs.length > 0) {
+                const group = document.createElement('optgroup');
+                group.label = '人物 (ego_*)';
+                egoDbs.forEach(db => {
+                    const opt = document.createElement('option');
+                    opt.value = db.filename;
+                    opt.textContent = `${db.display_name} (tick ${db.tick_min}~${db.tick_max})`;
+                    group.appendChild(opt);
+                });
+                dbSel.appendChild(group);
+            }
+
+            if (envDbs.length > 0) {
+                dbSel.value = envDbs[0].filename;
+                选择数据库(envDbs[0].filename);
+            } else if (egoDbs.length > 0) {
+                dbSel.value = egoDbs[0].filename;
+                选择数据库(egoDbs[0].filename);
+            }
+
+            document.getElementById('no-inst-msg').style.display = 'none';
+        }
+
+        async function 选择数据库(filename) {
+            当前数据库文件名 = filename;
+            
+            const dbInfo = document.getElementById('current-db-info');
+            const dbType = 获取数据库类型(filename);
+            const dbName = 获取数据库显示名(filename);
+            dbInfo.textContent = `${dbType}: ${dbName} (${filename})`;
+
+            // 加载元信息
+            try {
+                const result = await callApi('get_db_info', 当前实例, filename);
+                if (result && result.success) {
+                    实例元信息 = result.data;
+                    document.getElementById('tick-range-label').textContent = 
+                        `tick: ${实例元信息.tick_range[0]} ~ ${实例元信息.tick_range[1]}`;
+                    document.getElementById('chart-title').textContent = 
+                        `时序数据 - ${当前实例}/${filename}`;
+
+                    document.getElementById('entity-panel').style.display = 'block';
+                    document.getElementById('table-panel').style.display = 'block';
+
+                    曲线列表 = [];
+                    渲染侧边栏();
+                    刷新图表();
+                } else {
+                    console.error('加载数据库信息失败:', result);
+                }
+            } catch (e) {
+                console.error('加载数据库信息异常:', e);
+            }
+        }
+
+        // ===== 渲染侧边栏 =====
+        function 渲染侧边栏() {
+            const srcType = document.getElementById('source-type').value;
+            document.getElementById('entity-panel').style.display = srcType === 'entity' ? 'block' : 'none';
+            document.getElementById('table-panel').style.display = srcType === 'table' ? 'block' : 'none';
+
+            if (srcType === 'entity') 渲染实体面板();
+            else 渲染表面板();
+        }
+
+        function 渲染实体面板() {
+            const el = document.getElementById('entity-list');
+            el.innerHTML = '';
+            if (!实例元信息) return;
+            (实例元信息.entities || []).forEach(ent => {
+                const btn = document.createElement('button');
+                btn.textContent = ent;
+                btn.onclick = () => 选择实体(ent, btn);
+                el.appendChild(btn);
+            });
+            if ((实例元信息.entities || []).length > 0) {
+                el.firstChild?.click();
+            }
+        }
+
+        function 选择实体(ent, btn) {
+            document.querySelectorAll('#entity-list button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const fl = document.getElementById('field-list');
+            fl.innerHTML = '';
+            const fields = 实例元信息.entity_fields[ent] || [];
+            fields.forEach(f => {
+                const b = document.createElement('button');
+                b.textContent = f;
+                b.title = '点击添加到图表';
+                b.onclick = () => 添加曲线_entity(ent, f);
+                fl.appendChild(b);
+            });
+        }
+
+        function 渲染表面板() {
+            const tl = document.getElementById('table-list');
+            tl.innerHTML = '';
+            if (!实例元信息) return;
+            (实例元信息.tables || []).forEach(t => {
+                const btn = document.createElement('button');
+                btn.textContent = t;
+                btn.onclick = () => 选择表(t, btn);
+                tl.appendChild(btn);
+            });
+            if ((实例元信息.tables || []).length > 0) {
+                tl.firstChild?.click();
+            }
+        }
+
+        function 选择表(t, btn) {
+            document.querySelectorAll('#table-list button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            当前活跃表 = t;
+
+            const cl = document.getElementById('table-col-list');
+            cl.innerHTML = '';
+            const cols = (实例元信息.table_columns[t] || []).filter(c => c !== 'tick');
+            cols.forEach(c => {
+                const b = document.createElement('button');
+                b.textContent = c;
+                b.title = '点击添加到图表';
+                b.onclick = () => 添加曲线_table(t, c);
+                cl.appendChild(b);
+            });
+        }
+
+        // ===== 添加曲线 =====
+        function 添加曲线_entity(target, field) {
+            if (!当前实例 || !当前数据库文件名) return;
+            const id = `${当前实例}:${当前数据库文件名}:entity:${target}:${field}`;
+            if (曲线列表.find(s => s.id === id)) return;
+            曲线列表.push({
+                id,
+                source: 'entity',
+                target,
+                field,
+                label: `${target.replace('当前状态','').replace('_','')}·${field.replace('特征层_','').replace('关系层_','').replace('结构层_','').replace('计算层_','')}`,
+                color: 调色盘[曲线列表.length % 调色盘.length],
+                instance: 当前实例,
+                db: 当前数据库文件名,
+            });
+            刷新图表();
+        }
+
+        function 添加曲线_table(target, field) {
+            if (!当前实例 || !当前数据库文件名) return;
+            const id = `${当前实例}:${当前数据库文件名}:table:${target}:${field}`;
+            if (曲线列表.find(s => s.id === id)) return;
+            曲线列表.push({
+                id,
+                source: 'table',
+                target,
+                field,
+                label: `${target}·${field}`,
+                color: 调色盘[曲线列表.length % 调色盘.length],
+                instance: 当前实例,
+                db: 当前数据库文件名,
+            });
+            刷新图表();
+        }
+
+        function 移除曲线(id) {
+            曲线列表 = 曲线列表.filter(s => s.id !== id);
+            刷新图表();
+        }
+
+        function 清除所有曲线() {
+            曲线列表 = [];
+            刷新图表();
+        }
+
+        function 应用Tick过滤() { 刷新图表(); }
+
+        // ===== 刷新图表 =====
+        async function 刷新图表() {
+            if (!当前实例 || !当前数据库文件名 || 曲线列表.length === 0) {
+                document.getElementById('datapoint-count').textContent = '0 数据点';
+                渲染空图表();
+                渲染标签();
+                return;
+            }
+
+            const tickMin = document.getElementById('tick-min').value || undefined;
+            const tickMax = document.getElementById('tick-max').value || undefined;
+
+            const promises = 曲线列表.map(async s => {
+                try {
+                    const result = await callApi(
+                        'get_timeseries',
+                        s.instance,
+                        s.db,
+                        s.source,
+                        s.target,
+                        s.field,
+                        tickMin ? parseInt(tickMin) : undefined,
+                        tickMax ? parseInt(tickMax) : undefined
+                    );
+                    if (result && result.success) {
+                        return { series: s, data: result.data || [] };
+                    } else {
+                        return { series: s, data: [] };
+                    }
+                } catch (e) {
+                    console.error('获取时间序列数据失败:', e);
+                    return { series: s, data: [] };
+                }
+            });
+
+            const results = await Promise.all(promises);
+            const totalPoints = results.reduce((sum, r) => sum + r.data.length, 0);
+            document.getElementById('datapoint-count').textContent = `${totalPoints} 数据点`;
+
+            const series = results.map(r => ({
+                name: r.series.label,
+                type: 'line',
+                data: r.data.map(d => [d.tick, d.value]),
+                smooth: false,
+                symbol: 'none',
+                lineStyle: { color: r.series.color, width: 2.8 },
+                emphasis: { focus: 'series' },
+            }));
+
+            const option = {
+                backgroundColor: 'transparent',
+                grid: { left: 65, right: 45, top: 35, bottom: 55 },
+                xAxis: {
+                    type: 'value',
+                    name: 'Tick',
+                    nameTextStyle: { color: '#a28c7c', fontSize: 15 },
+                    axisLine: { lineStyle: { color: '#3a2c24' } },
+                    axisLabel: { color: '#a28c7c', fontSize: 14 },
+                    splitLine: { lineStyle: { color: '#3a2c2430' } },
+                    min: tickMin ? parseFloat(tickMin) : undefined,
+                    max: tickMax ? parseFloat(tickMax) : undefined,
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '值',
+                    nameTextStyle: { color: '#a28c7c', fontSize: 15 },
+                    axisLine: { lineStyle: { color: '#3a2c24' } },
+                    axisLabel: { color: '#a28c7c', fontSize: 14 },
+                    splitLine: { lineStyle: { color: '#3a2c2430' } },
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: '#1a1412',
+                    borderColor: '#3a2c24',
+                    textStyle: { color: '#e4d7cf', fontSize: 15 },
+                    formatter: function(params) {
+                        let s = `Tick: <b>${params[0].axisValue}</b><br/>`;
+                        params.forEach(p => {
+                            s += `<span style="display:inline-block;width:10px;height:10px;background:${p.color};margin-right:6px;"></span>`;
+                            s += `${p.seriesName}: <b>${p.value[1]?.toFixed(4)}</b><br/>`;
+                        });
+                        return s;
+                    },
+                },
+                series: series,
+            };
+
+            const dom = document.getElementById('main-chart');
+            if (!图表实例) {
+                图表实例 = echarts.init(dom);
+                图表实例.on('click', function(params) {
+                    if (params.componentType === 'series') {
+                        const tick = params.value[0];
+                        查看快照(tick);
+                        document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        document.querySelector('[data-tab="snapshot"]').classList.add('active');
+                        document.getElementById('tab-snapshot').classList.add('active');
+                    }
+                });
+            }
+            图表实例.setOption(option, true);
+            调整图表大小();
+            渲染标签();
+        }
+
+        function 渲染空图表() {
+            const dom = document.getElementById('main-chart');
+            if (!图表实例) 图表实例 = echarts.init(dom);
+            图表实例.setOption({
+                backgroundColor: 'transparent',
+                grid: { left: 65, right: 45, top: 35, bottom: 55 },
+                xAxis: { type: 'value', axisLabel: { color: '#a28c7c', fontSize: 14 }, splitLine: { lineStyle: { color: '#3a2c2430' } } },
+                yAxis: { type: 'value', axisLabel: { color: '#a28c7c', fontSize: 14 }, splitLine: { lineStyle: { color: '#3a2c2430' } } },
+                series: [],
+            }, true);
+        }
+
+        function 调整图表大小() {
+            if (图表实例) setTimeout(() => 图表实例.resize(), 50);
+        }
+
+        function 渲染标签() {
+            document.getElementById('series-tags').innerHTML = 曲线列表.map(s => `
+                    <div class="tag">
+                        <span class="dot" style="background:${s.color}"></span>
+                        ${s.label}
+                        <button onclick="移除曲线('${s.id}')" title="移除">×</button>
+                    </div>
+                `).join('');
+        }
+
+        // ===== 快照 =====
+        async function 查看快照(tick) {
+            if (!当前实例 || !当前数据库文件名 || tick === undefined || isNaN(tick)) {
+                alert('请先选择数据库并输入有效的tick号');
+                return;
+            }
+
+            document.getElementById('snapshot-tick-input').value = tick;
+            document.getElementById('snapshot-empty').style.display = 'none';
+
+            try {
+                const result = await callApi('get_snapshot', 当前实例, 当前数据库文件名, tick);
+                if (!result || !result.success) {
+                    document.getElementById('snapshot-grid').innerHTML = `<div class="empty-state"><div>❌ ${result?.message || '获取快照失败'}</div></div>`;
+                    return;
+                }
+
+                const data = result.data;
+                let html = '';
+                const snap = data.snapshot || {};
+                const snapKeys = Object.keys(snap).sort();
+
+                for (const entity of snapKeys) {
+                    const obj = snap[entity];
+                    if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) continue;
+                    const kvs = Object.entries(obj).filter(([k, v]) => typeof v !== 'object' || v === null);
+                    if (kvs.length === 0) continue;
+
+                    html += `<div class="snap-card">
+                            <h4>${entity}</h4>
+                            <div class="kv-grid">
+                                ${kvs.map(([k, v]) => {
+                                    let display = v;
+                                    if (typeof v === 'number') display = Number.isInteger(v) ? v : v.toFixed(3);
+                                    return `<span class="k">${k}</span><span class="v">${display}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>`;
+                }
+
+                if (data.experiences) {
+                    for (const [tableName, events] of Object.entries(data.experiences)) {
+                        if (events.length > 0) {
+                            html += `<div class="snap-card">
+                                    <h4>${tableName} @ tick ${data.tick}</h4>
+                                    ${events.map(e => `<div style="font-size:15px;color:var(--text-dim);margin:4px 0;">• ${e.类型}: ${e.描述}</div>`).join('')}
+                                </div>`;
+                        }
+                    }
+                }
+
+                document.getElementById('snapshot-grid').innerHTML = html ||
+                    '<div class="empty-state"><div>该 tick 无数据</div></div>';
+            } catch (e) {
+                console.error('查看快照异常:', e);
+                document.getElementById('snapshot-grid').innerHTML = `<div class="empty-state"><div>❌ 查看快照失败: ${e.message}</div></div>`;
+            }
+        }
+
+        // ===== 查看原始表 =====
+        async function 查看原始表() {
+            if (!当前实例 || !当前数据库文件名 || !当前活跃表) {
+                alert('请先在左侧选择一个数据表');
+                return;
+            }
+
+            document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector('[data-tab="table-view"]').classList.add('active');
+            document.getElementById('tab-table-view').classList.add('active');
+            document.getElementById('table-empty').style.display = 'none';
+
+            try {
+                const result = await callApi('get_table_data', 当前实例, 当前数据库文件名, 当前活跃表, 1, 100);
+                if (!result || !result.success) {
+                    document.getElementById('raw-table-container').innerHTML = `<div class="empty-state"><div>❌ ${result?.message || '获取数据失败'}</div></div>`;
+                    return;
+                }
+
+                const data = result.data;
+                let html = `
+                        <h3 style="font-size:18px;margin-bottom:14px;color:var(--accent);">${data.table} — ${data.total} 行 (显示前${data.rows.length})</h3>
+                        <table>
+                            <thead><tr>${data.columns.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+                            <tbody>
+                                ${data.rows.map(row => `
+                                    <tr>${data.columns.map(c => {
+                                        const v = row[c];
+                                        const d = typeof v === 'object' ? JSON.stringify(v).slice(0, 100) : String(v ?? '');
+                                        return `<td title="${d.replace(/"/g,'&quot;')}">${d}</td>`;
+                                    }).join('')}</tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+
+                document.getElementById('raw-table-container').innerHTML = html;
+            } catch (e) {
+                console.error('查看原始表异常:', e);
+                document.getElementById('raw-table-container').innerHTML = `<div class="empty-state"><div>❌ 查看数据失败: ${e.message}</div></div>`;
+            }
+        }
+
+        // ===== 启动 =====
+        init();
+    </script>
+</body>
+</html>
