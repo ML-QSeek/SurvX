@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+		<meta	http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+		<script	type="text/javascript"	src="./js/jquery.min.js"></script>
+		<script type="text/javascript" src="http://10.10.98.51/test/sys/qq/channel/js/editor/ueditor.config.js"></script>
+  	<script type="text/javascript" src="http://10.10.98.51/test/sys/qq/channel/js/editor/ueditor.all.js"></script>
+  	<script type="text/javascript" src="http://10.10.98.51/test/sys/qq/channel/js/editor/ueditor.parse.min.js"></script>
+		<link	type="text/css"	rel="stylesheet"	href="./css/smartMenu.css"/>
+		<script	type="text/javascript"	src="./js/jquery-smartMenu.js"></script>
+		<style type="text/css">
+			html,body
+			{
+				font-family:Open Sans,Arial,sans-serif;
+				font-weight:400;
+				font-size:14px;
+				line-height:1.3em;
+				width:100%;
+				height:100%;
+				color:#101010;
+				background:#101010;
+				margin:0;
+				padding:0;
+				overflow-x:auto;
+			}
+
+
+        /* 自定义滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 15, 25, 0.5);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(22, 192, 255, 0.5);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(22, 192, 255, 0.7);
+        }
+        
+
+			#mq_main
+			{
+				width:100%;
+				position:absolute;
+				top:0px;
+				bottom:0px;
+				box-sizing:border-box;
+			}
+			#mq_mainL
+			{
+				float:left;
+				height:100%;
+				width:50%;
+				box-sizing:border-box;
+			}
+			#mq_mainR
+			{
+				float:left;
+				height:100%;
+				width:50%;
+				padding:20px;
+				box-sizing:border-box;
+			}			
+			#mq_contents
+			{
+				
+				
+				}
+			#mq_notes
+			{
+				height:100%;
+				width:100%;
+				padding:20px;
+				background: rgba(20,177,235,0.1);
+				box-sizing:border-box;
+				border-radius:15px;
+				}
+			#inputTxt{
+				padding:0;
+				margin:0;
+				width:70%;
+				height:30px;
+				color:#16C0FF;
+				float:left;
+				font-size:100%;
+			  border: 1px #16C0FF solid;
+			  outline:none;
+				text-transform:uppercase;
+				background: transparent;
+				}
+			.btn3 {                        
+			    background-color: transparent;/*普通状态以及失效（无权限状态#F2F2F2）*/ 
+			    height: 30px;  
+			    width:14%;
+			    border: 1px #16C0FF solid;
+			    float:left;
+			    border-radius: 1px;    
+					font-size:100%;
+					color:#16C0FF;
+					margin-left:1px;
+			}    
+			.btn3:hover {  
+					cursor:pointer !important;
+					background-color:rgba(255,255,255,0.3) !important;
+			}                             
+			
+			.PointTr:hover
+				{
+					cursor:pointer !important;
+					background-color:rgba(20,177,235,0.3) !important;
+				}
+
+			.Warn
+				{
+					border:1px	solid	#16C0FF;
+					background:rgba(14,32,45,1);
+					width:400px;
+					height:160px;
+					z-index:99999999;
+					position:fixed;
+					top:50%;
+					left:50%;
+					margin-top:-80px;
+					margin-left:-200px;
+					box-sizing:border-box;
+					color:#16C0FF;
+				}
+			.WarnB
+				{
+					width:100%;
+					height:114px;
+					text-align:center;
+					font-size:12px;
+					line-height:-6px;
+					padding:10px;
+					line-height:124px;
+					color:#16C0FF;
+				}
+			.WarnM
+				{
+					width:100%;
+					height:26px;
+					text-align:center;
+					line-height:-6px;
+					color:#16C0FF;
+				}
+			.WarnMButton
+				{
+					background:transparent;
+					border:1px solid	#16C0FF;
+					color:#16C0FF;
+					width:50px;
+					height:22px;
+					text-align:center;
+					font-size:12px;
+					cursor:pointer;
+					margin:1px;
+				}
+
+			table.altrowstable1
+				{
+					border:0px	#16C0FF	solid;
+					border-collapse:collapse;
+					padding:0;
+					width:auto;
+					min-width:60%;
+					table-layout:fixed;
+				}
+				table.altrowstable1	th
+				{
+					border:0px	#16C0FF	solid;
+					text-align:center;
+					color:#16C0FF;
+				}
+				table.altrowstable1	td
+				{
+					border:0px	#16C0FF	solid;
+					text-align:center;
+					white-space:pre-line;
+					word-break:keep-all;
+					color:#16C0FF;
+					word-wrap:break-word;
+				}
+			#BG
+			{
+				width:100%;
+				height:100%;
+				background:#000000;
+				opacity: 1;
+				position:absolute;
+				/*overflow-y:scroll;*/
+				z-index:9999999;
+				top:0px;
+				left:0px;
+				box-sizing:border-box;
+				padding-top:30px;
+				}
+					
+			.shut1
+			{
+				width:20px;
+				height:20px;
+				position:fixed;
+				top:2px;
+				right:2px;
+				cursor:pointer;
+			}
+			
+			#edit_kuang
+			{
+				border:1px	solid	#16C0FF;
+				background:rgba(14,32,45,1);
+			  border-radius: 2px;  
+				z-index:99; 
+				position:fixed;
+				padding:1px;
+				bottom: 50px;
+				left:50%;
+				margin-left:-500px;
+				width:1000px;
+				height:478px;
+				box-sizing:border-box;
+				color:#16C0FF;
+				}	
+				
+			.myDIS_shut
+			{
+				width:auto;
+				height:auto;
+				position:absolute;
+				top:0px;
+				right:0px;
+				cursor:pointer;
+				}
+
+			
+			
+		</style>
+	
+	</head>
+	<body>
+		<div  id="mq_main">
+			<center>
+					<div style="height:60px; width:50%;margin-top:30px;">
+					<div style="display:none;" id="ssbtn"></div>
+					<input type="text" id="inputTxt"/><button id="QPointSelect" class="btn3">查询</button>
+					<button id="zengjia"  class="btn3">新建</button>
+					</div>
+					<div id="jbaobiao"></div>
+				</center>
+		</div>
+	</body>	
+	
+	<script	type="text/javascript">
+		
+		
+		const editkuang = `<div  id="edit_kuang">
+										<div class="myDIS_shut"><img src="./assets/images/Close2.png"/></div>
+										<div style="text-align:left;width:100%;">
+										<span>主题：</span>
+										<span id="tjtopic" style="color:#16C0FF"/></span>
+										<span>标题</span>
+										<input type="text" id="tjtopic1" style="background:rgba(20,177,235,0.3);color:#FFFFFF;padding:0;margin:0;width:auto;min-width:60px;height:24px;border:0;outline:none;text-transform:uppercase;font-size:100%;"/>
+										</div>
+										<div id="editor_DIV" style="width:100%;">
+										<script id="editor_myDIS" name="content" type="text/plain"><\/script>
+										</div>
+										<div style="text-align:right;width:100%;margin:1px;box-sizing:border-box;">
+										<span>作者：</span><span id="Author"></span>
+										<span>时间：</span><span id="newcontentTime"></span>
+										<input id="tjSubmit" type="button" class="WarnMButton" value="发布">
+										</div>
+										</div>`;
+
+		
+		
+		
+			//接受参数
+			$(document).ready(function(){
+				// 获取当前页面的URL参数
+				const params = new URLSearchParams(window.location.search);
+				// 获取指定参数的值
+				Q14123101 = params.get('par');
+				})
+			//server
+			var MServer = "http://10.10.98.51/test/sys/";
+			// 生成一个不重复的ID
+			function GenNonDuplicateID(randomLength){
+				return Number(Math.random().toString().substr(3,randomLength) + Date.now()).toString(36)
+			}
+			//警示消息
+			function WarnMessage(content){
+				var sid=GenNonDuplicateID(1);	
+				$("body").append('<div class="Warn"><div class="WarnB" id="WarnB_'+sid+'"></div><div class="WarnM"><button id="Yes" class="WarnMButton"> 好的 </button></div></div>');
+				$("#WarnB_"+sid).html(content);
+				}
+			//屏蔽右键事件
+			document.oncontextmenu=function(){return	false;}
+			$(document).ready(function (){$("#ssbtn").html("无");$("#QPointSelect").click();})
+			$(document).on("click",".shut1",function(){$(this).parent().remove();})
+			//时间
+			function getLangDate(item){
+				var dateObj = new Date();
+				var year = dateObj.getFullYear();
+				var month = dateObj.getMonth()+1;
+				var date = dateObj.getDate();
+				var day = dateObj.getDay();
+				var weeks = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+				var week = weeks[day];
+				var hour = dateObj.getHours();
+				var minute = dateObj.getMinutes();
+				var second = dateObj.getSeconds();
+				if(month<10){month="0"+month;}
+				if(date<10){date="0"+date;}
+				if(hour<10){hour="0"+hour;}
+				if(minute<10){minute="0"+minute;}
+				if(second<10){second="0"+second;}
+				//var newDate = year+"年"+month+"月"+date+"日 "+hour+":"+minute+":"+second+" "+week;
+				if(item=='systime'){
+				var newDate ="<font class='ttext'>"+year+"年"+month+"月"+date+"日 "+hour+":"+minute+":"+second+" "+week+"</font>";
+				document.getElementById("home_main_rbottom1_colr").innerHTML = newDate;
+				setTimeout("getLangDate('systime')",1000);//每隔1秒重新调用一次该函数
+					}
+				else{
+				var newDate = year.toString()+month.toString()+date.toString();
+				var newMonth = year.toString()+month.toString();
+				var newDate1 = year+"-"+month+"-"+date;
+				return eval(item);
+				}
+			}
+			//自定义右键上下文
+		function oncontextmenu(){
+			var obUp={text:"修改",func:function(){
+				
+			var ArticleTextID = $(this).attr('id');
+			if (ArticleTextID !=""){
+				$.ajax({
+					type: "POST",
+					url: MServer+"qq/channel/ch006C.php",
+					data:{
+						qflag:"QPOINT",
+						sflag:'ArticleText_04',
+						sid:ArticleTextID,
+						},
+						async:false,
+						success: function(data1){
+							JchanCon = JSON.parse(data1);
+							ArticleTextBT = JchanCon[2];
+							bghtml=JchanCon[3];
+							
+							}
+						});
+				
+						$("body").append(editkuang);
+						divmove("edit_kuang","edit_kuang");
+						$("#editor_myDIS").css('all','initial');
+						var ue = UE.getEditor('editor_myDIS');
+						$("#tjtopic").html("技术文档");
+						$("#tjtopic1").val(ArticleTextBT);
+						$("#Author").html(Q14123101);
+						$("#newcontentTime").html(getLangDate('newDate'));
+						ue.ready(function() {ue.setContent(bghtml);});
+						$(document).off('click','#tjSubmit').on('click','#tjSubmit', function(){
+							//alert(ue.getContent());
+								$.ajax({
+							  type: "POST",
+							  url: MServer+"qq/channel/ch006C.php",
+							  data:{
+							  	sid:ArticleTextID,//id
+									qflag:"QPOINT",
+							  	sflag:'ArticleText_02',
+									主题: $("#tjtopic").text(),//主题
+									提交人: $("#Author").text(),//作者 
+									标题: $("#tjtopic1").val(),//标题
+									内容: ue.getContent(),//内容   
+							  	},
+							  async:false,
+							  success: function(data1){
+									WarnMessage(data1);
+									$(document).off('click',"#Yes").on('click',"#Yes",function(){
+										$(this).parent().parent().remove();
+										//查询列表更新
+										$("#QPointSelect").click();
+										})
+							  	}
+							});
+						UE.getEditor('editor_myDIS',{toolbars:[]}).destroy();
+						$("#edit_kuang").remove();
+							});
+					
+			}
+			}
+			};
+			
+			var obDel={text:"删除",func:function(){
+			var trid =$(this).attr("id");
+			$.ajax({
+				type: "POST",
+				url: MServer+"qq/channel/ch006C.php",
+				data:{
+					qflag:"QPOINT",
+					sflag:"ArticleText_03",
+					trid:trid,
+					},
+				async:false,
+				success: function(data){
+					$("#QPointSelect").click();
+				}
+				})
+			}
+			};
+			var mailMenuData = [[obUp,obDel]];
+			$(".PointTr").smartMenu(mailMenuData, {
+				name: "mail",
+				beforeShow: function() {
+				$.smartMenu.remove();
+				}
+			});
+			
+		}
+		// 模块拖拽	
+		function	divmove(DivId1,DivId2){
+		var _move=false;
+		var _x,_y;
+		$('#'+DivId1).click(function(){
+			}).mousedown(function(e){
+				_move=true;
+				_x=e.pageX-parseInt($('#'+DivId2).css("left"));
+				_y=e.pageY-parseInt($('#'+DivId2).css("top"));
+				});
+			$(document).mousemove(function(e){
+				if(_move){
+					var x=e.pageX-_x;
+					var y=e.pageY-_y;
+					$('#'+DivId2).css({top:y,left:x});
+				}
+			}).mouseup(function(){
+			_move=false;
+			});
+		}
+
+//-------------------------------------------------------------每日观点查询1--
+$(document).off('click',"#QPointSelect").on('click',"#QPointSelect", function(){
+	var sKey="标题";
+	var sTxt=$("#inputTxt").val();
+	$.post(MServer+"qq/channel/ch006C.php",
+	{	qflag:"QPOINT",
+		sflag:"_04",
+		sKey:sKey,
+		sTxt:sTxt,
+		},
+		function(data1){
+			$("#jbaobiao").html(data1);
+			oncontextmenu();
+			});
+	})
+
+
+//查看文档
+$(document).off('dblclick',".PointTr").on('dblclick',".PointTr",function(){
+	$('.PointTr').css("background","transparent");
+	$(this).css("background","rgba(255,255,255,0.3)");
+	var CId=$(this).attr('id');
+	$("#ssbtn").html(CId);
+	$.ajax({
+		type: "POST",
+		url: MServer+"qq/channel/ch006C.php",
+		data:{
+			qflag:"QPOINT",
+			sflag:'ArticleText_04',
+			sid:CId,
+			},
+			async:false,
+			success: function(data1){
+				var JchanCon = JSON.parse(data1);
+				$("body").append('<div id="BG"><div class="shut1"><img src="./assets/images/Close2.png" style="width:100%;height:100%;"/></div></div>');
+				$("#BG").append('<center><div id="ArticleTextID" style="display:none;">'+CId+'</div><div id="ArticleTextBT" style="display:none;">'+JchanCon[2]+'</div><div id="BGcontentx" style="width:1200px;min-height:500px;height:auto;background:#FFFFFF;padding:9px;text-align:left;box-sizing:border-box;border-radius:15px;">'+JchanCon[3]+'</div></center>');
+					
+				}
+			});
+	
+	})		
+		
+//查看文档
+$(document).off('click',"#zengjia").on('click',"#zengjia",function(){		
+			
+				$("body").append(editkuang);
+				divmove("edit_kuang","edit_kuang");
+				$("#editor_myDIS").css('all','initial');
+				var ue = UE.getEditor('editor_myDIS');
+				$("#tjtopic").html("技术文档");
+				$("#Author").html(Q14123101);
+				$("#newcontentTime").html(getLangDate('newDate'));
+				$(document).off('click','#tjSubmit').on('click','#tjSubmit', function(){
+					//alert(ue.getContent());
+						$.ajax({
+					  type: "POST",
+					  url: MServer+"qq/channel/ch006C.php",
+					  data:{
+							qflag:"QPOINT",
+					  	sflag:'ArticleText_01',
+							主题: $("#tjtopic").text(),//主题
+							提交人: $("#Author").text(),//作者 
+							标题: $("#tjtopic1").val(),//标题
+							内容: ue.getContent(),//内容   
+					  	},
+					  async:false,
+					  success: function(data1){
+							WarnMessage(data1);
+							$(document).off('click',"#Yes").on('click',"#Yes",function(){
+								$(this).parent().parent().remove();
+								$("#QPointSelect").click();
+								})
+					  	}
+					});
+				UE.getEditor('editor_myDIS',{toolbars:[]}).destroy();
+				$("#edit_kuang").remove();
+					});
+				
+		
+	})		
+			
+		$(document).on("click",".myDIS_shut",function(){
+			UE.getEditor('editor_myDIS',{toolbars:[]}).destroy();
+			$("#edit_kuang").remove();
+		})
+		</script>
+</html>
+

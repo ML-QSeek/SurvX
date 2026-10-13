@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ModelLive Real · 摹林交易版 | 多策略复合执行引擎</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ========== 全局滚动条样式（深色科技风，与页面背景协调） ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background-color: #101010;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 0px;
+            transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16C0FF;
+        }
+        ::-webkit-scrollbar-corner {
+            background-color: #101010;
+        }
+        /* Firefox 滚动条 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333333 #1a1a1a;
+        }
+
+        /* ========== 下拉框统一样式（深色科技商务风） ========== */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0px;
+            padding: 10px 32px 10px 14px;
+            font-size: 0.85rem;
+            font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316C0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+        select:hover {
+            border-color: var(--primary);
+            background-color: #2a2a2a;
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary-transparent);
+        }
+        select option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 8px;
+        }
+
+        /* 模态框内下拉框样式保持一致 */
+        .modal-select {
+            width: 100%;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.1);
+            --bg-primary: #101010;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #4AD2FF;
+            --text-tertiary: #808080;
+            --border-color: #333333;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', 'JetBrains Mono', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--primary-transparent) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-transparent) 1px, transparent 1px);
+            background-size: 42px 42px;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .poster {
+            max-width: 1180px;
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .poster:hover {
+            border-color: var(--primary);
+            box-shadow: 0 28px 56px -14px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--primary-transparent);
+        }
+
+        .top-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--bg-secondary), var(--primary), var(--primary-light), var(--primary), var(--bg-secondary));
+            width: 100%;
+        }
+
+        .content {
+            padding: 2.4rem 2.8rem 2.8rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .logo h1 .en-name {
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .logo h1 .chinese-name {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            margin-left: 0.25rem;
+        }
+
+        .subtitle {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            font-weight: 400;
+            margin-top: 0.2rem;
+        }
+
+        .subtitle i {
+            color: var(--primary-light);
+            font-style: normal;
+        }
+
+        .pill {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hero {
+            margin: 1.5rem 0 2rem;
+        }
+
+        .hero .eyebrow {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.4rem 0.8rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-title .title-prefix {
+            font-size: 2.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .hero-title .title-strong {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            letter-spacing: -0.01em;
+            border-bottom: 2px solid var(--primary);
+            display: inline-block;
+        }
+
+        .hero-title .title-suffix {
+            font-size: 2.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .hero .desc {
+            font-size: 1rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+            max-width: 85%;
+            border-left: 2px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        @media (max-width: 780px) {
+            .hero-title .title-prefix,
+            .hero-title .title-strong,
+            .hero-title .title-suffix {
+                font-size: 1.8rem;
+            }
+            .hero .desc {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .hero-title {
+                flex-direction: column;
+                gap: 0.2rem;
+            }
+            .hero-title .title-prefix,
+            .hero-title .title-strong,
+            .hero-title .title-suffix {
+                font-size: 1.6rem;
+            }
+        }
+
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0 2rem;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem 1rem;
+            transition: 0.2s;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+            background: #2a2a2a;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary-light);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+            margin-top: 0.4rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.2rem;
+            margin: 2rem 0;
+        }
+
+        .feature {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--primary);
+            border-right: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 1rem;
+            transition: 0.2s;
+        }
+
+        .feature i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.7rem;
+            display: inline-block;
+        }
+
+        .feature h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .feature p {
+            font-size: 0.8rem;
+            color: #b0b0b0;
+            line-height: 1.4;
+        }
+
+        .highlight-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 1.3rem 1.8rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-block h4 {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight-block p {
+            color: #b0b0b0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        .spec-item i {
+            color: var(--primary);
+            font-size: 0.9rem;
+            width: 1.2rem;
+        }
+
+        .composite-badge {
+            background: var(--primary-transparent);
+            border: 1px solid var(--primary);
+            padding: 0.2rem 0.6rem;
+            font-size: 0.65rem;
+            color: var(--primary-light);
+            font-family: 'JetBrains Mono', monospace;
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+
+        .team-cta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .team-info {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .team-info i {
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .team-info span {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .cta-button {
+            background: transparent;
+            border: 1px solid var(--primary);
+            padding: 0.6rem 1.8rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .cta-button:hover {
+            background: var(--primary-transparent);
+            border-color: var(--primary-light);
+            color: var(--primary-light);
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            letter-spacing: 0.3px;
+        }
+
+        /* 模态框样式（用于演示下拉框） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+        }
+        .modal-content h3 {
+            color: var(--primary-light);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        .modal-content p {
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+        }
+        .modal-content select {
+            width: 100%;
+            margin: 0.8rem 0 1.2rem;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .modal-buttons button {
+            padding: 0.5rem 1.2rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .modal-buttons button:first-child {
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+        .modal-buttons button:first-child:hover {
+            background: var(--primary-transparent);
+        }
+        .modal-buttons button:last-child:hover {
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 800px) {
+            .content {
+                padding: 1.5rem;
+            }
+            .logo h1 {
+                font-size: 2rem;
+            }
+            .logo h1 .chinese-name {
+                font-size: 1.2rem;
+            }
+            .spec-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="poster">
+    <div class="top-line"></div>
+    <div class="content">
+        <div class="header">
+            <div class="logo">
+                <h1>
+                    <span class="en-name">ModelLive Real</span>
+                    <span class="chinese-name"> · 摹林交易版</span>
+                </h1>
+                <div class="subtitle">⚡ <i>策略复合 · 独立通道 · 穿透归因</i> | 多策略复合执行引擎</div>
+            </div>
+            <div class="pill">
+                <i class="fas fa-layer-group"></i> 多策略复合执行
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="eyebrow">摹林交易版 · 专为复合策略而生</div>
+            <div class="hero-title">
+                <span class="title-prefix">复合信号</span>
+                <span class="title-strong">不坍缩</span>
+            </div>
+            <div class="desc">保留 Σ 复合决策层的独立策略意图 —— 信号拆分、独立订单通道、独立风控、独立归因，让复合策略的执行与设计完全对齐。</div>
+        </div>
+
+        <!-- 核心指标：强调复合执行而非单纯低延迟 -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-number">策略级</div>
+                <div class="stat-label">独立通道</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">策略级</div>
+                <div class="stat-label">独立风控</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">策略级</div>
+                <div class="stat-label">独立归因</div>
+            </div>
+        </div>
+
+        <!-- 四大核心能力：完全围绕复合执行设计 -->
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-code-branch"></i>
+                <h4>复合信号拆解 <span class="composite-badge">核心差异</span></h4>
+                <p>接收 Σ 层输出的多策略、动态权重复合信号，自动拆解为独立子策略指令，保留每条策略的原始意图与风险暴露。</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-chart-line"></i>
+                <h4>独立订单通道</h4>
+                <p>每个子策略拥有独立的订单路由与成交通道，避免策略间相互干扰，支持差异化算法拆单与执行优先级。</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <h4>策略级穿透风控</h4>
+                <p>事前/事中/事后风控细化到子策略维度：独立资金额度、持仓上限、频次限制，任一策略触发风控不影响其他策略。</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-chart-pie"></i>
+                <h4>策略级独立归因</h4>
+                <p>成交、滑点、手续费、延迟成本按子策略拆分归因，精确评估每条策略的真实执行质量，反向指导 Σ 权重调整。</p>
+            </div>
+        </div>
+
+        <!-- 复合执行流程示意 -->
+        <div class="highlight-block">
+            <h4><i class="fas fa-code-branch" style="margin-right: 0.5rem;"></i> 复合执行流程 · 从 Σ 信号到市场</h4>
+            <p>Σ 复合决策层输出带有策略标签与权重的复合信号 → ModelLive Real 解析并拆解 → 为每个子策略建立独立执行上下文 → 并行执行 & 独立风控 → 成交数据按策略标签归因沉淀。</p>
+            <div class="spec-grid" style="margin-top: 1rem;">
+                <div class="spec-item"><i class="fas fa-chart-simple"></i> 策略标签传递</div>
+                <div class="spec-item"><i class="fas fa-chart-line"></i> 独立滑点统计</div>
+                <div class="spec-item"><i class="fas fa-chart-pie"></i> 策略级资金切分</div>
+                <div class="spec-item"><i class="fas fa-chart-bar"></i> 成交质量回检</div>
+            </div>
+        </div>
+
+        <!-- 与传统交易系统的对比 -->
+        <div class="highlight-block">
+            <h4><i class="fas fa-microchip" style="margin-right: 0.5rem;"></i> 与传统交易执行系统的区别</h4>
+            <div class="spec-grid">
+                <div class="spec-item"><i class="fas fa-times-circle" style="color:#FF4D4D;"></i> 传统系统：复合信号 → 合并为单一订单流 → 丢失策略结构</div>
+                <div class="spec-item"><i class="fas fa-check-circle" style="color:#00CC66;"></i> 摹林交易版：复合信号 → 保留标签 → 独立通道/风控/归因</div>
+            </div>
+        </div>
+
+        <!-- 与 ModelLive 的关系 -->
+        <div class="highlight-block">
+            <h4><i class="fas fa-link" style="margin-right: 0.5rem;"></i> 与 ModelLive 的分工</h4>
+            <p><strong>ModelLive</strong>：策略上线、版本管理、仿真验证与生命周期管理。<br>
+            <strong>ModelLive Real</strong>：多策略复合信号的实盘执行、独立风控与精准归因。<br>
+            两者共同构成从“策略部署”到“复合执行”的完整闭环。</p>
+        </div>
+
+        <!-- 演示下拉框（深色风格协调，仅供展示） -->
+        <div style="display: flex; justify-content: flex-end; margin: 0.5rem 0 0.8rem;">
+            <select id="execModeSelect" style="width: auto; min-width: 180px;">
+                <option value="parallel">并行执行模式</option>
+                <option value="priority">优先级执行模式</option>
+                <option value="weighted">权重分配模式</option>
+            </select>
+        </div>
+
+        <div class="team-cta">
+            <div class="team-info">
+                <i class="fas fa-chart-simple"></i>
+                <span>为复合策略团队设计的专业执行引擎</span>
+            </div>
+            <button class="cta-button" id="inquiryBtn"><i class="fas fa-handshake"></i> 预约演示</button>
+        </div>
+
+        <div class="footer-note">
+            ModelLive Real · 摹林交易版 | 多策略复合执行引擎<br>
+            信号不坍缩 · 策略级独立 · 执行与设计对齐
+        </div>
+    </div>
+    <div class="top-line" style="background: var(--border-color); height: 1px;"></div>
+</div>
+
+<!-- 演示模态框（包含下拉框，展示协调样式） -->
+<div id="contactModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-rocket"></i> 预约复合执行演示</h3>
+        <p>请选择您的策略类型，专业架构师将为您定制方案</p>
+        <select id="strategyTypeSelect">
+            <option value="alpha">Alpha 多因子复合策略</option>
+            <option value="cta">CTA 复合策略</option>
+            <option value="hybrid">量化+主观混合策略</option>
+            <option value="multi">多PM复合策略</option>
+        </select>
+        <div class="modal-buttons">
+            <button id="modalConfirm">提交预约</button>
+            <button id="modalClose">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const btn = document.getElementById('inquiryBtn');
+        const modal = document.getElementById('contactModal');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalClose = document.getElementById('modalClose');
+
+        // 演示下拉框的交互反馈
+        const execSelect = document.getElementById('execModeSelect');
+        if (execSelect) {
+            execSelect.addEventListener('change', (e) => {
+                const mode = e.target.options[e.target.selectedIndex]?.text;
+                const toast = document.createElement('div');
+                toast.innerText = `⚙️ 执行模式切换: ${mode}`;
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.left = '20px';
+                toast.style.backgroundColor = '#1a1a1a';
+                toast.style.color = '#4AD2FF';
+                toast.style.padding = '0.4rem 1rem';
+                toast.style.fontSize = '0.7rem';
+                toast.style.border = '1px solid #16C0FF';
+                toast.style.zIndex = '999';
+                toast.style.fontFamily = "'Inter', sans-serif";
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(() => toast.remove(), 350);
+                }, 1800);
+            });
+        }
+
+        if (btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (modal) modal.style.display = 'flex';
+                else {
+                    const toast = document.createElement('div');
+                    toast.innerHTML = '⚡ 摹林交易版 · 复合执行方案已准备 ⚡';
+                    toast.style.position = 'fixed';
+                    toast.style.bottom = '30px';
+                    toast.style.left = '50%';
+                    toast.style.transform = 'translateX(-50%)';
+                    toast.style.backgroundColor = '#1a1a1a';
+                    toast.style.color = '#4AD2FF';
+                    toast.style.padding = '0.8rem 1.6rem';
+                    toast.style.fontSize = '0.85rem';
+                    toast.style.fontWeight = '500';
+                    toast.style.border = '1px solid #16C0FF';
+                    toast.style.fontFamily = "'Inter', sans-serif";
+                    toast.style.zIndex = '1000';
+                    toast.style.backdropFilter = 'blur(12px)';
+                    document.body.appendChild(toast);
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        toast.style.transition = 'opacity 0.35s';
+                        setTimeout(() => toast.remove(), 450);
+                    }, 3000);
+                }
+            });
+        }
+
+        // 模态框逻辑
+        if (modalConfirm && modalClose && modal) {
+            modalConfirm.addEventListener('click', () => {
+                const selectVal = document.getElementById('strategyTypeSelect');
+                const selectedText = selectVal.options[selectVal.selectedIndex]?.text || '复合策略';
+                alert(`✅ 预约成功！摹林架构师将为您提供「${selectedText}」执行方案。`);
+                modal.style.display = 'none';
+                if (selectVal) selectVal.selectedIndex = 0;
+            });
+            modalClose.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
+
+        const poster = document.querySelector('.poster');
+        if (poster) {
+            poster.addEventListener('mousemove', (e) => {
+                const rect = poster.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const intensity = 0.1 + (Math.abs(x - 0.5) * 0.15);
+                poster.style.borderColor = `rgba(22, 192, 255, ${0.4 + intensity * 0.3})`;
+                poster.style.boxShadow = `0 24px 48px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(22, 192, 255, ${0.1 + intensity * 0.15})`;
+            });
+            poster.addEventListener('mouseleave', () => {
+                poster.style.borderColor = '#333333';
+                poster.style.boxShadow = '0 24px 48px -12px rgba(0, 0, 0, 0.8)';
+            });
+        }
+    })();
+</script>
+</body>
+</html>

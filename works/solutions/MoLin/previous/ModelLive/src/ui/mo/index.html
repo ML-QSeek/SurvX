@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>摹林 · 技术驱动投资 | 量化科技先锋 · 全景系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #6DD8FF;
+            --primary-glow: rgba(22, 192, 255, 0.3);
+            --primary-transparent: rgba(22, 192, 255, 0.12);
+            --bg-deep: #050508;
+            --bg-primary: #0A0A0F;
+            --bg-secondary: #0F0F16;
+            --bg-tertiary: #14141C;
+            --text-primary: #FFFFFF;
+            --text-secondary: #16C0FF;
+            --text-tertiary: #8E8E9A;
+            --border-color: #252530;
+            --accent-gold: #FFD966;
+            --accent-blue-dark: #0B2B3B;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;   /* 全局禁止滚动条，无下拉框 */
+            position: fixed;
+        }
+
+        body {
+            background: var(--bg-deep);
+            font-family: 'Inter', 'JetBrains Mono', system-ui, -apple-system, sans-serif;
+            position: relative;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--primary-transparent) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-transparent) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.35;
+        }
+
+        .glow-line {
+            position: fixed;
+            top: 0;
+            left: -30%;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--primary-light), var(--primary), transparent);
+            filter: blur(3px);
+            animation: slideGlow 12s infinite linear;
+            z-index: 1;
+            opacity: 0.5;
+        }
+
+        @keyframes slideGlow {
+            0% { left: -30%; opacity: 0; }
+            20% { opacity: 0.7; }
+            80% { opacity: 0.7; }
+            100% { left: 110%; opacity: 0; }
+        }
+
+        .glow-line:nth-child(2) {
+            top: 30%;
+            width: 60%;
+            animation-duration: 18s;
+            animation-delay: 3s;
+        }
+
+        .glow-line:nth-child(3) {
+            top: 70%;
+            width: 70%;
+            animation-duration: 15s;
+            animation-delay: 7s;
+        }
+
+        .orb-bg {
+            position: fixed;
+            top: -20vh;
+            left: -20vw;
+            width: 120vw;
+            height: 120vh;
+            background: radial-gradient(circle at 30% 40%, rgba(22,192,255,0.08), transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb-bg-2 {
+            position: fixed;
+            bottom: -10vh;
+            right: -10vw;
+            width: 80vw;
+            height: 80vh;
+            background: radial-gradient(circle at 70% 80%, rgba(255, 140, 0, 0.05), transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow-y: auto;   /* 内部允许滚动但无全局滚动条，实际内容较少时不会出现滚动条 */
+            scrollbar-width: none; /* 隐藏滚动条 Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+        }
+        .hero-container::-webkit-scrollbar {
+            display: none; /* 隐藏滚动条 Chrome/Safari */
+        }
+
+        .dot-matrix {
+            position: fixed;
+            bottom: 10%;
+            right: 5%;
+            width: 280px;
+            height: 280px;
+            background-image: radial-gradient(var(--primary-transparent) 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .dot-matrix-left {
+            position: fixed;
+            left: 5%;
+            top: 15%;
+            width: 220px;
+            height: 220px;
+            background-image: radial-gradient(var(--primary-transparent) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.25;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .main-title-card {
+            text-align: center;
+            margin-bottom: 1.2rem;
+            animation: fadeInUp 0.8s ease-out;
+            width: 100%;
+        }
+
+        .brand-main {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.1em;
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--primary-light) 40%, var(--primary) 70%, #A0E7FF 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 18px rgba(22,192,255,0.3);
+            margin-bottom: 0.3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .brand-main::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--primary-light), var(--primary), transparent);
+            border-radius: 4px;
+            filter: blur(1px);
+        }
+
+        .subtitle {
+            font-size: clamp(0.9rem, 3.5vw, 1.5rem);
+            font-weight: 400;
+            letter-spacing: 6px;
+            color: var(--text-tertiary);
+            margin-top: 0.8rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+        
+        .link-tech, .link-invest {
+            cursor: pointer;
+            font-weight: 500;
+            background: linear-gradient(120deg, var(--primary-light), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+            transition: all 0.2s ease;
+            position: relative;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .link-tech:hover, .link-invest:hover {
+            text-shadow: 0 0 8px rgba(22,192,255,0.6);
+            transform: scale(1.02);
+            background: linear-gradient(120deg, #FFFFFF, var(--primary-light));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .link-tech::after, .link-invest::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0%;
+            height: 1.5px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            transition: width 0.25s ease;
+            border-radius: 2px;
+        }
+        
+        .link-tech:hover::after, .link-invest:hover::after {
+            width: 100%;
+        }
+
+        .subtitle i {
+            font-size: 0.7em;
+            color: var(--primary);
+            margin: 0 0.2rem;
+        }
+
+        .divider-star {
+            margin: 0.6rem 0;
+            font-size: 0.65rem;
+            color: var(--primary);
+            opacity: 0.7;
+        }
+
+        .tagline {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            max-width: 700px;
+            text-align: center;
+            margin-top: 0.3rem;
+            backdrop-filter: blur(4px);
+            background: rgba(10, 10, 15, 0.4);
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            border: 1px solid var(--border-color);
+            width: auto;
+            display: inline-block;
+        }
+
+        .metrics-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1.8rem 0 1.5rem;
+        }
+
+        .metric-item {
+            text-align: center;
+            backdrop-filter: blur(8px);
+            background: rgba(20, 20, 28, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            padding: 0.6rem 1.4rem;
+            min-width: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .metric-item:hover {
+            border-color: var(--primary);
+            background: rgba(22, 192, 255, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .metric-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary-light);
+        }
+
+        .metric-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-tertiary);
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.65rem 1.6rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 48px;
+            transition: 0.2s ease;
+            cursor: pointer;
+            font-family: 'Inter', monospace;
+            letter-spacing: 1px;
+            border: 1px solid transparent;
+            backdrop-filter: blur(4px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(105deg, var(--primary-dark), var(--primary));
+            color: #0A0A0F;
+            box-shadow: 0 4px 12px rgba(22,192,255,0.3);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(22,192,255,0.5);
+            background: linear-gradient(105deg, var(--primary), var(--primary-light));
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary-light);
+        }
+
+        .btn-outline:hover {
+            background: rgba(22, 192, 255, 0.1);
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            max-width: 95%;
+        }
+
+        .tech-pill {
+            background: rgba(20, 20, 28, 0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            transition: all 0.2s;
+        }
+
+        .tech-pill i {
+            color: var(--primary);
+            margin-right: 5px;
+        }
+
+        .tech-pill:hover {
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+
+        .footer-home {
+            position: fixed;
+            bottom: 0.8rem;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.55rem;
+            color: var(--text-tertiary);
+            z-index: 10;
+            background: transparent;
+            pointer-events: none;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .hero-container { padding: 1.2rem; }
+            .subtitle { letter-spacing: 3px; gap: 0.3rem; }
+            .metrics-row { gap: 0.8rem; }
+            .metric-item { padding: 0.4rem 1rem; min-width: 90px; }
+            .tech-stack { max-width: 100%; }
+            .btn { padding: 0.5rem 1.2rem; font-size: 0.7rem; }
+            .metric-number { font-size: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-container { padding: 0.8rem 1rem; }
+            .btn { padding: 0.45rem 1rem; font-size: 0.65rem; }
+            .tagline { font-size: 0.7rem; }
+        }
+
+        .floating-cube {
+            position: fixed;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(22,192,255,0.05), transparent);
+            border-radius: 32px;
+            filter: blur(40px);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .btn-link {
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-line"></div>
+    <div class="glow-line"></div>
+    <div class="glow-line"></div>
+    <div class="orb-bg"></div>
+    <div class="orb-bg-2"></div>
+    <div class="dot-matrix"></div>
+    <div class="dot-matrix-left"></div>
+    <div class="floating-cube" style="top: 15%; left: 5%;"></div>
+    <div class="floating-cube" style="bottom: 10%; right: 8%; width: 240px; height: 240px; background: radial-gradient(circle, rgba(255,140,0,0.04), transparent);"></div>
+
+    <div class="hero-container">
+        <div class="main-title-card">
+            <div class="brand-main">摹林</div>
+            <div class="subtitle">
+                <i class="fas fa-code"></i> 
+                <a href="./technology.html" class="link-tech" id="techLink" target="_self">技术</a>
+                <i class="fas fa-chart-line"></i> 
+                <a href="./Investment.html" class="link-invest" id="investLink" target="_self">投资</a>
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="divider-star">
+                <i class="fas fa-circle" style="font-size: 0.3rem; margin: 0 4px;"></i>
+                <i class="fas fa-cube"></i>
+                <i class="fas fa-circle" style="font-size: 0.3rem; margin: 0 4px;"></i>
+            </div>
+            <div class="tagline">
+                <i class="fas fa-microchip"></i> 从数据到决策 · 从研究到交易 · 一体化量化投研与执行体系 · Q系列全景架构
+            </div>
+        </div>
+
+        <div class="metrics-row">
+            <div class="metric-item">
+                <div class="metric-number">QBase→QLens</div>
+                <div class="metric-label">基础设施层</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-number">QMulti→QSeek</div>
+                <div class="metric-label">AI引擎层</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-number">QFuse→QFlow</div>
+                <div class="metric-label">业务核心层</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-number">ModelLive</div>
+                <div class="metric-label">执行闭环</div>
+            </div>
+        </div>
+
+        <div class="cta-group">
+            <a href="./panorama.html" class="btn-link" id="panoramaLink" target="_self">
+                <button class="btn btn-primary" id="exploreBtn"><i class="fas fa-cubes"></i> 探索全景体系</button>
+            </a>
+            <!-- QSeek 约束边界Agent (原α24+升级) -->
+            <a href="./QSeek.html" class="btn-link" id="agentPageLink" target="_self">
+                <button class="btn btn-outline" id="agentBtn"><i class="fas fa-robot"></i> QSeek 智索</button>
+            </a>
+            <!-- QLens 算力集群 -->
+            <a href="./QLens.html" class="btn-link" id="clusterPageLink" target="_self">
+                <button class="btn btn-outline" id="clusterBtn"><i class="fas fa-server"></i> 算力集群</button>
+            </a>
+            <!-- 决策引擎快捷入口 -->
+            <a href="./QCore.html" class="btn-link" id="coreLink" target="_self">
+                <button class="btn btn-outline" id="coreBtn"><i class="fas fa-microchip"></i> 决策引擎</button>
+            </a>
+            <!-- 投资理念 (原投研洞察，放置在最右侧) -->
+            <a href="./philosophy.html" class="btn-link" id="insightPageLink" target="_self">
+                <button class="btn btn-outline" id="insightBtn"><i class="fas fa-chart-simple"></i> 投资理念</button>
+            </a>
+        </div>
+
+        <div class="tech-stack">
+            <div class="tech-pill"><i class="fas fa-database"></i> QBase · 统一数据底座 · TiKV/ClickHouse</div>
+            <div class="tech-pill"><i class="fas fa-brain"></i> QSeek · 约束边界Agent · 吝啬世界反思填空</div>
+            <div class="tech-pill"><i class="fas fa-cogs"></i> QSkills · 原子技能库 · 因子表达式引擎</div>
+            <div class="tech-pill"><i class="fas fa-hammer"></i> Q FORGE · 工程治理 · 技术债地图</div>
+            <div class="tech-pill"><i class="fas fa-chart-line"></i> QCore · 复合决策引擎 · 动态权重融合</div>
+            <div class="tech-pill"><i class="fas fa-cloud-arrow-up"></i> QLens算力集群 · QField统一网关</div>
+            <div class="tech-pill"><i class="fas fa-hand-holding-usd"></i> QFlow · 资金聚合 · S/A级分层</div>
+            <div class="tech-pill"><i class="fas fa-chart-pie"></i> ModelLive · 仿真验证+实盘执行 · 贡献归因</div>
+            <div class="tech-pill"><i class="fas fa-chart-line"></i> QSense · 态势感知因子生产</div>
+            <div class="tech-pill"><i class="fas fa-cube"></i> QMulti · 多重意义宇宙底座</div>
+        </div>
+
+        <div style="margin-top: 1.2rem; font-size: 0.65rem; background: rgba(0,0,0,0.3); padding: 0.4rem 1rem; border-radius: 100px; backdrop-filter: blur(4px); border: 1px solid var(--border-color);">
+            <i class="fas fa-charging-station" style="color: var(--primary);"></i> 摹林 · Q系列全景量化 | 基础设施 → AI引擎 → 业务核心 → 执行闭环 | 纯输出导向 · 贡献即评判
+        </div>
+    </div>
+
+    <div class="footer-home">
+        <i class="fas fa-shield-alt"></i> 合格投资者 · 专业机构伙伴 | QSeek约束边界 · QMulti多重宇宙 | 科技重塑投资边界
+    </div>
+
+    <script>
+        (function() {
+            // 确保无下拉框：html/body已设overflow:hidden，内部容器滚动条隐藏
+            function adjustContainer() {
+                const hero = document.querySelector('.hero-container');
+                if (hero) {
+                    hero.style.height = '100vh';
+                }
+            }
+            adjustContainer();
+            window.addEventListener('resize', adjustContainer);
+            
+            // 移除原有的任何潜在 alert 绑定，确保按钮仅通过父级 a 标签跳转
+            const agentButton = document.getElementById('agentBtn');
+            const insightButton = document.getElementById('insightBtn');
+            const clusterButton = document.getElementById('clusterBtn');
+            const coreButton = document.getElementById('coreBtn');
+            
+            function rebindButtonWithoutAlerts(btn) {
+                if (!btn) return null;
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                return newBtn;
+            }
+            
+            const newAgentBtn = rebindButtonWithoutAlerts(agentButton);
+            const newInsightBtn = rebindButtonWithoutAlerts(insightButton);
+            const newClusterBtn = rebindButtonWithoutAlerts(clusterButton);
+            const newCoreBtn = rebindButtonWithoutAlerts(coreButton);
+            
+            if (newAgentBtn) newAgentBtn.onclick = null;
+            if (newInsightBtn) newInsightBtn.onclick = null;
+            if (newClusterBtn) newClusterBtn.onclick = null;
+            if (newCoreBtn) newCoreBtn.onclick = null;
+            
+            const exploreOriginal = document.getElementById('exploreBtn');
+            if (exploreOriginal) exploreOriginal.onclick = null;
+            
+            // 确保所有链接指向正确的全景相关页面
+            const agentLink = document.getElementById('agentPageLink');
+            if (agentLink && agentLink.getAttribute('href') !== './QSeek.html') {
+                agentLink.setAttribute('href', './QSeek.html');
+            }
+            const clusterLink = document.getElementById('clusterPageLink');
+            if (clusterLink && clusterLink.getAttribute('href') !== './QLens.html') {
+                clusterLink.setAttribute('href', './QLens.html');
+            }
+            const insightLink = document.getElementById('insightPageLink');
+            if (insightLink && insightLink.getAttribute('href') !== './philosophy.html') {
+                insightLink.setAttribute('href', './philosophy.html');
+            }
+            const panoramaLink = document.getElementById('panoramaLink');
+            if (panoramaLink && panoramaLink.getAttribute('href') !== './panorama.html') {
+                panoramaLink.setAttribute('href', './panorama.html');
+            }
+            const coreLink = document.getElementById('coreLink');
+            if (coreLink && coreLink.getAttribute('href') !== './QCore.html') {
+                coreLink.setAttribute('href', './QCore.html');
+            }
+            
+            const techRef = document.getElementById('techLink');
+            if (techRef && techRef.getAttribute('href') !== './technology.html') techRef.setAttribute('href', './technology.html');
+            const investRef = document.getElementById('investLink');
+            if (investRef && investRef.getAttribute('href') !== './Investment.html') investRef.setAttribute('href', './Investment.html');
+            
+            // 动态光晕鼠标跟随 (保留原有视觉)
+            const orbBg = document.querySelector('.orb-bg');
+            document.addEventListener('mousemove', function(e) {
+                if (orbBg) {
+                    var xPos = (e.clientX / window.innerWidth) * 100;
+                    var yPos = (e.clientY / window.innerHeight) * 100;
+                    orbBg.style.background = 'radial-gradient(circle at ' + xPos + '% ' + yPos + '%, rgba(22,192,255,0.12), transparent 65%)';
+                }
+            });
+            
+            // 确保任何残留的内联事件被清理
+            const allBtns = document.querySelectorAll('.btn');
+            allBtns.forEach(btn => {
+                btn.onclick = null;
+            });
+            
+            // 禁止页面滚动回弹（针对移动端），但保留容器内无碍
+            document.body.addEventListener('touchmove', function(e) {
+                // 不做额外拦截避免卡顿
+            }, { passive: false });
+        })();
+    </script>
+</body>
+</html>

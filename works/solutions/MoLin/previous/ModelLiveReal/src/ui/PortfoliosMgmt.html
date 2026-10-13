@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link	type="text/css"	rel="stylesheet"	href="./css/smartMenu.css"/>
+		<link rel="stylesheet" href="./css/all.min.css">
+		<script	src="./js/jquery.min.js"></script>
+		<script	src="./js/jquery-smartMenu.js"></script>
+		<script	src="./js/echarts.min.js"></script>
+		<script	src="./js/socket.io.min.js"></script>
+
+		<style>
+    :root {
+        --primary-blue: #4A90E2; /* 主蓝色 */
+        --primary-blue-dark: #3A7BC8; /* 深蓝色 */
+        --primary-blue-light: #5CA2FF; /* 浅蓝色 */
+        --primary-blue-transparent: rgba(74, 144, 226, 0.1);
+        --white: #FFFFFF;
+        --light-gray: #F5F7FA;
+        --gray: #E1E5EB;
+        --dark-gray: #7B8A9E;
+        --text-dark: #1A1A1A;
+        --text-gray: #1A1A1A;
+        --border-color: #D1D9E6;
+        --error-color: #FF6B6B;
+        --success-color: #1DD1A1;
+        --warning-yellow: #4A90E2;
+    }
+    
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        font-weight: 300;
+        font-size: 13px;
+        line-height: 1.4em;
+    }
+    
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+    }
+    body {
+        background: linear-gradient(135deg, #F5F7FA 0%, #E4E9F2 100%);
+        display: flex;
+        flex-direction: column;
+    }
+    /* 背景装饰 */
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 10% 20%, rgba(74, 144, 226, 0.03) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(74, 144, 226, 0.03) 0%, transparent 40%);
+        z-index: 0;
+    }
+    
+    body > * {
+        position: relative;
+        z-index: 1;
+    }
+        
+    ::-webkit-scrollbar {
+        width:0px;
+        height:0px;
+        background-color: #F5F7FA;  
+    }
+            
+    #mq_mainT
+    {
+        height:24px;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        background: var(--white);
+        flex-shrink: 0;
+        margin: 0px 0px 5px 0px;
+    }
+    
+    #mq_mainB
+    {
+       display:flex;
+       flex-direction: column;
+       position:absolute;
+       top:0;
+       left:0;
+       right:0;
+       bottom:0;
+       overflow-y:auto;
+    }
+    
+    .MList
+    {
+        width:60px;
+        height:100%;
+        border:1px solid var(--border-color);
+        font-weight: 500;
+        font-size:13px;
+        display:flex;
+				justify-content: center;
+        align-items: center;
+				border-radius: 3px;		
+        background: var(--white);
+        transition: all 0.2s ease;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12),0 3px 6px rgba(0, 0, 0, 0.08);
+    }   
+    
+    .RJJHDiv
+    {
+    		margin: 0px 5px 5px 5px;
+    		box-sizing:border-box;
+    		display:flex;
+        border:1px solid var(--border-color);
+        height:300px;
+        background: var(--white);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    }
+    
+    .RJJHDivL
+    {
+        padding:1px;
+        box-sizing:border-box;
+        flex:1;
+        height:300px;
+    }
+    
+    .RJJHDivM
+    {
+        display:flex;
+        flex-direction: column;
+        border-left:1px solid var(--border-color);
+        width:450px;
+        height:100%;
+    }
+    
+    .RJJHDivR
+    {
+        display:flex;
+        flex-direction: column;
+        border-left:1px solid var(--border-color);
+        width:450px;
+        height:100%;
+    }
+    
+    table.altrowstable
+    {
+        border:1px var(--border-color) solid;
+        border-collapse:collapse;
+        font-size:15px;
+        table-layout:fixed;
+        margin:0px 3px 0px 3px;
+        box-sizing:border-box;
+        overflow: hidden;
+        background: var(--white);
+        width:calc(100% - 6px);
+    }
+    
+    table.altrowstable th
+    {
+        border:1px var(--border-color) solid;
+        text-align:center;
+        padding:6px;
+        background: var(--light-gray);
+        color: var(--text-dark);
+        font-weight: 550;
+    }
+    
+    table.altrowstable td
+    {
+        border:1px var(--border-color) solid;
+        white-space:pre-line;
+        word-break:keep-all;
+        padding:3px;
+        word-wrap:break-word;
+        text-align:center;
+        color: var(--text-gray);
+    }
+    
+    .pannelbord
+    {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding:0px;
+        width:100%;
+        flex:1;
+        background: var(--white);
+    }
+    
+    .pannelsels
+    {
+    		width:100%;
+    		height:40px;
+    		display:flex;
+        border-top:1px var(--border-color) solid;
+    	
+    	}
+    
+    .pannelsel
+    {
+    		flex:1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size:16px;
+        background: var(--white);
+        transition: all 0.2s ease;
+    }
+    .pannelsel.rborder
+    {
+    		border-right:1px var(--border-color) solid;
+    }
+    .xTar:hover,.xTar_:hover,.pannelsel:hover,.qtpannelBH:hover,.MList:hover,#rjjh_initOK:hover,#rjjh_initCancel:hover,
+    #rjjh_qtpannelGo:hover,#rjjh_qtpannelCancel:hover,#msgpannelGo:hover,#msgpannelCancel:hover,#rjjh_qtpannelSub:hover
+    {
+        cursor:pointer !important;
+        background-color: var(--primary-blue-transparent) !important;
+    }
+    
+    .basequantsel:hover,.baseindexsel:hover
+    {
+        cursor:pointer !important;
+        color:var(--primary-blue) !important;
+    } 
+    
+    #rjjh_init
+    {
+        background: var(--white);
+        color: var(--text-gray);
+        width:500px;
+        min-height:400px;
+        height:auto;
+        z-index:99999999;
+        position:absolute;
+        right:50%;
+        top:50%;
+        margin-right:-250px;
+        margin-top:-300px;
+        box-sizing:border-box;
+        box-shadow: 0 16px 48px rgba(44, 62, 80, 0.15);
+        border: 1px solid var(--border-color);
+    }
+    
+    #rjjh_initOK,#rjjh_initCancel,#rjysb,.basequantsel
+    {
+        cursor:pointer;
+        transition: all 0.2s ease;
+    }
+    
+    [contenteditable="true"] {
+        outline: none;
+        background-color: transparent;
+        border: none;
+        color: var(--text-gray);
+    }
+    
+    [contenteditable="true"]:focus {
+        background-color: var(--primary-blue-transparent);
+    }
+    
+    #rjjh_qtpannel
+    {
+        background: var(--white);
+        color: var(--text-gray);
+        width:1200px;
+        height:500px;
+        border:1px solid var(--border-color);
+        z-index:99;
+        position:absolute;
+        right:50%;
+        top:50%;
+        margin-right:-600px;
+        margin-top:-250px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 16px 48px rgba(44, 62, 80, 0.15);
+    }
+    
+    
+    
+    #rjjh_qtpannelH
+    {
+        height:30px;
+        width:1200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size:16px;
+        color: var(--text-dark);
+        border-bottom:1px solid var(--border-color);
+        background: var(--light-gray);
+        font-weight: 600;
+    }
+    
+    #rjjh_qtpannelB
+    {
+        height:440px;
+        width:1200px;
+        display: flex;
+        border-bottom:1px solid var(--border-color);
+    }
+    
+    #rjjh_qtpannelC
+    {
+        height:30px;
+        width:1200px;
+        display: flex;
+        background: var(--light-gray);
+    }
+    
+    #rjjh_qtpannelDB
+    {
+        display: flex;
+        flex-direction: column;
+        height:440px;
+        width:400px;
+    }
+    
+    #rjjh_qtpannelHB,#rjjh_qtpannelHF
+    {
+        height:440px;
+        width:400px;
+        overflow-y:auto;
+        border-left:1px solid var(--border-color);
+        padding:3px;
+        box-sizing:border-box;
+        background: var(--light-gray);
+    }
+    
+    #rjjh_qtpannelBH
+    {
+        height:30px;
+        width:400px;
+        color: var(--text-dark);
+        border-top:1px solid var(--border-color);
+        display: flex;
+        background: var(--light-gray);
+    }
+    
+    #rjjh_qtpannelBB
+    {
+        overflow-y:auto;
+        height:410px;
+        width:400px;
+        background: var(--white);
+    }
+    
+    #msgpannel
+    {
+        background: var(--white);
+        color: var(--text-gray);
+        width:600px;
+        height:400px;
+        border:1px solid var(--border-color);
+        z-index:99999999;
+        position:absolute;
+        right:50%;
+        top:50%;
+        margin-right:-300px;
+        margin-top:-200px;
+        box-sizing:border-box;
+        box-shadow: 0 16px 48px rgba(44, 62, 80, 0.15);
+    }
+    
+    #msgpannelH
+    {
+        height:375px;
+        width:600px;
+        box-sizing:border-box;
+        overflow-y:auto;
+        padding-left:3px;
+        padding-right:3px;
+        color:var(--text-dark);
+    }
+    
+    #msgpannelB
+    {
+        width:600px;
+    }
+    
+    #msgpannelGo,#msgpannelCancel
+    {
+        width:auto;
+        text-align:center;
+        border:1px solid var(--border-color);
+        position:absolute;
+        padding-left:31px;
+        padding-right:31px;
+        right:50%;
+        cursor:pointer;
+        box-sizing:border-box;
+        background: var(--white);
+        color: var(--text-gray);
+        transition: all 0.2s ease;
+    }
+    
+    #rjjh_qtpannelCancel,#rjjh_qtpannelSub,#rjjh_qtpannelGo
+    {
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        border:1px solid var(--border-color);
+        margin-top:2px;
+        height:24px;
+        width:60px;
+        cursor:pointer;
+        background: var(--white);
+        color:  var(--text-gray);
+        transition: all 0.2s ease;
+    }
+    
+    #rjjh_qtpannelCancel:hover,#rjjh_qtpannelSub:hover,#rjjh_qtpannelGo:hover,
+    #msgpannelGo:hover,#msgpannelCancel:hover {
+        background: var(--primary-blue);
+    }
+    
+    #msgpannelCancel
+    {
+        margin-right:-100px;
+    }
+    
+    #msgpannelGo
+    {
+        margin-right:-3px;
+    }
+    
+    #msgpannelGo,#msgpannelCancel
+    {
+        top:377px;
+    }
+    
+    .qtpannelBH
+    {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-right:1px solid var(--border-color);
+        width:133px;
+        height:30px;
+        color: var(--text-dark);
+        cursor:pointer;
+        font-weight: 600;
+        background: var(--light-gray);
+        transition: all 0.2s ease;
+    }
+    
+    #x_add0:hover,#x_add1:hover
+    {
+        cursor:pointer !important;
+        background-color: var(--primary-blue-transparent) !important;
+    }
+    
+    #tiaocangliyou
+    {
+        text-align:left;
+        width:100%;
+        height:100px;
+        overflow-y:auto;
+        border:1px solid var(--border-color);
+        padding: 8px;
+        background: var(--light-gray);
+        color: var(--text-gray);
+    }   
+    
+    #BG
+    {
+        width:100%;
+        height:100%;
+        background: rgba(44, 62, 80, 0.7);
+        z-index:999;
+        position:fixed;
+        top:0;
+        left:0;
+        backdrop-filter: blur(3px);
+    }
+    
+    
+    .status-grid {
+    		width:100%;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3px;
+        margin-bottom: 6px;
+    }
+    
+    .status-card {
+        background: var(--white);
+        padding: 4px 3px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 30px;
+        border-top: 3px solid;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .status-card.normal {
+        border-top-color: var(--success-color);
+    }
+    
+    .status-card.warning {
+        border-top-color: var(--warning-yellow);
+    }
+    
+    .status-card.error {
+        border-top-color: var(--error-color);
+    }
+    
+    .status-card:last-child {
+        border-top-color: var(--primary-blue);
+    }
+    
+    .status-value {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 2px;
+        color: var(--text-dark);
+    }
+    
+    .status-label {
+        font-size: 11px;
+        color: var(--text-gray);
+    }
+    
+    .data-section {
+    		width:100%;
+        flex: 1;
+        overflow-y:auto;
+        padding:9px;
+        background: var(--white);
+    }
+    
+    .data-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-dark);
+    }
+    
+    .data-value {
+        font-weight: 600;
+        color: var(--primary-blue);
+    }
+    
+    
+    .alert-item {
+        padding: 6px 0;
+        font-size: 12px;
+        color: var(--text-gray);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    #rjrebalance
+    {
+        width:100%;
+        height:30px;
+        display:flex;
+        margin-top: 10px;
+    }
+    
+    #noinitweight
+    {
+        width:50%;
+        height:100%;
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        cursor:pointer;
+        border:1px solid var(--border-color);
+        background: var(--error-color);
+        color:var(--text-gray);
+        transition: all 0.2s ease;
+        font-weight: 600;
+    }
+    
+    #initweight
+    {
+        width:50%;
+        height:100%;
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        cursor:pointer;
+        border:1px solid var(--border-color);
+        background: var(--white);
+        color: var(--text-gray);
+        transition: all 0.2s ease;
+        font-weight: 600;
+    }
+    
+    #noinitweight:hover, #initweight:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+    
+    /* 输入框焦点样式 */
+    input:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px var(--primary-blue-transparent);
+    }
+    
+    /* 按钮通用样式 */
+    button {
+        background: var(--primary-blue);
+        color: var(--text-gray);
+        border: none;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 600;
+    }
+    
+    button:hover {
+        background: var(--primary-blue-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    }
+    
+    /* 链接样式 */
+    a {
+        color: var(--primary-blue);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    a:hover {
+        color: var(--primary-blue-dark);
+        text-decoration: underline;
+    }
+    
+    /* 卡片阴影效果 */
+    .RJJHDiv, #rjjh_init, #rjjh_qtpannel, #msgpannel {
+        transition: all 0.3s ease;
+    }
+    
+    .RJJHDiv:hover, #rjjh_init:hover, #rjjh_qtpannel:hover, #msgpannel:hover {
+        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.1);
+    }
+		</style>
+
+	</head>
+	<body>
+			<div id="mq_mainT">
+					<div style="width:10px;"></div>
+					<div class="MList" id="Init">新增</div>
+					<div style="flex:1;"></div>
+				</div>
+			<div style="flex:1;position:relative;"><div id="mq_mainB"></div></div>
+	</body>
+	<script	type="text/javascript">
+		let tstate = new Object();
+		let tstate_ = new Object();
+		//策略服务器
+		var mpushserver0 = '10.10.98.51:3210';
+		//策略服务器连接
+		var smsocket0 = io.connect(mpushserver0);
+		//接受参数
+		$(document).ready(function(){
+			// 获取当前页面的URL参数
+			const params = new URLSearchParams(window.location.search);
+			// 获取指定参数的值
+			Q14123101 = params.get('par');
+			contents(Q14123101);
+			})
+		//屏蔽右键事件
+		document.oncontextmenu=function(){return	false;}
+		function trim(str){return str.replace(/(^\s*)|(\s*$)/g,"");}
+		// 生成一个不重复的ID
+		function GenNonDuplicateID(randomLength){
+			return Number(Math.random().toString().substr(3,randomLength) + Date.now()).toString(36)
+		}
+		//时间
+		function getLangDate(item){
+			var dateObj = new Date();
+			var year = dateObj.getFullYear();
+			var month = dateObj.getMonth()+1;
+			var date = dateObj.getDate();
+			var day = dateObj.getDay();
+			var weeks = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+			var week = weeks[day];
+			var hour = dateObj.getHours();
+			var minute = dateObj.getMinutes();
+			var second = dateObj.getSeconds();
+			if(month<10){month="0"+month;}
+			if(date<10){date="0"+date;}
+			if(hour<10){hour="0"+hour;}
+			if(minute<10){minute="0"+minute;}
+			if(second<10){second="0"+second;}
+			//var newDate = year+"年"+month+"月"+date+"日 "+hour+":"+minute+":"+second+" "+week;
+			if(item=='systime'){
+			var newDate ="<font class='ttext'>"+year+"年"+month+"月"+date+"日 "+hour+":"+minute+":"+second+" "+week+"</font>";
+			document.getElementById("home_main_rbottom1_colr").innerHTML = newDate;
+			setTimeout("getLangDate('systime')",1000);//每隔1秒重新调用一次该函数
+				}
+			else{
+			var newDate = year.toString()+month.toString()+date.toString();
+			var newDatetime = year.toString()+month.toString()+date.toString()+hour.toString()+minute.toString()+second.toString();
+			var newMonth = year.toString()+month.toString();
+			var newDate1 = year+"-"+month+"-"+date;
+			return eval(item);
+			}
+		}
+		//日期差
+		function getDaysDiff(date1, date2) {
+  		const oneDay = 24 * 60 * 60 * 1000; // 一天的毫秒数
+  		const timeDiff = Math.abs(date1.getTime() - date2.getTime()); // 获取时间戳差值的绝对值
+  		const daysDiff = Math.round(timeDiff / oneDay); // 根据时间戳差值计算天数差
+  		return daysDiff;
+			}
+
+		//标准差
+		function calculateStandardDeviation(numbers) {
+		    if (!numbers.length) return 0; // 如果数组为空，返回0
+		    let sum = 0;
+		    for (let i = 0; i < numbers.length; i++) {
+		        sum += numbers[i];
+		    }
+		    let mean = sum / numbers.length;
+		    let varianceSum = 0;
+		    for (let i = 0; i < numbers.length; i++) {
+		        varianceSum += Math.pow(numbers[i] - mean, 2);
+		    }
+		    let variance = varianceSum / numbers.length;
+		    return Math.sqrt(variance); // 返回标准差
+		}
+		//const numbers = [1, 2, 3, 4, 5];
+		//console.log(calculateStandardDeviation(numbers));
+		//令某个模块可以被拖拽
+		function	divmove(DivId1,DivId2){
+		var _move=false;
+		var _x,_y;
+		$('#'+DivId1).click(function(){
+			}).mousedown(function(e){
+				_move=true;
+				_x=e.pageX-parseInt($('#'+DivId2).css("left"));
+				_y=e.pageY-parseInt($('#'+DivId2).css("top"));
+				});
+			$(document).mousemove(function(e){
+				if(_move){
+					var x=e.pageX-_x;
+					var y=e.pageY-_y;
+					$('#'+DivId2).css({top:y,left:x});
+				}
+			}).mouseup(function(){
+			_move=false;
+			});
+		}
+		//获取目录的函数
+		function contents(auth) {
+				$.ajax({
+				type: "POST",
+				url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/ch014C.php",
+				data:{
+					qflag:"contents",
+					sflag:"_04",
+					quantauth:auth,
+					},
+				async:false,
+				success: function(data){
+					//alert(data)
+					if (data=='0'){
+						parent.WarnMessage(auth+": 你还没有人机结合投资策略!");
+				}else{
+					//alert(data);
+					data1=eval(trim(data));
+					for(var i=0;i<data1.length;i++){
+						var baseq = data1[i].baseq;
+						var baseid = baseq.split('-')[0];
+						var basename = baseq.split('-')[1];
+						var targetq = data1[i].targetq;
+						var basei = data1[i].basei;
+						var qtxt ='<div id="rj_'+baseid+'" class="RJJHDiv">';
+								qtxt+='<div id="rj_'+baseid+'_0" class="RJJHDivL"></div>';
+								qtxt+='<div id="rj_'+baseid+'_1" class="RJJHDivM"></div>';
+								qtxt+='<div id="rj_'+baseid+'_2" class="RJJHDivR"></div>';
+								qtxt+='</div>';
+						$("#mq_mainB").append(qtxt);
+						GetRjjhData(basei,baseq,targetq);
+					}	
+				}
+			}
+		})
+	}
+			
+		var xzinit=0
+		$(document).off('click','#Init').on('click','#Init',function(){
+			if (xzinit==0){
+				var txt = '<div id="rjjh_init">';
+					txt+= '<table class="altrowstable"><tr id="rjysb"><th colspan="4">填写策略要素</th></tr>';
+					txt+= '<tr><td colspan="1">组合名称</td><td id = "rjjh_init_name" colspan="3" contenteditable="true" style="text-align:left;"></td></tr>';
+					txt+= '<tr><td>作者</td><td id="rjjh_init_auth"></td><td>成立时间</td><td id="rjjh_init_date"></td></tr>'
+					txt+= '<tr><td colspan="4">策略介绍</td></tr>';
+					txt+= '<tr><td colspan="4" id="rjjh_init_note" style="height:100px;text-align:left;" contenteditable="true">请对投资策略做一个简介...</td></tr>';
+					txt+= '<tr><td colspan="1">基础策略</td><td colspan="3" id="rjjh_basequant"></td></tr>';
+					txt+= '<tr style="height:150px;"><td colspan="4" id="rjjh_basequant_sel"  style="padding:10px;"></td></tr>';
+					txt+= '<tr><td colspan="1">业绩基准</td><td colspan="3" id="rjjh_baseindex"></td></tr>';
+					txt+= '<tr style="height:80px;"><td colspan="4" id="rjjh_baseindex_sel"  style="padding:10px;"></td></tr>';
+					txt+= '<tr><td colspan="2" id ="rjjh_initOK">确定</td><td colspan="2" id ="rjjh_initCancel">取消</td></tr></table>';					
+					txt+= '</div>';
+					$("body").append(txt);
+					divmove("rjysb","rjjh_init");
+					xzinit = 1;
+					$("#rjjh_init_auth").html(Q14123101);
+					$("#rjjh_init_date").html(getLangDate('newDate'));
+					$.post("http://10.10.98.51/test/sys/qi/qi00002/qi04635C/ch014C.php",{
+							qflag:"rjjh_init_basequant",
+							sflag:'_04',
+							},
+						function(data){
+							$("#rjjh_basequant_sel").html(data);
+							});
+					var indexlist = '<span class="baseindexsel"	id="SH000001">上证指数</span>&nbsp;&nbsp;&nbsp;';
+							indexlist+= '<span class="baseindexsel"	id="SH000300">沪深300</span>&nbsp;&nbsp;&nbsp;';
+							indexlist+= '<span class="baseindexsel"	id="SZ399006">创业板指</span>&nbsp;&nbsp;&nbsp;';
+							indexlist+= '<span class="baseindexsel"	id="SH000905">中证500</span>&nbsp;&nbsp;&nbsp;';
+							indexlist+= '<span class="baseindexsel"	id="SH000852">中证1000</span>&nbsp;&nbsp;&nbsp;';
+							indexlist+= '<span class="baseindexsel"	id="WI881001">万得全A</span>&nbsp;&nbsp;&nbsp;';
+							indexlist+= '<span class="baseindexsel"	id="SH000016">上证50</span>&nbsp;&nbsp;&nbsp;';
+							indexlist+= '<span class="baseindexsel"	id="CSI000985">中证全指</span>&nbsp;&nbsp;&nbsp;';
+							indexlist+= '<span class="baseindexsel"	id="CSI000510">中证A500</span>&nbsp;&nbsp;&nbsp;';
+							indexlist+= '<span class="baseindexsel"	id="CSI932000">中证2000</span>&nbsp;&nbsp;&nbsp;';
+							indexlist+= '<span class="baseindexsel"	id="SLNHCI">南华商品</span>&nbsp;&nbsp;&nbsp;';
+					$("#rjjh_baseindex_sel").html(indexlist);		
+							
+				}
+			})
+			
+		$(document).off('click','#rjjh_initCancel').on('click','#rjjh_initCancel',function(){
+			$("#rjjh_init").remove();
+			xzinit = 0;
+			})
+		$(document).off('click','.basequantsel').on('click','.basequantsel',function(){
+			var thisid = $(this).attr("id");
+			var thisname = $(this).text();
+			$("#rjjh_basequant").attr('name',thisid);
+			$("#rjjh_basequant").html(thisname);
+			})
+		$(document).off('click','.baseindexsel').on('click','.baseindexsel',function(){
+			var thisid = $(this).attr("id");
+			var thisname = $(this).text();
+			$("#rjjh_baseindex").attr('name',thisid);
+			$("#rjjh_baseindex").html(thisname);
+			})
+		$(document).off('click','#rjjh_initOK').on('click','#rjjh_initOK',function(){
+			var rjjh_init_name = $("#rjjh_init_name").html();
+			var rjjh_init_auth = $("#rjjh_init_auth").html();
+			var rjjh_init_date = $("#rjjh_init_date").html();
+			var rjjh_init_note = $("#rjjh_init_note").html();
+			var rjjh_basequant = $("#rjjh_basequant").html();
+			var rjjh_basequantid = $("#rjjh_basequant").attr('name');
+			var rjjh_baseindex = $("#rjjh_baseindex").html();
+			var rjjh_baseindexid = $("#rjjh_baseindex").attr('name');
+			if (rjjh_init_name =="" || rjjh_init_auth =="" || rjjh_init_date =="" || rjjh_init_note =="请对投资策略做一个简介..." || rjjh_basequant =="" || rjjh_baseindex ==""){
+					parent.WarnMessage("请填写完整的策略要素表！");
+				}
+			else {
+					$.ajax({
+					type: "POST",
+					url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/ch014C.php",
+					data:{
+						qflag:"rjjhinit",
+						sflag:"_01",
+						initname:rjjh_init_name,
+						initauth:rjjh_init_auth,
+						initdate:rjjh_init_date,
+						initnote:rjjh_init_note,
+						basequant:rjjh_basequant,
+						basequantid:rjjh_basequantid,
+						baseindex:rjjh_baseindex,
+						baseindexid:rjjh_baseindexid,
+						},
+					async:false,
+					success: function(data){
+						if (data!='0'){
+							$("#rjjh_initCancel").click();
+							contents(Q14123101);
+							}
+						}
+					})
+			}
+		})
+function RjjhGraph(dom,title,var1,var2,var3,var4,var5,var6,var7,title1,title2,title3,title4,title5,title6){
+	var myChart=echarts.init(document.getElementById(dom));
+	var line1={
+		title:{
+			text:title,
+			left:'left',
+			textStyle:{color:'#1A1A1A',fontSize:16,fontWeight:'bold',},
+			top:'3px',
+		},
+		grid:{
+			bottom:'30px',
+			top:'50px',
+			right:'30px',
+			left:'50px',
+		},
+		tooltip:{
+			trigger:'axis',
+		},
+		color:['#D32F2F','#1890FF','#FA8C16','#D32F2F','#1890FF','#FA8C16'], // 红蓝橙：本策略(红) 基础策略(蓝) 业绩基准(橙)
+		legend:{
+			right:10,
+			top:25,
+			textStyle:{color:'#434343',fontSize:14, fontWeight: 'bold'},
+			itemHeight:12,
+			itemWidth:12,
+			data:[{name:title1,icon:'Rect'},{name:title2,icon:'Rect'},{name:title3,icon:'Rect'},{name:title4,icon:'Rect'},{name:title5,icon:'Rect'},{name:title6,icon:'Rect'}],
+		},
+		
+		dataZoom:[{
+			type:'inside',
+			show:true,
+			realtime:true,
+			start:0,
+			end:100,
+		}],
+		xAxis: [{
+			type: 'category',
+			data : (function(){return var1;})(),
+			splitLine:{show:true,lineStyle:{color:'#D9D9D9',width:0.5,type:'dotted'}},
+			axisLine: {lineStyle:{color:'#BFBFBF'}}, 
+			axisLabel:{color:'#595959', fontSize: 11},
+			splitNumber: 20,
+			min: 'dataMin',
+			max: 'dataMax'
+		}],
+		yAxis: [
+			{
+				boundaryGap: [0, '30%'],
+				type: 'value',
+				axisLabel: {formatter: '{value} %',color:'#595959', fontSize: 12},
+				axisLine: {lineStyle:{color:'#BFBFBF'}},
+				splitArea: {show: false},
+				splitNumber: 5,
+				scale:true,
+				splitLine:{show:true,lineStyle:{color:'#E8E8E8',width:0.5,type:'solid'}},
+			},
+			{
+				boundaryGap: [0, '150%'],
+				show:true,
+				axisLabel:{formatter: '{value} %',color:'#595959', fontSize: 11},
+				axisLine: {lineStyle:{color:'#BFBFBF'}},
+				splitLine:{show:false}
+			}
+		],
+		series : [
+			{
+				"name":title1, // 本策略收益
+				"type":"line",
+				"yAxisIndex": 0,
+				"symbolSize":0.1,
+				"lineStyle":{normal:{"width":2.5}}, // 加粗主策略线
+				"data":(function(){return var2;})(),
+			},
+			{
+				"name":title2, // 基础策略
+				"type":"line",
+				"yAxisIndex": 0,
+				"symbolSize":0.1,
+				"lineStyle":{normal:{"width":1.5}},
+				"data":(function(){return var3;})(),
+			},
+			{
+				"name":title3, // 业绩基准
+				"type":"line",
+				"yAxisIndex": 0,
+				"symbolSize":0.1,
+				"lineStyle":{normal:{"width":1.5}},
+				"data":(function(){return var4;})(),
+			},
+			{
+				"name":title4, // 本策略回撤
+				"type":"bar",
+				"barWidth": 2,
+				"barGap":0,
+				"yAxisIndex": 1,
+				"itemStyle":{normal:{color:'rgba(211, 47, 47, 0.7)'}}, // 红色回撤，70%透明度
+				"data":(function(){return var5;})(),
+			},
+			{
+				"name":title5, // 基础策略回撤
+				"type":"bar",
+				"barWidth": 2,
+				"barGap":0,
+				"yAxisIndex": 1,
+				"itemStyle":{normal:{color:'rgba(24, 144, 255, 0.7)'}}, // 蓝色回撤，70%透明度
+				"data":(function(){return var6;})(),
+			},
+			{
+				"name":title6, // 基准回撤
+				"type":"bar",
+				"barWidth": 2,
+				"barGap":0,
+				"yAxisIndex": 1,
+				"itemStyle":{normal:{color:'rgba(250, 140, 22, 0.7)'}}, // 橙色回撤，70%透明度
+				"data":(function(){return var7;})(),
+			}
+		]
+	};      
+	myChart.setOption(line1);
+}
+	function rcolor(tnum){if(tnum>=0){return 'style="color:#D32F2F;"';}else{return 'style="color:#388E3C;"';}}
+	function GetRjjhData(bindex,bquant,tquant){
+		var thisid=bquant.split('-')[0];
+		var thisname=bquant.split('-')[1];
+		var bindexname =bindex.split('-')[1];
+		var tquantname =tquant.split('-')[1];
+		$.ajax({
+			type: "POST",
+			url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/ch014C.php",
+			data:{
+				qflag:"rjjhgraph",
+				sflag:"_04",
+				sbindex:bindex,
+				sbquant:bquant,
+				stquant:tquant,
+				},
+				async:false,
+				success: function(data1){
+					var data1=eval(trim(data1));
+					var datelist = data1[0];
+					var bqlist = data1[1].map(Number);
+					var tqlist = data1[2].map(Number);
+					var bilist = data1[3].map(Number);
+					var bqtext = data1[4];
+					var lbq = 1;
+					var ltq = 1;
+					var lbi = 1;
+					var mlbq = 1;
+					var mltq = 1;
+					var mlbi = 1;
+					var bqhch = 0;
+					var tqhch = 0;
+					var bihch = 0 ;
+					var bqlist1 = [lbq-1];
+					var tqlist1 = [ltq-1];
+					var bilist1 = [lbi-1];
+					var bqhchlist = [bqhch];
+					var tqhchlist = [tqhch];
+					var bihchlist = [bihch];
+					var maxbqhch = 0;
+					var maxtqhch = 0;
+					var maxbihch = 0;
+					
+					for(var i=1;i<datelist.length;i++){
+						lbq = lbq*(parseFloat(bqlist[i])+1);
+						ltq = ltq*(parseFloat(tqlist[i])+1);
+						lbi = lbi*(parseFloat(bilist[i])+1);
+						if (lbq>mlbq){mlbq=lbq;}
+						if (ltq>mltq){mltq=ltq;}
+						if (lbi>mlbi){mlbi=lbi;}
+						bqhch = (lbq/mlbq)-1;
+						tqhch = (ltq/mltq)-1;
+						bihch = (lbi/mlbi)-1;
+						if (bqhch<maxbqhch){maxbqhch=bqhch;}
+						if (tqhch<maxtqhch){maxtqhch=tqhch;}
+						if (bihch<maxbihch){maxbihch=bihch;}
+						bqhchlist.push(Math.round(bqhch*10000)/100);
+						tqhchlist.push(Math.round(tqhch*10000)/100);
+						bihchlist.push(Math.round(bihch*10000)/100);
+						bqlist1.push(Math.round((lbq-1)*10000)/100);
+						tqlist1.push(Math.round((ltq-1)*10000)/100);
+						bilist1.push(Math.round((lbi-1)*10000)/100);
+						}
+					//$('#rj_'+thisid+'_0').html(datelist);
+					var id0 = 'rj_'+thisid+'_0';
+					RjjhGraph(id0,thisname,datelist,bqlist1,tqlist1,bilist1,bqhchlist,tqhchlist,bihchlist,'本策略收益',tquantname,bindexname,'本策略回撤',tquantname+'回撤',bindexname+'回撤');
+					var startdate = datelist[0];
+					var enddate = datelist[datelist.length-1];
+					var daydiff = getDaysDiff(new Date(enddate.substr(0,4)+'-'+enddate.substr(4,2)+'-'+enddate.substr(6,2)),new Date(startdate.substr(0,4)+'-'+startdate.substr(4,2)+'-'+startdate.substr(6,2)));
+					var bqljsyl = Math.round((lbq-1)*10000)/100;
+					var tqljsyl = Math.round((ltq-1)*10000)/100;
+					var biljsyl = Math.round((lbi-1)*10000)/100;
+					var zdifljsyl = Math.round((bqljsyl-tqljsyl)*100)/100;
+					var cdifljsyl = Math.round((bqljsyl-biljsyl)*100)/100;
+					var bqnhsyl = Math.round((lbq**(365/daydiff)-1)*10000)/100;
+					var tqnhsyl = Math.round((ltq**(365/daydiff)-1)*10000)/100;
+					var binhsyl = Math.round((lbi**(365/daydiff)-1)*10000)/100;
+					var zdifnhsyl = Math.round((bqnhsyl-tqnhsyl)*100)/100;
+					var cdifnhsyl = Math.round((bqnhsyl-binhsyl)*100)/100;
+					var bqdev = Math.round(calculateStandardDeviation(bqlist)*365**0.5*10000)/100;
+					var tqdev = Math.round(calculateStandardDeviation(tqlist)*365**0.5*10000)/100;
+					var bidev = Math.round(calculateStandardDeviation(bilist)*365**0.5*10000)/100;
+					var zdifdev = Math.round((bqdev-tqdev)*100)/100;
+					var cdifdev = Math.round((bqdev-bidev)*100)/100;
+					var bqsharp = Math.round((bqnhsyl/bqdev)*100)/100;
+					var tqsharp = Math.round((tqnhsyl/tqdev)*100)/100;
+					var bisharp = Math.round((binhsyl/bidev)*100)/100;
+					var zdifsharp = Math.round((bqsharp-tqsharp)*100)/100;
+					var cdifsharp = Math.round((bqsharp-bisharp)*100)/100;
+					var zdifmaxhch = maxbqhch-maxtqhch;
+					var cdifmaxhch = maxbqhch-maxbihch;
+					var maxbqhch = Math.round(maxbqhch*10000)/100;
+					var maxtqhch = Math.round(maxtqhch*10000)/100;
+					var maxbihch = Math.round(maxbihch*10000)/100;
+					var zdifmaxhch = Math.round(zdifmaxhch*10000)/100;
+					var cdifmaxhch = Math.round(cdifmaxhch*10000)/100;
+					
+					var txt2 = '<div style="height:24px;display:flex;"><div style="width:10px;"></div><div style="flex:1;">统计区间：'+startdate+'-'+enddate+'</div></div>';
+							txt2+='<div style="flex:1;position:relative;display:flex;"><div style="position:absolute;top:0;left:0;right:0;bottom:0;overflow:auto;">';
+							txt2+='<table class="altrowstable">';
+							txt2+='<tr><th>项目</th><th>本策略</th><th>基础策略</th><th>业绩基准</th><th>增强表现</th><th>超额表现</th></tr>';
+							txt2+='<tr><td>累计收益</td><td '+rcolor(bqljsyl)+'>'+bqljsyl+'%</td><td '+rcolor(tqljsyl)+'>'+tqljsyl+'%</td><td '+rcolor(biljsyl)+'>'+biljsyl+'%</td><td '+rcolor(zdifljsyl)+'>'+zdifljsyl+'%</td><td '+rcolor(cdifljsyl)+'>'+cdifljsyl+'%</td></tr>';
+							txt2+='<tr><td>年化收益</td><td '+rcolor(bqnhsyl)+'>'+bqnhsyl+'%</td><td '+rcolor(tqnhsyl)+'>'+tqnhsyl+'%</td><td '+rcolor(binhsyl)+'>'+binhsyl+'%</td><td '+rcolor(zdifnhsyl)+'>'+zdifnhsyl+'%</td><td '+rcolor(cdifnhsyl)+'>'+cdifnhsyl+'%</td></tr>';
+							txt2+='<tr><td>夏普比率</td><td '+rcolor(bqsharp)+'>'+bqsharp+'</td><td '+rcolor(tqsharp)+'>'+tqsharp+'</td><td '+rcolor(bisharp)+'>'+bisharp+'</td><td '+rcolor(zdifsharp)+'>'+zdifsharp+'</td><td '+rcolor(cdifsharp)+'>'+cdifsharp+'</td></tr>';
+							txt2+='<tr><td>年化波动</td><td '+rcolor(bqdev)+'>'+bqdev+'%</td><td '+rcolor(tqdev)+'>'+tqdev+'%</td><td '+rcolor(bidev)+'>'+bidev+'%</td><td '+rcolor(zdifdev)+'>'+zdifdev+'%</td><td '+rcolor(cdifdev)+'>'+cdifdev+'%</td></tr>';
+							txt2+='<tr><td>最大回撤</td><td '+rcolor(maxbqhch)+'>'+maxbqhch+'%</td><td '+rcolor(maxtqhch)+'>'+maxtqhch+'%</td><td '+rcolor(maxbihch)+'>'+maxbihch+'%</td><td '+rcolor(zdifmaxhch)+'>'+zdifmaxhch+'%</td><td '+rcolor(cdifmaxhch)+'>'+cdifmaxhch+'%</td></tr>';
+							txt2+='<tr style ="height:114px;"><td>综合评价</td><td colspan="5">'+bqtext+'</td></tr>';
+							txt2+='</table>';
+							txt2+='</div></div>';
+					var id1 = 'rj_'+thisid+'_1';
+					$('#'+id1).html(txt2);
+					var xxxtt	=`<div class="status-grid">
+											<div class="status-card normal"><div class="status-value">42</div><div class="status-label">正常</div></div>
+											<div class="status-card warning"><div class="status-value">5</div><div class="status-label">警告</div></div>
+											<div class="status-card error"><div class="status-value">2</div><div class="status-label">错误</div></div>
+											<div class="status-card"><div class="status-value">49</div><div class="status-label">总计</div></div>
+											</div>
+											<div class="data-section" style="background:transparent;">
+											<div class="alert-item">数据库连接池使用率超过80%</div>
+											<div class="alert-item">服务器内存使用率过高</div>
+											<div class="alert-item">网络延迟增加</div>
+											
+											<div class="alert-item">用户登录失败次数异常</div>
+											<div class="alert-item">磁盘空间不足警告</div>
+											<div class="alert-item">服务器内存使用率过高</div>
+											<div class="alert-item">网络延迟增加</div>
+											<div class="alert-item">用户登录失败次数异常</div>
+											<div class="alert-item">磁盘空间不足警告</div>
+											
+											</div>
+											`;
+					var  txt3 ='<div class="pannelbord" id="pannelbord_'+thisid+'" style="height:0px;">'+xxxtt+'</div>';
+							 txt3+='<div class = "pannelsels"><div class="pannelsel rborder" id="riskc_'+thisid+'" name="'+thisname+'">风险控制</div><div class="pannelsel rborder" id="rtqbasket_'+thisid+'" name="'+thisname+'">基准持仓</div><div class="pannelsel rborder" id="rbqbasket_'+thisid+'" name="'+thisname+'">叠加持仓</div><div class="pannelsel" id="getqtfactor_'+thisid+'" name="'+thisname+'">当前状态</div></div>';
+					var id2 = 'rj_'+thisid+'_2';
+					$('#'+id2).html(txt3);
+				}
+			})
+	}
+	/*整体风险控制模块*/
+	function riskc(quantid,ckey){
+		//根据记录生成调仓目标
+		var thiscon = ckey.replaceAll('#',',').replaceAll('\'','\"');
+ 		var thisconobject = JSON.parse(thiscon);
+		var tweight = thisconobject['tweight'];
+		var tqbasket = thisconobject['tqbasket'];
+		var bqbasket = thisconobject['bqbasket'];
+		var riskc = thisconobject['riskc'];
+		var sumweight=parseFloat(tweight[0])+parseFloat(tweight[1])+parseFloat(tweight[2]);
+		var isljhching = riskc['ljhch'][2];
+ 		var isdrhching = riskc['drhch'][2];
+		var isriskcing =  parseFloat(isljhching)+parseFloat(isdrhching);
+		//alert(ckey);
+		if(100<sumweight){
+			var isflag='总权重大于100，请返回修改！';
+			}
+		else if (0<isriskcing){
+			var isflag='请注意，本策略有正在执行的风控条款,如确定要接触风控，请返回双击标红的风控行解除！';
+			}
+		else {
+			var isflag=1;
+		}
+		return isflag;
+		}
+	function subs(thisid,thisname,factorkey,thisresean){
+		//alert(factorkey)
+		isriskc= riskc(thisid,factorkey);
+		if (isriskc==1){
+			//alert('go');		
+			//alert(tstate_[thisid]);
+			//alert(tstate[thisid]);
+			//_bqbasket
+			//根据记录生成调仓目标
+			var thiscon0 = tstate[thisid].replaceAll('#',',').replaceAll('\'','\"');
+ 			var thisconobject0 = JSON.parse(thiscon0);
+ 			var tweight0 = thisconobject0['tweight'];
+			var bqbasket0 = thisconobject0['bqbasket'];
+			_bqbasket = [];
+			if (bqbasket0.length>0){
+				for(var i=0;i<bqbasket0.length;i++){
+						_bqbasket.push([bqbasket0[i][0],0]);
+					}
+				}
+			var thiscon = tstate_[thisid].replaceAll('#',',').replaceAll('\'','\"');
+ 			var thisconobject = JSON.parse(thiscon);
+ 			var tweight1 = thisconobject['tweight'];
+ 			thisconobject["_bqbasket"] = _bqbasket;
+			var ordertxt = JSON.stringify(thisconobject).replaceAll(',','#').replaceAll('\"','\'')
+			
+			if (JSON.stringify(tweight1)!=JSON.stringify(tweight0)){var ordersour=3;}
+			else if ($("#rjrebalance").attr('name')=='0'){var ordersour=1;}
+			else if ($("#rjrebalance").attr('name')=='1'){var ordersour=2;}
+			
+			//alert(ordertxt);	
+			/*
+			var thiscon = tstate_[thisid].replaceAll('#',',').replaceAll('\'','\"');
+ 			var thisconobject = JSON.parse(thiscon);
+			var tweight = thisconobject['tweight'];
+			var tqbasket = thisconobject['tqbasket'];
+			var bqbasket = thisconobject['bqbasket'];
+			var orderlist =[tqbasket[0]];
+			var cashw = tweight[2]+tweight[0]*tqbasket[1][1]/100;
+			orderlist.push(['Cash',cashw]);
+			var bardict = {};
+			for(var i=2;i<tqbasket.length;i++){
+				bardict[tqbasket[i][0]]=[tqbasket[i][0],tqbasket[i][1],tqbasket[i][2]*tweight[0]/100];
+				}
+			for(var i=0;i<bqbasket.length;i++){
+				if (bqbasket[i][0] in bardict) {
+					//这块先合并为量化模型的价格
+					var v0 = bardict[bqbasket[i][0]][0];
+					var v1 = bardict[bqbasket[i][0]][1];
+					var v2 = bardict[bqbasket[i][0]][2]+bqbasket[i][2]*tweight[1]/100;
+					bardict[bqbasket[i][0]]=[v0,v1,v2];
+					} else {
+    				bardict[bqbasket[i][0]]=[bqbasket[i][0],bqbasket[i][1],bqbasket[i][2]*tweight[1]/100];
+					}
+				}
+			for (const key in bardict) {
+  			if (bardict.hasOwnProperty(key)) {
+    				//console.log(bardict[key]);
+    				orderlist.push(bardict[key]);
+  				}
+				}
+			*/
+			//新增人机调整记录
+			$.ajax({
+				type: "POST",
+				url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/ch014C.php",
+				data:{
+					qflag:"rjjhcreatetzh",
+					sflag:"_01",
+					stquant:thisid,
+					stname:thisname,
+					sjykey:ordertxt,
+					stres:thisresean,
+					ssour:ordersour,
+					},
+					async:false,
+					success: function(data1){
+						console.log(data1)
+					}
+			})
+			//向node服务器发送调仓目标
+			orderkey = thisname+'-调仓目标-'+getLangDate('newDatetime')+':'+ordersour+'#'+ordertxt;
+			smsocket0.emit('fromWebClient', {mess:orderkey});
+			//alert(orderkey);
+			$("#msgpannel").remove();
+			$("#BG").remove();			
+			}
+		else {
+				parent.WarnMessage(isriskc);
+		}
+		}
+	$(document).off('click','#msgpannelGo').on('click','#msgpannelGo',function(){
+		var thismod=$(this).attr('name');
+		if (thismod==0){$("#msgpannel").remove();$("#BG").remove();}
+		else if (thismod==1){
+			if($('#tiaocangliyou').html()==''){
+						parent.WarnMessage("请填写主观操作理由!");
+				}
+			else{
+				var tlist =$('#msgpannelH').attr('name').split('_');
+				subs(tlist[0],tlist[1],tstate_[tlist[0]],$("#tiaocangliyou").html());
+				}
+			}
+	})
+
+	$(document).off('click','#msgpannelCancel').on('click','#msgpannelCancel',function(){
+		$("#msgpannel").remove();$("#BG").remove();
+	})
+	$(document).off('click','#rjjh_qtpannelCancel').on('click','#rjjh_qtpannelCancel',function(){
+		$("#BG").remove();
+		$("#rjjh_qtpannel").remove();
+	})
+	
+	function msgpannel(qtcode,qtname,qitem,qcon){
+		$("#BG").remove();
+		$("#msgpannel").remove();
+		var txt = '<div id="BG"><div><div id="msgpannel">';
+				txt+=  '<div id="msgpannelH" name="'+qtcode+'_'+qtname+'"></div>';
+				txt+=  '<div id="msgpannelB"><center><div id="msgpannelGo" name="'+qitem+'">确定</div><div id="msgpannelCancel">取消</div></center></div>';
+				txt+= '</div>';
+		$("body").append(txt);
+				
+		var thiscon = qcon.replaceAll('#',',').replaceAll('\'','\"');
+		var thisconobject = JSON.parse(thiscon);
+		
+		var tweight = thisconobject['tweight'];
+		var ljhch = thisconobject['riskc']['ljhch'];
+		var drhch = thisconobject['riskc']['drhch'];
+		if (ljhch[2]==0){bcolor ='transparent'}else if (ljhch[2]==1){bcolor ='#FF0000'}
+		if (drhch[2]==0){dcolor ='transparent'}else if (drhch[2]==1){dcolor ='#FF0000'}
+		var rtxt = '<br/>整体权重：';
+				rtxt+='<center><table class="altrowstable">';
+				rtxt+='<tr><th>基准策略持仓权重</th><th>主观持仓权重</th><th>现金权重</th></tr>';
+				rtxt+='<tr><td>'+tweight[0]+'</td><td>'+tweight[1]+'</td><td>'+tweight[2]+'</td></tr>';
+				rtxt+='</table></center>';
+				rtxt+= '<br/>风控条件：';
+				rtxt+='<center><table class="altrowstable">';
+				rtxt+='<tr><th>项目</th><th>数值</th><th>策略权重</th></tr>';
+				rtxt+='<tr style ="background:'+bcolor+';"><td >整体回撤</td><td>'+ljhch[0]+'</td><td>'+ljhch[1]+'</td></tr>';
+				rtxt+='<tr style ="background:'+dcolor+';"><td >单日回撤</td><td>'+drhch[0]+'</td><td>'+drhch[1]+'</td></tr>';
+				rtxt+='</table></center>';
+		$("#msgpannelH").html(rtxt);
+		
+ 		var tqbasket = thisconobject['tqbasket'];
+ 		var rtxt = '<br/>策略持仓：';
+ 		    rtxt+='<center><table class="altrowstable">';
+ 				rtxt+='<tr><th>股票代码</th><th>基准价格</th><th>持仓权重</th></tr>';
+ 		for(var i=1;i<tqbasket.length;i++){
+ 			if (i==1){rtxt+='<tr><td>现金</td><td>.</td><td>'+tqbasket[i][1]+'</td></tr>';}
+ 			else{rtxt+='<tr><td>'+tqbasket[i][0]+'</td><td>'+tqbasket[i][1]+'</td><td>'+tqbasket[i][2]+'</td></tr>';}
+ 			}
+ 		rtxt+='</table></center>';
+ 		var t0 = tqbasket[0].join(',');
+ 		rtxt+='后补标的:'+t0;
+ 		$("#msgpannelH").append(rtxt);
+		
+		var bqbasket = thisconobject['bqbasket'];
+ 		var rtxt = '<br/>主观持仓：';
+ 		    rtxt+='<center><table class="altrowstable">';
+ 				rtxt+='<tr><th>股票代码</th><th>基准价格</th><th>持仓权重</th></tr>';
+ 		for(var i=0;i<bqbasket.length;i++){
+ 				rtxt+='<tr><td>'+bqbasket[i][0]+'</td><td>'+bqbasket[i][1]+'</td><td>'+bqbasket[i][2]+'</td></tr>';
+ 			}
+ 				rtxt+='</table></center>';
+ 			if(qitem==1){
+ 				rtxt+= '请填写调仓理由：<div id="tiaocangliyou"  contenteditable="true"></div>';
+ 				rtxt+= '<div id="rjrebalance" name="0"><div id="noinitweight">延续现有权重</div><div id="initweight">调整至初始权重</div></div>';
+ 				}
+ 				$("#msgpannelH").append(rtxt);
+		}
+		
+	$(document).off('click','#rjjh_qtpannelGo').on('click','#rjjh_qtpannelGo',function(){
+		var thisid = $('#rjjh_qtpannelH').attr('name');
+		var thisname = $('#rjjh_qtpannelH').html();
+		msgpannel(thisid,thisname,1,tstate_[thisid]);
+	})
+
+	$(document).off('click','#rjjh_qtpannelSub').on('click','#rjjh_qtpannelSub',function(){
+		var thisid = $("#rjjh_qtpannelH").attr('name');
+		var thisname = $("#rjjh_qtpannelH").html();
+ 		var thiscon = tstate_[thisid];
+		//$("#rjjh_qtpannelHB").html(thiscon);
+		
+		var thisitem = $("#rjjh_qtpannelBH").attr('name');
+		//alert(thisitem);
+		if (thisitem=='qriskc_'){
+			var thisid = $("#rjjh_qtpannelH").attr('name');
+			var thisname = $("#rjjh_qtpannelH").html();
+			var thiscon = tstate_[thisid].replaceAll('#',',').replaceAll('\'','\"');
+ 			var thisconobject = JSON.parse(thiscon);
+ 			//alert(JSON.stringify(thisconobject));
+ 			var isljhching = thisconobject['riskc']['ljhch'][2];
+ 			var isdrhching = thisconobject['riskc']['drhch'][2];
+			var isriskcing =  parseFloat(isljhching)+parseFloat(isdrhching);
+			
+			var bqweight=parseFloat($("#bqweight").html());
+			var tqweight=parseFloat($("#tqweight").html());
+			var cashweight=parseFloat($("#cashweight").html());
+			var ljhuicheval=parseFloat($("#ljhuicheval").html());
+			var ljhuichevalweight=parseFloat($("#ljhuichevalweight").html());
+			var drhuicheval=parseFloat($("#drhuicheval").html());
+			var drhuichevalweight=parseFloat($("#drhuichevalweight").html());
+			thisconobject['tweight']=[bqweight,tqweight,cashweight];
+			thisconobject['riskc']['ljhch']=[ljhuicheval,ljhuichevalweight,isljhching];
+			thisconobject['riskc']['drhch']=[drhuicheval,drhuichevalweight,isdrhching];
+			tstate_[thisid]=JSON.stringify(thisconobject).replaceAll(',','#').replaceAll('\"','\'');
+			qtpannel(thisid,thisname,tstate_[thisid]);
+			$("#qriskc_").click();
+			if (isriskcing>0){
+						parent.WarnMessage("请注意，本策略有正在执行的风控条款,如确定要接触风控，请返回双击标红的风控行解除！");
+				}
+			}
+		else if (thisitem=='qrtqbasket_'){
+			var thisid = $("#rjjh_qtpannelH").attr('name');
+			var thisname = $("#rjjh_qtpannelH").html();
+			var thiscon = tstate_[thisid].replaceAll('#',',').replaceAll('\'','\"');
+ 			var thisconobject = JSON.parse(thiscon);
+ 			//alert(JSON.stringify(thisconobject));
+			var tqlist = []
+			var hoububiaodilist = $("#hoububiaodi").html().split(',');
+			tqlist.push(hoububiaodilist)
+			var rows = $("#rtable2 tr");
+			for (var i = 1; i < rows.length-1; i++) {
+			    var rowData = [];
+			    var cells = $(rows[i]).find("td");
+			    if ($(cells[0]).html()=='现金'){
+			    	rowData.push($(cells[0]).html());
+			    	rowData.push(parseFloat($(cells[2]).html()));
+			    	}else{
+			    	rowData.push($(cells[0]).html());
+			    	rowData.push(parseFloat($(cells[1]).html()));
+			    	rowData.push(parseFloat($(cells[2]).html()));
+			    	}
+			    tqlist.push(rowData);
+			}
+			//alert(JSON.stringify(tqlist));
+			thisconobject["tqbasket"]=tqlist
+			tstate_[thisid]=JSON.stringify(thisconobject).replaceAll(',','#').replaceAll('\"','\'');
+			qtpannel(thisid,thisname,tstate_[thisid]);
+			$("#qrtqbasket_").click();
+			
+			}
+		else if (thisitem=='qrbqbasket_'){
+			
+			var thisid = $("#rjjh_qtpannelH").attr('name');
+			var thisname = $("#rjjh_qtpannelH").html();
+			var thiscon = tstate_[thisid].replaceAll('#',',').replaceAll('\'','\"');
+ 			var thisconobject = JSON.parse(thiscon);
+ 			//alert(JSON.stringify(thisconobject));
+			var bqlist = []
+			
+			var rows = $("#rtable3 tr");
+			for (var i = 1; i < rows.length-1; i++) {
+			    var rowData = [];
+			    var cells = $(rows[i]).find("td");
+			    rowData.push($(cells[0]).html());
+			    rowData.push(parseFloat($(cells[1]).html()));
+			    rowData.push(parseFloat($(cells[2]).html()));
+			    bqlist.push(rowData);
+			}
+			//alert(JSON.stringify(tqlist));
+			thisconobject["bqbasket"]=bqlist
+			tstate_[thisid]=JSON.stringify(thisconobject).replaceAll(',','#').replaceAll('\"','\'');
+			qtpannel(thisid,thisname,tstate_[thisid]);
+			$('#qrbqbasket_').click();
+			}	
+	})
+	//风险控制
+	$(document).off('click','#qriskc_').on('click','#qriskc_',function(){
+		$("#rjjh_qtpannelBH").attr('name','qriskc_');
+		var thisid = $("#rjjh_qtpannelH").attr('name');
+		var thisname = $("#rjjh_qtpannelH").html();
+ 		var thiscon = tstate_[thisid].replaceAll('#',',').replaceAll('\'','\"');
+ 		//alert(thiscon);
+		var thisconobject = JSON.parse(thiscon);
+		//alert(thisconobject['riskc']);
+		var tweight = thisconobject['tweight'];
+		var ljhch = thisconobject['riskc']['ljhch'];
+		var drhch = thisconobject['riskc']['drhch'];
+		if (ljhch[2]==0){bcolor ='transparent'}else if (ljhch[2]==1){bcolor ='#FF0000'}
+		if (drhch[2]==0){dcolor ='transparent'}else if (drhch[2]==1){dcolor ='#FF0000'}
+		var rtxt = '<br/>初始权重：';
+				rtxt+= '<br/>说明：主观和量化超出初始权重正负5个基点，或者用户选择调整的情况下，后端自动调整至初始权重。';
+				rtxt+='<center><table class="altrowstable" id="rtable0">';
+				rtxt+='<tr><th>基准策略持仓权重</th><th>主观持仓权重</th><th>现金权重</th></tr>';
+				rtxt+='<tr><td id="bqweight" contenteditable="true">'+tweight[0]+'</td><td  id="tqweight" contenteditable="true">'+tweight[1]+'</td><td id="cashweight" contenteditable="true">'+tweight[2]+'</td></tr>';
+				rtxt+='</table></center>';
+				rtxt+= '<br/>风控条件：';
+				rtxt+='<center><table class="altrowstable" id="rtable1">';
+				rtxt+='<tr><th>项目</th><th>数值</th><th>策略权重</th></tr>';
+				rtxt+='<tr style ="background:'+bcolor+';" class="riskcontrol" id="ljhch"><td >整体回撤</td><td id="ljhuicheval" contenteditable="true">'+ljhch[0]+'</td><td  id="ljhuichevalweight" contenteditable="true">'+ljhch[1]+'</td></tr>';
+				rtxt+='<tr style ="background:'+dcolor+';" class="riskcontrol" id="drhch"><td >单日回撤</td><td id="drhuicheval" contenteditable="true">'+drhch[0]+'</td><td  id="drhuichevalweight" contenteditable="true">'+drhch[1]+'</td></tr>';
+				rtxt+='</table></center>';
+		$("#rjjh_qtpannelBB").html(rtxt);
+	})
+	
+		//调整基准策略股票池
+	$(document).off('dblclick','.riskcontrol').on('dblclick','.riskcontrol',function(){
+			var tid = $("#rjjh_qtpannelH").attr('name');
+			var tname = $("#rjjh_qtpannelH").html();
+	 		var tcon = tstate_[tid].replaceAll('#',',').replaceAll('\'','\"');
+	 		//alert(thiscon);
+			var thisconobject = JSON.parse(tcon);
+			var thisid =$(this).css('background','transparent').attr('id');
+			//alert(thisid);
+			thisconobject['riskc'][thisid][2]=0;
+			tstate_[tid]=JSON.stringify(thisconobject).replaceAll(',','#').replaceAll('\"','\'');
+		})
+	
+	//调整基准策略股票池
+	$(document).off('click','#qrtqbasket_').on('click','#qrtqbasket_',function(){
+		$("#rjjh_qtpannelBH").attr('name','qrtqbasket_');
+		var thisid = $("#rjjh_qtpannelH").attr('name');
+		var thisname = $("#rjjh_qtpannelH").html();
+ 		var thiscon = tstate_[thisid].replaceAll('#',',').replaceAll('\'','\"');
+ 		var thisconobject = JSON.parse(thiscon);
+ 		var tqbasket = thisconobject['tqbasket'];
+ 		var rtxt = '<br/>策略持仓：';
+ 		    rtxt+='<center><table class="altrowstable" id="rtable2">';
+ 				rtxt+='<tr><th>股票代码</th><th>基准价格</th><th>持仓权重</th></tr>';
+ 		for(var i=1;i<tqbasket.length;i++){
+ 			if (i==1){rtxt+='<tr><td>现金</td><td>.</td><td contenteditable="true">'+tqbasket[i][1]+'</td></tr>';}
+ 			else{rtxt+='<tr class="rjjh_inputtr"><td contenteditable="true">'+tqbasket[i][0]+'</td><td contenteditable="true">'+tqbasket[i][1]+'</td><td contenteditable="true">'+tqbasket[i][2]+'</td></tr>';}
+ 			}
+ 		rtxt+='<tr id="x_add0"><td id="x_add0_1" colspan="3" style="color:#4A90E2;background:rgba(20,177,235,0.3);">双击新增一行!</td></tr>'
+ 		rtxt+='</table></center>';
+ 		var t0 = tqbasket[0].join(',');
+ 		rtxt+='后补标的:<span id="hoububiaodi" contenteditable="true">'+t0+'</span>';
+ 		$("#rjjh_qtpannelBB").html(rtxt);
+	})
+	
+	//叠加新的股票池
+	$(document).off('click','#qrbqbasket_').on('click','#qrbqbasket_',function(){
+		$("#rjjh_qtpannelBH").attr('name','qrbqbasket_');
+		var thisid = $("#rjjh_qtpannelH").attr('name');
+		var thisname = $("#rjjh_qtpannelH").html();
+ 		var thiscon = tstate_[thisid].replaceAll('#',',').replaceAll('\'','\"');
+		var thisconobject = JSON.parse(thiscon);
+		var bqbasket = thisconobject['bqbasket'];
+ 		var rtxt = '<br/>主观持仓：';
+ 		    rtxt+='<center><table class="altrowstable" id="rtable3">';
+ 				rtxt+='<tr><th>股票代码</th><th>基准价格</th><th>持仓权重</th></tr>';
+ 		for(var i=0;i<bqbasket.length;i++){
+ 				rtxt+='<tr class="rjjh_inputtr"><td contenteditable="true">'+bqbasket[i][0]+'</td><td contenteditable="true">'+bqbasket[i][1]+'</td><td contenteditable="true">'+bqbasket[i][2]+'</td></tr>';
+ 			}
+ 				rtxt+='<tr id="x_add1"><td id="x_add1_1" colspan="3" style="color:#4A90E2;background:rgba(20,177,235,0.3);">双击新增一行!</td></tr>'
+ 				rtxt+='</table></center>';
+ 				$("#rjjh_qtpannelBB").html(rtxt);
+	})
+	$(document).off('dblclick','#x_add1_1').on('dblclick','#x_add1_1',function(){
+			$('#x_add1').before('<tr class="rjjh_inputtr"><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>');
+	})
+	$(document).off('dblclick','#x_add0_1').on('dblclick','#x_add0_1',function(){
+			$('#x_add0').before('<tr class="rjjh_inputtr"><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>');
+	})
+	$(document).off('dblclick','.rjjh_inputtr').on('dblclick','.rjjh_inputtr',function(){
+			$(this).remove();
+	})
+	function qtpannel(qtcode,qtname,qtcon){
+		$("#BG").remove();
+		$("#rjjh_qtpannel").remove();
+		var txt = '<div id="BG"><div><div id="rjjh_qtpannel">';	
+				txt+= '<div id="rjjh_qtpannelH" name="'+qtcode+'">'+qtname+'</div>';
+				txt+= '<div id="rjjh_qtpannelB"><div id="rjjh_qtpannelDB"><div id="rjjh_qtpannelBB"></div>';
+				txt+= '<div id="rjjh_qtpannelBH"><div class="qtpannelBH" id="qriskc_">风险控制</div><div class="qtpannelBH" id="qrtqbasket_">基准持仓</div>';
+				txt+= '<div class="qtpannelBH" id="qrbqbasket_">叠加持仓</div></div></div>';
+				txt+= '<div id="rjjh_qtpannelHB"></div><div id="rjjh_qtpannelHF"></div></div>';
+				txt+= '<div id="rjjh_qtpannelC"><div style="width:340px;"></div><div id="rjjh_qtpannelSub">提交</div><div style="width:680px;"></div><div id="rjjh_qtpannelGo">调整</div><div style="width:3px;"></div><div id ="rjjh_qtpannelCancel">取消</div><div style="width:3px;"></div></div>';
+				txt+= '</div>';
+		$("body").append(txt);
+	
+		var thiscon = qtcon.replaceAll('#',',').replaceAll('\'','\"');
+		var thisconobject = JSON.parse(thiscon);
+		
+		var tweight = thisconobject['tweight'];
+		var ljhch = thisconobject['riskc']['ljhch'];
+		var drhch = thisconobject['riskc']['drhch'];
+		if (ljhch[2]==0){bcolor ='transparent'}else if (ljhch[2]==1){bcolor ='#FF0000'}
+		if (drhch[2]==0){dcolor ='transparent'}else if (drhch[2]==1){dcolor ='#FF0000'}
+		var rtxt = '<br/>整体权重：';
+				rtxt+='<center><table class="altrowstable">';
+				rtxt+='<tr><th>基准策略持仓权重</th><th>主观持仓权重</th><th>现金权重</th></tr>';
+				rtxt+='<tr><td >'+tweight[0]+'</td><td>'+tweight[1]+'</td><td>'+tweight[2]+'</td></tr>';
+				rtxt+='</table></center>';
+				rtxt+= '<br/>风控条件：';
+				rtxt+='<center><table class="altrowstable">';
+				rtxt+='<tr><th>项目</th><th>数值</th><th>策略权重</th></tr>';
+				rtxt+='<tr style ="background:'+bcolor+';"><td >整体回撤</td><td>'+ljhch[0]+'</td><td>'+ljhch[1]+'</td></tr>';
+				rtxt+='<tr style ="background:'+dcolor+';"><td >单日回撤</td><td>'+drhch[0]+'</td><td>'+drhch[1]+'</td></tr>';
+				rtxt+='</table></center>';
+		$("#rjjh_qtpannelHB").html(rtxt);
+		$("#rjjh_qtpannelHF").html(rtxt);
+ 		var tqbasket = thisconobject['tqbasket'];
+ 		var rtxt = '<br/>策略持仓：';
+ 		    rtxt+='<center><table class="altrowstable">';
+ 				rtxt+='<tr><th>股票代码</th><th>基准价格</th><th>持仓权重</th></tr>';
+ 		for(var i=1;i<tqbasket.length;i++){
+ 			if (i==1){rtxt+='<tr><td>现金</td><td>.</td><td>'+tqbasket[i][1]+'</td></tr>';}
+ 			else{rtxt+='<tr><td>'+tqbasket[i][0]+'</td><td>'+tqbasket[i][1]+'</td><td>'+tqbasket[i][2]+'</td></tr>';}
+ 			}
+ 		rtxt+='</table></center>';
+ 		var t0 = tqbasket[0].join(',');
+ 		rtxt+='后补标的:'+t0;
+ 		$("#rjjh_qtpannelHB").append(rtxt);
+		$("#rjjh_qtpannelHF").append(rtxt);
+		var bqbasket = thisconobject['bqbasket'];
+ 		var rtxt = '<br/>主观持仓：';
+ 		    rtxt+='<center><table class="altrowstable">';
+ 				rtxt+='<tr><th>股票代码</th><th>基准价格</th><th>持仓权重</th></tr>';
+ 		for(var i=0;i<bqbasket.length;i++){
+ 				rtxt+='<tr><td>'+bqbasket[i][0]+'</td><td>'+bqbasket[i][1]+'</td><td>'+bqbasket[i][2]+'</td></tr>';
+ 			}
+ 				rtxt+='</table></center>';
+ 				$("#rjjh_qtpannelHB").append(rtxt);
+ 				$("#rjjh_qtpannelHF").append(rtxt);
+		}
+		
+	$(document).off('click','.qtpannelBH').on('click','.qtpannelBH',function(){
+		$('.qtpannelBH').css('background','transparent');
+		$(this).css('background','rgba(255,255,255,0.3)');
+		})
+	$(document).off('click','.pannelsel').on('click','.pannelsel',function(){
+				$('.pannelsel').css('background','transparent');
+				$(this).css('background','rgba(255,255,255,0.3)');
+				var thiskeys = $(this).attr("id").split('_');
+				var thisname = $(this).attr("name");
+				var thisid = thiskeys[1];
+				var item = thiskeys[0];
+				var thisname = $(this).attr("name");
+				$.ajax({
+					type: "POST",
+					url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/ch014C.php",
+					data:{
+						qflag:"rjjhstqstate",
+						sflag:"_04",
+						stquant:thisid,
+						},
+						async:false,
+						success: function(data1){
+							tstate[thisid] =data1;
+							tstate_[thisid] =data1;
+							//alert(JSON.stringify(tstate));
+						}
+					})
+			if (item=='riskc'){
+				qtpannel(thisid,thisname,tstate_[thisid]);
+				$("#qriskc_").click();
+				//$("#pannelbord_"+thisid).html('风险控制');
+				}
+			else if (item=='rtqbasket'){
+				qtpannel(thisid,thisname,tstate_[thisid]);
+				$("#qrtqbasket_").click();
+				//$("#pannelbord_"+thisid).html('调整基准策略股票池');
+				}
+			else if (item=='rbqbasket'){
+				qtpannel(thisid,thisname,tstate_[thisid]);
+				$('#qrbqbasket_').click();
+				//$("#pannelbord_"+thisid).html('叠加新的股票池');
+				}
+			else if (item=='getqtfactor'){
+				msgpannel(thisid,thisname,0,tstate[thisid]);
+				//$("#pannelbord_"+thisid).html('查看策略要素');
+				}
+		})
+		
+		$(document).off('click','#noinitweight').on('click','#noinitweight',function(){
+			$(this).css({'background':'#FF0000','color':'#FFFFFF'});
+			$("#initweight").css({'background':'transparent','color':'#16C0FF'});
+			$("#rjrebalance").attr('name','0');
+			//alert($("#rjrebalance").attr('name'));
+		})
+		
+		$(document).off('click','#initweight').on('click','#initweight',function(){
+			$(this).css({'background':'#FF0000','color':'#FFFFFF'});
+			$("#noinitweight").css({'background':'transparent','color':'#16C0FF'});
+			$("#rjrebalance").attr('name','1');
+			//alert($("#rjrebalance").attr('name'));
+		})
+		
+	</script>
+</html>
+

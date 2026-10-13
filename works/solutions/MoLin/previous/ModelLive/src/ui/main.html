@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>ModelLive</title>
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/smartMenu.css">
+    <link rel="stylesheet" href="./css/all.min.css">
+    <link rel="stylesheet" href="./css/main.css">
+    <style>
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.1);
+            --bg-primary: #101010;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #4AD2FF;
+            --text-tertiary: #808080;
+            --border-color: #333333;
+            --error-color: #FF4D4D;
+            --success-color: #00CC66;
+            --warning-yellow: #FFC016;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            /*box-sizing: border-box;*/
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body {
+            font-weight: 300;
+            font-size: 13px;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 背景透明效果 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(22, 192, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(22, 192, 255, 0.03) 0%, transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+        }
+        
+		    [contenteditable="true"] {
+		        outline: none;
+		        background-color: transparent;
+		        border: none;
+		        color: var(--text-gray);
+		    }
+		    
+		    [contenteditable="true"]:focus {
+		        background-color: var(--primary-blue-transparent);
+		    }
+        
+        
+        a:link, a:visited, a:hover {
+            text-decoration: none;
+        }
+        
+        a {
+            color: var(--warning-yellow);
+            transition: color 0.3s;
+        }
+        
+        a:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+        
+        #mq_top {
+            height: 36px;
+            display: flex;
+            flex-shrink: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(22, 192, 255, 0.15);
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(22, 192, 255, 0.05);
+        }
+        
+        /* Q字符样式 - 优化调整，保持原有尺寸 */
+        .logo-q-char {
+            background: linear-gradient(135deg, #FFFFFF 0%, #E0F7FF 30%, #4AD2FF 70%, #16C0FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 24px; /* 恢复为24px，保持原有尺寸 */
+            text-shadow: 
+                0 0 15px rgba(22, 192, 255, 0.6),
+                0 0 30px rgba(22, 192, 255, 0.25);
+            font-weight: 500; /* 保持加粗 */
+            letter-spacing: -1px;
+            cursor:pointer;
+        }
+        
+        /* 文本样式 - 优化调整，保持原有尺寸 */
+        .logo-text {
+            background: linear-gradient(135deg, #B3EBFF 0%, #4AD2FF 30%, #16C0FF 70%, #0EA8E0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 18px; /* 恢复为18px，保持原有尺寸 */
+            position: relative;
+            top: 6px;
+            font-weight: 450; /* 中等粗细 */
+            letter-spacing: 0px; /* 恢复正常的字母间距 */
+            cursor:pointer;
+        }
+        
+        input,select {
+        	
+        		vertical-align:middle;
+        		background:transparent;
+        		color:#16C0FF;	
+        }
+        .label {
+        	
+        		font-size:14px;
+        		font-weight:bold;	
+        }
+        li {
+        		list-style-type:none;
+        		white-space:nowrap;
+        		overflow:hidden;
+        		text-overflow:ellipsis;
+        }
+        a:link {
+        		text-decoration:none;	
+        }
+        a:visited {
+        		text-decoration:none;	
+        }
+        a:hover {
+        		text-decoration:none;	
+        }
+        /* 添加按钮hover效果 */
+        .main_topic {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 90px;
+            font-weight: 450;
+            cursor: pointer;
+            color: var(--text-secondary);
+            box-sizing: border-box;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            position: relative;
+            height: 36px;
+        }
+        
+        .main_topic:hover {
+            color: var(--primary-light);
+            background-color: var(--primary-transparent);
+        }
+        
+        .main_topic::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .main_topic:hover::after {
+            width: 70%;
+        }
+        
+        #mq_top_ul_li_06 {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            width: 36px;
+            height: 100%;
+        }
+        
+        #mq_top_ul_li_user {
+            width: 150px;
+            height: 70px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            position: absolute;
+            font-weight: 450;
+            top: 36px;
+            right: 30px;
+            margin-top: 2px;
+            padding: 5px;
+            border-radius: 3px;
+            box-shadow: 
+                0 5px 15px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(22, 192, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .window-control {
+            width: 46px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 16px;
+            -webkit-app-region: no-drag;
+            transition: all 0.3s ease;
+            user-select: none;
+            font-weight: 350;
+            position: relative;
+        }
+        
+        .window-control:hover {
+            background-color: rgba(22, 192, 255, 0.1);
+            color: var(--primary-light);
+        }
+        
+        .window-control.close:hover {
+            background-color: rgba(232, 17, 35, 0.9);
+            color: var(--text-primary);
+        }
+        
+        /* 状态指示器样式 */
+        #pet, #mq_top_ul_li_15 {
+            color: var(--warning-yellow) !important;
+            font-size: 15px;
+            font-weight: 400;
+            text-shadow: 0 0 10px rgba(255, 192, 22, 0.3);
+        }
+        
+        /* 警报图标样式 */
+        .warning-icon {
+            width: 18px;
+            height: 18px;
+            fill: var(--warning-yellow);
+            filter: drop-shadow(0 0 5px rgba(255, 192, 22, 0.5));
+            transition: all 0.3s ease;
+        }
+        
+        #mq_top_ul_li_War:hover .warning-icon {
+            fill: #FFE066;
+            filter: drop-shadow(0 0 8px rgba(255, 192, 22, 0.8));
+            transform: scale(1.1);
+        }
+        
+        /* 购物篮图标样式 */
+        .basket-icon {
+            width: 20px;
+            height: 20px;
+            fill: var(--primary);
+            filter: drop-shadow(0 0 5px rgba(22, 192, 255, 0.5));
+            transition: all 0.3s ease;
+        }
+        
+        #mq_top_ul_li_07:hover .basket-icon {
+            fill: var(--primary-light);
+            filter: drop-shadow(0 0 8px rgba(22, 192, 255, 0.8));
+            transform: scale(1.1);
+        }
+        
+        /* 警报图标的闪烁动画 */
+        @keyframes warningPulse {
+            0%, 100% { 
+                opacity: 0.9;
+                filter: drop-shadow(0 0 5px rgba(255, 192, 22, 0.5));
+            }
+            50% { 
+                opacity: 1;
+                filter: drop-shadow(0 0 8px rgba(255, 192, 22, 0.8));
+            }
+        }
+        
+        .warning-icon {
+            animation: warningPulse 2s ease-in-out infinite;
+        }
+        
+        /******************/
+        #mq_main_r {
+            width: 220px;
+            height: 100%;
+            display:flex;
+            flex-direction: column;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+            box-sizing: border-box;
+            background: rgba(26, 26, 26, 0.8);
+        }
+        
+        #mq_main_m
+				{
+					width:100px;
+					height:100%;
+					overflow-y:hidden;
+					/*display:flex;*/
+					border-right: 1px solid var(--border-color);
+					display:none;
+				}
+				
+        #mq_main_l {
+            height: 100%;
+            flex:1;
+            overflow-y: auto;
+            box-sizing: border-box;
+            background: var(--bg-primary);
+        }
+                
+        /******************/   
+				#mq_main_r1
+				{
+            width: 160px;
+            height: 100%;
+            display:flex;
+            flex-direction: column;
+            overflow-y: hidden;
+            border-right: 1px solid var(--border-color);
+            background: rgba(26, 26, 26, 0.8);
+				}
+				
+				#mq_main_l1
+				{
+            height: 100%;
+            flex:1;
+            display:flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-sizing: border-box;
+            background: var(--bg-primary);
+				}
+        
+        .jkbtj,.jkzbj,.PRIT,.jkzb,.jkbt,.divselect,.xRep,.reportdiv,.mq_main_lT {
+            border-bottom: 1px solid var(--border-color);
+            width: 100%;
+            min-height:28px;
+            display:flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 300;
+            transition: all 0.3s;
+        }
+				#cqmonthlyreport,#cqweeklyreport,#cqdailyreport {
+            width: 60px;
+            height:100%;
+            display:flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 400;
+            transition: all 0.3s;
+        }
+				.jkbt,.jkbtj
+				{
+					background:rgba(20,177,235,0.6);
+					color:rgba(255,255,255,0.8);
+				}
+				
+        .jkbtj:hover,.jkzbj :hover,.jkzb:hover {
+            background-color: rgba(22, 192, 255, 0.08);
+            color: var(--primary-light);
+        }
+				.divselect {
+					height: 30px;
+					}
+        .divinput {
+        	height:100%;
+        	flex:1;
+        	padding-left:3px;
+        	display:flex;
+        	border: 1px solid var(--border-color);
+          justify-content: left;
+          align-items: center;
+        	}
+        .divselectsub {
+        	height:100%;
+        	width:60px;
+        	display:flex;
+        	border: 1px solid var(--border-color);
+          justify-content: center;
+          align-items: center;
+        	}
+        .jbaobiao {
+        	flex:1;
+        	overflow:auto;
+        	}
+        .xRep {
+        	justify-content: left;
+        	height:auto;
+        	}
+				.charts_kuang_ll
+				{
+					flex:1;
+					height:100%;
+				}
+				.charts_kuang_lr
+				{
+					width:450px;
+					height:100%;
+					border-left: 1px solid var(--border-color);
+					box-sizing:border-box;
+					overflow:auto;
+				}
+				#mq_main_lT4 {
+					flex:1;
+					display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 3px;
+          margin-bottom: 3px;
+          overflow-y:auto;
+					}  	
+				.charts_kuang_l
+				{
+					height:250px;
+					margin:0;
+					padding:0;
+					border:1px #16C0FF solid;
+					box-sizing:border-box;
+				}
+
+		    table.altrowstable {
+		        border: 1px var(--border-color) solid;
+		        border-collapse: collapse;
+		        font-size: 13px;
+		        table-layout: fixed;
+		        margin: 3px 3px 0px 3px;
+		        box-sizing: border-box;
+		        overflow: hidden;
+		        background: var(--white);
+		        width: calc(100% - 6px);
+		    }
+		    
+		    table.altrowstable th {
+		        border: 1px var(--border-color) solid;
+		        text-align: center;
+		        padding: 6px;
+		        background: var(--light-gray);
+		        color: var(--text-dark);
+		        font-weight: 550;
+		    }
+		    
+		    table.altrowstable td {
+		        border: 1px var(--border-color) solid;
+		        white-space: pre-line;
+		        word-break: keep-all;
+		        padding: 3px;
+		        word-wrap: break-word;
+		        text-align: center;
+		        color: var(--text-gray);
+		    }
+
+				.Warn
+				{
+					border:1px	solid	#16C0FF;
+					background:rgba(14,32,45,1);
+					width:400px;
+					height:160px;
+					z-index:9999;
+					position:fixed;
+					top:50%;
+					left:50%;
+					margin-top:-80px;
+					margin-left:-200px;
+					box-sizing:border-box;
+				}
+				.WarnB
+				{
+					width:100%;
+					height:114px;
+					font-size:12px;
+					line-height:-6px;
+					padding:10px;
+					word-wrap: break-word;
+					white-space: pre-wrap;
+					display:flex;
+          justify-content: center;
+          align-items: center;
+				}
+				.WarnM
+				{
+					width:100%;
+					height:26px;
+					text-align:center;
+					line-height:-6px;
+				}
+				.WarnMButton
+				{
+					background:transparent;
+					border:1px solid	#16C0FF;
+					color:#16C0FF;
+					width:50px;
+					height:22px;
+					text-align:center;
+					font-size:12px;
+					cursor:pointer;
+					margin:1px;
+				}
+
+
+
+
+    </style>
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/jquery-smartMenu.js"></script>
+    <script src="./js/echarts.min.js"></script>
+    <script src="./js/laydate/laydate.js"></script>
+    <script src="./js/socket.io.min.js"></script>
+</head>
+<body>
+    <div id="mq_top">
+        <div style="width:10px;"></div>
+        <div class="logo-q-char" id="logo-q-char">M</div>
+        <div class="logo-text" id="logo-text">odelLive</div>
+        <div style="flex-grow:1;"></div>
+        <div id="pet" class="main_topic" style="width:50px;color: var(--warning-yellow);">β9-</div>
+        <div id="mq_top_ul_li_15" class="main_topic" style="width:50px;color: var(--warning-yellow);">α24+</div>
+        <div style="width:200px;"></div>
+        <div id="mq_top_ul_li_War" class="main_topic" style="width:30px;">
+            <svg class="warning-icon" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+        </div>
+        <div id="mq_top_ul_li_07" class="main_topic" style="width:30px;">
+            <svg class="basket-icon" viewBox="0 0 24 24">
+               <path d="M17 18c-1.11 0-2 .89-2 2 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-1.11-.89-2-2-2zM7 18c-1.11 0-2 .89-2 2 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-1.11-.89-2-2-2zM15.55 13c.75 0 1.41-.41 1.75-1.03l3.58-6.49C21.21 4.42 20.62 4 20 4H7.39l-.95-2H2v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45z"/>
+            </svg>
+        </div>
+        <div id="mq_top_ul_li_12" class="main_topic">策略监控</div>
+        <div id="mq_top_ul_li_14" class="main_topic">产品查询</div>
+        <div id="mq_top_ul_li_04" class="main_topic">策略跟踪</div>
+        <div id="mq_top_ul_li_99" class="main_topic">策略研究</div>
+        <div id="mq_top_ul_li_01" class="main_topic">数据浏览</div>
+        <div id="mq_top_ul_li_10" class="main_topic">事件跟踪</div>
+        <div id="mq_top_ul_li_05" class="main_topic">文档中心</div>
+        <div id="mq_top_ul_li_13" class="main_topic">应用工具</div>
+        <div id="mq_top_ul_li_06">
+            <div style="width:30px;height:30px;">
+                <img src="./assets/images/Client.jpg" style="width:100%;height:100%;border-radius:15px;"/>
+            </div>
+        </div>
+        <!-- 窗口控制按钮 -->
+        <div class="window-control" id="window-minimize" title="最小化">−</div>
+        <div class="window-control" id="window-maximize" title="最大化">□</div>
+        <div class="window-control close" id="window-close" title="关闭">×</div>
+    </div>
+    <div style="flex:1;position:relative;">
+        <div id="mq_main" style="display:flex;position:absolute;top:0;left:0;right:0;bottom:0;"></div>
+    </div>
+    
+    <script>
+        // 窗口控制功能
+        document.getElementById('window-minimize').addEventListener('click', () => {
+            // pywebview API: 最小化窗口
+            if (typeof pywebview !== 'undefined') {
+                pywebview.api.minimize_window();
+            } else {
+                console.log('最小化窗口');
+            }
+        });
+        
+        let isMaximized = false;
+        const maximizeBtn = document.getElementById('window-maximize');
+        
+        maximizeBtn.addEventListener('click', () => {
+            if (!isMaximized) {
+                // 最大化窗口
+                if (typeof pywebview !== 'undefined') {
+                    pywebview.api.maximize_window();
+                } else {
+                    console.log('最大化窗口');
+                }
+                maximizeBtn.innerHTML = '❐'; // 恢复图标
+                maximizeBtn.title = '恢复';
+            } else {
+                // 恢复窗口
+                if (typeof pywebview !== 'undefined') {
+                    pywebview.api.restore_window();
+                } else {
+                    console.log('恢复窗口');
+                }
+                maximizeBtn.innerHTML = '□'; // 最大化图标
+                maximizeBtn.title = '最大化';
+            }
+            isMaximized = !isMaximized;
+        });
+        
+        function startRemoteDesktop() {
+				    // 这里可以从表单获取或硬编码服务器信息
+				    const hosts = '10.10.98.113';
+				    const username = 'quruyi';
+				    const password = 'zc001002';
+				    
+				    pywebview.api.connect_remote_desktop(hosts, username, password).then(response => {
+				        if (response.success) {
+				            ;
+				            //alert('远程桌面连接已启动');
+				        } else {
+				            alert('连接失败: ' + response.message);
+				        }
+				    });
+					};
+        
+        document.getElementById('window-close').addEventListener('click', () => {
+            // 关闭窗口
+            if (typeof pywebview !== 'undefined') {
+                pywebview.api.close_window();
+            } else {
+                console.log('关闭窗口');
+            }
+        });
+        
+        // 监听窗口状态变化（如果pywebview支持）
+        if (typeof pywebview !== 'undefined') {
+            pywebview.api.on_window_state_changed((state) => {
+                if (state === 'maximized') {
+                    isMaximized = true;
+                    maximizeBtn.innerHTML = '❐';
+                    maximizeBtn.title = '恢复';
+                } else {
+                    isMaximized = false;
+                    maximizeBtn.innerHTML = '□';
+                    maximizeBtn.title = '最大化';
+                }
+            });
+        };
+        
+        //将API暴露给iframe
+        window.exposeApiToIframe = function  () {
+        	return {
+        		download_image:function(){
+        			return window.pywebview.api.download_image(base64_data);
+        			
+        			}
+        		};
+        };
+        
+        
+    </script>
+    <script src="./js/mq.js"></script>
+    <script src="./js/mqcharts.js"></script>
+    <script src="./js/databgroups.js"></script>
+</body>
+</html>

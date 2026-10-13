@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=yes">
+  <title>摹林量化 | 硬核量化私募 · 数据深林 摹刻超额</title>
+  <!-- 引入现代字体 Inter & 等宽字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <style>
+    /* ========== 全局滚动条样式（深色科技感，与页面主色调#0b2b4f呼应） ========== */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+      background-color: #F7FAFF;
+    }
+    ::-webkit-scrollbar-track {
+      background: #eef2f8;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #9aafc4;
+      border-radius: 10px;
+      transition: background 0.2s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #0b2b4f;
+    }
+    ::-webkit-scrollbar-corner {
+      background-color: #F7FAFF;
+    }
+    /* Firefox 滚动条 */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #9aafc4 #eef2f8;
+    }
+
+    /* ========== 下拉框统一样式（select 协调商务蓝调） ========== */
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230b2b4f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 14px;
+      cursor: pointer;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    
+    /* 针对模态框内select做精细适配 */
+    .modal-card select,
+    .modal-card input,
+    .modal-card textarea {
+      width: 100%;
+      padding: 14px 0 14px 0;
+      border: none;
+      border-bottom: 1px solid #d6e2f0;
+      margin-bottom: 28px;
+      font-size: 0.95rem;
+      background: transparent;
+      outline: none;
+      transition: border 0.2s;
+      font-family: inherit;
+    }
+    .modal-card select {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230b2b4f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 14px;
+    }
+    
+    /* 其余页面内若有下拉框也做统一协调 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background-color: #fbfdff;
+      color: #0a1e2f;
+      line-height: 1.5;
+      scroll-behavior: smooth;
+      font-weight: 450;
+      letter-spacing: -0.01em;
+    }
+
+    /* 现代科技感渐变背景，柔和干净 */
+    .internal-badge {
+      background: rgba(10, 25, 45, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(74, 144, 226, 0.25);
+      color: #c3e0ff;
+      text-align: center;
+      padding: 10px 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 36px;
+    }
+
+    /* 按钮系统：圆润现代 */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #0b2b4f;
+      color: white;
+      font-weight: 600;
+      padding: 14px 34px;
+      border-radius: 40px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      border: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+      font-size: 0.98rem;
+      letter-spacing: 0.2px;
+      box-shadow: 0 10px 20px -8px rgba(11,43,79,0.25);
+      background: linear-gradient(135deg, #0b2b4f 0%, #123c69 100%);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0f3560 0%, #1b4f82 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 18px 28px -10px rgba(11,43,79,0.35);
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      background: transparent;
+      border: 1.5px solid #cbdae9;
+      color: #0b2b4f;
+      font-weight: 600;
+      padding: 10px 28px;
+      border-radius: 40px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(4px);
+    }
+
+    .btn-outline:hover {
+      border-color: #0b2b4f;
+      background: rgba(11,43,79,0.04);
+      color: #0b2b4f;
+      transform: translateY(-1px);
+    }
+
+    /* 导航栏：毛玻璃效果 */
+    .navbar {
+      padding: 18px 0;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .logo h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      background: linear-gradient(130deg, #0A2B44 0%, #1F6392 80%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.4px;
+    }
+    .logo span {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #456b8c;
+      display: block;
+      letter-spacing: 0.2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #1e3349;
+      font-weight: 520;
+      transition: all 0.2s;
+      font-size: 0.98rem;
+      position: relative;
+    }
+
+    .nav-links a:hover {
+      color: #0b2b4f;
+    }
+
+    .nav-links a:not(.btn-outline)::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #0b2b4f;
+      transition: width 0.25s;
+    }
+    .nav-links a:not(.btn-outline):hover::after {
+      width: 100%;
+    }
+
+    /* Hero 区域 */
+    .hero {
+      padding: 80px 0 70px;
+      background: #fbfdff;
+      background-image: radial-gradient(circle at 10% 30%, rgba(230, 240, 255, 0.5), transparent 50%);
+    }
+
+    .hero-grid {
+      display: flex;
+      align-items: center;
+      gap: 64px;
+      flex-wrap: wrap;
+    }
+
+    .hero-content {
+      flex: 1;
+    }
+
+    .hero-badge {
+      background: #edf3fa;
+      color: #0b2b4f;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 22px;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 28px;
+      border: 1px solid #d6e2f0;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 750;
+      line-height: 1.18;
+      margin-bottom: 22px;
+      color: #071a2b;
+      letter-spacing: -0.025em;
+    }
+
+    .hero-title .accent {
+      background: linear-gradient(120deg, rgba(15,60,95,0.12) 0%, rgba(15,60,95,0) 90%);
+      padding: 0 6px;
+      display: inline-block;
+      font-weight: 800;
+      color: #0f3c5f;
+    }
+
+    .hero-desc {
+      font-size: 1.15rem;
+      color: #2c4053;
+      margin-bottom: 36px;
+      max-width: 550px;
+      line-height: 1.5;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+      margin-top: 28px;
+    }
+    .stat-item p:first-child {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0b2b4f;
+      letter-spacing: -0.5px;
+    }
+    .stat-item p:last-child {
+      font-size: 0.9rem;
+      font-weight: 520;
+      color: #4f657c;
+    }
+
+    .hero-visual {
+      flex: 1;
+      background: rgba(11,43,79,0.02);
+      border-radius: 48px;
+      padding: 34px 24px;
+      text-align: center;
+      border: 1px solid rgba(11,43,79,0.12);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 25px 35px -14px rgba(0,0,0,0.04);
+    }
+
+    .chart-mock {
+      background: rgba(255,255,255,0.6);
+      border-radius: 32px;
+      padding: 24px 20px;
+      backdrop-filter: blur(2px);
+    }
+
+    .mock-bar {
+      display: flex;
+      gap: 24px;
+      align-items: flex-end;
+      justify-content: center;
+      height: 170px;
+      margin-bottom: 24px;
+    }
+    .bar {
+      width: 60px;
+      background: linear-gradient(0deg, #0b2b4f, #2c628b);
+      border-radius: 20px 20px 8px 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .mock-legend {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #2c4b6e;
+    }
+    .hero-note {
+      font-size: 0.7rem;
+      color: #6c86a0;
+      margin-top: 16px;
+    }
+
+    /* section通用 */
+    .section {
+      padding: 90px 0 80px;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.4px;
+      color: #0a1e2f;
+    }
+    .section-sub {
+      text-align: center;
+      color: #3f5268;
+      max-width: 720px;
+      margin: 0 auto 60px auto;
+      font-size: 1.1rem;
+      font-weight: 450;
+    }
+
+    /* 优势卡片 圆角现代 */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 32px;
+      margin-top: 20px;
+    }
+    .advantage-card {
+      background: white;
+      border-radius: 32px;
+      padding: 34px 28px;
+      box-shadow: 0 10px 24px -10px rgba(0,0,0,0.04);
+      border: 1px solid #eef2f8;
+      transition: all 0.3s ease;
+    }
+    .advantage-card:hover {
+      transform: translateY(-6px);
+      border-color: #bdd3ec;
+      box-shadow: 0 26px 38px -16px rgba(11,43,79,0.1);
+    }
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 22px;
+    }
+    .advantage-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 14px;
+      font-weight: 650;
+      color: #0c2238;
+    }
+    .advantage-card p {
+      color: #354a60;
+      line-height: 1.5;
+    }
+
+    /* 策略矩阵 直角但有科技细节 */
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-top: 20px;
+    }
+    .strategy-item {
+      background: white;
+      border-radius: 28px;
+      padding: 28px 24px;
+      border: 1px solid #ecf1f7;
+      transition: all 0.25s;
+    }
+    .strategy-item:hover {
+      transform: translateY(-4px);
+      border-color: #b6ceeb;
+      box-shadow: 0 14px 22px -8px rgba(0,0,0,0.05);
+    }
+    .strategy-tag {
+      background: #edf3fa;
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #0b2b4f;
+      margin-bottom: 18px;
+    }
+    .strategy-item h4 {
+      font-size: 1.3rem;
+      margin-bottom: 12px;
+      font-weight: 650;
+      color: #0c2238;
+    }
+    .strategy-item p {
+      color: #3f5268;
+      line-height: 1.5;
+      font-size: 0.9rem;
+    }
+
+    /* 投研理念区块 */
+    .philosophy-section {
+      background: #f7faff;
+      border-radius: 48px;
+      padding: 56px 48px;
+      margin: 20px 0 40px;
+      border: 1px solid rgba(11,43,79,0.08);
+      text-align: center;
+    }
+    .philosophy-grid {
+      display: flex;
+      gap: 48px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 40px;
+    }
+    .philosophy-item {
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+    }
+    .philosophy-icon {
+      font-size: 2.3rem;
+      margin-bottom: 16px;
+    }
+    .philosophy-item h4 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #0a2b44;
+    }
+    .philosophy-item p {
+      font-size: 0.9rem;
+      color: #4f657c;
+    }
+    .quote {
+      border-left: 3px solid #1f6392;
+      padding-left: 28px;
+      margin: 48px auto 0;
+      max-width: 620px;
+      color: #1e3a5a;
+      font-size: 1rem;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    /* CTA 块 */
+    .cta-section {
+      background: linear-gradient(125deg, #0a1c30, #123c5c);
+      color: white;
+      border-radius: 48px;
+      padding: 64px 40px;
+      text-align: center;
+      margin: 40px auto 70px;
+    }
+    .cta-section h2 {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+    .cta-section p {
+      opacity: 0.85;
+    }
+    .btn-white {
+      background: white;
+      color: #0b2b4f;
+      display: inline-block;
+      font-weight: 600;
+      padding: 14px 36px;
+      border-radius: 40px;
+      text-decoration: none;
+      margin-top: 28px;
+      transition: all 0.2s;
+    }
+    .btn-white:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px -8px rgba(0,0,0,0.2);
+    }
+
+    /* 页脚 */
+    .footer {
+      background: #fafcff;
+      padding: 50px 0 30px;
+      border-top: 1px solid #e7edf5;
+    }
+    .footer-grid {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 48px;
+    }
+    .footer-col p {
+      margin-top: 12px;
+      max-width: 260px;
+      font-size: 0.85rem;
+      color: #4f657c;
+    }
+    .footer-col h4 {
+      color: #0a1e2f;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .footer-links {
+      list-style: none;
+    }
+    .footer-links li {
+      margin-bottom: 12px;
+    }
+    .footer-links a {
+      text-decoration: none;
+      color: #4f657c;
+      transition: color 0.2s;
+      font-size: 0.85rem;
+    }
+    .footer-links a:hover {
+      color: #0b2b4f;
+    }
+    .copyright {
+      text-align: center;
+      padding-top: 32px;
+      margin-top: 32px;
+      border-top: 1px solid #e2e9f2;
+      font-size: 0.8rem;
+      color: #5a6f84;
+    }
+
+    @media (max-width: 1050px) {
+      .strategy-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 760px) {
+      .container {
+        padding: 0 22px;
+      }
+      .hero-title {
+        font-size: 2.4rem;
+      }
+      .strategy-grid {
+        grid-template-columns: 1fr;
+      }
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .philosophy-section {
+        padding: 36px 24px;
+      }
+    }
+
+    /* 弹窗现代风格 */
+    .modal-modern {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 30, 47, 0.7);
+      backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-card {
+      background: white;
+      max-width: 480px;
+      width: 90%;
+      padding: 42px 38px;
+      border-radius: 48px;
+      position: relative;
+      border: 1px solid #eef2f8;
+      box-shadow: 0 30px 40px -20px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .close-modal {
+      position: absolute;
+      right: 28px;
+      top: 28px;
+      font-size: 28px;
+      cursor: pointer;
+      color: #9aabbc;
+      transition: color 0.2s;
+    }
+    .close-modal:hover {
+      color: #0b2b4f;
+    }
+    .modal-card input, 
+    .modal-card select {
+      width: 100%;
+      padding: 14px 0 14px 0;
+      border: none;
+      border-bottom: 1px solid #d6e2f0;
+      margin-bottom: 28px;
+      font-size: 0.95rem;
+      background: transparent;
+      outline: none;
+      transition: border 0.2s;
+      font-family: inherit;
+    }
+    .modal-card select {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230b2b4f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 14px;
+    }
+    .modal-card input:focus, 
+    .modal-card select:focus {
+      border-bottom-color: #1f6392;
+    }
+    .modal-card button {
+      background: #0b2b4f;
+      color: white;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-card button:hover {
+      background: #123c69;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+<div class="internal-badge">
+  <span>⚡</span> 摹林量化 · 数据深林 摹刻超额 | 全自研AI量化体系 <span>📊</span>
+</div>
+
+<nav class="navbar">
+  <div class="container nav-flex">
+    <div class="logo">
+      <h1>摹林量化<span>Molin Quant</span></h1>
+    </div>
+    <div class="nav-links">
+      <a href="#home">首页</a>
+      <a href="#advantages">核心优势</a>
+      <a href="#strategies">策略体系</a>
+      <a href="#philosophy">投研理念</a>
+      <a href="#contact">联系</a>
+      <a href="#" class="btn-outline" id="openContactNav">预约路演 →</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section id="home" class="hero">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span>🌲📈</span> 摹林量化 · Molin Capital
+        </div>
+        <h1 class="hero-title">数据深林，<span class="accent">摹刻超额</span></h1>
+        <p class="hero-desc">摹林量化融合机器学习与多维度数据体系，在复杂市场中持续挖掘低相关性Alpha。严谨风控，科技驱动。</p>
+        <a href="#contact" class="btn-primary" id="heroContactBtn">与摹林同行 →</a>
+        <div class="hero-stats">
+          <div class="stat-item"><p>深厚积淀</p><p>实盘验证</p></div>
+          <div class="stat-item"><p>全自研</p><p>算法框架</p></div>
+          <div class="stat-item"><p>多策略</p><p>资产配置</p></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="chart-mock">
+          <div class="mock-bar">
+            <div style="height: 125px;" class="bar"></div>
+            <div style="height: 92px;" class="bar"></div>
+            <div style="height: 145px;" class="bar"></div>
+            <div style="height: 108px;" class="bar"></div>
+            <div style="height: 158px;" class="bar"></div>
+          </div>
+          <div class="mock-legend">
+            <span>超额收益示意</span>
+          </div>
+          <p class="hero-note">示意图标，不构成业绩承诺</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="advantages" class="section">
+    <div class="container">
+      <h2 class="section-title">投研护城河</h2>
+      <div class="section-sub">全链路自主研发 · 数据深度挖掘 · 策略持续迭代</div>
+      <div class="cards-grid">
+        <div class="advantage-card">
+          <div class="card-icon">📊</div>
+          <h3>多因子框架</h3>
+          <p>融合高频量价、基本面微观与另类数据，千级有效因子动态筛选，非线性合成增强。</p>
+        </div>
+        <div class="advantage-card">
+          <div class="card-icon">⚡</div>
+          <h3>极速执行系统</h3>
+          <p>硬件加速行情解析与低延迟交易，订单处理效率行业领先。</p>
+        </div>
+        <div class="advantage-card">
+          <div class="card-icon">🛡️</div>
+          <h3>全景风控</h3>
+          <p>多维度风险因子监控，行业、风格敞口实时约束，极端行情动态管理。</p>
+        </div>
+        <div class="advantage-card">
+          <div class="card-icon">🧠</div>
+          <h3>AI深度学习</h3>
+          <p>图神经网络+强化学习自适应调参，挖掘市场微观结构信号。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="strategies" class="section" style="padding-top: 20px;">
+    <div class="container">
+      <h2 class="section-title">策略矩阵</h2>
+      <div class="section-sub">指数增强 · 市场中性 · 量化CTA · 统计套利</div>
+      <div class="strategy-grid">
+        <div class="strategy-item">
+          <div class="strategy-tag">旗舰策略</div>
+          <h4>指数增强系列</h4>
+          <p>对标主流宽基指数，多因子+深度学习融合，追求稳定超额。</p>
+        </div>
+        <div class="strategy-item">
+          <div class="strategy-tag">绝对收益</div>
+          <h4>市场中性策略</h4>
+          <p>多空组合剥离Beta波动，获取纯净Alpha，与股指低相关。</p>
+        </div>
+        <div class="strategy-item">
+          <div class="strategy-tag">全时段覆盖</div>
+          <h4>量化CTA</h4>
+          <p>趋势追踪+截面多因子，覆盖商品及金融期货，分散配置。</p>
+        </div>
+        <div class="strategy-item">
+          <div class="strategy-tag">高频alpha</div>
+          <h4>日内策略</h4>
+          <p>基于订单流与微观结构，捕捉日内定价偏差。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="philosophy" class="section">
+    <div class="container">
+      <div class="philosophy-section">
+        <h2 style="font-size: 2rem; margin-bottom: 12px; font-weight:700;">量化森林 · 摹刻未来</h2>
+        <p style="color: #3f5268; max-width: 660px; margin: 0 auto;">我们相信市场非完全有效，通过严谨科学的方法论，持续挖掘被错误定价的机会。</p>
+        <div class="philosophy-grid">
+          <div class="philosophy-item">
+            <div class="philosophy-icon">📡</div>
+            <h4>数据驱动</h4>
+            <p>覆盖传统高频、另类卫星、舆情情感等多源数据。</p>
+          </div>
+          <div class="philosophy-item">
+            <div class="philosophy-icon">🔄</div>
+            <h4>持续迭代</h4>
+            <p>高频回测验证，模型自动进化，避免过拟合。</p>
+          </div>
+          <div class="philosophy-item">
+            <div class="philosophy-icon">🎯</div>
+            <h4>分散配置</h4>
+            <p>持仓覆盖广泛，策略间低相关，平滑净值曲线。</p>
+          </div>
+        </div>
+        <div class="quote">
+          “在不确定的市场中，用确定性的量化逻辑构建长期复利。”
+          <div style="margin-top: 10px; font-weight: 500; font-size: 0.8rem; color:#456b8c;">—— 摹林量化 投研委员会</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container" id="contact">
+    <div class="cta-section">
+      <h2>与摹林同行</h2>
+      <p style="margin-top: 8px;">预约专属路演，获取策略白皮书</p>
+      <a href="#" class="btn-white" id="openContactCta">预约深度交流 →</a>
+      <p style="margin-top: 32px; font-size: 0.8rem; opacity: 0.8;">合规投资者专线 400-668-8810</p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div style="font-size:1.5rem; font-weight:700; background: linear-gradient(130deg, #0A2B44, #1F6392); background-clip: text; -webkit-background-clip: text; color: transparent;">摹林量化</div>
+        <p>中国基金业协会登记私募管理人。专注量化投资，以科技驱动长期价值。</p>
+      </div>
+      <div class="footer-col">
+        <h4>策略领域</h4>
+        <ul class="footer-links">
+          <li><a href="#">指数增强</a></li>
+          <li><a href="#">市场中性</a></li>
+          <li><a href="#">量化CTA</a></li>
+          <li><a href="#">多策略配置</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>投研实力</h4>
+        <ul class="footer-links">
+          <li><a href="#">研究团队</a></li>
+          <li><a href="#">数据实验室</a></li>
+          <li><a href="#">合规风控</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>联系</h4>
+        <ul class="footer-links">
+          <li>上海·浦东</li>
+          <li>ir@molin-quant.com</li>
+          <li>公众号：摹林量化</li>
+        </ul>
+      </div>
+    </div>
+    <div class="copyright">
+      © 2026 摹林量化私募基金管理有限公司 | 基金投资有风险，投资需谨慎。
+    </div>
+  </div>
+</footer>
+
+<!-- 弹窗 -->
+<div id="contactModal" class="modal-modern">
+  <div class="modal-card">
+    <span class="close-modal" id="closeModalBtn">&times;</span>
+    <h3>预约路演</h3>
+    <p style="color: #4f657c; margin-bottom: 32px;">专业投顾将在24小时内联系</p>
+    <form id="demoForm">
+      <input type="text" placeholder="姓名" required>
+      <input type="tel" placeholder="手机号" required>
+      <select>
+        <option>合格投资者认证</option>
+        <option>个人投资者</option>
+        <option>机构投资者</option>
+      </select>
+      <button type="submit">提交预约</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // 模态框逻辑
+  const modal = document.getElementById('contactModal');
+  const openBtnCta = document.getElementById('openContactCta');
+  const openBtnNav = document.getElementById('openContactNav');
+  const heroBtn = document.getElementById('heroContactBtn');
+  const closeSpan = document.getElementById('closeModalBtn');
+
+  function openModal(e) {
+    if(e) e.preventDefault();
+    modal.style.display = 'flex';
+  }
+  function closeModal() {
+    modal.style.display = 'none';
+  }
+  if(openBtnCta) openBtnCta.addEventListener('click', openModal);
+  if(openBtnNav) openBtnNav.addEventListener('click', openModal);
+  if(heroBtn) heroBtn.addEventListener('click', openModal);
+  if(closeSpan) closeSpan.addEventListener('click', closeModal);
+  window.addEventListener('click', (e) => {
+    if(e.target === modal) closeModal();
+  });
+
+  const demoForm = document.getElementById('demoForm');
+  if(demoForm) {
+    demoForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('感谢关注摹林量化！投顾团队会尽快联系您。');
+      closeModal();
+      demoForm.reset();
+    });
+  }
+
+  // 柱状图动效保持原有高度  const bars = document.querySelectorAll('.bar');
+  const definedHeights = [125, 92, 145, 108, 158];
+  bars.forEach((bar, idx) => {
+    if(definedHeights[idx]) bar.style.height = definedHeights[idx] + 'px';
+  });
+</script>
+</body>
+</html>

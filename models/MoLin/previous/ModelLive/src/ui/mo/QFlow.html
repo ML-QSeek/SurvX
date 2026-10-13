@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>QFlow · 募集层 | 资金聚合 · 策略分发 · 高净值服务</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ========== 全局滚动条样式（深色科技风，与页面背景协调） ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background-color: #101010;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 0px;
+            transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16C0FF;
+        }
+        ::-webkit-scrollbar-corner {
+            background-color: #101010;
+        }
+        /* Firefox 滚动条 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333333 #1a1a1a;
+        }
+
+        /* ========== 下拉框统一样式（深色科技商务风） ========== */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0px;
+            padding: 10px 32px 10px 14px;
+            font-size: 0.85rem;
+            font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316C0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+        select:hover {
+            border-color: var(--primary);
+            background-color: #2a2a2a;
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary-transparent);
+        }
+        select option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 8px;
+        }
+
+        /* 模态框内下拉框样式保持一致 */
+        .modal-select {
+            width: 100%;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.1);
+            --bg-primary: #101010;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #4AD2FF;
+            --text-tertiary: #808080;
+            --border-color: #333333;
+            --layer-psi: #FF8C00;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', 'JetBrains Mono', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--primary-transparent) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-transparent) 1px, transparent 1px);
+            background-size: 42px 42px;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .poster {
+            max-width: 1180px;
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .poster:hover {
+            border-color: var(--primary);
+            box-shadow: 0 28px 56px -14px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--primary-transparent);
+        }
+
+        .top-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--bg-secondary), var(--primary), var(--primary-light), var(--primary), var(--bg-secondary));
+            width: 100%;
+        }
+
+        .content {
+            padding: 2.4rem 2.8rem 2.8rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .logo h1 .en-name {
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .logo h1 .chinese-name {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            margin-left: 0.25rem;
+        }
+
+        .subtitle {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            font-weight: 400;
+            margin-top: 0.2rem;
+        }
+
+        .subtitle i {
+            color: var(--primary-light);
+            font-style: normal;
+        }
+
+        .pill {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hero {
+            margin: 1.5rem 0 2rem;
+        }
+
+        .hero .eyebrow {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.4rem 0.8rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-title .title-main {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            letter-spacing: -0.01em;
+        }
+
+        .hero-sub {
+            font-size: 1rem;
+            color: var(--text-tertiary);
+            margin-bottom: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        .hero .desc {
+            font-size: 1rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+            max-width: 85%;
+            border-left: 2px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        @media (max-width: 780px) {
+            .hero-title .title-main {
+                font-size: 1.8rem;
+            }
+            .hero .desc {
+                max-width: 100%;
+            }
+        }
+
+        /* 核心数据卡片 */
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-light);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            margin-top: 0.3rem;
+        }
+
+        .stat-desc {
+            font-size: 0.6rem;
+            color: #6b6b7a;
+            margin-top: 0.4rem;
+        }
+
+        /* 策略分层 — 与Σ页面风格一致 */
+        .strategy-architecture {
+            margin: 2rem 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .arch-layer {
+            margin-bottom: 1.2rem;
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .arch-layer h4 {
+            font-size: 0.85rem;
+            color: var(--primary-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .arch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .arch-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 0.8rem;
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .arch-item i {
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        /* 核心价值卡片 */
+        .composite-modes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .mode-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+        .mode-card:hover {
+            border-color: var(--primary);
+        }
+
+        .mode-card i {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+        }
+
+        .mode-card h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .mode-card p {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            line-height: 1.4;
+        }
+
+        /* 能力标签 */
+        .capabilities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 1.5rem 0;
+            justify-content: center;
+        }
+
+        .cap-tag {
+            background: var(--primary-transparent);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin: 1.5rem 0 1rem;
+            letter-spacing: 1px;
+            border-left: 2px solid var(--primary);
+            padding-left: 0.8rem;
+        }
+
+        /* 高净值层级卡片 */
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .value-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .value-card i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .value-card .value-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .value-card .value-desc {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            margin-top: 0.3rem;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            letter-spacing: 0.3px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .beta-meaning {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            text-align: right;
+            margin-top: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        /* 模态框样式（用于演示下拉框） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+        }
+        .modal-content h3 {
+            color: var(--primary-light);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        .modal-content p {
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+        }
+        .modal-content select {
+            width: 100%;
+            margin: 0.8rem 0 1.2rem;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .modal-buttons button {
+            padding: 0.5rem 1.2rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .modal-buttons button:first-child {
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+        .modal-buttons button:first-child:hover {
+            background: var(--primary-transparent);
+        }
+        .modal-buttons button:last-child:hover {
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 800px) {
+            .content {
+                padding: 1.5rem;
+            }
+            .logo h1 {
+                font-size: 2rem;
+            }
+            .logo h1 .chinese-name {
+                font-size: 1.2rem;
+            }
+            .composite-modes {
+                grid-template-columns: 1fr;
+            }
+            .value-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="poster">
+    <div class="top-line"></div>
+    <div class="content">
+        <div class="header">
+            <div class="logo">
+                <h1>
+                    <span class="en-name">QFlow</span>
+                    <span class="chinese-name"> · 募集层</span>
+                </h1>
+                <div class="subtitle">⚡ <i>资金聚合 · 策略分发 · 高净值服务</i> | 基于全景投研体系 · 容量黄金期</div>
+            </div>
+            <div class="pill">
+                <i class="fas fa-hand-holding-usd"></i> 旗舰募集 · 容量红绿灯
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="eyebrow">QFlow · 募集层</div>
+            <div class="hero-title">
+                <span class="title-main">资金聚合 · 策略分发 · 高净值服务</span>
+            </div>
+            <div class="hero-sub">基于全景投研体系（Ω→Δ→Γ+β9-→α24+→Σ）输出的策略能力，完成资金募集、策略匹配与客户服务闭环</div>
+            <div class="desc">核心层（量化中性）+ 卫星层（量化CTA）双层架构 · 低波动 · 与股债低相关 · 容量黄金期</div>
+        </div>
+
+        <!-- 演示下拉框 - 客户层级选择（深色协调风格） -->
+        <div style="display: flex; justify-content: flex-end; margin: 0 0 1rem 0;">
+            <select id="clientLevelSelect" style="width: auto; min-width: 200px;">
+                <option value="standard">标准合格投资者</option>
+                <option value="a_class">A级 · 300-1000万</option>
+                <option value="s_class">S级 · 1000万以上</option>
+                <option value="institutional">机构投资者 · 定制化配置</option>
+            </select>
+        </div>
+
+        <!-- 核心数据卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">中性策略</div>
+                <div class="stat-label">年化波动＜6% · 最大回撤＜4%</div>
+                <div class="stat-desc">剥离Beta依赖，专注选股Alpha</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">8%~12%</div>
+                <div class="stat-label">目标收益区间（绝对收益）</div>
+                <div class="stat-desc">近三年夏普比维持在1.5~2.0区间</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">容量黄金期</div>
+                <div class="stat-label">当前管理规模 · 舒适容量仍有3~5倍空间</div>
+                <div class="stat-desc">策略迭代快 · 未触及容量天花板</div>
+            </div>
+        </div>
+
+        <!-- 策略分层架构 — 与Σ页面风格一致 -->
+        <div class="strategy-architecture">
+            <div class="arch-layer">
+                <h4><i class="fas fa-cube"></i> 核心层 · 量化市场中性策略（60%-80%）</h4>
+                <div class="arch-grid">
+                    <div class="arch-item"><i class="fas fa-chart-line"></i> 多因子模型 · 基本面+价量+高频</div>
+                    <div class="arch-item"><i class="fas fa-chart-pie"></i> 动态对冲 · 股指期货实时对冲</div>
+                    <div class="arch-item"><i class="fas fa-chart-bar"></i> 市值敞口≤5% · 行业偏离≤±2%</div>
+                    <div class="arch-item"><i class="fas fa-chart-simple"></i> 月频因子检验 · 年淘汰率20%</div>
+                </div>
+            </div>
+            <div class="arch-layer">
+                <h4><i class="fas fa-layer-group"></i> 卫星层 · 量化CTA策略（20%-40%）</h4>
+                <div class="arch-grid">
+                    <div class="arch-item"><i class="fas fa-chart-line"></i> 覆盖工业品/农产品/能化主力品种</div>
+                    <div class="arch-item"><i class="fas fa-chart-pie"></i> 时序动量+截面多因子 · 趋势+套利</div>
+                    <div class="arch-item"><i class="fas fa-chart-bar"></i> 与股票策略相关性＜0.2</div>
+                    <div class="arch-item"><i class="fas fa-chart-simple"></i> 极端行情下提供危机Alpha保护</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 风控 + 容量管理 — 三种模式卡片风格 -->
+        <div class="section-title"><i class="fas fa-shield-alt" style="margin-right: 0.5rem;"></i> 风控体系 · 容量管理</div>
+        <div class="composite-modes">
+            <div class="mode-card">
+                <i class="fas fa-chart-line"></i>
+                <h4>实时风控体系</h4>
+                <p>动态压力测试 · 每月模拟流动性枯竭、市场暴跌20%极端场景<br>三重复核指令 · 严禁报价泄露<br>季度风险揭示确认书</p>
+            </div>
+            <div class="mode-card">
+                <i class="fas fa-chart-pie"></i>
+                <h4>容量红绿灯机制</h4>
+                <p>每日净申购上限动态调整<br>接近舒适容量90% → 暂停大额申购<br>超过硬上限 → 全渠道封盘</p>
+            </div>
+            <div class="mode-card">
+                <i class="fas fa-brain"></i>
+                <h4>合规防火墙</h4>
+                <p>合格投资者严格审核<br>所有沟通留痕 · 季度风险揭示确认<br>向非合格投资者募集零容忍</p>
+            </div>
+        </div>
+
+        <!-- 高净值客户服务层级 -->
+        <div class="section-title"><i class="fas fa-crown" style="margin-right: 0.5rem;"></i> 高净值客户 · 尊享服务</div>
+        <div class="value-grid">
+            <div class="value-card">
+                <i class="fas fa-star"></i>
+                <div class="value-title">S级 · 单笔≥1000万</div>
+                <div class="value-desc">策略参数投票权 · PM季度一对一策略会 · 专属定制风控参数</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-gem"></i>
+                <div class="value-title">A级 · 300-1000万</div>
+                <div class="value-desc">月度归因报告定制 · 专属IR · 策略开放日VIP席位</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-handshake"></i>
+                <div class="value-title">转介绍计划</div>
+                <div class="value-desc">老客户引荐新客户享管理费返还礼遇（合规框架执行）</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-chart-line"></i>
+                <div class="value-title">差异化竞争力</div>
+                <div class="value-desc">免费分析现有持仓与产品的相关性热力图 · 让量化成为资产配置的「压舱石」</div>
+            </div>
+        </div>
+
+        <!-- 服务权益标签 -->
+        <div class="capabilities">
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 每周净值+归因快报</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 每日估值推送（合格投资者）</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 策略参数迭代日志脱敏共享</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 季度投资交流会+闭门晚宴</span>
+        </div>
+
+        <!-- 与全景系统的关联 -->
+        <div class="section-title"><i class="fas fa-cubes" style="margin-right: 0.5rem;"></i> 全景协同 · QFlow在全体系中的位置</div>
+        <div class="composite-modes">
+            <div class="mode-card">
+                <i class="fas fa-database"></i>
+                <h4>Ω → Δ → Γ+β9-</h4>
+                <p>数据存储与感知层提供因子与信号<br>知识层沉淀研究成果与策略经验</p>
+            </div>
+            <div class="mode-card">
+                <i class="fas fa-robot"></i>
+                <h4>α24+ → Σ</h4>
+                <p>投研Agent独立产出决策观点<br>复合决策层完成策略调度与权重分配</p>
+            </div>
+            <div class="mode-card">
+                <i class="fas fa-hand-holding-usd"></i>
+                <h4>QFlow → ModelLive</h4>
+                <p>募集层完成资金聚合与策略分发<br>执行层完成订单落地与归因闭环</p>
+            </div>
+        </div>
+
+        <!-- 策略迭代亮点 -->
+        <div class="section-title"><i class="fas fa-microchip" style="margin-right: 0.5rem;"></i> 持续进化 · 策略迭代能力</div>
+        <div class="value-grid">
+            <div class="value-card">
+                <i class="fas fa-brain"></i>
+                <div class="value-title">🧬 AI驱动的因子流水线</div>
+                <div class="value-desc">每月因子有效性滚动检验，每年策略库更新率约20%，防止过拟合</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-chart-line"></i>
+                <div class="value-title">⏳ 容量稀缺性管理</div>
+                <div class="value-desc">旗舰策略主动封盘机制，QFlow层容量红绿灯保障超额质量</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-chart-pie"></i>
+                <div class="value-title">📉 危机防御实证</div>
+                <div class="value-desc">多次市场冲击中最大回撤严格控制在目标阈值内</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-robot"></i>
+                <div class="value-title">🤖 α24+ 赋能</div>
+                <div class="value-desc">投研Agent观点可作为策略输入，增强复合决策能力</div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            QFlow · 募集层 | 资金聚合 · 策略分发 · 高净值服务<br>
+            基于全景投研体系（Ω→Δ→Γ+β9-→α24+→Σ→执行），策略容量舒适区，为合格投资者提供低相关、绝对收益配置方案<br>
+            <span style="font-size: 0.55rem;">合格投资者提示：本文档仅面向合格投资者，不构成投资建议，过往业绩不代表未来表现</span>
+        </div>
+        <div class="beta-meaning">
+            QFlow · 聚合 · 连接 · 服务
+        </div>
+    </div>
+    <div class="top-line" style="background: var(--border-color); height: 1px;"></div>
+</div>
+
+<!-- 演示模态框（包含下拉框，展示协调样式） -->
+<div id="contactModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-hand-holding-usd"></i> 尊享服务咨询</h3>
+        <p>请选择您的投资者类型，专属顾问将为您提供定制化资产配置方案</p>
+        <select id="investorTypeSelect">
+            <option value="individual_a">A级个人投资者 · 300-1000万</option>
+            <option value="individual_s">S级个人投资者 · 1000万以上</option>
+            <option value="institutional">机构投资者 · 定制化配置</option>
+            <option value="family">家族办公室 · 全方位服务</option>
+        </select>
+        <div class="modal-buttons">
+            <button id="modalConfirm">提交咨询</button>
+            <button id="modalClose">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const poster = document.querySelector('.poster');
+        if (poster) {
+            poster.addEventListener('mousemove', (e) => {
+                const rect = poster.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const intensity = 0.1 + (Math.abs(x - 0.5) * 0.15);
+                poster.style.borderColor = `rgba(22, 192, 255, ${0.4 + intensity * 0.3})`;
+                poster.style.boxShadow = `0 24px 48px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(22, 192, 255, ${0.1 + intensity * 0.15})`;
+            });
+            poster.addEventListener('mouseleave', () => {
+                poster.style.borderColor = '#333333';
+                poster.style.boxShadow = '0 24px 48px -12px rgba(0, 0, 0, 0.8)';
+            });
+        }
+
+        // 演示下拉框交互
+        const clientSelect = document.getElementById('clientLevelSelect');
+        if (clientSelect) {
+            clientSelect.addEventListener('change', (e) => {
+                const mode = e.target.options[e.target.selectedIndex]?.text;
+                const toast = document.createElement('div');
+                toast.innerText = `👑 客户层级切换: ${mode}`;
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.left = '20px';
+                toast.style.backgroundColor = '#1a1a1a';
+                toast.style.color = '#4AD2FF';
+                toast.style.padding = '0.4rem 1rem';
+                toast.style.fontSize = '0.7rem';
+                toast.style.border = '1px solid #16C0FF';
+                toast.style.zIndex = '999';
+                toast.style.fontFamily = "'Inter', sans-serif";
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(() => toast.remove(), 350);
+                }, 1800);
+            });
+        }
+
+        // 模态框逻辑
+        const modal = document.getElementById('contactModal');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalClose = document.getElementById('modalClose');
+
+        if (modalConfirm && modalClose && modal) {
+            modalConfirm.addEventListener('click', () => {
+                const selectVal = document.getElementById('investorTypeSelect');
+                const selectedText = selectVal.options[selectVal.selectedIndex]?.text || '';
+                alert(`✅ 咨询已提交！QFlow专属顾问将为您提供「${selectedText}」尊享服务方案。`);
+                modal.style.display = 'none';
+                if (selectVal) selectVal.selectedIndex = 0;
+            });
+            modalClose.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
+
+        // 页面加载时确保模态框不可见
+        if (modal) modal.style.display = 'none';
+    })();
+</script>
+</body>
+</html>

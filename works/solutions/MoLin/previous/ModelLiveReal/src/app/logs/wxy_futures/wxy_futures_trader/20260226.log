@@ -1,0 +1,45 @@
+2026-02-26 14:19:37,133 - ScriptMain.wxy_futures_trader - INFO - 初始化无限易期货交易脚本: 股债金多因子01
+2026-02-26 14:19:37,135 - ScriptMain.wxy_futures_trader - INFO - 账号: 9080005118, 用户: quruyi0101
+2026-02-26 14:19:37,136 - ScriptMain.wxy_futures_trader - INFO - 输出目录: //MLTR001/PublicDoc/9080005118/
+2026-02-26 14:19:37,136 - ScriptMain.wxy_futures_trader - INFO - 期货信息文件: F:/myproject/tmodellive/data/excel/期货信息.xlsx
+2026-02-26 14:19:37,137 - ScriptMain.wxy_futures_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-02-26 14:19:37,137 - ScriptMain.wxy_futures_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-02-26 14:19:37,155 - ScriptMain.wxy_futures_trader - INFO - 初始化无限易期货交易算法: WxyFuturesTradingAlgorithm
+2026-02-26 14:19:37,176 - ScriptMain.wxy_futures_trader - INFO - 权限验证成功
+2026-02-26 14:19:37,177 - ScriptMain.wxy_futures_trader - INFO - 数据发送线程启动
+2026-02-26 14:19:37,179 - ScriptMain.wxy_futures_trader - INFO - 数据接收线程启动
+2026-02-26 14:19:37,179 - ScriptMain.wxy_futures_trader - INFO - 监控线程启动
+2026-02-26 14:19:37,180 - ScriptMain.wxy_futures_trader - INFO - 已启动 3 个工作线程
+2026-02-26 14:19:37,184 - ScriptMain.wxy_futures_trader - INFO - 无限易期货交易脚本启动成功
+2026-02-26 14:19:37,188 - ScriptMain.wxy_futures_trader - INFO - SocketIO连接已建立
+2026-02-26 14:19:37,189 - ScriptMain.wxy_futures_trader - INFO - mqReceiver连接已建立
+2026-02-26 14:19:50,192 - ScriptMain.wxy_futures_trader - INFO - 清理脚本资源...
+2026-02-26 14:19:50,193 - ScriptMain.wxy_futures_trader - INFO - 正在停止无限易期货交易脚本...
+2026-02-26 14:19:50,198 - ScriptMain.wxy_futures_trader - INFO - 从mqReceiver服务器断开连接
+2026-02-26 14:19:50,199 - ScriptMain.wxy_futures_trader - INFO - 数据接收线程停止
+2026-02-26 14:19:52,199 - ScriptMain.wxy_futures_trader - INFO - 从服务器断开连接
+2026-02-26 14:19:52,201 - ScriptMain.wxy_futures_trader - INFO - 数据发送线程停止
+2026-02-26 14:36:47,093 - ScriptMain.wxy_futures_trader - INFO - 初始化无限易期货交易脚本: 股债金多因子01
+2026-02-26 14:36:47,095 - ScriptMain.wxy_futures_trader - INFO - 账号: 9080005118, 用户: quruyi0101
+2026-02-26 14:36:47,095 - ScriptMain.wxy_futures_trader - INFO - 输出目录: //MLTR001/PublicDoc/9080005118/
+2026-02-26 14:36:47,096 - ScriptMain.wxy_futures_trader - INFO - 期货信息文件: F:/myproject/tmodellive/data/excel/期货信息.xlsx
+2026-02-26 14:36:47,096 - ScriptMain.wxy_futures_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-02-26 14:36:47,097 - ScriptMain.wxy_futures_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-02-26 14:36:47,097 - ScriptMain.wxy_futures_trader - INFO - 多进程环境: False
+2026-02-26 14:36:47,117 - ScriptMain.wxy_futures_trader - INFO - 初始化无限易期货交易算法: WxyFuturesTradingAlgorithm
+2026-02-26 14:36:47,123 - ScriptMain.wxy_futures_trader - INFO - 权限验证成功
+2026-02-26 14:36:47,124 - ScriptMain.wxy_futures_trader - INFO - 数据发送线程启动
+2026-02-26 14:36:47,125 - ScriptMain.wxy_futures_trader - INFO - 数据接收线程启动
+2026-02-26 14:36:47,127 - ScriptMain.wxy_futures_trader - INFO - 监控线程启动
+2026-02-26 14:36:47,127 - ScriptMain.wxy_futures_trader - INFO - 已启动 3 个工作线程
+2026-02-26 14:36:47,131 - ScriptMain.wxy_futures_trader - INFO - 无限易期货交易脚本启动成功
+2026-02-26 14:36:47,136 - ScriptMain.wxy_futures_trader - INFO - SocketIO连接已建立
+2026-02-26 14:36:47,137 - ScriptMain.wxy_futures_trader - INFO - mqReceiver连接已建立
+2026-02-26 14:36:47,138 - ScriptMain.wxy_futures_trader - INFO - 已连接到SocketIO服务器: http://10.10.98.51:3211
+2026-02-26 14:36:47,139 - ScriptMain.wxy_futures_trader - INFO - 已连接到mqReceiver服务器: http://10.10.98.51:3210
+2026-02-26 14:37:01,140 - ScriptMain.wxy_futures_trader - INFO - 清理脚本资源...
+2026-02-26 14:37:01,141 - ScriptMain.wxy_futures_trader - INFO - 正在停止无限易期货交易脚本...
+2026-02-26 14:37:01,147 - ScriptMain.wxy_futures_trader - INFO - 从mqReceiver服务器断开连接
+2026-02-26 14:37:01,148 - ScriptMain.wxy_futures_trader - INFO - 数据接收线程停止
+2026-02-26 14:37:01,156 - ScriptMain.wxy_futures_trader - INFO - 从服务器断开连接
+2026-02-26 14:37:01,157 - ScriptMain.wxy_futures_trader - INFO - 数据发送线程停止

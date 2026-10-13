@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交易账户监控系统</title>
+    <link rel="stylesheet" href="./css/all.min.css">
+		<script	src="./js/jquery.min.js"></script>
+		<script src="./js/echarts.min.js"></script>
+    <style>
+    :root {
+        --primary-blue: #4A90E2;
+        --primary-blue-dark: #3A7BC8;
+        --primary-blue-light: #5CA2FF;
+        --primary-blue-transparent: rgba(74, 144, 226, 0.1);
+        --white: #FFFFFF;
+        --light-gray: #F5F7FA;
+        --gray: #E1E5EB;
+        --dark-gray: #7B8A9E;
+        --text-dark: #1A1A1A;
+        --text-gray: #1A1A1A;
+        --border-color: #D1D9E6;
+        --error-color: #FF6B6B;
+        --success-color: #1DD1A1;
+        --warning-yellow: #4A90E2;
+    }
+    
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        font-weight: 300;
+        font-size: 13px;
+        line-height: 1.4em;
+    }
+    
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #F5F7FA 0%, #E4E9F2 100%);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* 背景装饰 */
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 10% 20%, rgba(74, 144, 226, 0.03) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(74, 144, 226, 0.03) 0%, transparent 40%);
+        z-index: 0;
+    }
+    
+    body > * {
+        position: relative;
+        z-index: 1;
+    }
+        
+    ::-webkit-scrollbar {
+        width: 0px;
+        height: 0px;
+        background-color: #F5F7FA;  
+    }
+         
+    /* 顶部标题栏 */
+    #mq_mainT {
+        height: 24px;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        background: var(--white);
+        flex-shrink: 0;
+        margin: 0px 0px 5px 0px;
+    }
+    
+    #mq_mainB {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: auto;
+    }
+    
+    .MList {
+        width: 60px;
+        height: 100%;
+        border: 1px solid var(--border-color);
+        font-weight: 500;
+        font-size: 13px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 3px;		
+        background: var(--white);
+        transition: all 0.2s ease;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }   
+    
+    .MList:hover {
+        cursor: pointer !important;
+        background-color: var(--primary-blue-transparent) !important;
+    }
+    
+    
+    /* 交易账户卡片 */
+    .account-card {
+        margin: 0px 5px 5px 5px;
+        box-sizing: border-box;
+        display: flex;
+        border: 1px solid var(--border-color);
+        height: 300px;
+        background: var(--white);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    }
+       
+    /* 左侧图表区域 */
+    .card-chart {
+        padding: 1px;
+        box-sizing: border-box;
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chart-header {
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .chart-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-gray);
+        font-style: italic;
+    }
+        
+    .account-name {
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        font-size: 13px;
+        height: 100%;
+        width: auto;
+        font-weight: 600;
+        color: var(--text-gray);
+    }
+    
+    
+    /* 数据统计表区域 
+    .card-stats {
+        padding: 1px;
+        box-sizing: border-box;
+        border-left: 1px solid var(--border-color);
+        width: 350px;
+        height: 100%;
+        overflow-y: auto;
+    }
+        
+    table.altrowstable {
+        border: 1px var(--border-color) solid;
+        border-collapse: collapse;
+        font-size: 15px;
+        table-layout: fixed;
+        margin: 3px 3px 0px 3px;
+        box-sizing: border-box;
+        overflow: hidden;
+        background: var(--white);
+        width: calc(100% - 6px);
+    }
+    
+    table.altrowstable th {
+        border: 1px var(--border-color) solid;
+        text-align: center;
+        padding: 6px;
+        background: var(--light-gray);
+        color: var(--text-dark);
+        font-weight: 550;
+    }
+    
+    table.altrowstable td {
+        border: 1px var(--border-color) solid;
+        white-space: pre-line;
+        word-break: keep-all;
+        padding: 3px;
+        word-wrap: break-word;
+        text-align: center;
+        color: var(--text-gray);
+    }
+    */
+    /* 即时监控面板 */
+    .card-monitor {
+        padding: 1px;
+        border-left: 1px solid var(--border-color);
+        width: 950px;
+        height: 100%;
+        display: flex;
+    }
+        
+    .left-column {
+    		width:400px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3px;
+        margin-bottom: 6px;
+    }
+    
+    .status-card {
+        background: var(--white);
+        padding: 4px 3px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 30px;
+        border-top: 3px solid;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .status-card.normal {
+        border-top-color: var(--success-color);
+    }
+    
+    .status-card.warning {
+        border-top-color: var(--warning-yellow);
+    }
+    
+    .status-card.error {
+        border-top-color: var(--error-color);
+    }
+    
+    .status-card:last-child {
+        border-top-color: var(--primary-blue);
+    }
+    
+    .status-value {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 2px;
+        color: var(--text-dark);
+    }
+    
+    .status-label {
+        font-size: 12px;
+        color: var(--text-gray);
+    }
+    
+    .data-section {
+        flex: 1;
+    		display:flex;
+        background: var(--white);
+    }
+    .ldata-section {
+        flex: 1;
+        overflow-y: auto;
+        padding: 9px;
+        background: var(--white);
+    }
+    .rdata-section {
+        flex: 1;
+        border-left: 1px solid var(--border-color);
+        overflow-y: auto;
+        padding: 9px;
+        background: var(--white);
+    }
+    .data-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-dark);
+    }
+    
+    .data-value {
+        font-weight: 600;
+        color: var(--primary-blue);
+    }
+
+    .right-column {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+        padding: 9px;
+        border-left: 1px solid var(--border-color);
+        background: var(--white);
+        /* 添加这行确保正确的flex容器行为 */
+    		align-items: stretch;
+    }
+    
+    .alert-item {
+        padding: 3px 0;
+        font-size: 13px;
+        color: var(--text-gray);
+        /*border-bottom: 1px solid var(--border-color);*/
+        /* 确保alert-item不会破坏flex布局 */
+		    width: 100%;
+		    flex-shrink: 0; /* 防止被压缩 */
+    }
+    
+    .positive {
+        color: var(--success-color);
+    }
+    
+    .negative {
+        color: var(--error-color);
+    }
+    
+    /* 操作按钮区域 */
+    .card-actions {
+        box-sizing: border-box;
+        border-left: 1px solid var(--border-color);
+        width: 100px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .action-btn {
+        flex: 1;
+        border: 1px solid var(--border-color);
+        background: var(--white);
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        gap: 6px;
+    }
+
+    /* 设置按钮 - 蓝色背景 */
+    .action-btn:nth-child(1) {
+        border-top: none;
+        border-bottom: 1px solid var(--border-color);
+        background-color: rgba(74, 144, 226, 0.08);
+    }
+
+    /* 删除按钮 - 红色背景 */
+    .action-btn:nth-child(2) {
+        border-top: none;
+        border-bottom: 1px solid var(--border-color);
+        background-color: rgba(255, 107, 107, 0.08);
+    }
+
+    /* 暂停按钮 - 绿色背景 */
+    .action-btn:nth-child(3) {
+        border-top: none;
+        background-color: rgba(29, 209, 161, 0.08);
+    }
+
+    .action-btn:hover {
+        cursor: pointer !important;
+        background-color: var(--primary-blue-transparent) !important;
+    }
+    
+    /* 模态框背景 */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(44, 62, 80, 0.7);
+        z-index: 999;
+        backdrop-filter: blur(3px);
+    }
+    
+    /* 模态框表单 */
+    .modal-form {
+        display: flex;
+        flex-direction: column;
+        background: var(--white);
+        color: var(--text-gray);
+        width: 500px;
+        height: 600px;
+        z-index: 99999999;
+        position: absolute;
+        right: 50%;
+        top: 50%;
+        margin-right: -250px;
+        margin-top: -300px;
+        box-sizing: border-box;
+        box-shadow: 0 16px 48px rgba(44, 62, 80, 0.15);
+        border: 1px solid var(--border-color);
+    }
+    
+    .modal-header {
+        height: 30px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        color: var(--text-gray);
+        background: var(--light-gray);
+        font-weight: 600;
+    }
+    
+    .modal-body {
+        flex: 1;
+        padding: 3px 20px 0px 20px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .modal-footer {
+        height: 24px;
+        display: flex;
+        margin-top: 3px;
+        align-items: center;
+        justify-content: center;
+        background: var(--light-gray);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: left;
+    }
+    
+    .form-options0 {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--border-color);
+        margin-top: 2px;
+        min-height: 0;
+        width: 100%;
+        height: 100px;
+        overflow-y: auto;
+    }
+    
+    .form-options1 {
+        flex: 1;
+        border: 1px solid var(--border-color);
+        margin-top: 2px;
+        display: flex;
+        padding: 0;
+        min-height: 0;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .option-item,.option-item0 {
+        width: 100%;
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: left;
+        padding-left: 10px;
+        height: 24px;
+        min-height: 24px;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--white);
+        color: var(--text-gray);
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .option-item:hover,.option-item0:hover,
+    .option-item.selected,.option-item0.selected {
+        background: var(--primary-blue);
+        color: var(--white);
+    }
+    
+    .form-optionin {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow-y: auto;
+    }
+    
+    #accountName,
+    #interfaceValue,
+    #directoryPath,
+    #strategyValue {
+        height: 24px;
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: left;
+    }
+    
+    /* 按钮样式 */
+    .TJButton {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-dark);
+        width: 80px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .TJButton:hover {
+        background: var(--primary-blue);
+        color: var(--white);
+    }
+    
+    [contenteditable="true"] {
+        outline: none;
+        background-color: transparent;
+        border: none;
+        color: var(--text-gray);
+    }
+    
+    [contenteditable="true"]:focus {
+        background-color: var(--primary-blue-transparent);
+    }
+    </style>
+</head>
+<body>
+    <div id="mq_mainT">
+        <div style="width:10px;"></div>
+        <div class="MList" id="Init">新增</div>
+        <div style="flex:1;"></div>
+    </div>
+    <div style="flex:1;position:relative;">
+        <div id="mq_mainB">
+            <!-- 交易账户卡片1
+            <div class="account-card" id="test">
+                <div class="card-chart">
+                    <div class="chart-header">
+                        <div style="width:10px;"></div>
+                        <div class="account-name">账户1</div>
+                        <div style="flex:1;height:100%;"></div>
+                    </div>
+                    <div class="chart-container">
+                        图表区域
+                    </div>
+                </div>
+                
+                <div class="card-monitor">
+                    <div class="left-column">
+                        <div class="status-grid">
+                            <div class="status-card normal">
+                                <div class="status-value">202</div>
+                                <div class="status-label">使用时长</div>
+                            </div>
+                            <div class="status-card warning">
+                                <div class="status-value">30%</div>
+                                <div class="status-label">时长比率</div>
+                            </div>
+                            <div class="status-card error">
+                                <div class="status-value">12%</div>
+                                <div class="status-label">累计收益</div>
+                            </div>
+                            <div class="status-card">
+                                <div class="status-value">30%</div>
+                                <div class="status-label">策略同期</div>
+                            </div>
+                        </div>
+                        <div class="data-section">
+                        	<div class="ldata-section">
+                            <div class="data-item">
+                                <span>总资产</span>
+                                <span class="data-value">0</span>
+                            </div>
+                            <div class="data-item">
+                                <span>今日收益</span>
+                                <span class="data-value">0</span>
+                            </div>
+	                          <div class="data-item">
+	                              <span>手续费</span>
+	                              <span class="data-value">0</span>
+	                          </div>
+	                          <div class="data-item">
+	                              <span>滑点</span>
+	                              <span class="data-value">0</span>
+	                          </div>
+	                          
+	                          <div class="data-item">
+	                              <span>委托笔数</span>
+	                              <span class="data-value">总数/单位最高</span>
+	                          </div>                    
+	                          <div class="data-item">
+	                              <span>成交金额</span>
+	                              <span class="data-value">0</span>
+	                          </div>	    
+	                          <div class="data-item">
+	                              <span>换手率</span>
+	                              <span class="data-value">0</span>
+	                          </div>
+	                        </div>
+	                          
+	                        <div class="rdata-section">
+                            <div class="data-item">
+                                <span>当日指令</span>
+                                <span class="data-value">0</span>
+                            </div>
+                            <div class="data-item">
+                                <span>当日执行</span>
+                                <span class="data-value">0</span>
+                            </div>
+                            <div class="data-item">
+                                <span>警告数量</span>
+                                <span class="data-value">0</span>
+                            </div>
+                            <div class="data-item">
+                                <span>错误数量</span>
+                                <span class="data-value">0</span>
+                            </div>
+                            <div class="data-item">
+                                <span>网络延迟</span>
+                                <span class="data-value">1s</span>
+                            </div>
+                            <div class="data-item">
+                                <span>响应时间</span>
+                                <span class="data-value">100ms</span>
+                            </div>
+                            <div class="data-item">
+                                <span>初次使用</span>
+                                <span class="data-value">20240101</span>
+                            </div>
+													</div>
+                        </div>
+                    </div>
+                    <div class="right-column">
+                        <div class="alert-item">数据库连接池使用率超过80%</div>
+                        <div class="alert-item">API服务响应时间异常</div>
+                        <div class="alert-item">服务器内存使用率过高</div>
+                        <div class="alert-item">网络延迟增加</div>
+                        <div class="alert-item">用户登录失败次数异常</div>
+                        <div class="alert-item">磁盘空间不足警告</div>
+                        <div class="alert-item">服务器内存使用率过高</div>
+                        <div class="alert-item">网络延迟增加</div>
+                        <div class="alert-item">用户登录失败次数异常</div>
+                        <div class="alert-item">磁盘空间不足警告</div>
+                        <div class="alert-item">网络延迟增加</div>
+                        <div class="alert-item">用户登录失败次数异常</div>
+                        <div class="alert-item">磁盘空间不足警告</div>
+                        <div class="alert-item">服务器内存使用率过高</div>
+                        <div class="alert-item">网络延迟增加</div>
+                        <div class="alert-item">用户登录失败次数异常</div>
+                        <div class="alert-item">磁盘空间不足警告</div>
+                    </div>
+                </div>
+                
+                <div class="card-actions">
+                    <div class="action-btn">设置</div>
+                    <div class="action-btn">停止</div>
+                    <div class="action-btn" name="0">删除</div>
+                </div>
+            </div>
+            -->
+        </div>
+    </div>
+    
+    <!-- 模态框背景 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <!-- 悬浮式表单 -->
+        <div class="modal-form" id="modalForm" name="0">
+            <div class="modal-header">
+                新增交易账户
+            </div>
+            <div class="modal-body">
+                <div class="form-label">交易账户:</div>
+                <div id="accountName" contenteditable="true"></div>
+            
+                <div class="form-label">挂载接口</div>
+                <div id="interfaceValue"></div>
+                <div class="form-options0" id="interfaceOptions">
+                    <div class="option-item0" id="XtQmtStockTrader">迅投股票</div>
+                    <div class="option-item0" id="GoldTraderStock">掘金股票</div>
+                    <div class="option-item0" id="GoldTraderFutures">掘金期货</div>
+                    <div class="option-item0" id="WxyStockTrader">无限易股票</div>
+                    <div class="option-item0" id="WxyFuturesTrader">无限易期货</div>
+                </div>
+            
+                <div class="form-label">指定目录</div>
+                <div id="directoryPath"></div>
+            
+                <div class="form-label">使用策略</div>
+                <div id="strategyValue"></div>
+                <div class="form-options1">
+                    <div class="form-optionin" id="strategyOptions">
+                    		<!--
+                        <div class="option-item" data-value="策略1">策略1</div>
+                        <div class="option-item" data-value="策略2">策略2</div>
+                        <div class="option-item" data-value="策略3">策略3</div>
+                        <div class="option-item" style="border:none;"></div>
+                    		-->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="TJButton" id="cancelBtn">取消</div>
+                <div style="width:3px;"></div>
+                <div class="TJButton" id="confirmBtn">确定</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    		//server
+				var MServer = "http://10.10.98.51/test/sys/";
+				
+				//进程字典
+				window.allProcesses = {};
+        // 显示模态框
+        function showModal() {$('#modalOverlay').css('display','block');}
+        // 隐藏模态框
+        function hideModal() {$('#modalOverlay').css('display','none');resetForm();}
+        // 重置表单
+        function resetForm() {$('#modalForm').attr('name','0');$('#accountName').html('');$('#interfaceValue').html('');$('#strategyValue').html('');$('#directoryPath').html('');}
+				// 确认按钮点击事件
+				$(document).off('click',"#confirmBtn").on('click',"#confirmBtn",function(){
+					const thisname = $('#modalForm').attr('name');
+					if (thisname=='0'){
+            const accountName = $('#accountName').html().trim();
+            const directoryPath =  $('#directoryPath').html().trim();
+            const interface0 = $('#interfaceValue').attr('name');
+            const strategy = $('#strategyValue').attr('name');
+            if (!accountName) {alert('请输入账户名称');$('#accountName').focus();return;}
+            if (!directoryPath) {alert('请指定交易目录');return;}
+            if (!interface0) {alert('请选择交易接口');return;}
+            if (!strategy) {alert('请选择交易策略');return;}
+            //alert(directoryPath);
+         		const configData = {
+         			config_name:accountName,
+         			account_name:accountName,
+         			api_name:interface0,
+         			target_dir:directoryPath,
+         			strategy_name:strategy
+         			}
+         		save_trading_config(Q14123101,configData);
+         		//alert(111111111111111111111);
+         		//重新载入，以便获取新增卡片的id
+         		// 创建新的账户卡片
+         		//createAccountCard(accountName, interface0, strategy,directoryPath);
+            }
+          else {
+            const accountName = $('#accountName').html().trim();
+            const directoryPath =  $('#directoryPath').html().trim();
+            const interface0 = $('#interfaceValue').attr('name');
+            const strategy = $('#strategyValue').attr('name');
+		        if (!accountName) {alert('请输入账户名称');$('#accountName').focus();return;}
+		        if (!directoryPath) {alert('请指定交易目录');return;}
+		        if (!interface0) {alert('请选择交易接口');return;}
+		        if (!strategy) {alert('请选择交易策略');return;}
+		        //alert(directoryPath);
+		        const configData = {
+		        	config_name:accountName,
+		        	account_name:accountName,
+		        	api_name:interface0,
+		        	target_dir:directoryPath,
+		        	strategy_name:strategy
+		        	}
+		        update_trading_config(Q14123101,thisname, configData);
+          	}
+					})
+    		$(document).off('click',"#Init").on('click',"#Init",function(){
+    			
+    			const cardcount = $('.account-card[id]').length;
+    			//alert(cardcount);
+    			if (cardcount<=5){showModal();}
+    			else {parent.WarnMessage('已经达到可部署实例上限！');		}
+    			})
+				$(document).off('click',"#cancelBtn").on('click',"#cancelBtn",function(){hideModal();})
+				// 选择目录
+				$(document).off('click',"#directoryPath").on('click',"#directoryPath",function(){
+		        try {
+		            // 调用 pywebview API
+		            parent.pywebview.api.select_directory().then(function(path) {
+		                if (path) {
+		                    directoryPath.textContent = path;
+		                    // 这里可以进一步处理选择的目录路径
+		                   	// console.log('选择的目录:', path);
+		                } else {
+		                    alert('未选择目录');
+		                }
+		            }).catch(function(error) {
+		                console.error('选择目录时出错:', error);
+		                alert('选择目录失败: ' + error);
+		            });
+		        } catch (error) {
+		            console.error('API 调用错误:', error);
+		            alert('无法调用选择目录功能');
+		        }
+				})
+					
+					//画图
+					function tjjhGraph(dom,title,var1,var2,var3,title1,title2){
+						var myChart=echarts.init(document.getElementById(dom));
+						var line1={
+							/*
+							title:{
+								text:title,
+								left:'left',
+								textStyle:{color:'#1A1A1A',fontSize:16,fontWeight:'bold',},
+								top:'3px',
+							},*/
+							grid:{
+								bottom:'30px',
+								top:'10px',
+								right:'30px',
+								left:'50px',
+							},
+							tooltip:{
+								trigger:'axis',
+							},
+							color:['#D32F2F','#1890FF','#FA8C16','#D32F2F','#1890FF','#FA8C16'], // 红蓝橙：本策略(红) 基础策略(蓝) 业绩基准(橙)
+							/*
+							legend:{
+								right:10,
+								top:25,
+								textStyle:{color:'#434343',fontSize:14, fontWeight: 'bold'},
+								itemHeight:12,
+								itemWidth:12,
+								data:[{name:title1,icon:'Rect'},{name:title2,icon:'Rect'}],
+							},
+							*/
+							dataZoom:[{
+								type:'inside',
+								show:true,
+								realtime:true,
+								start:0,
+								end:100,
+							}],
+							xAxis: [{
+								type: 'category',
+								data : (function(){return var1;})(),
+								splitLine:{show:true,lineStyle:{color:'#D9D9D9',width:0.5,type:'dotted'}},
+								axisLine: {lineStyle:{color:'#BFBFBF'}}, 
+								axisLabel:{color:'#595959', fontSize: 11},
+								splitNumber: 20,
+								min: 'dataMin',
+								max: 'dataMax'
+							}],
+							yAxis: [
+								{
+									boundaryGap: [0, '30%'],
+									type: 'value',
+									axisLabel: {formatter: '{value} %',color:'#595959', fontSize: 12},
+									axisLine: {lineStyle:{color:'#BFBFBF'}},
+									splitArea: {show: false},
+									splitNumber: 5,
+									scale:true,
+									splitLine:{show:true,lineStyle:{color:'#E8E8E8',width:0.5,type:'solid'}},
+								},
+								{
+									boundaryGap: [0, '150%'],
+									show:true,
+									axisLabel:{formatter: '{value} %',color:'#595959', fontSize: 11},
+									axisLine: {lineStyle:{color:'#BFBFBF'}},
+									splitLine:{show:false}
+								}
+							],
+							series : [
+								{
+									/*
+									"name":title1, // 当日累计收益
+									"type":"line",
+									"yAxisIndex": 0,
+									"symbolSize":0.1,
+									"lineStyle":{normal:{"width":1.5}}, // 加粗主策略线
+									"data":(function(){return var2;})(),
+									*/
+									
+									 "name": title1,
+								   "type": "line",
+								   "yAxisIndex": 0,
+								   "symbolSize": 0.1,
+								   "smooth": false, // 就这一行关键代码
+								   "lineStyle": {normal:{"width":1}},
+								   "data": (function(){return var2;})(),
+									
+								},
+								{
+									"name":title2, // 单位收益率
+									"type":"bar",
+									"barWidth": 2,
+									"barGap":0,
+									"yAxisIndex": 1,
+									/*"itemStyle":{normal:{color:'rgba(211, 47, 47, 0.7)'}}, // 红色回撤，70%透明度*/
+									"itemStyle": {
+							      normal: {
+							        color: function(params) {
+							          // params.value 是当前数据点的值
+							          if (params.value >= 0) {
+							            // 正收益：红色
+							            return 'rgba(211, 47, 47, 0.7)';  // 您的原红色
+							          } else {
+							            // 负收益：绿色
+							            return 'rgba(76, 175, 80, 0.7)';  // Material Design 绿色
+							          }
+							        }
+							      }
+							    },
+									"data":(function(){return var3;})(),
+								}
+							]
+						};      
+						myChart.setOption(line1);
+					}
+					
+					
+            // 创建新账户卡片
+           function createAccountCard(id,name, interface, strategy,directoryPath) {
+           		 var qname = $('#'+strategy).attr("data-value");      
+               var ttxt = `<div class="account-card" id="${name}" name="${interface}" data-value="${strategy}" data-custom-info="${id}#${directoryPath}">
+                   <div class="card-chart">
+                       <div class="chart-header">
+                           <div style="width:10px;"></div>
+                           <!--<div class="account-name">${name}(${directoryPath})</div>-->
+                           <div class="account-name">账户：${name} | 策略：${qname}</div>
+                           <div style="flex:1;height:100%;"></div>
+                       </div>
+                       <div class="chart-container"  id="container_${name}"></div>
+                   </div>
+                   
+                   <div class="card-monitor">
+	                    <div class="left-column">
+	                        <div class="status-grid">
+	                        
+                            <div class="status-card normal">
+                                <div class="status-value" id="hours_${name}">202</div>
+                                <div class="status-label">使用时长</div>
+                            </div>
+                            <div class="status-card warning">
+                                <div class="status-value" id="hoursratio_${name}">30%</div>
+                                <div class="status-label">时长比率</div>
+                            </div>
+                            <div class="status-card error">
+                                <div class="status-value" id="lreturn_${name}">12%</div>
+                                <div class="status-label">累计收益</div>
+                            </div>
+                            <div class="status-card">
+                                <div class="status-value" id="qlreturn_${name}">30%</div>
+                                <div class="status-label">策略同期</div>
+                            </div>
+	                        
+	                        </div>
+	                        <div class="data-section">
+		                        	<div class="ldata-section">
+			                            <div class="data-item">
+			                                <span>总资产</span>
+			                                <span class="data-value" id="assets_${name}">0</span>
+			                            </div>
+			                            <div class="data-item">
+			                                <span>今日收益</span>
+			                                <span class="data-value" id="return_${name}">0</span>
+			                            </div>
+			                            <div class="data-item">
+			                                <span>手续费</span>
+			                                <span class="data-value" id="fei_${name}">0</span>
+			                            </div>
+			                            <div class="data-item">
+			                                <span>滑点</span>
+			                                <span class="data-value" id="huadian_${name}">0</span>
+			                            </div>
+			                            
+				                          <div class="data-item">
+				                              <span>委托笔数</span>
+				                              <span class="data-value"  id="weituo_${name}">总数/单位最高</span>
+				                          </div>                    
+				                          <div class="data-item">
+				                              <span>成交金额</span>
+				                              <span class="data-value" id="chengjiao_${name}">0</span>
+				                          </div>	    
+				                          <div class="data-item">
+				                              <span>换手率</span>
+				                              <span class="data-value" id="huanshou_${name}">0</span>
+				                          </div>
+		                           </div>
+		                           
+		                        	<div class="rdata-section">
+			                            <div class="data-item">
+			                                <span>当日指令</span>
+			                                <span class="data-value" id="order_${name}">0</span>
+			                            </div>
+			                            <div class="data-item">
+			                                <span>当日执行</span>
+			                                <span class="data-value" id="zhixing_${name}">0</span>
+			                            </div>
+			                            <div class="data-item">
+			                                <span>警告数量</span>
+			                                <span class="data-value" id="war_${name}">0</span>
+			                            </div>
+			                            <div class="data-item" id="err_${name}">
+			                                <span>错误数量</span>
+			                                <span class="data-value">0</span>
+			                            </div>
+			                            <div class="data-item">
+			                                <span>网络延迟</span>
+			                                <span class="data-value" id="holdnum_${name}">1s</span>
+			                            </div>
+			                            <div class="data-item">
+			                                <span>响应时间</span>
+			                                <span class="data-value" id="yanchi_${name}">100ms</span>
+			                            </div>
+			                            <div class="data-item">
+			                                <span>初次使用</span>
+			                                <span class="data-value" id="holdnum_${name}">0</span>
+			                            </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="right-column" id="mess_${name}">
+	                        <!--<div class="alert-item">数据库连接池使用率超过80%数据库连接池使用率超过80%数据库连接池使用率超过80%数据库连接池使用率超过80%数据库连接池使用率超过80%</div>
+	                        <div class="alert-item">API服务响应时间异常</div>
+	                        <div class="alert-item">服务器内存使用率过高</div>
+	                        <div class="alert-item">网络延迟增加</div>
+	                        <div class="alert-item">用户登录失败次数异常</div>
+	                        <div class="alert-item">磁盘空间不足警告</div>-->
+	                    </div>
+                   </div>
+                   
+                   <div class="card-actions">
+                       <div class="action-btn"  >设置</div>
+                       <div class="action-btn"  id="oc_${name}">启动</div>
+                       <div class="action-btn" name="0">删除</div>
+                   </div>
+                   </div>
+               `;
+               $('#mq_mainB').prepend(ttxt);
+           }
+
+						$(document).off('click',".option-item0").on('click',".option-item0",function(){
+							var tid =$(this).attr('id');
+							var tname =$(this).html();
+							$('#interfaceValue').attr('name',tid).html(tname);							
+							})
+						$(document).off('click',".option-item").on('click',".option-item",function(){
+							var tid =$(this).attr('id');
+							var tname =$(this).html();
+							$('#strategyValue').attr('name',tid).html(tname);		
+							})
+            
+						$(document).off('click',".action-btn").on('click',".action-btn",function(){
+							var titem =$(this).html();
+							var tcount = $(this).parents().eq(1).attr('id');
+							var tinterface = $(this).parents().eq(1).attr('name');
+							var tquant = $(this).parents().eq(1).attr('data-value');
+							var ttext = $(this).parents().eq(1).attr('data-custom-info');
+							var tid = ttext.split('#')[0];
+							var tdir = ttext.split('#')[1];
+							//alert(tid);alert(tdir);alert(titem);alert(tid);alert(tcount);alert(tquant);
+							if(titem=='设置'){
+								showModal();
+		            $('#modalForm').attr('name',tid);
+		            $('#accountName').html(tcount);
+		            $('#directoryPath').html(tdir);
+		            $('#interfaceValue').html($('#'+tinterface).html()).attr('name',tinterface);
+		            $('#strategyValue').html($('#'+tquant).attr('data-value')).attr('name',tquant);
+								}	
+							else if (titem=='删除'){
+								
+								const delnum = parseInt($(this).attr('name'));
+								if (delnum<1){
+									$(this).attr('name',(delnum+1).toString());
+									parent.WarnMessage('请谨慎删除实例，如确认删除，请再次点击删除！');	
+									}
+								else{
+									delete_trading_config(username=Q14123101,config_name=tcount,configId=null); 
+									}
+								}
+							else if (titem=='停止'){ 
+								
+								const tprocessId =window.allProcesses[tcount];
+								//alert(tprocessId);
+								stopProcess(tcount,tprocessId);
+																
+								}	
+							else if (titem=='启动'){
+									
+									//$(this).html("暂停");alert('启动运行！');
+									//alert(Q14123101);
+									//alert(tcount);
+									//alert(tid);				
+									//alert(tdir.replace(/\\/g, "/"));
+									//alert(tquant);
+									//alert($('#'+tquant).attr('data-value'));
+									//alert(tinterface);
+									
+									const xtqmt_config = {
+									    "script_path": tinterface+".py",
+							        "config_name": tcount,
+							        "username": Q14123101,
+							        "password": Q14123101,
+							        "quant_id": tquant,
+							        "quant_name": $('#'+tquant).attr('data-value'),
+							        "account": tcount,
+							        "mq_dir": tdir.replace(/\\/g, "/")+"/",
+							        "out_dir": tdir.replace(/\\/g, "/")+"/"
+							        //"assets": "total",
+							        //"server_url": "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/MQDataAPICtest.php",
+							        //"socketio_sender_url": "http://10.10.98.51:3211",
+							        //"socketio_receiver_url": "http://10.10.98.51:3210"
+									}	
+									//alert(JSON.stringify(xtqmt_config));	
+									startTradingProcess(tcount,JSON.stringify(xtqmt_config));
+																	
+								}				
+							})
+							
+						$(document).ready(function(){
+							// 获取当前页面的URL参数
+							const params = new URLSearchParams(window.location.search);
+							// 获取指定参数的值
+							Q14123101 = params.get('par');
+							//获取备选策略列表
+							$.post(MServer+"qi/qi00002/qi04635C/mqC.php",{
+								qflag:"strategyOptions",
+								dflag:'_04',
+								},
+								function(data){
+									//alert(data);
+									var Jdata = JSON.parse(data);
+									//alert(Jdata);
+									var ttxt ='';
+									for (var key1 in Jdata) {
+										ttxt += '<div class="option-item" id = "'+Jdata[key1].qid+'" data-value="'+Jdata[key1].qname+'">'+Jdata[key1].qname+'</div>';
+									}
+									ttxt += '<div class="option-item" style="border:none;"></div>';
+									$("#strategyOptions").html(ttxt);
+									load_trading_configs(Q14123101);
+									refreshAllProcesses();
+								});
+							});			
+						
+						// 在交易配置页面加载时
+						async function load_trading_configs(username) {
+						    try {
+						        const response = await parent.pywebview.api.get_trading_configs(username);
+						        if (response.success) {
+						            // 显示配置列表
+						            
+						            //console.log(JSON.stringify(response.configs));
+						            for (let i = 0; i <  Math.min(response.configs.length,5); i++) {
+													  //console.log(`索引 ${i}: 值 ${response.configs[i]}`);
+													  createAccountCard(response.configs[i].id,response.configs[i].config_name,response.configs[i].api_name,response.configs[i].strategy_name,response.configs[i].target_dir);
+													
+													
+														
+												// 时间列表（240分钟，09:30-14:59）
+												const timeList = [
+												  "09:30", "09:31", "09:32", "09:33", "09:34", "09:35", "09:36", "09:37", "09:38", "09:39",
+												  "09:40", "09:41", "09:42", "09:43", "09:44", "09:45", "09:46", "09:47", "09:48", "09:49",
+												  "09:50", "09:51", "09:52", "09:53", "09:54", "09:55", "09:56", "09:57", "09:58", "09:59",
+												  "10:00", "10:01", "10:02", "10:03", "10:04", "10:05", "10:06", "10:07", "10:08", "10:09",
+												  "10:10", "10:11", "10:12", "10:13", "10:14", "10:15", "10:16", "10:17", "10:18", "10:19",
+												  "10:20", "10:21", "10:22", "10:23", "10:24", "10:25", "10:26", "10:27", "10:28", "10:29",
+												  "10:30", "10:31", "10:32", "10:33", "10:34", "10:35", "10:36", "10:37", "10:38", "10:39",
+												  "10:40", "10:41", "10:42", "10:43", "10:44", "10:45", "10:46", "10:47", "10:48", "10:49",
+												  "10:50", "10:51", "10:52", "10:53", "10:54", "10:55", "10:56", "10:57", "10:58", "10:59",
+												  "11:00", "11:01", "11:02", "11:03", "11:04", "11:05", "11:06", "11:07", "11:08", "11:09",
+												  "11:10", "11:11", "11:12", "11:13", "11:14", "11:15", "11:16", "11:17", "11:18", "11:19",
+												  "11:20", "11:21", "11:22", "11:23", "11:24", "11:25", "11:26", "11:27", "11:28", "11:29",
+												  "13:00", "13:01", "13:02", "13:03", "13:04", "13:05", "13:06", "13:07", "13:08", "13:09",
+												  "13:10", "13:11", "13:12", "13:13", "13:14", "13:15", "13:16", "13:17", "13:18", "13:19",
+												  "13:20", "13:21", "13:22", "13:23", "13:24", "13:25", "13:26", "13:27", "13:28", "13:29",
+												  "13:30", "13:31", "13:32", "13:33", "13:34", "13:35", "13:36", "13:37", "13:38", "13:39",
+												  "13:40", "13:41", "13:42", "13:43", "13:44", "13:45", "13:46", "13:47", "13:48", "13:49",
+												  "13:50", "13:51", "13:52", "13:53", "13:54", "13:55", "13:56", "13:57", "13:58", "13:59",
+												  "14:00", "14:01", "14:02", "14:03", "14:04", "14:05", "14:06", "14:07", "14:08", "14:09",
+												  "14:10", "14:11", "14:12", "14:13", "14:14", "14:15", "14:16", "14:17", "14:18", "14:19",
+												  "14:20", "14:21", "14:22", "14:23", "14:24", "14:25", "14:26", "14:27", "14:28", "14:29",
+												  "14:30", "14:31", "14:32", "14:33", "14:34", "14:35", "14:36", "14:37", "14:38", "14:39",
+												  "14:40", "14:41", "14:42", "14:43", "14:44", "14:45", "14:46", "14:47", "14:48", "14:49",
+												  "14:50", "14:51", "14:52", "14:53", "14:54", "14:55", "14:56", "14:57", "14:58", "14:59"
+												];
+
+												// 完全随机的1分钟收益率 - 真正的随机
+												const minuteReturnList = (() => {
+												  const data = [];
+												  
+												  // 生成240个完全随机的收益率
+												  for (let i = 0; i < 240; i++) {
+												    // 大部分时间小波动（±0.3%）
+												    let value;
+												    const rand = Math.random();
+												    
+												    if (rand < 0.7) {
+												      // 70%的时间：小波动 ±0.3%
+												      value = (Math.random() * 0.6 - 0.3); // -0.3到+0.3
+												    } else if (rand < 0.9) {
+												      // 20%的时间：中等波动 ±0.6%
+												      value = (Math.random() * 1.2 - 0.6); // -0.6到+0.6
+												    } else {
+												      // 10%的时间：大波动 ±1.2%
+												      value = (Math.random() * 2.4 - 1.2); // -1.2到+1.2
+												    }
+												    
+												    // 四舍五入到2位小数
+												    data.push(parseFloat(value.toFixed(2)));
+												  }
+												  
+												  return data;
+												})();
+
+												// 计算累计收益率
+												const cumulativeReturnList = [];
+												let currentCumulative = 0;
+
+												for (let i = 0; i < minuteReturnList.length; i++) {
+												  currentCumulative += minuteReturnList[i];
+												  cumulativeReturnList.push(parseFloat(currentCumulative.toFixed(2)));
+												}
+
+												var id0 = 'container_'+response.configs[i].config_name;
+												tjjhGraph(id0,'当日收益',timeList,cumulativeReturnList,minuteReturnList,'今日收益','1分钟收益率');
+													
+													}
+						            
+						        } else {
+						            console.error(response.message);
+						        }
+						    } catch (error) {
+						        console.error('加载配置失败:', error);
+						    }
+						}
+
+
+
+						function childFunction (tid,content){//alert(1);
+							$('#mess_'+tid).append('<div class="alert-item">'+content+'</div>').scrollTop($('#mess_'+tid)[0].scrollHeight);
+							//$('#mq_mainB').append(1);
+							//alert(1);
+							}
+							
+						// 保存新配置
+						async function save_trading_config(username,configData) {
+						    try {
+						        const response = await parent.pywebview.api.save_trading_config(
+						            username,
+						            configData.config_name,
+						            configData.account_name,
+						            configData.api_name,
+						            configData.target_dir,
+						            configData.strategy_name
+						        );
+						        if (response.success) {
+						            console.log('配置保存成功');
+						            //load_trading_configs(username);
+						            // 重新加载列表
+						            $('#mq_mainB').html('');
+						            load_trading_configs(Q14123101);
+         								hideModal();
+						        } else {
+						            console.log(response.message);
+						        }
+						    } catch (error) {
+						        console.error('保存失败:', error);
+						    }
+						}
+						// 更新配置
+						async function update_trading_config(username,configId, updates) {
+						    try {
+						        const response = await parent.pywebview.api.update_trading_config(configId, updates);
+						        if (response.success) {
+						            console.log('配置更新成功');
+						            $('#mq_mainB').html('');
+						            load_trading_configs(Q14123101);
+         								hideModal();
+						        } else {
+						            console.log(response.message);
+						        }
+						    } catch (error) {
+						        console.error('更新失败:', error);
+						    }
+						}
+						// 删除配置
+						async function delete_trading_config(username,config_name,configId) {
+						    if (confirm('确定要删除此配置吗？')) {
+						        try {
+						            const response = await parent.pywebview.api.delete_trading_config(username, config_name, configId);
+						            if (response.success) {
+						                console.log('配置已删除');
+						                $('#'+config_name).remove();
+						                //load_trading_configs(Q14123101);
+						            } else {
+						                console.log(response.message);
+						            }
+						        } catch (error) {
+						            console.error('删除失败:', error);
+						        }
+						    }
+						}
+						
+						// 启动交易进程
+						async function startTradingProcess(configName,configs) {
+						    const result = await parent.pywebview.api.start_trading_process(configs);
+						    if (result.success) {
+						    		window.allProcesses[configName] = result.process_id;
+						    		$('#oc_'+configName).html('停止');
+						    		parent.WarnMessage(configName+'：启动运行！');		
+						        //console.log(`${configName} 启动成功，进程ID: ${result.process_id}`);
+						        // 保存进程ID用于后续操作
+						        //window.activeProcesses = window.activeProcesses || {};
+						        //window.activeProcesses[configName] = result.process_id;
+						        // 开始监控
+						        //startMonitoringProcess(result.process_id, configName);
+						    } else {
+						        console.log(`启动失败: ${result.message}`);
+						    }
+						}
+
+						// 停止进程
+						async function stopProcess(tname,processId) {
+								//alert("stopProcess运行了");
+						    const success = await parent.pywebview.api.stop_trading_process(processId);
+						    if (success) {
+						    		$('#oc_'+tname).html('启动');
+						        parent.WarnMessage("进程已停止");
+						    }
+						}
+						// 获取所有进程
+						async function refreshAllProcesses() {
+						    const result = await parent.pywebview.api.get_all_processes();
+						    if (result.success) {
+						    		//alert(JSON.stringify(result.processes));
+										Object.values(result.processes).forEach(value => {
+												if (value.config.hasOwnProperty('quant_name') && value.status == 'running' ){
+														window.allProcesses[value.config_name] = value.process_id;
+														$('#oc_'+value.config_name).html('停止');
+														
+													}
+										});
+						    }
+						}
+						
+						/*
+						// 发送命令到进程
+						async function pauseProcess(processId) {
+						    const result = await window.pywebview.api.send_command(processId, "pause");
+						    if (result.success) {
+						        showInfo("暂停命令已发送");
+						    }
+						}
+						// 获取进程状态
+						async function getProcessStatus(processId) {
+						    const result = await window.pywebview.api.get_process_status(processId);
+						    if (result.success) {
+						        updateProcessUI(result.data);
+						    }
+						}
+						*/
+						
+    </script>
+</body>
+</html>

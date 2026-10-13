@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摹林 · 投资理念与系统</title>
+    <style>
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.1);
+            --bg-primary: #101010;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --text-tertiary: #808080;
+            --border-color: #333333;
+            --error-color: #FF4D4D;
+            --success-color: #00CC66;
+            --warning-yellow: #FFC016;
+            /* 三色体系：红、蓝、黄 */
+            --linian-color: #FF6B8B;
+            --xitong-color: #16C0FF;
+            --fangfa-color: #FFC016;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 15, 25, 0.5);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(22, 192, 255, 0.5);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(22, 192, 255, 0.7);
+        }
+        
+        /* 背景装饰 */
+        .bg-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.03;
+            filter: blur(60px);
+        }
+        
+        .circle-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--linian-color);
+            top: -150px;
+            right: -100px;
+        }
+        
+        .circle-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--fangfa-color);
+            bottom: -100px;
+            left: -80px;
+        }
+        
+        .circle-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--xitong-color);
+            top: 30%;
+            left: 60%;
+        }
+        
+        /* 头部 */
+        .header {
+            padding: 50px 0 30px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .main-title {
+            font-size: 36px;
+            font-weight: 400;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+        
+        .title-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 300;
+            max-width: 600px;
+            margin: 20px auto 0;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 30px 50px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 30px;
+        }
+        
+        .section-container {
+            flex: 1;
+            min-width: 300px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .section-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .section-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            background: var(--bg-tertiary);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .linian-container::before { background: var(--linian-color); }
+        .xitong-container::before { background: var(--xitong-color); }
+        .fangfa-container::before { background: var(--fangfa-color); }
+        
+        .section-title {
+            font-size: 22px;
+            font-weight: 400;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            letter-spacing: 0.5px;
+        }
+        
+        .linian-title { color: var(--linian-color); }
+        .xitong-title { color: var(--xitong-color); }
+        .fangfa-title { color: var(--fangfa-color); }
+        
+        .title-icon {
+            margin-right: 10px;
+            font-size: 20px;
+            opacity: 0.9;
+        }
+        
+        .section-content {
+            margin-bottom: 18px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            font-weight: 350;
+            font-size: 15px;
+            position: relative;
+            padding-left: 12px;
+        }
+        
+        .section-content::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: inherit;
+            opacity: 0.5;
+        }
+        
+        .linian-content { color: rgba(255, 107, 139, 0.8); }
+        .xitong-content { color: rgba(22, 192, 255, 0.8); }
+        .fangfa-content { color: rgba(255, 192, 22, 0.8); }
+        
+        .section-container:hover .section-content {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .section-container:hover .linian-content {
+            color: rgba(255, 107, 139, 0.95);
+        }
+        
+        .section-container:hover .xitong-content {
+            color: rgba(22, 192, 255, 0.95);
+        }
+        
+        .section-container:hover .fangfa-content {
+            color: rgba(255, 192, 22, 0.95);
+        }
+        
+        /* 全链路提示条 */
+        .pipeline-hint {
+            max-width: 1200px;
+            margin: 20px auto 10px;
+            padding: 12px 20px;
+            text-align: center;
+            background: rgba(22, 192, 255, 0.03);
+            border-radius: 30px;
+            border: 1px solid rgba(22, 192, 255, 0.15);
+            font-size: 12px;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+        }
+        
+        .pipeline-hint span {
+            color: var(--primary);
+            margin: 0 4px;
+        }
+        
+        /* 标语区 */
+        .motto-section {
+            max-width: 1200px;
+            margin: 40px auto 30px;
+            padding: 30px;
+            text-align: center;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .motto-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--linian-color), var(--xitong-color), var(--fangfa-color));
+            opacity: 0.7;
+        }
+        
+        .motto-section:hover {
+            background: var(--bg-tertiary);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .motto-title {
+            font-size: 24px;
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+        
+        .motto-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .motto {
+            font-size: 16px;
+            color: var(--text-secondary);
+            padding: 10px 22px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 350;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .motto:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 底部 */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 30px;
+            border-top: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 1px;
+            background: var(--primary);
+        }
+        
+        .copyright {
+            color: var(--text-tertiary);
+            font-size: 14px;
+            font-weight: 350;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 992px) {
+            .main-content {
+                padding: 0 20px 40px;
+            }
+            .section-container {
+                min-width: calc(50% - 20px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 32px;
+            }
+            .title-description {
+                font-size: 15px;
+            }
+            .main-content {
+                flex-direction: column;
+                padding: 0 20px 40px;
+            }
+            .section-container {
+                min-width: 100%;
+            }
+            .motto-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .motto {
+                width: 100%;
+                max-width: 280px;
+            }
+            .pipeline-hint {
+                font-size: 10px;
+                margin: 15px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .main-title {
+                font-size: 28px;
+            }
+            .section-title {
+                font-size: 20px;
+            }
+            .section-content {
+                font-size: 14px;
+            }
+            .motto-section {
+                padding: 25px 15px;
+            }
+            .motto-title {
+                font-size: 22px;
+            }
+            .motto {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decoration">
+        <div class="bg-circle circle-1"></div>
+        <div class="bg-circle circle-2"></div>
+        <div class="bg-circle circle-3"></div>
+    </div>
+    
+    <div class="header">
+        <h1 class="main-title">投资理念与系统</h1>
+        <p class="title-description">专业量化投资研究框架：理念指导系统 · 系统实现方法 · 方法验证理念</p>
+    </div>
+    
+    <!-- 全链路提示 -->
+    <div class="pipeline-hint">
+        数据 → 感知 → 知识 → 决策 → 募集 → 执行 ｜ 全链路闭环 · 持续进化
+    </div>
+    
+    <div class="main-content">
+        <!-- 核心理念 - 红色系 -->
+        <div class="section-container linian-container">
+            <div class="section-title linian-title">
+                <span class="title-icon">💡</span>核心理念
+            </div>
+            <div class="section-content linian-content">
+                1、尊重市场的复杂性与不确定性，通过数据驱动的态势感知系统，从政策、事件、现象中提取可量化的信号，而非预设方向性立场。
+            </div>
+            <div class="section-content linian-content">
+                2、以中国市场的结构性特征为研究前提，融合多市场、多周期的实证方法论，构建适配本土环境的量化模型。
+            </div>
+            <div class="section-content linian-content">
+                3、融合金融经济理论与数理工程技术，构建可解释、可追溯、符合投资逻辑的量化策略。
+            </div>
+        </div>
+        
+        <!-- 系统架构 - 蓝色系 -->
+        <div class="section-container xitong-container">
+            <div class="section-title xitong-title">
+                <span class="title-icon">⚙️</span>系统架构
+            </div>
+            <div class="section-content xitong-content">
+                1、量化系统是围绕投研与业务一体化的综合平台，覆盖数据、感知、知识、决策、募集、执行全链路。
+            </div>
+            <div class="section-content xitong-content">
+                2、系统采用模块化分层设计，在统一架构下统筹全局，将复杂目标逐层拆解，实现策略生产的流水线化与人员分工的科学评估。
+            </div>
+            <div class="section-content xitong-content">
+                3、系统支持内外部协同，通过强化知识管理与课题生态，保持研究工作的持续创新与活力。
+            </div>
+        </div>
+        
+        <!-- 方法论 - 黄色系 -->
+        <div class="section-container fangfa-container">
+            <div class="section-title fangfa-title">
+                <span class="title-icon">🔬</span>方法论
+            </div>
+            <div class="section-content fangfa-content">
+                1、相信知识和技术是取得成功的关键要素，通过不断交替提升技术和认知水平谋求成功。
+            </div>
+            <div class="section-content fangfa-content">
+                2、在宏观层通过态势感知与复合决策做策略权重分配，在微观层通过多因子模型与算法执行实现精细化落地。
+            </div>
+            <div class="section-content fangfa-content">
+                3、利用算法和系统对主观研究与量化做深层次融合，获得更丰富的研究成果和更显著的投资业绩。
+            </div>
+            <div class="section-content fangfa-content">
+                4、以历史回测为基础，结合实时态势感知，对不确定的未来市场做出概率化应对。
+            </div>
+            <div class="section-content fangfa-content">
+                5、注重细节，分析不同策略方案之间的微小差别是决定投资策略优劣的关键要素。
+            </div>
+        </div>
+    </div>
+    
+    <!-- 投资哲学 -->
+    <div class="motto-section">
+        <div class="motto-title">投资哲学</div>
+        <div class="motto-container">
+            <div class="motto">人机结合 多空相济</div>
+            <div class="motto">以史为鉴 参详兴替</div>
+            <div class="motto">以技为舟 彼岸有渡</div>
+            <div class="motto">明哲思辨 格物致知</div>
+            <div class="motto">立足国内 融通全球</div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="copyright">© 2025 摹林 · 专业量化投资研究平台</div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.section-container').forEach(container => {
+            container.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+            });
+            container.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
+        
+        const mottos = document.querySelectorAll('.motto');
+        mottos.forEach((motto, index) => {
+            motto.style.transitionDelay = `${index * 0.05}s`;
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+            
+            const sections = document.querySelectorAll('.section-container');
+            sections.forEach((section, index) => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(15px)';
+                section.style.transition = `opacity 0.4s ease ${0.2 + index * 0.15}s, transform 0.4s ease ${0.2 + index * 0.15}s`;
+                setTimeout(() => {
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+	<!DOCTYPE html>
+		<html lang="zh-CN">
+		<head>
+		<meta	http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+		<link	type="text/css"	rel="stylesheet"	href="./css/smartMenu.css"/>
+		<link rel="stylesheet" href="./css/main.css">
+		<script	type="text/javascript"	src="./js/jquery.min.js"></script>
+		<script	type="text/javascript"	src="./js/echarts.min.js"></script>
+		<script	type="text/javascript"	src="./js/echarts-gl.min.js"></script>
+		<script	type="text/javascript"	src="./js/mqcharts.js"></script>
+		<script	type="text/javascript"	src="./js/jquery-smartMenu.js"></script>
+	
+		<style type="text/css">
+			
+			   :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.1);
+            --bg-primary: #101010;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #4AD2FF;
+            --text-tertiary: #808080;
+            --border-color: #333333;
+            --error-color: #FF4D4D;
+            --success-color: #00CC66;
+            --warning-yellow: #FFC016;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        }
+        
+				html,body
+				{
+					font-weight:400;
+					font-size:14px;
+					line-height:1.3em;
+					width:100%;
+					height:100%;
+					color:#16C0FF;
+					background:#101010;
+					margin:0;
+					padding:0;
+				}
+				#bkuang
+				{
+					width:964px;
+					height:350px;
+					/*border:solid 0px #16C0FF;*/
+					float:left;
+					margin-left:482px;
+					top:50px;
+					position:absolute;
+					}
+				#top
+				{
+					width:100%;
+					height:58px;
+					/*border-bottom:solid 0px #16C0FF;*/
+					box-sizing:border-box;
+					/*background:#fff102;*/
+					
+					}
+				#bottom
+				{
+					width:100%;
+					height:242px;
+					box-sizing:border-box;
+					border:solid 1px #16C0FF;
+					}
+				#selslide
+				{
+					width:100%;
+					height:50px;
+					padding-top:10px;
+					/*background:#ff0000;*/
+					
+					}
+				.graphs
+				{
+					width:320px;
+					height:240px;
+					border:solid 1px #16C0FF;
+					float:left;
+					/*background:#ffff00;*/
+					box-sizing:border-box;
+					margin-left:0.5px;
+					}
+					
+				.mq_top_T
+				{
+					width:auto;
+					padding:0;
+					margin:0;
+					height:58px;
+				}
+				.mq_top_T	li
+				{
+					float:left;
+					list-style-type:none;
+					width:auto;
+					height:58px;
+					line-height:80px;
+					padding:0 0	0	0;
+					text-align:center;
+					font-weight:bold;
+					font-size:34px;
+				  background: linear-gradient(to right, red, blue);
+				  -webkit-background-clip: text;
+				  color:transparent;
+				}
+									
+					
+		</style>
+	
+	</head>
+	<body>
+		<!--
+		<div  id="mq_top">
+			<ul class ="ul0">
+				<li id="1D" class="layer">1日</li>
+				<li id="10D" class="layer">10个自然日</li>
+				<li id="M" class="layer">1个自然月</li>
+				<li id="a" class="G">图形a</li>
+				<li id="b" class="G">图形b</li>
+				</ul>
+        <div style="position:absolute;top:3px;right:5px;background:transparent; margin:0;">
+        <input type="text" id="key"  value="">
+        <a id="submit" class="act" style="cursor:pointer;"><i></i>搜索</a>
+        </div>
+		</div>
+		<div id="note"></div>
+		<div  id="mq1" style="background-color: aliceblue;overflow-y:auto;"></div>
+		
+		-->
+		
+		<div id="bkuang"> 
+			<div id="top">
+				
+		<div	style="height:58px;width:auto;position:absolute;left:24px;">
+		<ul	id="mq_top_T1" class="mq_top_T"><li>Q<span style="font-size:15px;color:#888888;">的投资笔记</span></li></ul>
+			</div>
+				<center><text style="font-size:40px;line-height:40px;">规模效应</text></center>
+				<div style="position:absolute;top:0;right:0;width:58px;height:58px;background:#ff0000;"><img src="./assets/images/WePay.png" style="width:100%;height:100%;"></div>
+			</div>
+			<div id="bottom">
+			<!--
+			<div id="g0" class="graphs"><img src="..\..\qi\qi00001\qi04645\xx\2022_06_24a1.png" style="width:100%;height:100%;"></div>
+			<div id="g1" class="graphs"><img src="..\..\qi\qi00001\qi04645\xx\2022_06_24b1.png" style="width:100%;height:100%;"></div>
+			<div id="g2" class="graphs"><img src="..\..\qi\qi00001\qi04645\xx\2022_06_24c1.png" style="width:100%;height:100%;"></div>
+			-->
+			<div id="g0" class="graphs"></div>
+			<div id="g1" class="graphs"></div>
+			<div id="g2" class="graphs"></div>
+				
+			</div>
+			
+			<div id="selslide">
+				<center>
+        <input type="text" id="key"  value="" style="background:transparent;color:#16C0FF;border:1px	#16C0FF solid;">
+        <a id="submit" class="act" style="cursor:pointer;"><i></i>搜索</a>
+        </center>
+			</div>
+		</div>
+		
+		
+<script	type="text/javascript">
+	
+	
+//server
+		var MServer = "http://10.10.98.51/test/sys/";
+		
+//屏蔽右键事件
+document.oncontextmenu=function(){return	false;}
+function trim(str){return str.replace(/(^\s*)|(\s*$)/g,"");}
+myChart0 = echarts.init(document.getElementById('g0'));	
+myChart1 = echarts.init(document.getElementById('g1'));	
+myChart2 = echarts.init(document.getElementById('g2'));	
+
+
+
+
+
+function hg3(tl,myChart,df){
+	var ddate = ['g0','g1','g2','g3','g4','g5','g6','g7','g8','g9'];
+	// 指定图表的配置项和数据
+	var hfen = {
+		title: {
+			text: tl+'规模效应',left: 'left',padding:4,textStyle:{color:'#FFFFFF',fontSize:15,}
+			},
+			tooltip: {},
+			//toolbox: {
+			// feature: {
+			//dataView: {show: true, readOnly: false},
+			//}
+			//},
+			grid: {left: '2',right: '2',top: '15%',bottom: '3%',containLabel: true},
+    	color:['#F2F2F2','#00CCFF','#F34100','#FFC016'],
+    	/*
+			legend: {
+				textStyle:{color:'#16C0FF',fontSize:15},
+				icon:'Rect',
+				itemHeight:8,
+				itemWidth:10,
+				data:['短期因素'],
+				right:70,
+				top:30,
+				},
+				*/
+				animationDuration: 0,
+  			animationDurationUpdate: 200,
+  			animationEasing: 'linear',
+  			animationEasingUpdate: 'linear',
+				dataZoom: [
+				{
+					type: 'inside',
+					show: true,
+					realtime: true,
+					}
+				],
+				xAxis: {
+					axisLine:{onZero: true,show:true,lineStyle:{color:'#16C0FF'}},
+					data: (function(){return ddate;})(),
+					splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},
+					},
+            yAxis: {boundaryGap: [0, '50%'],type: 'value',splitNumber:5,scale:true,axisLine:{onZero: true,show:true,lineStyle:{color:'#16C0FF'}},splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},},
+            tooltip: {
+            trigger: 'axis'
+        },
+
+            series: [{
+                name: '短期因素',
+                type: 'bar',
+                data: (function(){return df;})(),
+                }               
+                ]
+        };      
+        // 使用刚指定的配置项和数据显示图表。
+        eval(myChart+".setOption(hfen);");
+}
+
+
+	i=0
+
+	$(document).off('click',"#submit").on('click',"#submit", function(){
+			var sTxt=$("#key").val();
+			if(sTxt==''){
+				alert("请输入查询周期，格式：#-#");
+				}
+			else if(sTxt!=''){
+				btxt = sTxt.split("_");
+				sdate = btxt[0];
+				edate = btxt[1];
+				$.ajax({
+				type: "POST",
+				url: MServer+"qq/channel/ch001C.php",
+				data:{
+					sdate:sdate,
+					edate:edate,
+					},
+				async:false,
+				success: function(data){
+					var result=eval(trim(data));
+					var date = result[i][2][0];
+					var data0 = [result[i][2][1],result[i][2][2],result[i][2][3],result[i][2][4],result[i][2][5],result[i][2][6],result[i][2][7],result[i][2][8],result[i][2][9],result[i][2][10]];
+					var data1 = [result[i][1][1],result[i][1][2],result[i][1][3],result[i][1][4],result[i][1][5],result[i][1][6],result[i][1][7],result[i][1][8],result[i][1][9],result[i][1][10]];
+					var data2 = [result[i][0][1],result[i][0][2],result[i][0][3],result[i][0][4],result[i][0][5],result[i][0][6],result[i][0][7],result[i][0][8],result[i][0][9],result[i][0][10]];
+					hg3(date+'当月','myChart0',data0)
+					hg3(date+'当周','myChart1',data1)
+					hg3(date+'当天','myChart2',data2)
+					i+=1
+					
+					function run() {
+					var date = result[i][2][0];
+					var data0 = [result[i][2][1],result[i][2][2],result[i][2][3],result[i][2][4],result[i][2][5],result[i][2][6],result[i][2][7],result[i][2][8],result[i][2][9],result[i][2][10]];
+					var data1 = [result[i][1][1],result[i][1][2],result[i][1][3],result[i][1][4],result[i][1][5],result[i][1][6],result[i][1][7],result[i][1][8],result[i][1][9],result[i][1][10]];
+					var data2 = [result[i][0][1],result[i][0][2],result[i][0][3],result[i][0][4],result[i][0][5],result[i][0][6],result[i][0][7],result[i][0][8],result[i][0][9],result[i][0][10]];
+					
+  				myChart0.setOption({
+  					title: {
+								text: date+'当月规模效应',left: 'left',padding:4,textStyle:{color:'#FFFFFF',fontSize:15,}
+						},
+  				  series: [
+  				    {
+  				      type: 'bar',
+  				      data: (function(){return data0;})(),
+  				    }
+  				  ]
+  				});
+  				
+  				  myChart1.setOption({
+  					title: {
+								text: date+'当周规模效应',left: 'left',padding:4,textStyle:{color:'#FFFFFF',fontSize:15,}
+						},
+  				  series: [
+  				    {
+  				      type: 'bar',
+  				      data: (function(){return data1;})(),
+  				    }
+  				  ]
+  				});
+  				  myChart2.setOption({
+  					title: {
+								text: date+'当天规模效应',left: 'left',padding:4,textStyle:{color:'#FFFFFF',fontSize:15,}
+						},
+  				  series: [
+  				    {
+  				      type: 'bar',
+  				      data: (function(){return data2;})(),
+  				    }
+  				  ]
+  				});
+  				i+=1;
+  				if (i==result.length){
+  					clearInterval(timer1);
+  					i=0;
+  					}
+			}
+		
+		timer1 = setInterval(function (){run();},1000);
+		
+				}
+			})	
+			}
+		});
+			
+		
+	</script>
+	</body>	
+</html>
+

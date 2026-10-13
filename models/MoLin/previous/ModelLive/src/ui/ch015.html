@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>量化投资公司组织架构图</title>
+    <link rel="stylesheet" href="./css/all.min.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #16C0FF; /* 主蓝色 */
+            --primary-blue-dark: #0A9ED9; /* 深蓝色 */
+            --primary-blue-light: #5CA2FF; /* 浅蓝色 */
+            --primary-blue-transparent: rgba(22, 192, 255, 0.1);
+            --white: #0d1b2a;
+            --light-gray: rgba(22, 192, 255, 0.05);
+            --gray: rgba(141, 162, 181, 0.3);
+            --dark-gray: #7B8A9E;
+            --text-dark: #FFFFFF;
+            --text-gray: #8da2b5;
+            --border-color: rgba(22, 192, 255, 0.3);
+            --error-color: #FF6B6B;
+            --success-color: #06D6A0;
+            --warning-color: #FFD166;
+            --storage-color: #4ECDC4;
+            --client-color: #8A2BE2;
+            --marketing-color: #4CAF50;
+            --finance-color: #FF9800;
+            --admin-color: #9C27B0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            font-weight: 300;
+            font-size: 13px;
+            line-height: 1.4em;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #0d1b2a;
+            color: #16C0FF;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(22, 192, 255, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(22, 192, 255, 0.03) 0%, transparent 40%);
+            z-index: 0;
+        }
+        
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        ::-webkit-scrollbar {  
+            width: 0px;  
+            height: 0px;  
+            background-color: rgba(15, 23, 42, 0.5);  
+        }
+        
+        /* 图例 */
+        .legend {
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.8);
+            flex-shrink: 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            margin-right: 6px;
+            border: 1px solid;
+        }
+        
+        .legend-text {
+            font-size: 13px;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+        
+        .dashboard {
+            display: flex;
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            transform-origin: center;
+            transition: transform 0.3s;
+            overflow-y: auto !important;
+            background: rgba(15, 23, 42, 0.8);
+        }
+        
+        .metrics-panel {
+            width: 300px;
+            padding: 3px;
+            border-left: 1px solid var(--border-color);
+            overflow-y: auto !important;
+            background: rgba(15, 23, 42, 0.8);
+        }
+        
+        .metric-item {
+            margin-bottom: 3px;
+            padding: 12px;
+            background: var(--light-gray);
+            border-left: 2px solid var(--primary-blue);
+        }
+        
+        .metric-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+        
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+        
+        .metric-trend {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        .trend-up {
+            color: var(--success-color);
+        }
+        
+        .trend-down {
+            color: var(--error-color);
+        }
+        
+        .node {
+            position: absolute;
+            width: 150px;
+            height: 80px;
+            color: var(--text-dark);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            z-index: 10;
+            user-select: none;
+            padding: 6px;
+            flex-direction: column;
+            border: 1px solid var(--primary-blue);
+            background: rgba(15, 23, 42, 0.8);
+            transition: all 0.3s;
+        }
+        
+        .node:hover {
+            transform: translateY(-3px);
+            z-index: 100;
+            border-color: var(--primary-blue-dark);
+            box-shadow: 0 10px 25px rgba(22, 192, 255, 0.5);
+        }
+        
+        /* 节点类型专用样式 */
+        .node.risk {
+            border-color: #FF6B6B;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.research {
+            border-color: #4ECDC4;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.investment {
+            border-color: #FFD166;
+            background: rgba(255, 209, 102, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.trading {
+            border-color: #8A2BE2;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.it {
+            border-color: #16C0FF;
+            background: rgba(22, 192, 255, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.marketing {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.finance {
+            border-color: #FF9800;
+            background: rgba(255, 152, 0, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.admin {
+            border-color: #9C27B0;
+            background: rgba(156, 39, 176, 0.1);
+            border-radius: 12px;
+        }
+        
+        /* 关键节点样式 */
+        .node.critical {
+            border-width: 2px;
+            border-color: gold;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        
+        /* 闪烁动画关键帧 */
+        @keyframes blink {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.6); }
+            100% { filter: brightness(1); }
+        }
+        
+        .node.blink {
+            animation: blink 1.5s infinite;
+        }
+        
+        .node-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+            color: var(--text-dark);
+        }
+        
+        .node-subtitle {
+            font-size: 13px;
+            font-weight: normal;
+            opacity: 0.85;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            max-height: 30px;
+            color: var(--text-gray);
+        }
+        
+        .jtk-connector {
+            z-index: 5;
+            stroke: var(--primary-blue);
+            stroke-width: 2;
+        }
+        
+        .jtk-endpoint {
+            z-index: 6;
+            fill: var(--primary-blue);
+        }
+        
+        .jtk-hover {
+            z-index: 7;
+        }
+        
+        /* 自定义箭头样式 */
+        .flow-arrow {
+            fill: var(--primary-blue);
+            animation: flow 2s infinite linear;
+        }
+        
+        @keyframes flow {
+            0% {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+        }
+        
+        /* 连接线动画 */
+        .animated-connector {
+            stroke-dasharray: 10 5;
+            animation: dash 1s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -15;
+            }
+        }
+        
+        /* 脉冲效果 */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                r: 4;
+                opacity: 1;
+            }
+            50% {
+                r: 6;
+                opacity: 0.7;
+            }
+            100% {
+                r: 4;
+                opacity: 1;
+            }
+        }
+        
+        /* 节点详情面板 */
+        .node-detail {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 350px;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 10px;
+            z-index: 1000;
+            border: 1px solid var(--primary-blue-dark);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12),0 3px 6px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+        }
+        
+        .node-detail.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .detail-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+        
+        .close-detail {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-detail:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--error-color);
+        }
+        
+        .detail-content {
+            line-height: 1.7;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+            display: block;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            color: var(--text-dark);
+            font-size: 16px;
+        }
+        
+        /* 控制面板 */
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            background: rgba(22, 192, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-gray);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: rgba(22, 192, 255, 0.2);
+            color: var(--primary-blue);
+        }
+        
+        /* 层次标题 */
+        .layer-title {
+            position: absolute;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-gray);
+            text-align: center;
+            width: 100%;
+            z-index: 1;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        /* 部门信息卡片 */
+        .dept-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            color: var(--text-gray);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            max-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(255, 107, 107, 0.1); border-color: #FF6B6B;"></div>
+            <div class="legend-text">风控部</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(78, 205, 196, 0.1); border-color: #4ECDC4;"></div>
+            <div class="legend-text">投研部</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(255, 209, 102, 0.1); border-color: #FFD166;"></div>
+            <div class="legend-text">投资部</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(138, 43, 226, 0.1); border-color: #8A2BE2;"></div>
+            <div class="legend-text">交易部</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(22, 192, 255, 0.1); border-color: #16C0FF;"></div>
+            <div class="legend-text">信息与估值</div>
+        </div>
+    </div>
+    
+    <div class="dashboard">
+        <div class="chart-container" id="chart-container">
+            <!-- 层次标题 -->
+            <div class="layer-title" style="top: 20px;">管理层</div>
+            <div class="layer-title" style="top: 170px;">核心业务层</div>
+            <div class="layer-title" style="top: 320px;">支持部门层</div>
+            <div class="layer-title" style="top: 470px;">行政后勤层</div>
+            
+            
+            <!-- 部门信息卡片 -->
+            <div class="dept-info">
+                <div style="font-weight: 600; color: var(--primary-blue); margin-bottom: 5px;">量化投资公司</div>
+                <div>总部门数: <span id="dept-count">0</span></div>
+                <div>总连接数: <span id="conn-count">0</span></div>
+            </div>
+            
+            <!-- 节点详情面板 -->
+            <div class="node-detail">
+                <div class="detail-header">
+                    <div class="detail-title">部门详情</div>
+                    <button class="close-detail">&times;</button>
+                </div>
+                <div class="detail-content"></div>
+            </div>
+        </div>
+        
+        <div class="metrics-panel">                
+            <div class="metric-item">
+                <div class="metric-name">公司总人数</div>
+                <div class="metric-value">285</div>
+                <div class="metric-trend trend-up">较上月增加 12人</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">资产管理规模</div>
+                <div class="metric-value">¥18.7B</div>
+                <div class="metric-trend trend-up">较上月增长 5.2%</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">年化收益率</div>
+                <div class="metric-value">24.3%</div>
+                <div class="metric-trend trend-up">高于行业平均</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">风险控制指标</div>
+                <div class="metric-value">98.7%</div>
+                <div class="metric-trend trend-up">风险可控</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">研发投入占比</div>
+                <div class="metric-value">15.8%</div>
+                <div class="metric-trend trend-up">持续增加</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">交易成功率</div>
+                <div class="metric-value">99.95%</div>
+                <div class="metric-trend trend-up">系统稳定</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">客户满意度</div>
+                <div class="metric-value">96.4%</div>
+                <div class="metric-trend trend-up">客户关系良好</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">运营成本率</div>
+                <div class="metric-value">2.3%</div>
+                <div class="metric-trend trend-down">成本控制良好</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jsPlumb库 -->
+    <script src="js/jsplumb.min.js"></script>
+    <script>
+        // 初始化jsPlumb实例
+        const jsPlumbInstance = jsPlumb.getInstance({
+            Connector: ["Flowchart", {cornerRadius: 10}],
+            Anchors: ['Right', 'Left', 'Top', 'Bottom'],
+            Endpoint: ["Dot", { radius: 2 }],
+            EndpointStyle: { fill: "#16C0FF" },
+            PaintStyle: { 
+                stroke: "#16C0FF", 
+                strokeWidth: 1,
+                strokeDasharray: "10 5"
+            },
+            HoverPaintStyle: { stroke: "#0A9ED9", strokeWidth: 4 },
+            Container: "chart-container"
+        });
+        
+        // 根据容器大小计算居中偏移
+        const bias = ($('#chart-container').width() - 750 - 250 - 150) * 0.5;
+        
+        // 节点数据 - 量化投资公司组织架构
+        const nodes = [
+            // 第一层 - 管理层
+            { id: "risk", name: "风控部", type: "risk", x: bias + 500, y: 80, description: "负责风险管理和控制，确保公司投资活动符合法规要求" },
+            
+            // 第二层 - 核心业务层
+            { id: "research", name: "投研部", type: "research", x: bias + 250, y: 230, description: "负责投资研究和分析，提供市场洞察和投资策略" },
+            { id: "investment", name: "投资部", type: "investment", x: bias + 500, y: 230, description: "负责投资决策和执行，管理投资组合" },
+            { id: "trading", name: "交易部", type: "trading", x: bias + 750, y: 230, description: "负责交易执行和监控，确保交易高效准确" },
+            
+            // 第三层 - 支持部门层
+            { id: "it", name: "信息与估值", type: "it", x: bias + 250, y: 380, description: "负责信息系统和估值管理，提供技术支持" },
+            { id: "marketing", name: "市场部", type: "marketing", x: bias + 500, y: 380, description: "负责市场拓展和客户关系，维护公司品牌形象" },
+            { id: "finance", name: "财务", type: "finance", x: bias + 750, y: 380, description: "负责财务管理和报告，确保财务合规性" },
+            
+            // 第四层 - 行政后勤层
+            { id: "admin", name: "行政", type: "admin", x: bias + 500, y: 530, description: "负责行政管理和后勤支持，保障公司日常运营" }
+        ];
+        
+        // 定义连接配置数组
+        const connectionConfigs = [
+            // 风控部到各核心部门
+            {from: "risk", to: "research", anchors: ["Bottom", "Top"], color: "#FF6B6B", width: 2, style: "solid"},
+            {from: "risk", to: "investment", anchors: ["Bottom", "Top"], color: "#FF6B6B", width: 2, style: "solid"},
+            {from: "risk", to: "trading", anchors: ["Bottom", "Top"], color: "#FF6B6B", width: 2, style: "solid"},
+            
+            // 投研部连接
+            {from: "research", to: "it", anchors: ["Bottom", "Top"], color: "#4ECDC4", width: 2, style: "solid"},
+            {from: "research", to: "investment", anchors: ["Right", "Left"], color: "#4ECDC4", width: 2, style: "solid"},
+            
+            // 投资部连接
+            {from: "investment", to: "marketing", anchors: ["Bottom", "Top"], color: "#FFD166", width: 2, style: "solid"},
+            {from: "investment", to: "trading", anchors: ["Right", "Left"], color: "#FFD166", width: 2, style: "solid"},
+            
+            // 交易部连接
+            {from: "trading", to: "finance", anchors: ["Bottom", "Top"], color: "#8A2BE2", width: 2, style: "solid"},
+            
+            // 支持部门到行政部门
+            {from: "it", to: "admin", anchors: ["Bottom", "Top"], color: "#16C0FF", width: 2, style: "solid"},
+            {from: "marketing", to: "admin", anchors: ["Bottom", "Top"], color: "#4CAF50", width: 2, style: "solid"},
+            {from: "finance", to: "admin", anchors: ["Bottom", "Top"], color: "#FF9800", width: 2, style: "solid"}
+        ];
+        
+        // 存储所有连接对象
+        let connectionObjects = [];
+        let animationsEnabled = true;
+        let blinkingEnabled = false;
+        
+        // 添加节点函数
+        function addNode(node) {
+            const nodeElement = document.createElement("div");
+            nodeElement.id = node.id;
+            nodeElement.className = `node ${node.type}`;
+            nodeElement.innerHTML = `
+                <div class="node-title">${node.name}</div>
+                <div class="node-subtitle">${node.description}</div>
+            `;
+            // 设置位置
+            nodeElement.style.left = `${node.x}px`;
+            nodeElement.style.top = `${node.y}px`;
+            
+            // 添加到容器
+            document.getElementById("chart-container").appendChild(nodeElement);
+            
+            // 使节点可拖拽
+            jsPlumbInstance.draggable(nodeElement, {containment: "parent"});
+            
+            // 双击编辑节点名称
+            nodeElement.addEventListener("dblclick", function() {
+                const currentName = this.querySelector(".node-title").textContent;
+                const newName = prompt("请输入部门名称:", currentName);
+                if (newName !== null && newName.trim() !== "") {
+                    this.querySelector(".node-title").textContent = newName;
+                    
+                    // 更新数据
+                    const nodeData = nodes.find(n => n.id === this.id);
+                    if (nodeData) nodeData.name = newName;
+                }
+            });
+            
+            // 右键查看节点详情
+            nodeElement.addEventListener("contextmenu", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showNodeDetail(this.id);
+            });
+            
+            return nodeElement;
+        }
+        
+        function createSingleConnection(config, index) {
+            const sourceNode = document.getElementById(config.from);
+            const targetNode = document.getElementById(config.to);
+
+            if (!sourceNode || !targetNode) return;
+
+            const conn = {
+                id: `conn-${index}`,
+                source: config.from,
+                target: config.to,
+                color: config.color || "#16C0FF",
+                width: config.width || 2,
+                style: config.style || "solid",
+                animation: config.animation || "dash",
+                arrow: config.arrow !== false,
+                anchors: config.anchors
+            };
+
+            const connection = jsPlumbInstance.connect({
+                source: sourceNode,
+                target: targetNode,
+                anchors: conn.anchors,
+                paintStyle: getConnectionStyle(conn),
+                overlays: conn.arrow ? [
+                    ["Custom", { 
+                        create: function(component) {
+                            // 创建自定义箭头
+                            const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            arrow.setAttribute("points", "0,0 10,5 0,10");
+                            arrow.setAttribute("class", "flow-arrow");
+                            arrow.style.fill = conn.color;
+                            return arrow;
+                        },
+                        location: 0.5,
+                        id: "customArrow"
+                    }]
+                ] : []
+            });
+
+            connectionObjects.push({
+                jsPlumbConnection: connection,
+                metadata: conn
+            });
+
+            applyConnectionAnimation(connection, conn.animation);
+        }
+
+        // 获取连接线样式
+        function getConnectionStyle(conn) {
+            let dashstyle = "";
+            if (conn.style === "dashed") {
+                dashstyle = "5 5";
+            } else if (conn.style === "dotted") {
+                dashstyle = "2 2";
+            }
+            
+            return {
+                stroke: conn.color,
+                strokeWidth: conn.width,
+                strokeDasharray: dashstyle
+            };
+        }
+        
+        // 应用连接线动画
+        function applyConnectionAnimation(connection, animationType) {
+            const connector = connection.connector.canvas;
+            if (!connector) return;
+            
+            // 移除所有动画类
+            connector.classList.remove("animated-connector", "pulse");
+            
+            if (animationType === "dash") {
+                connector.classList.add("animated-connector");
+            } else if (animationType === "pulse") {
+                connector.classList.add("pulse");
+            }
+        }
+        
+        // 显示节点详情
+        function showNodeDetail(nodeId) {
+            const node = nodes.find(n => n.id === nodeId);
+            if (!node) return;
+            
+            const detailPanel = document.querySelector(".node-detail");
+            const detailContent = detailPanel.querySelector(".detail-content");
+            
+            // 模拟部门数据
+            let deptSize = 0;
+            let deptBudget = 0;
+            switch(node.type) {
+                case "risk": deptSize = 15; deptBudget = 5.2; break;
+                case "research": deptSize = 45; deptBudget = 12.8; break;
+                case "investment": deptSize = 28; deptBudget = 15.5; break;
+                case "trading": deptSize = 22; deptBudget = 8.7; break;
+                case "it": deptSize = 35; deptBudget = 9.3; break;
+                case "marketing": deptSize = 18; deptBudget = 6.5; break;
+                case "finance": deptSize = 12; deptBudget = 3.8; break;
+                case "admin": deptSize = 20; deptBudget = 4.2; break;
+            }
+            
+            detailContent.innerHTML = `
+                <div class="detail-item">
+                    <span class="detail-label">部门ID:</span>
+                    <span class="detail-value">${node.id}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">部门名称:</span>
+                    <span class="detail-value">${node.name}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">部门类型:</span>
+                    <span class="detail-value">${getNodeTypeName(node.type)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">部门职能:</span>
+                    <span class="detail-value">${node.description}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">部门人数:</span>
+                    <span class="detail-value">${deptSize}人</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">年度预算:</span>
+                    <span class="detail-value">¥${deptBudget}百万</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">位置坐标:</span>
+                    <span class="detail-value">(${node.x}, ${node.y})</span>
+                </div>
+            `;
+            
+            // 显示面板
+            detailPanel.classList.add("active");
+        }
+
+        // 获取节点类型名称
+        function getNodeTypeName(type) {
+            const typeNames = {
+                "risk": "风控部门",
+                "research": "投研部门",
+                "investment": "投资部门",
+                "trading": "交易部门",
+                "it": "信息技术部门",
+                "marketing": "市场部门",
+                "finance": "财务部门",
+                "admin": "行政部门"
+            };
+            return typeNames[type] || "其他";
+        }
+        
+        // 切换动画
+        function toggleAnimations() {
+            animationsEnabled = !animationsEnabled;
+            
+            connectionObjects.forEach(conn => {
+                const connector = conn.jsPlumbConnection.connector.canvas;
+                if (connector) {
+                    if (animationsEnabled) {
+                        applyConnectionAnimation(conn.jsPlumbConnection, conn.metadata.animation);
+                    } else {
+                        connector.classList.remove("animated-connector", "pulse");
+                    }
+                }
+            });
+            
+            document.getElementById("toggle-animations").textContent = animationsEnabled ? "禁用动画" : "启用动画";
+        }
+        
+        // 切换闪烁
+        function toggleBlinking() {
+            blinkingEnabled = !blinkingEnabled;
+            const nodes = document.querySelectorAll('.node');
+            
+            nodes.forEach(node => {
+                if (blinkingEnabled) {
+                    node.classList.add('blink');
+                } else {
+                    node.classList.remove('blink');
+                }
+            });
+            
+            document.getElementById("toggle-blinking").textContent = blinkingEnabled ? "停止闪烁" : "开始闪烁";
+        }
+        
+        // 重置节点位置
+        function resetPositions() {
+            nodes.forEach(node => {
+                const nodeElement = document.getElementById(node.id);
+                if (nodeElement) {
+                    nodeElement.style.left = `${node.x}px`;
+                    nodeElement.style.top = `${node.y}px`;
+                    jsPlumbInstance.revalidate(nodeElement);
+                }
+            });
+        }
+        
+        // 更新统计信息
+        function updateStats() {
+            document.getElementById("dept-count").textContent = nodes.length;
+            document.getElementById("conn-count").textContent = connectionObjects.length;
+        }
+        
+        // 关闭详情面板
+        document.querySelector(".close-detail").addEventListener("click", function() {
+            document.querySelector(".node-detail").classList.remove("active");
+        });
+        
+        // 点击空白处关闭详情面板
+        document.addEventListener("click", function(e) {
+            if (!e.target.closest('.node-detail') && !e.target.closest('.node')) {
+                document.querySelector(".node-detail").classList.remove("active");
+            }
+        });
+        
+        // 初始化架构图
+        function initializeChart() {
+            nodes.forEach(node => {addNode(node);});
+            setTimeout(() => {               
+              for (let i = 0; i < connectionConfigs.length; i++) {
+                createSingleConnection(connectionConfigs[i], i);
+              }
+              updateStats();
+            }, 100);
+            
+        }
+        
+        // 页面加载完成后初始化
+        window.onload = function(){
+            initializeChart();
+        };
+    </script>
+</body>
+</html>

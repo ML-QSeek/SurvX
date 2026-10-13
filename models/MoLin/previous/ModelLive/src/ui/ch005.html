@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head type="text/javascript">
+		<meta	http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+		<link	type="text/css"	rel="stylesheet"	href="./css/smartMenu.css"/>
+		<script	type="text/javascript"	src="./js/jquery.min.js"></script>
+		<script	type="text/javascript"	src="./js/jquery-smartMenu.js"></script>
+		<style type="text/css">
+			html,body
+			{
+				font-family:Open Sans,Arial,sans-serif;
+				font-weight:400;
+				font-size:14px;
+				line-height:1.3em;
+				width:100%;
+				height:100%;
+				color:#16C0FF;
+				background:#101010;
+				margin:0;
+				padding:0;
+				overflow-x:auto;
+				}
+			/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/  
+			::-webkit-scrollbar  
+			{  
+			    width: 0px;  
+			    height: 0px;  
+			    background-color: #101010;  
+			}  
+			/*定义滚动条轨道 内阴影+圆角*/  
+			::-webkit-scrollbar-track  
+			{  
+			    border-radius: 0px;  
+			    background-color: #3C3C3C;  
+			}  
+			/*定义滑块 内阴影+圆角*/  
+			::-webkit-scrollbar-thumb  
+			{  
+			    border-radius: 0px;  
+			    background-color: #6C6C6C;  
+			}  
+			#mq_main
+			{
+				width:100%;
+				position:absolute;
+				top:0px;
+				bottom:0px;
+				box-sizing:border-box;
+				}
+			#mq_mainL
+			{
+				float:left;
+				height:100%;
+				width:50%;
+				padding-left:5px;
+				box-sizing:border-box;
+				overflow-y:auto;
+				}
+			#mq_mainR
+			{
+				float:left;
+				height:100%;
+				width:50%;
+				padding:20px;
+				box-sizing:border-box;
+				}			
+			#mq_notes
+			{
+				height:100%;
+				width:100%;
+				padding:20px;
+				background: rgba(20,177,235,0.1);
+				box-sizing:border-box;
+				border-radius:15px;
+				overflow:auto;
+				}
+			table.altrowstable
+			{
+				box-sizing:border-box;
+				border:1px	#16C0FF solid;
+				border-collapse:collapse;
+				padding:0;
+				width:100%;
+				table-layout:fixed;
+				}
+			table.altrowstable	th
+			{
+				box-sizing:border-box;
+				border:1px	#16C0FF	solid;
+				text-align:center;
+				}
+			table.altrowstable	td
+			{
+				box-sizing:border-box;
+				border:1px #16C0FF	solid;
+				padding:6px;
+				text-align:left;
+				white-space:pre-line;
+				word-break:keep-all;
+				word-wrap:break-word;
+				}
+			.xItem:hover,#x_add:hover
+			{
+				cursor:pointer !important;
+				background-color:rgba(255,255,255,0.3) !important;
+				}
+			@keyframes changeColor {
+  			0% { background-color: rgba(255,255,255,0.3); }
+  			50% { background-color: transparent; }
+  			100% { background-color: rgba(255,255,255,0.3); }
+				}
+							
+	</style>
+	</head>
+	<body>
+		<div  id="mq_main">
+			<div id="mq_mainL"></div>
+			<div id="mq_mainR"><div id="mq_notes"></div></div>
+		</div>
+		<script	type="text/javascript"></script>
+	</body>
+	<script	type="text/javascript">
+	//server
+	var MServer = "http://10.10.98.51/test/sys/";
+	//屏蔽右键事件
+	document.oncontextmenu=function(){return	false;}
+	function oncontextmenu(){//自定义右键上下文
+			var obOK={text:"已完成",func:function(){
+			var trid =$(this).attr("id");
+			//alert(trid);
+			$.ajax({
+				type: "POST",
+				url: MServer+"qq/channel/ch005C.php",
+				data:{
+					qflag:"contents",
+					sflag:"_03_01",
+					trid:trid,
+					},
+				async:false,
+				success: function(data){
+					//alert(data);
+					Scontents();
+				}
+				})
+			}
+			};
+			var obUp={text:"修改",func:function(){
+			var trid =$(this).attr("id");
+			$('#'+trid).css('animation','changeColor 1s infinite').click();
+			//设置为可编辑
+			$('#'+trid+'_1').attr('contenteditable', 'true');
+			$('#'+trid+'_2').attr('contenteditable', 'true');
+			$('#'+trid+'_3').attr('contenteditable', 'true');
+			$('#mq_notes').attr('contenteditable', 'true');
+			}
+			};
+			var obSave={text:"保存",func:function(){
+			var trid =$(this).attr("id");
+			//设置为可编辑
+			var ts1 = $('#'+trid+'_1').html();
+			var ts2 = $('#'+trid+'_2').html();
+			var ts3 = $('#'+trid+'_3').html();
+			var ts4 = $('#mq_notes').html();
+			//alert(trid);
+			$.ajax({
+				type: "POST",
+				url: MServer+"qq/channel/ch005C.php",
+				data:{
+					qflag:"contents",
+					sflag:"_03",
+					trid:trid,
+					s1:ts1,
+					s2:ts2,
+					s3:ts3,
+					s4:ts4,
+					},
+				async:false,
+				success: function(data){
+					//alert(data);
+					Scontents();
+				}
+				})
+				
+			}
+			};
+			var obDel={text:"删除",func:function(){
+			var trid =$(this).attr("id");
+			//alert(trid);
+			$.ajax({
+				type: "POST",
+				url: MServer+"qq/channel/ch005C.php",
+				data:{
+					qflag:"contents",
+					sflag:"_02",
+					trid:trid,
+					},
+				async:false,
+				success: function(data){
+					Scontents();
+				}
+				})
+			}
+			};
+
+			var mailMenuData = [[obOK,obUp,obSave,obDel]];
+			$(".xItem").smartMenu(mailMenuData, {
+				name: "mail",
+				beforeShow: function() {
+				$.smartMenu.remove();
+				}
+			});
+		}
+		//获取目录
+		function Scontents(){
+			$.ajax({
+				type: "POST",
+				url: MServer+"qq/channel/ch005C.php",
+				data:{
+					qflag:"contents",
+					sflag:"_04",
+					},
+				async:false,
+				success: function(data){
+					$("#mq_mainL").html(data);
+					oncontextmenu();
+					$('#mq_notes').attr('contenteditable', 'False');
+				}
+				})
+		} 
+		
+		$(document).ready(function(){
+			Scontents();
+			})
+
+		$(document).off('dblclick',"#x_add").on('dblclick',"#x_add", function(){
+			if ($('#x_add_i').html()=="双击新增一行!"){
+			$('#x_add').before('<tr id ="x_new"><td contenteditable="true" style="text-align:left;" id="x_new_1">...</td><td style="text-align:center;">---</td><td contenteditable="true" style="text-align:left;" id="x_new_3">...</td></tr>');
+			$('#x_add_i').html("双击保存!");
+			$("#mq_notes").html('').attr('contenteditable', 'true');
+		}
+		else if ($('#x_add_i').html()=="双击保存!") {
+			var ts1 = $("#x_new_1").html();
+			var ts3 = $("#x_new_3").html();
+			var ts4 = $('#mq_notes').html();
+			//提交保存
+				$.ajax({
+				type: "POST",
+				url: MServer+"qq/channel/ch005C.php",
+				data:{
+					qflag:"contents",
+					sflag:"_01",
+					s1:ts1,
+					s3:ts3,
+					s4:ts4,
+					},
+				async:false,
+				success: function(data){
+					Scontents();
+				}
+				})
+			}
+		})
+		
+		$(document).off('click',".xItem").on('click',".xItem", function(){
+			var trid =$(this).attr("id");
+			$.ajax({
+				type: "POST",
+				url: MServer+"qq/channel/ch005C.php",
+				data:{
+					qflag:"contents",
+					sflag:"_04_01",
+					trid:trid,
+					},
+				async:false,
+				success: function(data){
+					zdata = data.replace(/&gt;/g,">").replace(/&lt;/g,"<");
+					//alert(zdata);
+					$("#mq_notes").html(zdata);
+				}
+				})
+		
+		})
+		
+		
+		
+		
+		</script>
+</html>
+
+<td></td>
+

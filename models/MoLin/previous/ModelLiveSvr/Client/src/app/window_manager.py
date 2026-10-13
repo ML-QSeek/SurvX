@@ -1,0 +1,407 @@
+import webview
+import threading
+import time
+import os
+import sys
+import json
+import requests
+import tkinter as tk
+import subprocess
+import signal
+import atexit
+from api import Api
+from connection_pool import ConnectionPool
+from credential_manager import CredentialManager
+
+class WindowManager:
+    def __init__(self):
+        self.window = None
+        self.user_data = None
+        self.window_width = 800
+        self.window_height = 480
+        self.is_hidden = False
+        self.backend_process = None  # 存储后端进程
+        self.is_closing = False  # 标记是否正在关闭
+        
+        # 创建连接池
+        self.connection_pool = ConnectionPool()
+        
+        # 创建凭证管理器
+        self.credential_manager = CredentialManager()
+        
+        # 创建Api实例
+        self.api = Api()
+        self.api.set_window_manager(self)
+        
+        # 注册退出处理函数
+        atexit.register(self.cleanup)
+    
+    def start_backend_as_new_process(self):
+        """启动后端服务器作为独立进程"""
+        try:
+            # 根据你的实际路径修改这里
+            script_path = r"F:\myproject\mtrade\_mqServer\web_controller.py"
+            
+            # 检查文件是否存在
+            if not os.path.exists(script_path):
+                print(f"错误：找不到文件 {script_path}")
+                return None
+            
+            # 启动独立进程的关键参数
+            if sys.platform == 'win32':
+                # Windows: 使用 DETACHED_PROCESS 创建完全独立的进程
+                DETACHED_PROCESS = 0x00000008
+                CREATE_NEW_PROCESS_GROUP = 0x00000200
+                
+                process = subprocess.Popen(
+                    [sys.executable, script_path],
+                    cwd=os.path.dirname(script_path),
+                    creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    close_fds=True
+                )
+            else:
+                # Linux/Mac: 使用 double fork 方式创建守护进程
+                process = subprocess.Popen(
+                    [sys.executable, script_path],
+                    cwd=os.path.dirname(script_path),
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    close_fds=True,
+                    start_new_session=True
+                )
+            
+            print(f"后端服务器已在独立进程中启动，PID: {process.pid}")
+            return process
+            
+        except Exception as e:
+            print(f"启动后端服务器时出错: {e}")
+            return None
+    
+    def kill_backend_process(self):
+        """彻底杀死后端进程（包括子进程）"""
+        if self.backend_process is None:
+            return
+        
+        # 检查进程是否还在运行
+        if self.backend_process.poll() is not None:
+            print(f"后端进程 {self.backend_process.pid} 已经结束")
+            self.backend_process = None
+            return
+        
+        try:
+            print(f"正在关闭后端进程 (PID: {self.backend_process.pid})...")
+            
+            if sys.platform == 'win32':
+                # Windows: 使用 taskkill 强制杀死进程树
+                result = subprocess.run(
+                    ['taskkill', '/F', '/T', '/PID', str(self.backend_process.pid)],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    print(f"已强制关闭后端进程 {self.backend_process.pid} 及其子进程")
+                else:
+                    print(f"关闭进程失败: {result.stderr}")
+                    
+                    # 备选方案：尝试终止进程
+                    try:
+                        self.backend_process.terminate()
+                        self.backend_process.wait(timeout=3)
+                        print(f"进程 {self.backend_process.pid} 已终止")
+                    except subprocess.TimeoutExpired:
+                        self.backend_process.kill()
+                        print(f"进程 {self.backend_process.pid} 已被强制杀死")
+            else:
+                # Linux/Mac: 使用 SIGTERM 优雅关闭，然后 SIGKILL
+                try:
+                    # 先尝试优雅关闭
+                    os.killpg(os.getpgid(self.backend_process.pid), signal.SIGTERM)
+                    time.sleep(2)
+                    
+                    # 检查是否还在运行
+                    if self.backend_process.poll() is None:
+                        # 强制杀死
+                        os.killpg(os.getpgid(self.backend_process.pid), signal.SIGKILL)
+                        print(f"已强制关闭进程组 {self.backend_process.pid}")
+                except ProcessLookupError:
+                    print(f"进程 {self.backend_process.pid} 已不存在")
+                except Exception as e:
+                    print(f"关闭进程时出错: {e}")
+                    # 最后尝试
+                    try:
+                        self.backend_process.terminate()
+                        self.backend_process.kill()
+                    except:
+                        pass
+        except Exception as e:
+            print(f"关闭进程时出错: {e}")
+        finally:
+            self.backend_process = None
+    
+    def on_window_closing(self):
+        """窗口关闭时的回调"""
+        print("窗口正在关闭，清理资源...")
+        self.is_closing = True
+        self.cleanup()
+    
+    def cleanup(self):
+        """清理资源，关闭后端进程"""
+        if self.is_closing:
+            return
+        
+        self.is_closing = True
+        print("开始清理资源...")
+        
+        if self.backend_process:
+            self.kill_backend_process()
+        
+        print("清理完成")
+    
+    def create_app(self):
+        """创建应用窗口"""
+        
+        """获取资源路径（兼容开发和打包环境）"""
+        if hasattr(sys, '_MEIPASS'):  # 打包后的环境
+            base_path = sys._MEIPASS
+        else:  # 开发环境
+            base_path = os.path.abspath("../../")
+        # 在当前目录下创建数据子目录
+        login_path = os.path.join(base_path, "src/ui/index.html")
+        dash_path = os.path.join(base_path, "src/ui/main.html")
+        self.dash_path = dash_path
+        
+        # 检查登录页面是否存在
+        if not os.path.exists(login_path):
+            print("错误: {login_path} 文件不存在!")
+            return
+        
+        # 创建窗口
+        self.window = webview.create_window(
+            '请先登录',
+            url=f'file://{login_path}',
+            width=self.window_width,
+            height=self.window_height,
+            x=-2000,
+            y=-2000,
+            resizable=False,
+            frameless=True,
+            min_size=(800, 480),
+            easy_drag=False,
+            on_top=False,
+            js_api=self.api
+        )
+        
+        # 启动webview，并设置关闭回调
+        webview.start(debug=True, func=self.after_start, private_mode=False)
+    
+    def after_start(self):
+        """webview启动后的回调"""
+        if self.window:
+            # 监听窗口关闭事件
+            self.monitor_window_close()
+            threading.Timer(3, self.show_visible_window).start()
+            
+            # 自动测试服务器连接
+            threading.Thread(target=self.test_server_connections, daemon=True).start()
+    
+    def monitor_window_close(self):
+        """监控窗口是否关闭"""
+        def check():
+            while not self.is_closing:
+                try:
+                    # 检查窗口是否还存在
+                    if self.window and not self.window.closed:
+                        time.sleep(1)
+                    else:
+                        print("检测到窗口关闭")
+                        self.cleanup()
+                        break
+                except Exception as e:
+                    print(f"监控窗口时出错: {e}")
+                    break
+        
+        threading.Thread(target=check, daemon=True).start()
+    
+    def test_server_connections(self):
+        """测试服务器连接"""
+        print("正在测试服务器连接...")
+        server = self.connection_pool.get_available_server()
+        if server:
+            print(f"已选择服务器: {server['name']} ({server['url']})")
+        else:
+            print("警告：没有可用的服务器，登录后可能会无法加载主页面")
+    
+    def show_visible_window(self):
+        """显示窗口到屏幕中央"""
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            screen_width = root.winfo_screenwidth()
+            screen_height = root.winfo_screenheight()
+            current_width = self.window_width
+            current_height = self.window_height
+            x = (screen_width - current_width) // 2
+            y = (screen_height - current_height) // 2
+            
+            self.window.move(x, y)
+            
+            root.destroy()
+            root.quit()
+        except Exception as e:
+            print(f"显示窗口失败: {e}")
+    
+    def center_window(self):
+        """供JavaScript调用的居中方法"""
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            
+            screen_width = root.winfo_screenwidth()
+            screen_height = root.winfo_screenheight()
+            
+            current_width = self.window_width
+            current_height = self.window_height
+            
+            x = (screen_width - current_width) // 2
+            y = (screen_height - current_height) // 2
+            
+            self.window.move(x, y)
+            print(f"JavaScript调用：窗口已居中 ({x}, {y})")
+            
+            root.destroy()
+            root.quit()
+            return True
+        except Exception as e:
+            print(f"JavaScript调用居中失败: {e}")
+            return False
+    
+    def handle_login(self, user_data):
+        """处理登录请求"""
+        print(f"收到登录请求: 用户名={user_data.get('username', '')}")
+        
+        # 验证用户数据
+        success = self.validate_login(user_data)
+        
+        if success:
+            self.user_data = user_data
+            
+            # 保存凭证（如果需要）
+            remember_password = user_data.get('rememberPassword', False)
+            auto_login = user_data.get('autoLogin', False)
+            password = user_data.get('password', '')
+            
+            if remember_password:
+                self.credential_manager.save_credentials(
+                    username=user_data['username'],
+                    password=password,
+                    remember_password=remember_password,
+                    auto_login=auto_login
+                )
+            elif auto_login:
+                # 如果选择了自动登录但没有选择记住密码，只保存用户名和标志
+                self.credential_manager.save_credentials(
+                    username=user_data['username'],
+                    password="",  # 不保存密码
+                    remember_password=False,
+                    auto_login=True
+                )
+            
+            return {"success": True, "message": "登录成功"}
+        else:
+            return {"success": False, "message": "用户名或密码错误"}
+    
+    def validate_login(self, user_data):
+        """验证用户名和密码"""
+        username = user_data.get('username', '').strip()
+        password = user_data.get('password', '').strip()
+        
+        Url = 'http://10.10.98.51/test/sys/qi/qi00002/qi04635C/MQDataAPICtest.php'
+        Sub_Field = {
+            'sflag': 'login',
+            'sid': '_04',
+            'username': username,
+            'password': password,
+        } 
+        r = requests.post(Url, data=Sub_Field)
+        rtext = r.text.strip()[1:]
+        rtext = json.loads(rtext)
+        if type(rtext) == list:
+            print(rtext[0]['Q14123103'] + '：登录成功！')
+            return True
+        return False
+    
+    def get_saved_credentials(self):
+        """获取保存的登录凭证（供JavaScript调用）"""
+        try:
+            credentials = self.credential_manager.get_credentials()
+            print(f"获取保存的凭证: {credentials.get('username', '')}")
+            return credentials
+        except Exception as e:
+            print(f"获取保存凭证失败: {e}")
+            return {
+                'has_saved': False,
+                'username': "",
+                'password': "",
+                'rememberPassword': False,
+                'autoLogin': False
+            }
+    
+    def clear_saved_credentials(self):
+        """清除保存的登录凭证（供JavaScript调用）"""
+        try:
+            success = self.credential_manager.clear_credentials()
+            return {"success": success}
+        except Exception as e:
+            print(f"清除保存凭证失败: {e}")
+            return {"success": False}
+    
+    def load_main_page(self):
+        """加载主应用页面"""
+        username = self.user_data.get('username', '').strip()
+        
+        # 启动后端服务器作为独立进程
+        print("正在启动后端服务器（独立进程）...")
+        self.backend_process = self.start_backend_as_new_process()
+        
+        if self.backend_process is None:
+            print("警告：无法启动后端服务器，主页面可能无法正常工作")
+        else:
+            # 可选：等待2-3秒让服务器有时间启动
+            time.sleep(2)
+            print(f"后端服务器已在独立进程中运行 (PID: {self.backend_process.pid})")
+        
+        # 调整窗口大小
+        new_width = 1800
+        new_height = 900
+        self.window.resize(new_width, new_height)
+        
+        # 获取屏幕尺寸
+        root = tk.Tk()
+        root.withdraw()
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        
+        # 计算居中位置
+        x = (screen_width - new_width) // 2
+        y = (screen_height - new_height) // 2
+        
+        # 调整窗口
+        self.window.move(x, y)
+        
+        # 更新存储的窗口尺寸
+        self.window_width = new_width
+        self.window_height = new_height
+        
+        # 获取可用的服务器URL
+        server_url = self.dash_path    
+        
+        # 加载主页面
+        print(f"正在加载主页面: {server_url}")
+        self.window.load_url(server_url + '?par=' + username)
+        root.destroy()
+        root.quit()

@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>ModelLiveReal</title>
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary-blue: #4A90E2;
+            --primary-blue-dark: #3A7BC8;
+            --primary-blue-light: #5CA2FF;
+            --primary-blue-transparent: rgba(74, 144, 226, 0.1);
+            --white: #FFFFFF;
+            --light-gray: #F5F7FA;
+            --gray: #E1E5EB;
+            --dark-gray: #7B8A9E;
+            --text-dark: #2C3E50;
+            --text-gray: #5D6D7E;
+            --border-color: #D1D9E6;
+            --error-color: #FF6B6B;
+            --success-color: #1DD1A1;
+            --warning-yellow: #FFC016;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        }
+        html, body {
+            width:100%;
+            height:100%;
+            overflow: hidden;
+        }
+        body {
+        		font-weight: 300;
+            font-size: 13px;
+            background: linear-gradient(135deg, #F5F7FA 0%, #E4E9F2 100%);
+            display: flex;
+            flex-direction: column;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(74, 144, 226, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(74, 144, 226, 0.03) 0%, transparent 40%);
+            z-index: 0;
+        }
+        ::-webkit-scrollbar {  
+            width: 0px;  
+            height: 0px;  
+        }  
+        #mq_top {
+            height: 36px;
+            display: flex;
+            flex-shrink: 0;
+            background: var(--white);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.05),
+                0 0 20px rgba(74, 144, 226, 0.03);
+        }
+        .mq_main_l_Frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+					  display: block;
+        }
+        .logo-q-char {
+            background: linear-gradient(135deg, var(--text-dark) 0%, var(--primary-blue) 30%, var(--primary-blue-light) 70%, var(--primary-blue-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 24px;
+            text-shadow: 
+                0 0 12px rgba(74, 144, 226, 0.3),
+                0 0 25px rgba(74, 144, 226, 0.1);
+            font-weight: 500;
+            letter-spacing: -1px;
+        }
+        .logo-text {
+            background: linear-gradient(to right, var(--text-dark), var(--primary-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 18px;
+            position: relative;
+            top: 6px;
+            font-weight: 450;
+            letter-spacing: 0px; /* 恢复正常的字母间距 */
+        }
+        .main_topic {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 90px;
+            font-weight: 450;
+            cursor: pointer;
+            color: var(--text-gray);
+            box-sizing: border-box;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+        .main_topic:hover {
+            color: var(--primary-blue);
+            background-color: var(--primary-blue-transparent);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.15);
+        }
+        .window-control {
+            width: 46px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: var(--text-gray);
+            font-size: 16px;
+            -webkit-app-region: no-drag;
+            transition: all 0.3s ease;
+            user-select: none;
+            font-weight: 350;
+            position: relative;
+        }
+        .window-control:hover {
+            background-color: var(--primary-blue-transparent);
+            color: var(--primary-blue);
+        }
+        .window-control.close:hover {
+            background-color: rgba(232, 17, 35, 0.9);
+            color: var(--white);
+        }
+        #mq_top_ul_li_06 {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            width: 36px;
+        }
+        #mq_top_ul_li_user {
+            width: 150px;
+            height: 70px;
+            border: 1px solid var(--border-color);
+            background-color: var(--white);
+            color: var(--text-gray);
+            font-size: 13px;
+            font-weight: 450;
+            position: absolute;
+            top: 36px;
+            right: 10px;
+            margin-top: 2px;
+            padding: 5px;
+            border-radius: 3px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+
+
+				.Warn {
+				    border: 1px solid var(--border-color);
+				    background: var(--white);
+				    box-shadow: 0 8px 24px rgba(74, 144, 226, 0.15), 0 2px 8px rgba(74, 144, 226, 0.1);
+				    width: 400px;
+				    height: 160px;
+				    z-index: 999;
+				    position: fixed;
+				    top: 50%;
+				    left: 50%;
+				    margin-top: -80px;
+				    margin-left: -200px;
+				    box-sizing: border-box;
+				    border-radius: 3px;
+				    overflow: hidden;
+				}
+
+				.WarnB {
+				    width: 100%;
+				    height: 130px;
+				    font-size: 14px;
+				    padding: 20px;
+				    word-wrap: break-word;
+				    white-space: pre-wrap;
+				    display: flex;
+				    justify-content: center;
+				    align-items: center;
+				    color: var(--text-dark);
+				    line-height: 1.5;
+				    text-align: center;
+				}
+
+				.WarnM {
+				    width: 100%;
+				    height: 30px;
+				    display: flex;
+				    justify-content: center;
+				    align-items: center;
+				    background: var(--white);
+				}
+
+				.WarnMButton {
+				    background: var(--white);
+				    border: 1px solid var(--border-color);
+				    color: var(--text-gray);
+				    width: 80px;
+				    height: 24px;
+				    display: flex;
+				    justify-content: center;
+				    align-items: center;
+				    font-size: 13px;
+				    border-radius: 3px;
+				    font-weight: 500;
+				    transition: all 0.2s ease;
+				}
+
+				.WarnMButton:hover {
+				    cursor: pointer !important;
+        		background-color: var(--primary-blue-transparent) !important;
+				}
+        
+    </style>
+    
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/echarts.min.js"></script>
+    <script src="./js/laydate/laydate.js"></script>
+    <script src="./js/socket.io.min.js"></script>
+</head>
+<body>
+    <div id="mq_top">
+        <div style="width:10px;"></div>
+        <div class="logo-q-char">M</div>
+        <div class="logo-text">odelLiveReal</div>
+        <div style="flex-grow:1;"></div>
+        
+        <div id="mq_top_ul_li_17" class="main_topic">风险控制</div>
+        <!--
+        <div id="mq_top_ul_li_04" class="main_topic">策略跟踪</div>
+        -->
+        <div id="mq_top_ul_li_18" class="main_topic">组合管理</div>
+        <div id="mq_top_ul_li_19" class="main_topic">账户管理</div>
+        <div id="mq_top_ul_li_06">
+            <div style="width:30px;height:30px;">
+                <img src="./assets/images/Client.jpg" style="width:100%;height:100%;border-radius:15px;"/>
+            </div>
+        </div>
+        <div class="window-control" id="window-minimize" title="最小化">−</div>
+        <div class="window-control" id="window-maximize" title="最大化">□</div>
+        <div class="window-control close" id="window-close" title="关闭">×</div>
+    </div>
+    <div style="flex:1;position:relative;"><div id="mq_main" style="position:absolute;top:0;left:0;right:0;bottom:0;"></div></div>
+    <script>
+        // 窗口控制功能
+        document.getElementById('window-minimize').addEventListener('click', () => {
+            if (typeof pywebview !== 'undefined') {
+                pywebview.api.minimize_window();
+            } else {
+                console.log('最小化窗口');
+            }
+        });
+        
+        let isMaximized = false;
+        const maximizeBtn = document.getElementById('window-maximize');
+        
+        maximizeBtn.addEventListener('click', () => {
+            if (!isMaximized) {
+                if (typeof pywebview !== 'undefined') {
+                    pywebview.api.maximize_window();
+                } else {
+                    console.log('最大化窗口');
+                }
+                maximizeBtn.innerHTML = '❐';
+                maximizeBtn.title = '恢复';
+            } else {
+                if (typeof pywebview !== 'undefined') {
+                    pywebview.api.restore_window();
+                } else {
+                    console.log('恢复窗口');
+                }
+                maximizeBtn.innerHTML = '□';
+                maximizeBtn.title = '最大化';
+            }
+            isMaximized = !isMaximized;
+        });
+        
+        document.getElementById('window-close').addEventListener('click', () => {
+            if (typeof pywebview !== 'undefined') {
+                pywebview.api.close_window();
+            } else {
+                console.log('关闭窗口');
+            }
+        });
+        
+        if (typeof pywebview !== 'undefined') {
+            pywebview.api.on_window_state_changed((state) => {
+                if (state === 'maximized') {
+                    isMaximized = true;
+                    maximizeBtn.innerHTML = '❐';
+                    maximizeBtn.title = '恢复';
+                } else {
+                    isMaximized = false;
+                    maximizeBtn.innerHTML = '□';
+                    maximizeBtn.title = '最大化';
+                }
+            });
+        }
+              
+        const menuItems = document.querySelectorAll('.mq_top_ul li, .mq_main_r_ul1 li');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                menuItems.forEach(i => i.style.backgroundColor = 'transparent');
+                this.style.backgroundColor = 'rgba(74, 144, 226, 0.15)';
+                this.style.color = 'var(--primary-blue)';
+                
+                if (this.id === 'mq_top_ul_li_06') {
+                    console.log('打开登录界面');
+                }
+            });
+        });
+        
+        $(document).off('click',"#mq_top_ul_li_17").on('click',"#mq_top_ul_li_17",function(){
+            var ch024_ = '<iframe class="mq_main_l_Frame" runat="server" src="./RiskCtrlMgmt.html?par='+Q14123101+'"></iframe>';
+            $("#mq_main").html(ch024_);
+        });
+     
+        $(document).off('click',"#mq_top_ul_li_18").on('click',"#mq_top_ul_li_18",function(){
+            var ch014 = '<iframe class="mq_main_l_Frame" runat="server" src="./PortfoliosMgmt.html?par='+Q14123101+'"></iframe>';
+            $("#mq_main").html(ch014);
+        });
+        
+        $(document).off('click',"#mq_top_ul_li_19").on('click',"#mq_top_ul_li_19",function(){
+            var ch026 = '<iframe class="mq_main_l_Frame"  id="tradingFrame"  name="tradingWindow" runat="server" src="./TradingMgmt.html?par='+Q14123101+'"></iframe>';
+            $("#mq_main").empty().html(ch026);
+        });
+        
+			//警示消息
+			function WarnMessage(content){
+				var sid=GenNonDuplicateID(1);	
+				$("body").append('<div class="Warn"><div class="WarnB" id="WarnB_'+sid+'"></div><div class="WarnM"><button id="Yes" class="WarnMButton"> 好的 </button></div></div>');
+				$("#WarnB_"+sid).html(content);
+				}
+      /* 
+			WarnMessage(stxt);
+			$(document).off('click',"#Yes").on('click',"#Yes",function(){
+						$(this).parent().parent().remove();
+					})
+			*/		
+
+			;
+			//名称:mq.js --编写：曲如意 --编写日期：2024-12-15
+			//提交：01；修改：03；删除：02；查询：04；执行：05；
+
+			//用户名
+			// 获取当前页面的URL参数
+			const params = new URLSearchParams(window.location.search);
+			// 获取指定参数的值
+			Q14123101 = params.get('par');
+
+			//server
+			var MServer = "http://10.10.98.51/test/sys/";
+			//alert(Q14123101);
+			//用户具备的权限
+			var	UserAuthority=[];
+			//用户操作的痕迹记录
+			var	UserNote={};
+			//当前页面的主题
+			var NowTopic = 'mq_top_ul_li_12';//mq_top_ul_li_04;
+			//策略服务器
+			var mpushserver0 = '10.10.98.51:3210';
+			//交易服务器
+			var mpushserver1 = '10.10.98.51:3211';
+			//var mpushserver1 = 'quruyi0909.oicp.net:10034';
+			//系统监控服务器
+			var mpushserver3 = '10.10.98.51:3213';
+
+			//策略服务器连接
+			var smsocket0 = io.connect(mpushserver0);
+			//交易服务器连接
+			var smsocket1 = io.connect(mpushserver1);
+			//行情服务器连接
+			var smsocket3 = io.connect(mpushserver3);
+			//获取策略服务器消息集合
+			var quantmess= new Set();
+			//获取交易服务器消息集合
+			var clientmess= new Set();
+			var x1=[];
+			var x2=[];
+			var x3=[];
+
+			//屏蔽右键事件
+			document.oncontextmenu=function(){return	false;}
+			//获取日期
+			function getLangDate(item){
+				var dateObj = new Date();
+				var year = dateObj.getFullYear();
+				var month = dateObj.getMonth()+1;
+				var date = dateObj.getDate();
+				var day = dateObj.getDay();
+				var weeks = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+				var week = weeks[day];
+				var hour = dateObj.getHours();
+				var minute = dateObj.getMinutes();
+				var second = dateObj.getSeconds();
+				if(month<10){month="0"+month;}
+				if(date<10){date="0"+date;}
+				if(hour<10){hour="0"+hour;}
+				if(minute<10){minute="0"+minute;}
+				if(second<10){second="0"+second;}
+				//var newDate = year+"年"+month+"月"+date+"日 "+hour+":"+minute+":"+second+" "+week;
+				if(item=='systime'){
+				var newDate ="<font class='ttext'>"+year+"年"+month+"月"+date+"日 "+hour+":"+minute+":"+second+" "+week+"</font>";
+				document.getElementById("home_main_rbottom1_colr").innerHTML = newDate;
+				setTimeout("getLangDate('systime')",1000);//每隔1秒重新调用一次该函数
+					}
+				else{
+				var newDate = year.toString()+month.toString()+date.toString();
+				var newMonth = year.toString()+month.toString();
+				var newDate1 = year+"-"+month+"-"+date;
+				return eval(item);
+				}
+			}
+			//去除空格
+			function trim(str){return str.replace(/(^\s*)|(\s*$)/g,"");}
+			// 生成一个不重复的ID
+			function GenNonDuplicateID(randomLength){
+				return Number(Math.random().toString().substr(3,randomLength) + Date.now()).toString(36)
+			}
+			//关闭按钮
+			$(document).on("click",".shut",function(){
+				$(this).parent().remove();
+				})
+			//关闭按钮
+			$(document).on("click",".shut1",function(){
+				$(this).parent().parent().remove();
+				})
+			//查询某个用户针对某个模块是否具备权限
+			function	Authority(User,item){
+				if($.inArray(item,UserAuthority)>-1){
+					return 1;
+				}
+				else{
+					var	tempflag=0;
+					$.ajax({
+						type:"POST",
+						url:"qi/qi00002/qi04635C/AuthorityC.php",
+						data:{
+							username:User,
+							Authority:item,
+							sflag:"_04",
+							date:getLangDate('newDate'),
+						},
+						async:false,
+						success:function(data){
+							if(trim(data)!=0){
+								UserAuthority.push(trim(data));
+								tempflag=1;
+							}
+							else{
+								return	false;
+								}
+						}
+					});
+					return tempflag;
+				}
+			}
+			//没有权限，警示不具备权限并询问是否购买这个模块，已经用户剩余的金额
+			function NoAuthority(item){
+				if(Q14123101=='demo'){
+					$("#ch006").click();
+					}
+				else{
+					$.ajax({
+						type: "POST",
+						url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/ServiceC.php",
+						data:{
+							sflag:'_04',
+							item:item,
+							},
+						async:false,
+						success: function(data){
+							var data1 = eval(trim(data));;
+							//alert(data1[0].ServiceID);
+							$("#BG").remove();
+							$.ajax({
+								type: "POST",
+								url: "./BG.php",
+								data:{fid:'',},
+								async:false,
+								success: function(rdata){
+									$("body").append(rdata);
+									var stxt = '<div id="PayDiv"><div style="width:300px;height:150px;"><center><img src="qi/qi00001/qi04645/WePay.png" /></center></div>';
+											stxt+='<div style="width:300px;height:50px;"><span id="pServiceID" style="display:none;">'+data1[0].ServiceID+'</span>';
+											stxt+='<span id="pServiceNa">'+data1[0].ServiceNa+'</span>：<span id="pServicePr">'+data1[0].ServicePr+'</span>金币/';
+											stxt+='<span id="pServiceTi">'+data1[0].ServiceTi+'</span>天，您目前剩余'+Q14123104+'金币。<span style="color:#FFC016;">添加微信获赠更多金币</span></div><center><input type="button" id="testbutton" value="购买"></center></div>';
+									$("#BGcontent").css({'width':'400px','height':'300px','margin-top':'-150px','margin-right':'-200px'}).append(stxt);
+								}
+							})
+						}
+					})
+				}	
+			}
+			function	trans1(name1){
+				var data1="";
+				$.ajax({
+					type: "POST",
+					url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/mqC.php",
+					data:{
+						qflag:"trans1",
+						sflag:"_04",
+						stxt:name1,
+						},
+					async:false,
+					success: function(data){
+						data1= data;
+					}
+					})
+					return trim(data1);
+			}
+			//令某个模块可以被拖拽
+			function	divmove(DivId1,DivId2){
+			var _move=false;
+			var _x,_y;
+			$('#'+DivId1).click(function(){
+				}).mousedown(function(e){
+					_move=true;
+					_x=e.pageX-parseInt($('#'+DivId2).css("left"));
+					_y=e.pageY-parseInt($('#'+DivId2).css("top"));
+					});
+				$(document).mousemove(function(e){
+					if(_move){
+						var x=e.pageX-_x;
+						var y=e.pageY-_y;
+						$('#'+DivId2).css({top:y,left:x});
+					}
+				}).mouseup(function(){
+				_move=false;
+				});
+			}
+
+
+			//小于0返回绿色，大于等于0返回红色
+			function rcolor(tnum){if(tnum>=0){return 'style="color:#FF0000;"';}else{return 'style="color:#00CC00;"';}}
+			//日期差
+			function getDaysDiff(date1, date2) {
+			  const oneDay = 24 * 60 * 60 * 1000; // 一天的毫秒数
+			  const timeDiff = Math.abs(date1.getTime() - date2.getTime()); // 获取时间戳差值的绝对值
+			  const daysDiff = Math.round(timeDiff / oneDay); // 根据时间戳差值计算天数差
+			  return daysDiff;
+			}
+			//标准差
+			function calculateStandardDeviation(numbers) {
+				if (!numbers.length) return 0; // 如果数组为空，返回0
+				let sum = 0;
+				for (let i = 0; i < numbers.length; i++) {
+					sum += numbers[i];
+				}
+				let mean = sum / numbers.length;
+				let varianceSum = 0;
+				for (let i = 0; i < numbers.length; i++) {
+					 varianceSum += Math.pow(numbers[i] - mean, 2);
+				}
+				let variance = varianceSum / numbers.length;
+				return Math.sqrt(variance); // 返回标准差
+			}
+
+
+			// 发送数据至服务器
+			//msocket.emit('fromWebClient', {mess:'终端申请数据！'});
+			//策略数据处理器
+			function QuantData_(SData){
+				var Msg = SData.split("#")[1];
+				var MsgV = Msg.split(":")[1];
+				var MsgK = Msg.split(":")[0]
+				var MsgKA =MsgK.split("-");
+				if(MsgKA[1]!="程序调试"){
+					//$("#Rcontainer1").append(SData+'<br />');
+					console.log(SData);
+					/*
+					if(MsgKA[3]=='general'){
+						//$(Sid).append('<span style="color:#ff0000;">'+MsgKA[0]+'-'+MsgKA[2]+'-'+MsgKA[3]+'</span>-'+MsgKA[4]+':'+'<span style="color:#ffff00;">'+MsgV+'</span><br />');
+						}
+					else{
+						//$(Sid).append(MsgKA[0]+'-'+MsgKA[2]+'-'+MsgKA[3]+'-'+MsgKA[4]+':'+MsgV+'<br />');
+					}
+					*/
+					}
+					//if (NowTopic = 'mq_top_ul_li_12'){}
+			}
+			//交易数据处理器
+			function ClientData_(SData){
+				var Msg = SData.split("#")[1];
+				var MsgV = Msg.split(":")[1];
+				var MsgK = Msg.split(":")[0]
+				var MsgKA =MsgK.split("-");
+				if(MsgKA[1]=="程序调试"){
+					if(MsgKA[3]=='general'){
+						$(Sid).append('<span style="color:#ff0000;">'+MsgKA[0]+'-'+MsgKA[2]+'-'+MsgKA[3]+'</span>-'+MsgKA[4]+':'+'<span style="color:#ffff00;">'+MsgV+'</span><br />');
+						}
+					else{
+						$(Sid).append(MsgKA[0]+'-'+MsgKA[2]+'-'+MsgKA[3]+'-'+MsgKA[4]+':'+MsgV+'<br />');
+					}
+					}
+				else if(MsgKA[1]=="账户总览"){
+					//$("#mq_main_ljBR").append(Msg+'<br />');
+					//$("#mq_main_ljBR").scrollTop( $("#mq_main_ljBR")[0].scrollHeight );
+					var tid = MsgKA[0];
+					var tneirong = eval(MsgV);
+					//$('"#'+tid+'"').html(tid);
+					$('#IsOn_'+tid).css('color','#FF0000').text('1');
+					//$('#IsOn_'+tid).css('background','#FFFF00');
+					$('#NAV_'+tid).css('color','#FF0000').text(Math.round(tneirong[0]*100)/100);
+					$('#AVAILABLE_'+tid).css('color','#FF0000').text(Math.round(tneirong[1]*100)/100);
+					
+					//alert('"#AVAILABLE_'+tid+'"');
+					//$("#MARKET_VAL_"+tid).html(Math.round(tneirong[2]*100)/100);
+					}
+					//if (NowTopic = 'mq_top_ul_li_12'){}
+			}
+			/********************************************************/
+
+			//const numbers = [1, 2, 3, 4, 5];
+			//console.log(calculateStandardDeviation(numbers));
+			//用户登录验证，以及成功登录之后运行的程序
+			function	minit(username){
+
+				$.ajax({
+					type:"POST",
+					url:"http://10.10.98.51/test/sys/qi/qi00002/qi04635C/loginC.php",
+					data:{
+						sflag:'_04',
+						username:username,
+					},
+					async:false,
+					success:function(data){
+						var	backtext=eval('('+trim(data)+')');
+						//JSON.stringify()
+						//alert(backtext[0].Q14123105);
+						UserNote=JSON.parse(backtext[0].Q14123105);//用户记录
+						Q14123101=backtext[0].Q14123101;//登录名
+						Q14123104=backtext[0].Q14123104;//金币
+						//Q14123002=backtext[0].Q14123002;//部门
+						//Q14123004=backtext[0].Q14123004;//岗位
+						$("#mq_top_T1").append('<li id="Client"></li>');
+						//$("#Client").html('用户名：'+Q14123101);
+						
+				//---------------------------------------------
+				$.ajax({
+					type: "POST",
+					url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/mqC.php",
+					data:{
+						qflag:"Redis1Redis2",
+						sflag:"_04",
+						},
+							async:false,
+							success: function(data1){
+								var Jdata = JSON.parse(data1);
+								var qJdata = Jdata[0];
+								var cJdata = Jdata[1];
+								if (qJdata != "init"){
+									//alert(qJdata);
+									$.ajax({
+										type: "POST",
+										url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/mqC.php",
+										data:{
+											qflag:"Redis1",
+											sflag:"_04",
+											sKey:qJdata,
+											},
+												async:false,
+												success: function(_data1){
+													//alert(_data1);
+													var Jdatas = JSON.parse(_data1);
+													for (var key1 in Jdatas) {
+														if (Jdatas[key1].includes("策略错误")) {
+															$("#mq_top_ul_li_War").css({'animation':'blink 1s infinite'});
+															$("#Dash_0").css("display","block");
+															
+															var Msg = Jdatas[key1].split("#")[1];
+															var MsgV = Msg.split(":")[1];
+															var MsgK = Msg.split(":")[0]
+															var MsgKA =MsgK.split("-");
+															$("#DashB_0").append('<span style="color:#ffff00;">'+MsgKA[0]+'</span><span style="color:#ff0000;">'+'-'+MsgKA[1]+'-'+MsgKA[2]+':</span><span style="color:#00ff00;">'+MsgV+'</span><br />');
+															$("#DashB_0").scrollTop( $("#DashB_0")[0].scrollHeight );
+															}
+														quantmess.add(Jdatas[key1]);
+														}
+													}
+												});
+									
+									}
+								if (cJdata != "init"){
+									//alert(cJdata);
+									$.ajax({
+										type: "POST",
+										url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/mqC.php",
+										data:{
+											qflag:"Redis2",
+											sflag:"_04",
+											sKey:cJdata,
+											},
+												async:false,
+												success: function(_data2){
+													var Jdatas = JSON.parse(_data2);
+													for (var key2 in Jdatas) {
+														
+														if (Jdatas[key2].includes("交易错误")) {
+															$("#mq_top_ul_li_War").css({'animation':'blink 1s infinite'});
+															$("#Dash_0").css("display","block");
+															
+															var Msg = Jdatas[key2].split("#")[1];
+															var MsgV = Msg.split(":")[1];
+															var MsgK = Msg.split(":")[0]
+															var MsgKA =MsgK.split("-");
+															$("#DashB_0").append('<span style="color:#ffff00;">'+MsgKA[0]+'-'+MsgKA[1]+'-'+MsgKA[2]+'</span><span style="color:#ff0000;">-'+MsgKA[3]+'-'+MsgKA[4]+':</span>'+'<span style="color:#00ff00;">'+MsgV+'</span><br />');
+															$("#DashB_0").scrollTop( $("#DashB_0")[0].scrollHeight );
+															}
+														clientmess.add(Jdatas[key2]);
+														}
+													}
+												});
+									}
+									
+								}
+							});
+
+						//接收策略端消息
+						var bflag0= 0;
+						smsocket0.off().on('pushToWebClient', function (data1){
+							//console.log(Array.from(quantmess).join(','));
+							if (bflag0==0){
+								var tt = data1.split("#")[0];
+								var mkey = tt.split("_")[0];
+								var mnum = parseInt(tt.split("_")[1]);
+								if (mnum>0){
+									$.ajax({
+										type: "POST",
+										url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/mqC.php",
+										data:{
+											qflag:"Redis1",
+											sflag:"_04",
+											sKey:tt,
+											},
+								 		async:false,
+								 		success: function(_data1){
+								 			var Jdata = JSON.parse(_data1);
+								 			for (var key1 in Jdata) {
+								 				if(!quantmess.has(Jdata[key1])){
+								 						//alert(11);
+														if (Jdata[key1].includes("策略错误")) {
+															$("#mq_top_ul_li_War").css({'animation':'blink 1s infinite'});
+															$("#Dash_0").css("display","block");
+															var Msg = Jdata[key1].split("#")[1];
+															var MsgV = Msg.split(":")[1];
+															var MsgK = Msg.split(":")[0]
+															var MsgKA =MsgK.split("-");
+															$("#DashB_0").append('<span style="color:#ffff00;">'+MsgKA[0]+'</span><span style="color:#ff0000;">'+'-'+MsgKA[1]+'-'+MsgKA[2]+':</span><span style="color:#00ff00;">'+MsgV+'</span><br />');
+															$("#DashB_0").scrollTop( $("#DashB_0")[0].scrollHeight );
+															}
+														quantmess.add(Jdata[key1]);
+														QuantData_(Jdata[key1]);
+								 						}
+								 					}
+								 				}
+								 			});
+								 		}
+								bflag0+=1;
+								 	}
+								else{
+									
+									if (data1.includes("策略错误")) {
+										$("#mq_top_ul_li_War").css({'animation':'blink 1s infinite'});
+										$("#Dash_0").css("display","block");
+										var Msg = data1.split("#")[1];
+										var MsgV = Msg.split(":")[1];
+										var MsgK = Msg.split(":")[0]
+										var MsgKA =MsgK.split("-");
+										$("#DashB_0").append('<span style="color:#ffff00;">'+MsgKA[0]+'</span><span style="color:#ff0000;">'+'-'+MsgKA[1]+'-'+MsgKA[2]+':</span><span style="color:#00ff00;">'+MsgV+'</span><br />');
+										$("#DashB_0").scrollTop( $("#DashB_0")[0].scrollHeight );
+										}
+									quantmess.add(data1);
+								 	QuantData_(data1);
+								 }
+								
+							});
+						
+						//获取交易端信息
+						var bflag1= 0;
+						smsocket1.off().on('pushToWebClient', function (data1){
+							if (bflag1==0){
+								var tt = data1.split("#")[0];
+								var mkey = tt.split("_")[0];
+								var mnum = parseInt(tt.split("_")[1]);
+								if (mnum>0){
+									$.ajax({
+										type: "POST",
+										url: "http://10.10.98.51/test/sys/qi/qi00002/qi04635C/mqC.php",
+										data:{
+											qflag:"Redis2",
+											sflag:"_04",
+											sKey:tt,
+											},
+								 			async:false,
+								 			success: function(_data1){
+								 				var Jdata = JSON.parse(_data1);
+								 				for (var key2 in Jdata) {
+								 					if(!clientmess.has(Jdata[key2])){
+								 					
+														if (Jdata[key2].includes("交易错误")) {
+															$("#mq_top_ul_li_War").css({'animation':'blink 1s infinite'});
+															$("#Dash_0").css("display","block");
+															var Msg = Jdata[key2].split("#")[1];
+															var MsgV = Msg.split(":")[1];
+															var MsgK = Msg.split(":")[0]
+															var MsgKA =MsgK.split("-");
+															$("#DashB_0").append('<span style="color:#ffff00;">'+MsgKA[0]+'-'+MsgKA[1]+'-'+MsgKA[2]+'</span><span style="color:#ff0000;">-'+MsgKA[3]+'-'+MsgKA[4]+':</span>'+'<span style="color:#00ff00;">'+MsgV+'</span><br />');
+															$("#DashB_0").scrollTop( $("#DashB_0")[0].scrollHeight );
+															}
+														clientmess.add(Jdata[key2]);
+														ClientData_(Jdata[key2]);
+								 						}
+								 					}
+								 				}
+								 			});
+								 		}
+								 	bflag1+=1;
+								}
+								else{
+									
+									if (data1.includes("交易错误")) {
+										$("#mq_top_ul_li_War").css({'animation':'blink 1s infinite'});
+										$("#Dash_0").css("display","block");
+										
+										var Msg = data1.split("#")[1];
+										var MsgV = Msg.split(":")[1];
+										var MsgK = Msg.split(":")[0]
+										var MsgKA =MsgK.split("-");
+										$("#DashB_0").append('<span style="color:#ffff00;">'+MsgKA[0]+'-'+MsgKA[1]+'-'+MsgKA[2]+'</span><span style="color:#ff0000;">-'+MsgKA[3]+'-'+MsgKA[4]+':</span>'+'<span style="color:#00ff00;">'+MsgV+'</span><br />');
+										$("#DashB_0").scrollTop( $("#DashB_0")[0].scrollHeight );
+										}
+									clientmess.add(data1);
+								 	ClientData_(data1);
+								 }
+							});
+							
+						
+						//---------------------------------------------
+						
+						//第一个界面是实时数据，登录后进入A股市场
+						
+						$("#mq_top_ul_li_18").click();
+						//alert(UserNote.dd);
+					}
+				});
+				
+			}
+			//登录按钮，点击登录按钮，调用登录函数
+			$(document).off('click',"#mq_top_ul_li_06").on('click',"#mq_top_ul_li_06",function(){
+					if($("#mq_top_ul_li_user").length == 0) {
+			    	$("body").append('<div id="mq_top_ul_li_user"></div>');
+						$("#mq_top_ul_li_user").html('<div class="form3">用&nbsp;户&nbsp;名：'+Q14123101+'</div><div class="form3">权&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;益：'+Q14123104+'金币</div>').mouseleave(function(){$("#mq_top_ul_li_user").remove();});
+					}
+			
+			})
+
+
+			$(document).off('click',"#Yes").on('click',"#Yes",function(){
+				$(this).parent().parent().remove();
+				})
+								
+			$(document).ready(function(){	
+				minit(Q14123101);
+
+				})
+
+        //将API暴露给iframe，用于子页面调用
+        window.exposeApiToIframe = function  () {
+        	return {
+        		
+        		WarnMessage:function(){
+        			return WarnMessage(content);
+        			
+        			},
+        		select_directory:function(){
+        			return window.pywebview.api.select_directory();
+        			
+        			},
+        		get_trading_configs:function(){
+        			return window.pywebview.api.get_trading_configs(username);
+        			
+        			},
+        		save_trading_config:function(){
+        			return window.pywebview.api.save_trading_config(username, config_name, account_name, api_name, target_dir, strategy_name);
+        			
+        			},
+        		update_trading_config:function(){
+        			return window.pywebview.api.update_trading_config(config_id, skwargs);
+        			
+        			},
+        		delete_trading_config:function(){
+        			return window.pywebview.api.delete_trading_config(username, config_name, config_id);
+        			
+        			},
+        		start_trading_process:function(){
+        			return window.pywebview.api.start_trading_process(configs);
+        			},
+        		stop_trading_process:function(){
+        			return window.pywebview.api.stop_trading_process(process_id);
+        			},
+        		get_all_processes:function(){
+        			return window.pywebview.api.get_all_processes();
+        			}
+        			
+        		};
+        };
+        //向子页面输出数据
+				function chulidata(content1){
+					//console.log(content1);
+					var iframe = document.getElementById('tradingFrame');
+					if (content1.type =="system" ||content1.type =="trade"  ){
+						iframe.contentWindow.childFunction(content1.config_name,content1.message);
+						}
+				}
+				
+				
+    </script>
+    <script src="./js/mqcharts.js"></script>
+    <script src="./js/databgroups.js"></script>
+</body>
+</html>

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>策略模型监控与跟踪误差分析系统</title>
+		<link rel="stylesheet" href="./css/all.min.css">
+    <script	type="text/javascript"	src="./js/jquery.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #16C0FF; /* 主蓝色 */
+            --primary-blue-dark: #0A9ED9; /* 深蓝色 */
+            --primary-blue-light: #5CA2FF; /* 浅蓝色 */
+            --primary-blue-transparent: rgba(22, 192, 255, 0.1);
+            --white: #0d1b2a;
+            --light-gray: rgba(22, 192, 255, 0.05);
+            --gray: rgba(141, 162, 181, 0.3);
+            --dark-gray: #7B8A9E;
+            --text-dark: #FFFFFF;
+            --text-gray: #8da2b5;
+            --border-color: rgba(22, 192, 255, 0.3);
+            --error-color: #FF6B6B;
+            --success-color: #06D6A0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            font-weight: 300;
+            font-size: 13px;
+            line-height: 1.4em;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #0d1b2a;
+            color: #16C0FF;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(22, 192, 255, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(22, 192, 255, 0.03) 0%, transparent 40%);
+            z-index: 0;
+        }
+        
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        ::-webkit-scrollbar {  
+            width: 0px;  
+            height: 0px;  
+            background-color: rgba(15, 23, 42, 0.5);  
+        }
+        
+        /* 图例 */
+        .legend {
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.8);
+            flex-shrink: 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            margin-right: 6px;
+            border: 1px solid;
+        }
+        
+        .legend-text {
+            font-size: 13px;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+        
+        .dashboard {
+            display: flex;
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            transform-origin: center;
+            transition: transform 0.3s;
+            overflow-y: auto !important;
+            background: rgba(15, 23, 42, 0.8);
+        }
+        
+        .metrics-panel {
+            width: 300px;
+            padding: 3px;
+            border-left: 1px solid var(--border-color);
+            overflow-y: auto !important;
+            background: rgba(15, 23, 42, 0.8);
+        }
+           
+        .metric-item {
+            margin-bottom: 3px;
+            padding: 12px;
+            background: var(--light-gray);
+            border-left: 2px solid var(--primary-blue);
+        }
+        
+        .metric-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+        
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+        
+        .metric-trend {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        .trend-up {
+            color: var(--success-color);
+        }
+        
+        .trend-down {
+            color: var(--error-color);
+        }
+        
+        .node {
+            position: absolute;
+            width: 150px;
+            height: 80px;
+            color: var(--text-dark);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            z-index: 10;
+            user-select: none;
+            padding: 6px;
+            flex-direction: column;
+            border: 1px solid var(--primary-blue);
+            background: rgba(15, 23, 42, 0.8);
+            transition: all 0.3s;
+        }
+        
+        .node:hover {
+            transform: translateY(-3px);
+            z-index: 100;
+            border-color: var(--primary-blue-dark);
+            box-shadow: 0 10px 25px rgba(22, 192, 255, 0.5);
+        }
+        
+        /* 策略模型专用节点样式 */
+        .node.model-development {
+            border-color: #16C0FF;
+            background: rgba(22, 192, 255, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.model-validation {
+            border-color: #FF6B6B;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.risk-management {
+            border-color: #4ECDC4;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.performance-monitoring {
+            border-color: #FFD166;
+            background: rgba(255, 209, 102, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.tracking-error {
+            border-color: #8A2BE2;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 12px;
+        }
+        
+        .node.operational-monitoring {
+            border-color: #06D6A0;
+            background: rgba(6, 214, 160, 0.1);
+            border-radius: 12px;
+        }
+        
+        /* 关键节点样式 */
+        .node.critical {
+            border-width: 2px;
+            border-color: gold;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        
+        /* 闪烁动画关键帧 */
+        @keyframes blink {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.6); }
+            100% { filter: brightness(1); }
+        }
+        
+        .node.blink {
+            animation: blink 1.5s infinite;
+        }
+        
+        .node-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 3px;
+            letter-spacing: 0.5px;
+            color: var(--text-dark);
+        }
+        
+        .node-subtitle {
+            font-size: 13px;
+            font-weight: normal;
+            opacity: 0.85;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            max-height: 30px;
+            color: var(--text-gray);
+        }
+        
+        .jtk-connector {
+            z-index: 5;
+            stroke: var(--primary-blue);
+            stroke-width: 2;
+        }
+        
+        .jtk-endpoint {
+            z-index: 6;
+            fill: var(--primary-blue);
+        }
+        
+        .jtk-hover {
+            z-index: 7;
+        }
+                
+        /* 自定义箭头样式 */
+        .flow-arrow {
+            fill: var(--primary-blue);
+            animation: flow 2s infinite linear;
+        }
+        
+        @keyframes flow {
+            0% {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+        }
+        
+        /* 连接线动画 */
+        .animated-connector {
+            stroke-dasharray: 10 5;
+            animation: dash 1s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -15;
+            }
+        }
+        
+        /* 脉冲效果 */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                r: 4;
+                opacity: 1;
+            }
+            50% {
+                r: 6;
+                opacity: 0.7;
+            }
+            100% {
+                r: 4;
+                opacity: 1;
+            }
+        }
+        
+        /* 节点详情面板 */
+        .node-detail {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 350px;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 10px;
+            z-index: 1000;
+            border: 1px solid var(--primary-blue-dark);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12),0 3px 6px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+        }
+        
+        .node-detail.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .detail-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+        
+        .close-detail {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-detail:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--error-color);
+        }
+        
+        .detail-content {
+            line-height: 1.7;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+            display: block;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            color: var(--text-dark);
+            font-size: 16px;
+        }
+        
+        /* 关键节点标记 */
+        .critical-mark {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: gold;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            z-index: 11;
+        }
+        
+        /* 层次标题 */
+        .layer-title {
+            position: absolute;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-gray);
+            text-align: center;
+            width: 100%;
+            z-index: 1;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(22, 192, 255, 0.1); border-color: #16C0FF;"></div>
+            <div class="legend-text">模型开发</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(255, 107, 107, 0.1); border-color: #FF6B6B;"></div>
+            <div class="legend-text">模型验证</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(78, 205, 196, 0.1); border-color: #4ECDC4;"></div>
+            <div class="legend-text">风险管理</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(255, 209, 102, 0.1); border-color: #FFD166;"></div>
+            <div class="legend-text">绩效监控</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(138, 43, 226, 0.1); border-color: #8A2BE2;"></div>
+            <div class="legend-text">跟踪误差分析</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(6, 214, 160, 0.1); border-color: #06D6A0;"></div>
+            <div class="legend-text">运营监控</div>
+        </div>
+        <div class="legend-item">
+            <div class="critical-mark" style="position: static; margin-right: 8px;"></div>
+            <div class="legend-text">关键节点</div>
+        </div>
+    </div>
+    
+    <div class="dashboard">
+        <div class="chart-container" id="chart-container">
+            <!-- 层次标题 -->
+            <div class="layer-title" style="top: 40px;">模型开发</div>
+            <div class="layer-title" style="top: 190px;">模型验证</div>
+            <div class="layer-title" style="top: 340px;">风险管理</div>
+            <div class="layer-title" style="top: 490px;">绩效监控</div>
+            <div class="layer-title" style="top: 640px;">跟踪误差分析</div>
+            <div class="layer-title" style="top: 790px;">运营监控</div>
+            
+            <!-- 节点详情面板 -->
+            <div class="node-detail">
+                <div class="detail-header">
+                    <div class="detail-title">节点详情</div>
+                </div>
+                <div class="detail-content"></div>
+            </div>
+        </div>
+        
+        <div class="metrics-panel">                
+            <div class="metric-item">
+                <div class="metric-name">跟踪误差 (TE)</div>
+                <div class="metric-value">2.34%</div>
+                <div class="metric-trend trend-down">较上月下降 0.15%</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">信息比率 (IR)</div>
+                <div class="metric-value">0.78</div>
+                <div class="metric-trend trend-up">较上月上升 0.12</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">模型准确率</div>
+                <div class="metric-value">87.5%</div>
+                <div class="metric-trend trend-up">较上月上升 2.3%</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">最大回撤</div>
+                <div class="metric-value">-8.2%</div>
+                <div class="metric-trend trend-down">较上月下降 1.1%</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">夏普比率</div>
+                <div class="metric-value">1.45</div>
+                <div class="metric-trend trend-up">较上月上升 0.08</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">策略收益率</div>
+                <div class="metric-value">15.8%</div>
+                <div class="metric-trend trend-up">较基准超额 3.2%</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">系统可用性</div>
+                <div class="metric-value">99.87%</div>
+                <div class="metric-trend trend-up">本月无故障</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">数据延迟</div>
+                <div class="metric-value">0.23秒</div>
+                <div class="metric-trend trend-down">在可接受范围内</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jsPlumb库 -->
+    <script src="js/jsplumb.min.js"></script>
+    <script>
+        // 初始化jsPlumb实例
+        const jsPlumbInstance = jsPlumb.getInstance({
+            Connector: ["Flowchart", {cornerRadius: 10}],
+            Anchors: ['Right', 'Left', 'Top', 'Bottom'],
+            Endpoint: ["Dot", { radius: 2 }],
+            EndpointStyle: { fill: "#16C0FF" },
+            PaintStyle: { 
+                stroke: "#16C0FF", 
+                strokeWidth: 1,
+                strokeDasharray: "10 5"
+            },
+            HoverPaintStyle: { stroke: "#0A9ED9", strokeWidth: 4 },
+            Container: "chart-container"
+        });
+        const bias = ($('#chart-container').width()-710-100-150)*0.5;
+        // 风险控制节点数据 - 优化布局
+        // 策略模型监控节点数据
+        const nodes = [
+            // 模型开发层
+            { id: "model-design", name: "策略模型设计", type: "model-development", x: bias+100, y: 100, 
+              description: "定义模型架构、特征工程、参数设置", critical: true },
+            { id: "backtesting", name: "历史回测", type: "model-development", x: bias+400, y: 100, 
+              description: "使用历史数据验证模型有效性", critical: true },
+            { id: "parameter-tuning", name: "参数调优", type: "model-development", x: bias+700, y: 100, 
+              description: "优化模型参数，提高预测准确率" },
+
+            // 模型验证层
+            { id: "out-sample-test", name: "样本外测试", type: "model-validation", x: bias+100, y: 250, 
+              description: "使用未参与训练的数据验证模型", critical: true },
+            { id: "stress-testing", name: "压力测试", type: "model-validation", x: bias+400, y: 250, 
+              description: "极端市场条件下的模型表现" },
+            { id: "robustness-check", name: "稳健性检验", type: "model-validation", x: bias+700, y: 250, 
+              description: "检查模型对不同市场环境的适应性" },
+
+            // 风险管理层
+            { id: "risk-assessment", name: "风险评估", type: "risk-management", x: bias+100, y: 400, 
+              description: "评估模型潜在风险，设置风险阈值", critical: true },
+            { id: "position-sizing", name: "仓位管理", type: "risk-management", x: bias+400, y: 400, 
+              description: "根据风险控制规则确定仓位大小" },
+            { id: "stop-loss", name: "止损机制", type: "risk-management", x: bias+700, y: 400, 
+              description: "设置止损点，控制单次损失" },
+
+            // 绩效监控层
+            { id: "performance-metrics", name: "绩效指标计算", type: "performance-monitoring", x: bias+100, y: 550, 
+              description: "计算收益率、夏普比率等指标", critical: true },
+            { id: "attribution-analysis", name: "归因分析", type: "performance-monitoring", x: bias+400, y: 550, 
+              description: "分析收益来源，识别超额收益驱动因素" },
+            { id: "benchmark-comparison", name: "基准比较", type: "performance-monitoring", x: bias+700, y: 550, 
+              description: "与市场基准进行对比分析" },
+
+            // 跟踪误差分析层
+            { id: "te-calculation", name: "跟踪误差计算", type: "tracking-error", x: bias+200, y: 700, 
+              description: "计算策略与基准的跟踪误差", critical: true },
+            { id: "te-breakdown", name: "误差分解", type: "tracking-error", x: bias+600, y: 700, 
+              description: "分解跟踪误差来源，识别主要贡献因素" },
+
+            // 运营监控层
+            { id: "system-health", name: "系统健康监控", type: "operational-monitoring", x: bias+100, y: 850, 
+              description: "监控系统运行状态、资源使用情况", critical: true },
+            { id: "data-quality", name: "数据质量监控", type: "operational-monitoring", x: bias+400, y: 850, 
+              description: "监控数据完整性、准确性和及时性" },
+            { id: "alert-system", name: "预警系统", type: "operational-monitoring", x: bias+710, y: 850, 
+              description: "异常情况自动预警，及时处理问题" }
+        ];
+        
+        // 定义连接配置数组
+        const connectionConfigs = [
+            // 模型开发流程
+            {from: "model-design", to: "backtesting", anchors: ["Right", "Left"], color: "#16C0FF", width: 2, style: "solid"},
+            {from: "backtesting", to: "parameter-tuning", anchors: ["Right", "Left"], color: "#16C0FF", width: 2, style: "solid"},
+            // 模型验证流程
+            {from: "parameter-tuning", to: "out-sample-test", anchors: ["Bottom", "Top"], color: "#FF6B6B", width: 2, style: "solid"},
+            {from: "out-sample-test", to: "stress-testing", anchors: ["Right", "Left"], color: "#FF6B6B", width: 2, style: "solid"},
+            {from: "stress-testing", to: "robustness-check", anchors: ["Right", "Left"], color: "#FF6B6B", width: 2, style: "solid"},
+            // 风险管理流程
+            {from: "robustness-check", to: "risk-assessment", anchors: ["Bottom", "Top"], color: "#4ECDC4", width: 2, style: "solid"},
+            {from: "risk-assessment", to: "position-sizing", anchors: ["Right", "Left"], color: "#4ECDC4", width: 2, style: "solid"},
+            {from: "position-sizing", to: "stop-loss", anchors: ["Right", "Left"], color: "#4ECDC4", width: 2, style: "solid"},
+            // 绩效监控流程
+            {from: "stop-loss", to: "performance-metrics", anchors: ["Bottom", "Top"], color: "#FFD166", width: 2, style: "solid"},
+            {from: "performance-metrics", to: "attribution-analysis", anchors: ["Right", "Left"], color: "#FFD166", width: 2, style: "solid"},
+            {from: "attribution-analysis", to: "benchmark-comparison", anchors: ["Right", "Left"], color: "#FFD166", width: 2, style: "solid"},
+            // 跟踪误差分析
+            {from: "benchmark-comparison", to: "te-calculation", anchors: ["Bottom", "Top"], color: "#8A2BE2", width: 2, style: "solid"},
+            {from: "te-calculation", to: "te-breakdown", anchors: ["Right", "Left"], color: "#8A2BE2", width: 2, style: "solid"},
+            // 运营监控
+            {from: "te-breakdown", to: "system-health", anchors: ["Bottom", "Top"], color: "#06D6A0", width: 2, style: "solid"},
+            {from: "system-health", to: "data-quality", anchors: ["Right", "Left"], color: "#06D6A0", width: 2, style: "solid"},
+            {from: "data-quality", to: "alert-system", anchors: ["Right", "Left"], color: "#06D6A0", width: 2, style: "solid"},
+            // 反馈循环
+            {from: "alert-system", to: "model-design", anchors: ["Right","Top"], color: "#FF6B6B", width: 2, style: "dotted"},
+            {from: "te-breakdown", to: "parameter-tuning", anchors: ["Right", "Right"], color: "#FF6B6B", width: 2, style: "dotted"},
+            {from: "performance-metrics", to: "risk-assessment", anchors: ["Left","Left"], color: "#FF6B6B", width: 2, style: "dotted"}
+        ];
+        
+        // 存储所有连接对象
+        let connectionObjects = [];
+        let animationsEnabled = true;
+        let blinkingEnabled = false;
+        let currentScale = 1;
+        let criticalHighlighted = false;
+        
+        // 添加节点函数
+        function addNode(node) {
+            const nodeElement = document.createElement("div");
+            nodeElement.id = node.id;
+            nodeElement.className = `node ${node.type}`;
+            
+            // 如果是关键节点，添加标记
+            if (node.critical) {
+                nodeElement.classList.add('critical');
+                nodeElement.innerHTML = `
+                    <div class="critical-mark">!</div>
+                    <div class="node-title">${node.name}</div>
+                    <div class="node-subtitle">${node.description}</div>
+                `;
+            } else {
+                nodeElement.innerHTML = `
+                    <div class="node-title">${node.name}</div>
+                    <div class="node-subtitle">${node.description}</div>
+                `;
+            }
+            
+            // 设置位置
+            nodeElement.style.left = `${node.x}px`;
+            nodeElement.style.top = `${node.y}px`;
+            
+            // 添加到容器
+            document.getElementById("chart-container").appendChild(nodeElement);
+            
+            // 使节点可拖拽
+            jsPlumbInstance.draggable(nodeElement, {containment: "parent"});
+            
+            // 双击编辑节点名称
+            nodeElement.addEventListener("dblclick", function() {
+                const currentName = this.querySelector(".node-title").textContent;
+                const newName = prompt("请输入节点名称:", currentName);
+                if (newName !== null && newName.trim() !== "") {
+                    this.querySelector(".node-title").textContent = newName;
+                    
+                    // 更新数据
+                    const nodeData = nodes.find(n => n.id === this.id);
+                    if (nodeData) nodeData.name = newName;
+                }
+            });
+            
+            // 右键查看节点详情
+            nodeElement.addEventListener("contextmenu", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showNodeDetail(this.id);
+            });
+            
+            return nodeElement;
+        }
+        
+        function createSingleConnection(config, index) {
+            const sourceNode = document.getElementById(config.from);
+            const targetNode = document.getElementById(config.to);
+
+            if (!sourceNode || !targetNode) return;
+
+            const conn = {
+                id: `conn-${index}`,
+                source: config.from,
+                target: config.to,
+                color: config.color || "var(--primary-blue)",
+                width: config.width || 2,
+                style: config.style || "solid",
+                animation: config.animation || "dash",
+                arrow: config.arrow !== false,
+                anchors: config.anchors
+            };
+
+            const connection = jsPlumbInstance.connect({
+                source: sourceNode,
+                target: targetNode,
+                anchors: conn.anchors,
+                paintStyle: getConnectionStyle(conn),
+                overlays: conn.arrow ? [
+                    ["Custom", { 
+                        create: function(component) {
+                            // 创建自定义箭头
+                            const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            arrow.setAttribute("points", "0,0 10,5 0,10");
+                            arrow.setAttribute("class", "flow-arrow");
+                            arrow.style.fill = conn.color;
+                            return arrow;
+                        },
+                        location: 0.5,
+                        id: "customArrow"
+                    }]
+                ] : []
+            });
+
+            connectionObjects.push({
+                jsPlumbConnection: connection,
+                metadata: conn
+            });
+
+            applyConnectionAnimation(connection, conn.animation);
+        }
+
+        // 获取连接线样式
+        function getConnectionStyle(conn) {
+            let dashstyle = "";
+            if (conn.style === "dashed") {
+                dashstyle = "5 5";
+            } else if (conn.style === "dotted") {
+                dashstyle = "2 2";
+            }
+            
+            return {
+                stroke: conn.color,
+                strokeWidth: conn.width,
+                strokeDasharray: dashstyle
+            };
+        }
+        
+        // 应用连接线动画
+        function applyConnectionAnimation(connection, animationType) {
+            const connector = connection.connector.canvas;
+            if (!connector) return;
+            
+            // 移除所有动画类
+            connector.classList.remove("animated-connector", "pulse");
+            
+            if (animationType === "dash") {
+                connector.classList.add("animated-connector");
+            } else if (animationType === "pulse") {
+                connector.classList.add("pulse");
+            }
+        }
+        
+        // 显示节点详情
+        function showNodeDetail(nodeId) {
+            const node = nodes.find(n => n.id === nodeId);
+            if (!node) return;
+            
+            const detailPanel = document.querySelector(".node-detail");
+            const detailContent = detailPanel.querySelector(".detail-content");
+            
+            const criticalText = node.critical ? "是" : "否";
+            
+            detailContent.innerHTML = `
+                <div class="detail-item">
+                    <span class="detail-label">节点ID:</span>
+                    <span class="detail-value">${node.id}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">节点名称:</span>
+                    <span class="detail-value">${node.name}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">节点类型:</span>
+                    <span class="detail-value">${getNodeTypeName(node.type)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">关键节点:</span>
+                    <span class="detail-value">${criticalText}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">节点描述:</span>
+                    <span class="detail-value">${node.description}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">位置坐标:</span>
+                    <span class="detail-value">(${node.x}, ${node.y})</span>
+                </div>
+            `;
+            
+            // 显示面板
+            detailPanel.classList.add("active");
+        }
+
+        // 获取节点类型名称
+        function getNodeTypeName(type) {
+            const typeNames = {
+                "model-development": "模型开发",
+                "model-validation": "模型验证",
+                "risk-management": "风险管理",
+                "performance-monitoring": "绩效监控",
+                "tracking-error": "跟踪误差分析",
+                "operational-monitoring": "运营监控"
+            };
+            return typeNames[type] || "其他";
+        }
+                
+        // 切换动画
+        function toggleAnimations() {
+            animationsEnabled = !animationsEnabled;
+            
+            connectionObjects.forEach(conn => {
+                const connector = conn.jsPlumbConnection.connector.canvas;
+                if (connector) {
+                    if (animationsEnabled) {
+                        applyConnectionAnimation(conn.jsPlumbConnection, conn.metadata.animation);
+                    } else {
+                        connector.classList.remove("animated-connector", "pulse");
+                    }
+                }
+            });
+        }
+        
+        // 切换闪烁
+        function toggleBlinking() {
+            blinkingEnabled = !blinkingEnabled;
+            const nodes = document.querySelectorAll('.node');
+            
+            nodes.forEach(node => {
+                if (blinkingEnabled) {
+                    node.classList.add('blink');
+                } else {
+                    node.classList.remove('blink');
+                }
+            });
+        }
+        
+        // 重置节点位置
+        function resetPositions() {
+            nodes.forEach(node => {
+                const nodeElement = document.getElementById(node.id);
+                if (nodeElement) {
+                    nodeElement.style.left = `${node.x}px`;
+                    nodeElement.style.top = `${node.y}px`;
+                    jsPlumbInstance.revalidate(nodeElement);
+                }
+            });
+        }
+        
+        // 高亮关键节点
+        function highlightCritical() {
+            criticalHighlighted = !criticalHighlighted;
+            const criticalNodes = document.querySelectorAll('.node.critical');
+            
+            criticalNodes.forEach(node => {
+                if (criticalHighlighted) {
+                    node.style.borderColor = 'gold';
+                    node.style.zIndex = '100';
+                } else {
+                    node.style.borderColor = '';
+                }
+            });
+        }
+        
+        // 点击空白处关闭详情面板
+        document.addEventListener("click", function(e) {
+            if (!e.target.closest('.node-detail') && !e.target.closest('.node')) {
+                document.querySelector(".node-detail").classList.remove("active");
+            }
+        });
+        
+        // 初始化架构图
+        function initializeChart() {
+            nodes.forEach(node => {addNode(node);});
+            setTimeout(() => {               
+              for (let i1=0;i1<connectionConfigs.length;i1++){
+                createSingleConnection(connectionConfigs[i1], i1);
+              }
+            }, 100);
+        }
+        
+        // 页面加载完成后初始化
+        window.onload = function(){
+            initializeChart();
+        };
+    </script>
+</body>
+</html>

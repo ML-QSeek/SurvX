@@ -1,0 +1,210 @@
+	<!DOCTYPE html>
+		<html lang="zh-CN">
+		<head>
+		<meta	http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+		<script	type="text/javascript"	src="./js/jquery.min.js"></script>
+		<script	type="text/javascript"	src="./js/echarts.min.js"></script>
+		<script	type="text/javascript"	src="./js/echarts-gl.min.js"></script>
+		<script	type="text/javascript"	src="./js/mqcharts.js"></script>
+	
+		<style type="text/css">
+			html,body
+			{
+				font-family:Open Sans,Arial,sans-serif;
+				font-weight:400;
+				font-size:14px;
+				line-height:1.3em;
+				width:100%;
+				height:100%;
+				color:#16C0FF;
+				background:#101010;
+				margin:0;
+				padding:0;
+			}
+			.ul0
+			{
+				width:420px;
+				padding:0;
+				margin:0;
+				height:30px;
+				box-sizing:border-box;
+			}
+			.ul0	li
+			{
+				float:left;
+				list-style-type:none;
+				width:80px;
+				height:30px;
+				line-height:30px;
+				padding:3px	0	3px	0;
+				margin-left:3px;
+				text-align:center;
+				cursor:pointer;
+				color:#16C0FF;
+				box-sizing:border-box;
+				border-bottom:1px	#16C0FF	solid;
+			}
+			
+			#mq1
+			{
+				width:100%;
+				position:absolute;
+				top:30px;
+				bottom:0px;
+				/*border-top:1px	#101010	solid;*/
+				box-sizing:border-box;
+			}
+		</style>
+	
+	</head>
+	<body>
+		<div  id="mq_top">
+			<ul class ="ul0">
+				<li id="li0" class="layer">结构</li>
+				<li id="li1" class="layer">计算</li>
+				<li id="li2" class="layer">关系</li>
+				<li id="li3" class="layer">约束</li>
+				<li id="li4" class="layer">特征</li>
+				</ul>
+            <div style="position:absolute;top:3px;right:5px;background:transparent; margin:0;">
+            	<input type="text" id="key"  value="">
+            	<a id="submit" class="act" style="cursor:pointer;"><i></i>搜索</a>
+            	</div>
+		</div>
+		<div  id="mq1" style="overflow-y:auto;"></div>
+	<script	type="text/javascript">
+		//server
+		var MServer = "http://10.10.98.51/test/sys/";
+		//屏蔽右键事件
+		document.oncontextmenu=function(){return	false;}
+		$layer =""
+		$model =""
+		//没有交互的关系图
+		function GxtNoInteractive(ds,title1,fd1,fd2){
+			echarts.init(document.getElementById(ds)).dispose();
+			var myChart = echarts.init(document.getElementById(ds));
+			var option = {
+				title: { text: title1 },
+				tooltip: {
+					formatter: function (x) {
+						return x.data.des;
+					}
+				},
+				animationEasingUpdate: 'quinticInOut',
+				series: [
+				{
+					type: 'graph',
+					layout: 'force',
+					symbol:"rect",//circle,rect,roundRect,triangle,diamond,pin,arrow
+					symbolSize: [100,30],
+					roam: true,
+					focusNodeAdjacency:true,
+					edgeSymbol: ['circle', 'arrow'],
+					edgeSymbolSize: [4, 10],
+					force: {
+						repulsion: 2000,
+						edgeLength: [10, 50],
+						layoutAnimation:false
+					},
+					draggable: true,
+					itemStyle: {
+						normal: {
+							color: '#16C0FF'
+						}
+					},
+					lineStyle: {
+						normal: {
+							width: 2,
+							color: '#16C0FF'
+						}
+					},
+					edgeLabel: {
+						normal: {
+							show: true,
+							formatter: function (x) {
+								return x.data.name;
+							},
+							textStyle: {
+								fontSize: '12',
+							}
+						}
+					},
+					label: {
+						normal: {
+							show: true,
+							textStyle: {
+								color:'#16C0FF',
+								fontSize:'14',
+							}
+						}
+					},
+					data:(function(){return fd1;})(),
+					links:(function(){return fd2;})()
+				}
+				]
+			};
+			myChart.setOption(option);
+			myChart.on("click", function (param){
+				var tecode=	option.series[0].data[param.dataIndex].des;
+				var tename= option.series[0].data[param.dataIndex].name;
+				var echarts_group_var = trim(tecode.substring(eval(tecode.indexOf('<span style="display:none;">')+28),eval(tecode.indexOf('</span>'))));
+				//alert(echarts_group_var);
+			});
+			myChart.on("mouseover", function(data) {
+				//取消节点连接线触发效果
+				if (data.dataType == "edge") {
+					myChart.dispatchAction({
+						type: 'unfocusNodeAdjacency',
+						seriesIndex: 0
+					});
+				}
+			})
+		}
+		
+		$(document).off('click',"#submit").on('click',"#submit", function(){
+			//alert($layer)
+			var sTxt=$("#key").val();
+			if(sTxt==''){
+				alert("请输入查询内容");
+				}
+			else if(sTxt!=''){
+				$model = sTxt
+				$.ajax({
+					type: "POST",
+					url: MServer+"qq/channel/ch009C.php",
+					data:{
+						qflag:"struct",
+						sflag:"_04",
+						stxt:sTxt,
+						slayer:$layer,
+						},
+					async:false,
+					success: function(data){
+				if(data=="0"){
+					alert("模型不存在！")
+						}else{
+						var cgx1=JSON.parse(data);
+						//$("#mq1").html(data)
+						var df1 = cgx1[0];var df2 = cgx1[1];
+						//alert(df1);alert(df2);
+						GxtNoInteractive('mq1'," ",df1,df2);
+						}
+					}
+				})
+			}
+		});
+		
+		
+		$(document).off('click',".layer").on('click',".layer", function(){
+			$(".layer").css("background","transparent");
+			$(this).css("background","rgba(20,177,235,0.3)");
+			$layer= $(this).html()
+			if($model!=""){
+				$("#submit").click()
+			}
+		})
+		$(document).ready(function (){$("#li0").click()});
+	</script>
+	</body>	
+</html>
+

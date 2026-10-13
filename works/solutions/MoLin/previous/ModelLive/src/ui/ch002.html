@@ -1,0 +1,283 @@
+	<!DOCTYPE html>
+		<html lang="zh-CN">
+		<head>
+		<meta	http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+		<link	type="text/css"	rel="stylesheet"	href="./css/smartMenu.css"/>
+		<script	type="text/javascript"	src="./js/jquery.min.js"></script>
+		<script	type="text/javascript"	src="./js/echarts.min.js"></script>
+		<script	type="text/javascript"	src="./js/echarts-gl.min.js"></script>
+		<script	type="text/javascript"	src="./js/mqcharts.js"></script>
+		<script	type="text/javascript"	src="./js/jquery-smartMenu.js"></script>
+	
+		<style type="text/css">
+				html,body
+				{
+					font-family:Open Sans,Arial,sans-serif;
+					font-weight:400;
+					font-size:14px;
+					line-height:1.3em;
+					width:100%;
+					height:100%;
+					color:#16C0FF;
+					background:#101010;
+					margin:0;
+					padding:0;
+				}
+				#bkuang
+				{
+					width:1500px;
+					height:350px;
+					/*border:solid 0px #16C0FF;*/
+					float:left;
+					margin-left:100px;
+					top:50px;
+					position:absolute;
+					}
+				#top
+				{
+					width:100%;
+					height:58px;
+					/*border-bottom:solid 0px #16C0FF;*/
+					box-sizing:border-box;
+					/*background:#fff102;*/
+					
+					}
+				#bottom
+				{
+					width:100%;
+					height:600px;
+					box-sizing:border-box;
+					border:solid 1px #16C0FF;
+					}
+				#selslide
+				{
+					width:100%;
+					height:50px;
+					padding-top:10px;
+					/*background:#ff0000;*/
+					
+					}
+				.mq_top_T
+				{
+					width:auto;
+					padding:0;
+					margin:0;
+					height:58px;
+				}
+				.mq_top_T	li
+				{
+					float:left;
+					list-style-type:none;
+					width:auto;
+					height:58px;
+					line-height:80px;
+					padding:0 0	0	0;
+					text-align:center;
+					font-weight:bold;
+					font-size:34px;
+				  background: linear-gradient(to right, red, blue);
+				  -webkit-background-clip: text;
+				  color:transparent;
+				}
+									
+					
+		</style>
+	
+	</head>
+	<body>
+		<div id="bkuang"> 
+			<div id="top">
+		<div	style="height:58px;width:auto;position:absolute;left:24px;">
+		<ul	id="mq_top_T1" class="mq_top_T"><li>Q<span style="font-size:15px;color:#888888;">的投资笔记</span></li></ul>
+			</div>
+				<center><text style="font-size:40px;line-height:40px;">半年报快报专题</text></center>
+				<!--<div style="position:absolute;top:0;right:0;width:58px;height:58px;background:#ff0000;"><img src="..\..\qi\qi00001\qi04645\WePay.png" style="width:100%;height:100%;"></div>-->
+			</div>
+			<div id="bottom"></div>
+			
+			<!--
+			<div id="selslide">
+				<center>
+        <input type="text" id="key"  value="" style="background:transparent;color:#16C0FF;border:1px	#16C0FF solid;">
+        <a id="submit" class="act" style="cursor:pointer;"><i></i>搜索</a>
+        </center>
+			</div>
+			-->
+		</div>
+		
+		
+<script	type="text/javascript">
+	
+	//server
+		var MServer = "http://10.10.98.51/test/sys/";
+	//屏蔽右键事件
+	document.oncontextmenu=function(){return	false;}
+	myChart = echarts.init(document.getElementById('bottom'));	
+	var ROOT_PATH = MServer+'qq/channel/data/breport.json';
+$.get(
+  ROOT_PATH,
+  function (data) {
+    var sizeValue = '57%';
+    var symbolSize = 2.5;
+    option = {
+    	color:['#F34100','#FFC016','#FFFF00','#FF0000','#FF00FF'],
+      tooltip: {},
+      grid3D: {
+        width: '50%'
+      },
+		  xAxis3D: {
+		      type: 'value',
+      		min: 'dataMin',
+      		max: 'dataMax',
+      		name:'平均净资产收益率',
+      		splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},
+      		axisLine: { onZero: false,lineStyle:{color:'#16C0FF'}},
+      		axisPointer:{lineStyle: {color: '#16C0FF',}}
+		  },
+		  yAxis3D: {
+		      type: 'value',
+      		min: 'dataMin',
+      		max: 'dataMax',
+      		name:'扣非净利润增长率',
+      		splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},
+      		axisLine: { onZero: false,lineStyle:{color:'#16C0FF'}},
+      		axisPointer:{lineStyle: {color: '#16C0FF',}}
+		  },
+		  zAxis3D: {
+		      type: 'value',
+      		min: 'dataMin',
+      		max: 'dataMax',
+      		name:'收益率',
+      		splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},
+      		axisLine: { onZero: false,lineStyle:{color:'#16C0FF'}},
+      		axisPointer:{lineStyle: {color: '#16C0FF',}}
+		  },
+      grid: [
+        { left: '50%', width: '20%', bottom: sizeValue },
+        { left: '75%', width: '20%', bottom: sizeValue },
+        { left: '50%', width: '20%', top: sizeValue },
+        { left: '75%', width: '20%', top: sizeValue }
+      ],
+      xAxis: [
+        {
+          type: 'value',
+          gridIndex: 0,
+          name: '扣非净利润',
+          axisLine:{onZero: true,show:true,lineStyle:{color:'#16C0FF'}},
+          splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},
+          axisLabel: { rotate: 50, interval: 0,color:'#16C0FF' }
+        },
+        {
+          type: 'value',
+          gridIndex: 1,
+          name: '净资产收益率',
+          boundaryGap: false,
+          axisLine:{onZero: true,show:true,lineStyle:{color:'#16C0FF'}},
+          splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},
+          axisLabel: { rotate: 50, interval: 0 ,color:'#16C0FF'}
+        },
+        {
+          type: 'value',
+          gridIndex: 2,
+          name: '每股收益',
+          axisLine:{onZero: true,show:true,lineStyle:{color:'#16C0FF'}},
+          splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},
+          axisLabel: { rotate: 50, interval: 0,color:'#16C0FF' }
+        },
+        {
+          type: 'value',
+          gridIndex: 3,
+          name: '营业收入',
+          axisLine:{onZero: true,show:true,lineStyle:{color:'#16C0FF'}},
+          splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},
+          axisLabel: { rotate: 50, interval: 0 ,color:'#16C0FF'}
+        }
+      ],
+      yAxis: [
+        { type: 'value', gridIndex: 0, name: '收益率',axisLabel:{color:'#16C0FF'},axisLine:{onZero: true,show:true,lineStyle:{color:'#16C0FF'}},splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}}, },
+        { type: 'value', gridIndex: 1, name: '收益率', axisLabel:{color:'#16C0FF'},axisLine:{onZero: true,show:true,lineStyle:{color:'#16C0FF'}},splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},},
+        { type: 'value', gridIndex: 2, name: '收益率' ,axisLabel:{color:'#16C0FF'},axisLine:{onZero: true,show:true,lineStyle:{color:'#16C0FF'}},splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},},
+        { type: 'value', gridIndex: 3, name: '收益率', axisLabel:{color:'#16C0FF'},axisLine:{onZero: true,show:true,lineStyle:{color:'#16C0FF'}},splitLine:{show:true,lineStyle:{color:'#16C0FF',width:0.5,type:'dotted'}},}
+      ],
+      dataset: {
+        dimensions: [
+        	'股票代码',
+					'股票名称',
+					'业绩快报最新披露日期',
+					'营业收入同比增长率',
+					'营业利润同比增长率',
+					'利润总额同比增长率',
+					'归属母公司股东的净利润同比增长率',
+					'归属于上市公司股东的扣除非经常性损益的净利润同比增长率',
+					'基本每股收益同比增长率',
+					'加权平均净资产收益率同比增长率',
+					'快报前一天至今区间收益率'
+        ],
+        source: data
+      },
+      series: [
+        {
+          type: 'scatter3D',
+          symbolSize: 20,
+          encode: {
+            x: '加权平均净资产收益率同比增长率',
+            y: '归属于上市公司股东的扣除非经常性损益的净利润同比增长率',
+            z: '快报前一天至今区间收益率',
+            tooltip: [0, 1, 2, 3, 4,5,6,7,8,9,10]
+          }
+        },
+        {
+          type: 'scatter',
+          //symbolSize: symbolSize,
+          symbolSize: 10,
+          xAxisIndex: 0,
+          yAxisIndex: 0,
+          encode: {
+            x: '归属于上市公司股东的扣除非经常性损益的净利润同比增长率',
+            y: '快报前一天至今区间收益率',
+            tooltip: [0, 1, 2, 3, 4,5,6,7,8,9,10]
+          }
+        },
+        {
+          type: 'scatter',
+          symbolSize: 10,
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          encode: {
+            x: '加权平均净资产收益率同比增长率',
+            y: '快报前一天至今区间收益率',
+            tooltip: [0, 1, 2, 3, 4,5,6,7,8,9,10]
+          }
+        },
+        {
+          type: 'scatter',
+          symbolSize: 10,
+          xAxisIndex: 2,
+          yAxisIndex: 2,
+          encode: {
+            x: '基本每股收益同比增长率',
+            y: '快报前一天至今区间收益率',
+            tooltip: [0, 1, 2, 3, 4,5,6,7,8,9,10]
+          }
+        },
+        {
+          type: 'scatter',
+          symbolSize: 10,
+          xAxisIndex: 3,
+          yAxisIndex: 3,
+          encode: {
+            x: '营业收入同比增长率',
+            y: '快报前一天至今区间收益率',
+            tooltip: [0, 1, 2, 3, 4,5,6,7,8,9,10]
+          }
+        }
+      ]
+    };
+    myChart.setOption(option);
+  }
+);
+	
+	</script>
+	</body>	
+</html>
+

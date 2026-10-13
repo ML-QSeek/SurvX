@@ -1,0 +1,52 @@
+2026-02-26 15:46:26,394 - ScriptMain.2018134 - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-02-26 15:46:26,395 - ScriptMain.2018134 - INFO - 账号: 2018134, 用户: quruyi0101
+2026-02-26 15:46:26,396 - ScriptMain.2018134 - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-02-26 15:46:26,396 - ScriptMain.2018134 - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-02-26 15:46:26,396 - ScriptMain.2018134 - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-02-26 15:46:26,396 - ScriptMain.2018134 - INFO - 多进程环境: True
+2026-02-26 15:46:26,397 - ScriptMain.2018134 - INFO - 尝试启动工作线程 (尝试次数: 1)
+2026-02-26 15:46:28,398 - ScriptMain.2018134 - INFO - 通过run_iteration设置running=True
+2026-02-26 15:46:28,398 - ScriptMain.2018134 - INFO - 初始化迅投QMT交易算法: XtQmtTradingAlgorithm
+2026-02-26 15:46:28,399 - ScriptMain.2018134 - INFO - 数据发送线程启动
+2026-02-26 15:46:28,400 - ScriptMain.2018134 - INFO - 数据接收线程启动
+2026-02-26 15:46:28,401 - ScriptMain.2018134 - INFO - 监控线程启动
+2026-02-26 15:46:28,401 - ScriptMain.2018134 - INFO - 已启动 3 个工作线程
+2026-02-26 15:46:28,402 - ScriptMain.2018134 - INFO - 工作线程已通过run_iteration启动
+2026-02-26 15:46:28,408 - ScriptMain.2018134 - INFO - SocketIO连接已建立
+2026-02-26 15:46:28,410 - ScriptMain.2018134 - INFO - 已连接到SocketIO服务器: http://10.10.98.51:3211
+2026-02-26 15:46:28,426 - ScriptMain.2018134 - INFO - mqReceiver连接已建立
+2026-02-26 15:46:28,426 - ScriptMain.2018134 - INFO - 已连接到mqReceiver服务器: http://10.10.98.51:3210
+2026-02-26 15:46:51,173 - ScriptMain.2018134 - INFO - 清理脚本资源...
+2026-02-26 15:46:51,174 - ScriptMain.2018134 - INFO - 正在停止迅投QMT交易脚本...
+2026-02-26 15:46:51,438 - ScriptMain.2018134 - INFO - 从mqReceiver服务器断开连接
+2026-02-26 15:46:51,439 - ScriptMain.2018134 - INFO - 数据接收线程停止
+2026-02-26 15:46:51,496 - ScriptMain.2018134 - INFO - 从服务器断开连接
+2026-02-26 15:46:51,497 - ScriptMain.2018134 - INFO - 数据发送线程停止
+2026-02-26 15:46:54,503 - ScriptMain.2018134 - INFO - 迅投QMT交易脚本已停止
+2026-02-26 15:46:54,504 - ScriptMain.2018134 - INFO - 脚本资源清理完成
+2026-02-26 15:49:11,901 - ScriptMain.2018134 - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-02-26 15:49:11,901 - ScriptMain.2018134 - INFO - 账号: 2018134, 用户: quruyi0101
+2026-02-26 15:49:11,902 - ScriptMain.2018134 - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-02-26 15:49:11,902 - ScriptMain.2018134 - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-02-26 15:49:11,902 - ScriptMain.2018134 - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-02-26 15:49:11,903 - ScriptMain.2018134 - INFO - 多进程环境: True
+2026-02-26 15:49:11,903 - ScriptMain.2018134 - INFO - 尝试启动工作线程 (尝试次数: 1)
+2026-02-26 15:49:13,905 - ScriptMain.2018134 - INFO - 通过run_iteration设置running=True
+2026-02-26 15:49:13,905 - ScriptMain.2018134 - INFO - 初始化迅投QMT交易算法: XtQmtTradingAlgorithm
+2026-02-26 15:49:13,906 - ScriptMain.2018134 - INFO - 数据发送线程启动
+2026-02-26 15:49:13,907 - ScriptMain.2018134 - INFO - 数据接收线程启动
+2026-02-26 15:49:13,908 - ScriptMain.2018134 - INFO - 监控线程启动
+2026-02-26 15:49:13,908 - ScriptMain.2018134 - INFO - 已启动 3 个工作线程
+2026-02-26 15:49:13,909 - ScriptMain.2018134 - INFO - 工作线程已通过run_iteration启动
+2026-02-26 15:49:13,916 - ScriptMain.2018134 - INFO - mqReceiver连接已建立
+2026-02-26 15:49:13,917 - ScriptMain.2018134 - INFO - 已连接到mqReceiver服务器: http://10.10.98.51:3210
+2026-02-26 15:49:13,929 - ScriptMain.2018134 - INFO - SocketIO连接已建立
+2026-02-26 15:49:13,929 - ScriptMain.2018134 - INFO - 已连接到SocketIO服务器: http://10.10.98.51:3211
+2026-02-26 15:49:39,995 - ScriptMain.2018134 - INFO - 清理脚本资源...
+2026-02-26 15:49:39,996 - ScriptMain.2018134 - INFO - 正在停止迅投QMT交易脚本...
+2026-02-26 15:49:40,021 - ScriptMain.2018134 - INFO - 从服务器断开连接
+2026-02-26 15:49:40,024 - ScriptMain.2018134 - INFO - 数据发送线程停止
+2026-02-26 15:49:40,935 - ScriptMain.2018134 - INFO - 从mqReceiver服务器断开连接
+2026-02-26 15:49:40,937 - ScriptMain.2018134 - INFO - 数据接收线程停止
+2026-02-26 15:49:43,949 - ScriptMain.2018134 - INFO - 迅投QMT交易脚本已停止
+2026-02-26 15:49:43,949 - ScriptMain.2018134 - INFO - 脚本资源清理完成

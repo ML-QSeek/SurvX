@@ -1,0 +1,299 @@
+2026-01-11 00:17:30,688 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 00:17:30,688 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-01-11 00:17:30,689 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-01-11 00:17:30,689 - ScriptMain.xtqmt_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-01-11 00:17:30,690 - ScriptMain.xtqmt_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-01-11 00:19:08,782 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 00:19:08,784 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-01-11 00:19:08,785 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-01-11 00:19:08,785 - ScriptMain.xtqmt_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-01-11 00:19:08,786 - ScriptMain.xtqmt_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-01-11 00:19:08,786 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易算法: XtQmtTradingAlgorithm
+2026-01-11 00:19:08,809 - ScriptMain.xtqmt_trader - INFO - 权限验证成功
+2026-01-11 00:19:08,809 - ScriptMain.xtqmt_trader - INFO - 数据发送线程启动
+2026-01-11 00:19:08,811 - ScriptMain.xtqmt_trader - INFO - 数据接收线程启动
+2026-01-11 00:19:08,812 - ScriptMain.xtqmt_trader - INFO - 监控线程启动
+2026-01-11 00:19:08,813 - ScriptMain.xtqmt_trader - INFO - 已启动 3 个工作线程
+2026-01-11 00:19:08,816 - ScriptMain.xtqmt_trader - INFO - 迅投QMT交易脚本启动成功
+2026-01-11 00:19:08,820 - ScriptMain.xtqmt_trader - INFO - SocketIO连接已建立
+2026-01-11 00:19:08,840 - ScriptMain.xtqmt_trader - INFO - mqReceiver连接已建立
+2026-01-11 00:19:33,833 - ScriptMain.xtqmt_trader - INFO - 清理脚本资源...
+2026-01-11 00:19:33,833 - ScriptMain.xtqmt_trader - INFO - 正在停止迅投QMT交易脚本...
+2026-01-11 00:19:33,855 - ScriptMain.xtqmt_trader - INFO - 从mqReceiver服务器断开连接
+2026-01-11 00:19:33,856 - ScriptMain.xtqmt_trader - INFO - 数据接收线程停止
+2026-01-11 00:19:33,871 - ScriptMain.xtqmt_trader - INFO - 从服务器断开连接
+2026-01-11 00:19:33,872 - ScriptMain.xtqmt_trader - INFO - 数据发送线程停止
+2026-01-11 00:21:03,023 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 00:21:03,023 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-01-11 00:21:03,024 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-01-11 00:21:03,024 - ScriptMain.xtqmt_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-01-11 00:21:03,024 - ScriptMain.xtqmt_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-01-11 00:21:42,155 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 00:21:42,156 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-01-11 00:21:42,156 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-01-11 00:21:42,156 - ScriptMain.xtqmt_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-01-11 00:21:42,156 - ScriptMain.xtqmt_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-01-11 00:22:23,807 - ScriptMain.xtqmt_trader - INFO - 清理脚本资源...
+2026-01-11 00:22:23,807 - ScriptMain.xtqmt_trader - WARNING - 脚本未在运行
+2026-01-11 00:22:23,807 - ScriptMain.xtqmt_trader - INFO - 脚本资源清理完成
+2026-01-11 00:22:23,927 - ScriptMain.xtqmt_trader - INFO - 清理脚本资源...
+2026-01-11 00:22:23,928 - ScriptMain.xtqmt_trader - WARNING - 脚本未在运行
+2026-01-11 00:22:23,928 - ScriptMain.xtqmt_trader - INFO - 脚本资源清理完成
+2026-01-11 00:22:24,008 - ScriptMain.xtqmt_trader - INFO - 清理脚本资源...
+2026-01-11 00:22:24,009 - ScriptMain.xtqmt_trader - WARNING - 脚本未在运行
+2026-01-11 00:22:24,009 - ScriptMain.xtqmt_trader - INFO - 脚本资源清理完成
+2026-01-11 00:27:08,341 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 00:27:08,341 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-01-11 00:27:08,342 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-01-11 00:27:08,342 - ScriptMain.xtqmt_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-01-11 00:27:08,342 - ScriptMain.xtqmt_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-01-11 01:05:30,962 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 01:05:30,964 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-01-11 01:05:30,964 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-01-11 01:05:30,965 - ScriptMain.xtqmt_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-01-11 01:05:30,965 - ScriptMain.xtqmt_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-01-11 01:05:30,966 - ScriptMain.xtqmt_trader - INFO - 多进程环境: False
+2026-01-11 01:05:30,967 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易算法: XtQmtTradingAlgorithm
+2026-01-11 01:05:30,973 - ScriptMain.xtqmt_trader - INFO - 权限验证成功
+2026-01-11 01:05:30,974 - ScriptMain.xtqmt_trader - INFO - 数据发送线程启动
+2026-01-11 01:05:30,976 - ScriptMain.xtqmt_trader - INFO - 数据接收线程启动
+2026-01-11 01:05:30,977 - ScriptMain.xtqmt_trader - INFO - 监控线程启动
+2026-01-11 01:05:30,977 - ScriptMain.xtqmt_trader - INFO - 已启动 3 个工作线程
+2026-01-11 01:05:30,980 - ScriptMain.xtqmt_trader - INFO - 迅投QMT交易脚本启动成功
+2026-01-11 01:05:31,000 - ScriptMain.xtqmt_trader - INFO - mqReceiver连接已建立
+2026-01-11 01:05:31,001 - ScriptMain.xtqmt_trader - INFO - SocketIO连接已建立
+2026-01-11 01:05:31,003 - ScriptMain.xtqmt_trader - INFO - 已连接到mqReceiver服务器: http://10.10.98.51:3210
+2026-01-11 01:05:31,003 - ScriptMain.xtqmt_trader - INFO - 已连接到SocketIO服务器: http://10.10.98.51:3211
+2026-01-11 01:06:05,459 - ScriptMain.xtqmt_trader - INFO - 清理脚本资源...
+2026-01-11 01:06:05,459 - ScriptMain.xtqmt_trader - WARNING - 脚本未在运行
+2026-01-11 01:06:05,460 - ScriptMain.xtqmt_trader - INFO - 脚本资源清理完成
+2026-01-11 01:06:18,273 - ScriptMain.xtqmt_trader - INFO - 前端消息: 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 01:06:18,273 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 01:06:18,273 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-01-11 01:06:18,274 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-01-11 01:06:18,274 - ScriptMain.xtqmt_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-01-11 01:06:18,274 - ScriptMain.xtqmt_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-01-11 01:06:18,274 - ScriptMain.xtqmt_trader - INFO - 多进程环境: True
+2026-01-11 01:06:18,275 - ScriptMain.xtqmt_trader - INFO - 尝试启动工作线程 (尝试次数: 1)
+2026-01-11 01:06:20,276 - ScriptMain.xtqmt_trader - INFO - 通过run_iteration设置running=True
+2026-01-11 01:06:20,276 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易算法: XtQmtTradingAlgorithm
+2026-01-11 01:06:20,277 - ScriptMain.xtqmt_trader - INFO - 前端消息: 初始化迅投QMT交易算法: XtQmtTradingAlgorithm
+2026-01-11 01:06:20,278 - ScriptMain.xtqmt_trader - INFO - 数据发送线程启动
+2026-01-11 01:06:20,278 - ScriptMain.xtqmt_trader - INFO - 前端消息: 数据发送线程启动
+2026-01-11 01:06:20,279 - ScriptMain.xtqmt_trader - INFO - 数据接收线程启动
+2026-01-11 01:06:20,280 - ScriptMain.xtqmt_trader - INFO - 监控线程启动
+2026-01-11 01:06:20,280 - ScriptMain.xtqmt_trader - INFO - 已启动 3 个工作线程
+2026-01-11 01:06:20,285 - ScriptMain.xtqmt_trader - INFO - 前端消息: 数据接收线程启动
+2026-01-11 01:06:20,286 - ScriptMain.xtqmt_trader - INFO - 前端消息: 监控线程启动
+2026-01-11 01:06:20,286 - ScriptMain.xtqmt_trader - INFO - 前端消息: 已启动 3 个工作线程
+2026-01-11 01:06:20,287 - ScriptMain.xtqmt_trader - INFO - SocketIO连接已建立
+2026-01-11 01:06:20,287 - ScriptMain.xtqmt_trader - INFO - 工作线程已通过run_iteration启动
+2026-01-11 01:06:20,288 - ScriptMain.xtqmt_trader - INFO - 前端消息: SocketIO连接已建立
+2026-01-11 01:06:20,288 - ScriptMain.xtqmt_trader - INFO - 前端消息: 工作线程已启动
+2026-01-11 01:06:20,288 - ScriptMain.xtqmt_trader - INFO - 已连接到SocketIO服务器: http://10.10.98.51:3211
+2026-01-11 01:06:20,291 - ScriptMain.xtqmt_trader - INFO - mqReceiver连接已建立
+2026-01-11 01:06:20,291 - ScriptMain.xtqmt_trader - INFO - 前端消息: mqReceiver连接已建立
+2026-01-11 01:06:20,292 - ScriptMain.xtqmt_trader - INFO - 已连接到mqReceiver服务器: http://10.10.98.51:3210
+2026-01-11 01:06:20,301 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:06:25,312 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:06:30,321 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:06:35,334 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:06:40,344 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:06:45,360 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:06:50,368 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:06:50,370 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:06:50,371 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:06:55,382 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:00,393 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:05,421 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:10,431 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:15,445 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:20,288 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行正常，存活线程: 3/3
+2026-01-11 01:07:20,457 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:20,468 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:07:20,468 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:07:25,466 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:30,479 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:35,490 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:40,500 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:45,510 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:50,520 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:07:50,548 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:07:50,548 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:07:51,057 - ScriptMain.xtqmt_trader - INFO - 清理脚本资源...
+2026-01-11 01:07:51,058 - ScriptMain.xtqmt_trader - INFO - 正在停止迅投QMT交易脚本...
+2026-01-11 01:07:51,081 - ScriptMain.xtqmt_trader - INFO - 从mqReceiver服务器断开连接
+2026-01-11 01:07:51,082 - ScriptMain.xtqmt_trader - INFO - 数据接收线程停止
+2026-01-11 01:07:51,317 - ScriptMain.xtqmt_trader - INFO - 从服务器断开连接
+2026-01-11 01:07:51,318 - ScriptMain.xtqmt_trader - INFO - 数据发送线程停止
+2026-01-11 01:07:55,532 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:08:00,542 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:08:05,552 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:08:10,562 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:08:33,195 - ScriptMain.xtqmt_trader - INFO - 前端消息: 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 01:08:33,195 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 01:08:33,196 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-01-11 01:08:33,196 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-01-11 01:08:33,196 - ScriptMain.xtqmt_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-01-11 01:08:33,196 - ScriptMain.xtqmt_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-01-11 01:08:33,196 - ScriptMain.xtqmt_trader - INFO - 多进程环境: True
+2026-01-11 01:08:33,196 - ScriptMain.xtqmt_trader - INFO - 尝试启动工作线程 (尝试次数: 1)
+2026-01-11 01:08:35,197 - ScriptMain.xtqmt_trader - INFO - 通过run_iteration设置running=True
+2026-01-11 01:08:35,197 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易算法: XtQmtTradingAlgorithm
+2026-01-11 01:08:35,197 - ScriptMain.xtqmt_trader - INFO - 前端消息: 初始化迅投QMT交易算法: XtQmtTradingAlgorithm
+2026-01-11 01:08:35,198 - ScriptMain.xtqmt_trader - INFO - 数据发送线程启动
+2026-01-11 01:08:35,198 - ScriptMain.xtqmt_trader - INFO - 前端消息: 数据发送线程启动
+2026-01-11 01:08:35,198 - ScriptMain.xtqmt_trader - INFO - 数据接收线程启动
+2026-01-11 01:08:35,198 - ScriptMain.xtqmt_trader - INFO - 监控线程启动
+2026-01-11 01:08:35,198 - ScriptMain.xtqmt_trader - INFO - 已启动 3 个工作线程
+2026-01-11 01:08:35,199 - ScriptMain.xtqmt_trader - INFO - 前端消息: 数据接收线程启动
+2026-01-11 01:08:35,199 - ScriptMain.xtqmt_trader - INFO - 前端消息: 监控线程启动
+2026-01-11 01:08:35,200 - ScriptMain.xtqmt_trader - INFO - 前端消息: 已启动 3 个工作线程
+2026-01-11 01:08:35,201 - ScriptMain.xtqmt_trader - INFO - 工作线程已通过run_iteration启动
+2026-01-11 01:08:35,204 - ScriptMain.xtqmt_trader - INFO - 前端消息: 工作线程已启动
+2026-01-11 01:08:35,206 - ScriptMain.xtqmt_trader - INFO - SocketIO连接已建立
+2026-01-11 01:08:35,206 - ScriptMain.xtqmt_trader - INFO - 前端消息: SocketIO连接已建立
+2026-01-11 01:08:35,207 - ScriptMain.xtqmt_trader - INFO - 已连接到SocketIO服务器: http://10.10.98.51:3211
+2026-01-11 01:08:35,207 - ScriptMain.xtqmt_trader - INFO - mqReceiver连接已建立
+2026-01-11 01:08:35,208 - ScriptMain.xtqmt_trader - INFO - 前端消息: mqReceiver连接已建立
+2026-01-11 01:08:35,208 - ScriptMain.xtqmt_trader - INFO - 已连接到mqReceiver服务器: http://10.10.98.51:3210
+2026-01-11 01:08:35,215 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:08:40,226 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:08:45,239 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:08:50,264 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:08:55,273 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:00,283 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:05,294 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:05,300 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:09:05,300 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:09:10,304 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:15,316 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:20,327 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:25,340 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:30,350 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:35,201 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行正常，存活线程: 3/3
+2026-01-11 01:09:35,302 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:09:35,302 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:09:35,360 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:40,370 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:45,382 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:50,391 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:09:55,401 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:00,411 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:05,402 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:10:05,402 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:10:05,422 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:10,432 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:15,442 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:20,453 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:25,463 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:30,474 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:35,202 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行正常，存活线程: 3/3
+2026-01-11 01:10:35,403 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:10:35,403 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:10:35,483 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:40,493 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:45,505 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:50,515 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:10:55,526 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:00,537 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:05,410 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:11:05,410 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:11:05,548 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:10,557 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:15,569 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:20,579 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:25,591 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:30,602 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:35,204 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行正常，存活线程: 3/3
+2026-01-11 01:11:35,502 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:11:35,502 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:11:35,614 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:40,625 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:45,637 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:50,648 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:11:55,658 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:00,667 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:05,596 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:12:05,596 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:12:05,677 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:10,687 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:11,663 - ScriptMain.xtqmt_trader - INFO - 前端消息: 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 01:12:11,663 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-01-11 01:12:11,664 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-01-11 01:12:11,664 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-01-11 01:12:11,665 - ScriptMain.xtqmt_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-01-11 01:12:11,665 - ScriptMain.xtqmt_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-01-11 01:12:11,666 - ScriptMain.xtqmt_trader - INFO - 多进程环境: True
+2026-01-11 01:12:11,667 - ScriptMain.xtqmt_trader - INFO - 尝试启动工作线程 (尝试次数: 1)
+2026-01-11 01:12:13,668 - ScriptMain.xtqmt_trader - INFO - 通过run_iteration设置running=True
+2026-01-11 01:12:13,668 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易算法: XtQmtTradingAlgorithm
+2026-01-11 01:12:13,668 - ScriptMain.xtqmt_trader - INFO - 前端消息: 初始化迅投QMT交易算法: XtQmtTradingAlgorithm
+2026-01-11 01:12:13,669 - ScriptMain.xtqmt_trader - INFO - 数据发送线程启动
+2026-01-11 01:12:13,669 - ScriptMain.xtqmt_trader - INFO - 前端消息: 数据发送线程启动
+2026-01-11 01:12:13,669 - ScriptMain.xtqmt_trader - INFO - 数据接收线程启动
+2026-01-11 01:12:13,670 - ScriptMain.xtqmt_trader - INFO - 前端消息: 数据接收线程启动
+2026-01-11 01:12:13,670 - ScriptMain.xtqmt_trader - INFO - 监控线程启动
+2026-01-11 01:12:13,670 - ScriptMain.xtqmt_trader - INFO - 已启动 3 个工作线程
+2026-01-11 01:12:13,671 - ScriptMain.xtqmt_trader - INFO - 前端消息: 监控线程启动
+2026-01-11 01:12:13,673 - ScriptMain.xtqmt_trader - INFO - 前端消息: 已启动 3 个工作线程
+2026-01-11 01:12:13,674 - ScriptMain.xtqmt_trader - INFO - 工作线程已通过run_iteration启动
+2026-01-11 01:12:13,675 - ScriptMain.xtqmt_trader - INFO - 前端消息: 工作线程已启动
+2026-01-11 01:12:13,678 - ScriptMain.xtqmt_trader - INFO - mqReceiver连接已建立
+2026-01-11 01:12:13,678 - ScriptMain.xtqmt_trader - INFO - SocketIO连接已建立
+2026-01-11 01:12:13,678 - ScriptMain.xtqmt_trader - INFO - 前端消息: mqReceiver连接已建立
+2026-01-11 01:12:13,678 - ScriptMain.xtqmt_trader - INFO - 前端消息: SocketIO连接已建立
+2026-01-11 01:12:13,679 - ScriptMain.xtqmt_trader - INFO - 已连接到mqReceiver服务器: http://10.10.98.51:3210
+2026-01-11 01:12:13,679 - ScriptMain.xtqmt_trader - INFO - 已连接到SocketIO服务器: http://10.10.98.51:3211
+2026-01-11 01:12:13,687 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:15,697 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:18,697 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:20,708 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:23,713 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:25,719 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:28,735 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:30,729 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:33,746 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:35,205 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行正常，存活线程: 3/3
+2026-01-11 01:12:35,692 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:12:35,692 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:12:35,743 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:38,757 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:40,753 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:43,679 - ScriptMain.xtqmt_trader - INFO - 系统运行中，存活线程: 3/3
+2026-01-11 01:12:43,679 - ScriptMain.xtqmt_trader - INFO - 前端消息: 系统运行中，存活线程: 3/3
+2026-01-11 01:12:43,767 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:45,764 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:47,968 - ScriptMain.xtqmt_trader - INFO - 清理脚本资源...
+2026-01-11 01:12:47,970 - ScriptMain.xtqmt_trader - INFO - 前端消息: 清理脚本资源...
+2026-01-11 01:12:47,971 - ScriptMain.xtqmt_trader - INFO - 正在停止迅投QMT交易脚本...
+2026-01-11 01:12:47,972 - ScriptMain.xtqmt_trader - INFO - 前端消息: 正在停止迅投QMT交易脚本...
+2026-01-11 01:12:48,351 - ScriptMain.xtqmt_trader - INFO - 从mqReceiver服务器断开连接
+2026-01-11 01:12:48,351 - ScriptMain.xtqmt_trader - INFO - 前端消息: 从mqReceiver服务器断开连接
+2026-01-11 01:12:48,352 - ScriptMain.xtqmt_trader - INFO - 数据接收线程停止
+2026-01-11 01:12:48,352 - ScriptMain.xtqmt_trader - INFO - 前端消息: 数据接收线程停止
+2026-01-11 01:12:48,767 - ScriptMain.xtqmt_trader - INFO - 从服务器断开连接
+2026-01-11 01:12:48,767 - ScriptMain.xtqmt_trader - INFO - 前端消息: 从服务器断开连接
+2026-01-11 01:12:48,768 - ScriptMain.xtqmt_trader - INFO - 数据发送线程停止
+2026-01-11 01:12:48,768 - ScriptMain.xtqmt_trader - INFO - 前端消息: 数据发送线程停止
+2026-01-11 01:12:48,778 - ScriptMain.xtqmt_trader - INFO - 前端消息: 账户信息更新
+2026-01-11 01:12:51,783 - ScriptMain.xtqmt_trader - INFO - 迅投QMT交易脚本已停止
+2026-01-11 01:12:51,785 - ScriptMain.xtqmt_trader - INFO - 前端消息: 迅投QMT交易脚本已停止
+2026-01-11 01:12:51,786 - ScriptMain.xtqmt_trader - INFO - 脚本资源清理完成
+2026-01-11 01:12:51,788 - ScriptMain.xtqmt_trader - INFO - 前端消息: 脚本资源清理完成
+2026-01-11 01:12:51,941 - ScriptMain.xtqmt_trader - INFO - 清理脚本资源...
+2026-01-11 01:12:51,941 - ScriptMain.xtqmt_trader - INFO - 前端消息: 清理脚本资源...
+2026-01-11 01:12:51,941 - ScriptMain.xtqmt_trader - INFO - 正在停止迅投QMT交易脚本...
+2026-01-11 01:12:51,941 - ScriptMain.xtqmt_trader - INFO - 前端消息: 正在停止迅投QMT交易脚本...
+2026-01-11 01:12:52,704 - ScriptMain.xtqmt_trader - INFO - 从mqReceiver服务器断开连接
+2026-01-11 01:12:52,704 - ScriptMain.xtqmt_trader - INFO - 前端消息: 从mqReceiver服务器断开连接
+2026-01-11 01:12:52,705 - ScriptMain.xtqmt_trader - INFO - 数据接收线程停止
+2026-01-11 01:12:52,705 - ScriptMain.xtqmt_trader - INFO - 前端消息: 数据接收线程停止
+2026-01-11 01:12:52,780 - ScriptMain.xtqmt_trader - INFO - 从服务器断开连接
+2026-01-11 01:12:52,780 - ScriptMain.xtqmt_trader - INFO - 前端消息: 从服务器断开连接
+2026-01-11 01:12:52,781 - ScriptMain.xtqmt_trader - INFO - 数据发送线程停止
+2026-01-11 01:12:52,781 - ScriptMain.xtqmt_trader - INFO - 前端消息: 数据发送线程停止
+2026-01-11 01:12:55,784 - ScriptMain.xtqmt_trader - INFO - 迅投QMT交易脚本已停止
+2026-01-11 01:12:55,784 - ScriptMain.xtqmt_trader - INFO - 前端消息: 迅投QMT交易脚本已停止
+2026-01-11 01:12:55,785 - ScriptMain.xtqmt_trader - INFO - 脚本资源清理完成
+2026-01-11 01:12:55,786 - ScriptMain.xtqmt_trader - INFO - 前端消息: 脚本资源清理完成

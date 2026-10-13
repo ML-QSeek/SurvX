@@ -1,0 +1,631 @@
+		<!DOCTYPE html>
+		<html lang="zh-CN">
+		<head>
+		<meta	http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+		<link	type="text/css"	rel="stylesheet"	href="./css/smartMenu.css"/>
+		<script	type="text/javascript"	src="./js/jquery.min.js"></script>
+		<script	type="text/javascript"	src="./js/jquery-smartMenu.js"></script>
+		<style type="text/css">
+			html,body
+			{
+				font-family:Open Sans,Arial,sans-serif;
+				font-weight:400;
+				font-size:14px;
+				line-height:1.3em;
+				width:100%;
+				height:100%;
+				color:#16C0FF;
+				background:#101010;
+				margin:0;
+				padding:0;
+				overflow-x:auto;
+			}
+			/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/  
+			::-webkit-scrollbar  
+			{  
+			    width: 0px;  
+			    height: 0px;  
+			    background-color: #101010;  
+			}  
+			/*定义滚动条轨道 内阴影+圆角*/  
+			::-webkit-scrollbar-track  
+			{  
+			    border-radius: 0px;  
+			    background-color: #3C3C3C;  
+			}  
+			/*定义滑块 内阴影+圆角*/  
+			::-webkit-scrollbar-thumb  
+			{  
+			    border-radius: 0px;  
+			    background-color: #6C6C6C;  
+			} 
+			#mq_main
+			{
+				width:100%;
+				position:absolute;
+				top:0px;
+				bottom:0px;
+				box-sizing:border-box;
+			}
+			#mq_mainL
+			{
+				float:left;
+				height:100%;
+				width:50%;
+				box-sizing:border-box;
+			}
+			#mq_mainR
+			{
+				float:left;
+				height:100%;
+				width:50%;
+				padding:20px;
+				background: rgba(20,177,235,0.1);
+				box-sizing:border-box;
+				border-radius:15px;
+				overflow-y:auto;
+			}	
+			#inputTxt{
+				padding:0;
+				margin:0;
+				width:70%;
+				height:30px;
+				float:left;
+				color:#16C0FF;
+			  border: 1px #16C0FF solid;
+			  outline:none;
+				text-transform:uppercase;
+				background: transparent;
+				}
+			.btn3 {                        
+			    background-color: transparent;/*普通状态以及失效（无权限状态#F2F2F2）*/ 
+			    height: 30px;  
+			    width:14%;
+			    border: 1px #16C0FF solid;
+			    float:left;
+			    border-radius: 1px;    
+					font-size:100%;
+					color:#16C0FF;
+					margin-left:1px;
+				}    
+			.btn3:hover {  
+					cursor:pointer !important;
+					background-color:rgba(255,255,255,0.3) !important;
+			}                             
+			                        
+			.PointTr:hover
+				{
+					cursor:pointer !important;
+					background-color:rgba(255,255,255,0.3) !important;
+				}
+			table.altrowstable1
+			{
+				border:0px	#16C0FF	solid;
+				border-collapse:collapse;
+				padding:0;
+				width:90%;
+				min-width:60%;
+				table-layout:fixed;
+			}
+			table.altrowstable1	th
+			{
+				border:0px	#16C0FF	solid;
+				text-align:center;
+			}
+			table.altrowstable1	td
+			{
+				border:0px	#16C0FF	solid;
+				text-align:center;
+				white-space:pre-line;
+				word-break:keep-all;
+				word-wrap:break-word;
+			}
+			.BGcontent
+			{
+				width:100%;
+				height:auto;
+				margin-top:1.5px;
+				padding:0;
+				
+				}
+			.BGcontentT
+			{
+				width:100%;
+				height:38px;
+				margin:0px;
+				padding:9px;
+				box-sizing:border-box;
+				background:rgba(255,255,255,0.3);
+				text-align:left;
+				font-size:100%;
+				}
+			.BGcontentB
+			{
+				width:100%;
+				min-height:100px;
+				height:auto;
+				margin-top:0.5dpx;
+				border-top:1px solid	#16C0FF;
+				background:rgba(255,255,255,0.3);
+				padding:9px;
+				box-sizing:border-box;
+				text-align:left;
+				font-size:16px;
+				line-height:20px;
+				text-indent: 2ch;
+				letter-spacing: 1px;
+				}
+			.BGcontentX
+			{
+				text-align:right;
+				float:right;
+				width:auto;
+				box-sizing:border-box;
+				}
+			.Warn
+				{
+					border:1px	solid	#16C0FF;
+					background:rgba(14,32,45,1);
+					width:400px;
+					height:160px;
+					z-index:99999999;
+					position:fixed;
+					top:50%;
+					left:50%;
+					margin-top:-80px;
+					margin-left:-200px;
+					box-sizing:border-box;
+				}
+			.WarnB
+				{
+					width:100%;
+					height:114px;
+					text-align:center;
+					font-size:12px;
+					line-height:-6px;
+					padding:10px;
+					line-height:124px;
+				}
+			.WarnM
+				{
+					width:100%;
+					height:26px;
+					text-align:center;
+					line-height:-6px;
+				}
+			.WarnMButton,.TJButton
+			{
+				background:transparent;
+				border:1px solid	#16C0FF;
+				color:#16C0FF;
+				width:50px;
+				height:22px;
+				text-align:center;
+				font-size:12px;
+				cursor:pointer;
+				margin:1px;
+			}
+			.tjtopic1
+			{
+				
+				background:transparent;
+				color:#FFCC00;
+				padding:0;
+				margin:0;
+				width:280px;
+				overflow-x:auto;
+				height:20px;
+				border-bottom:1px solid	#16C0FF;
+				font-size:16px;
+				float:left;
+				letter-spacing: 1px;
+			}
+			@keyframes changeColor {
+  			0% { background-color: rgba(255,255,255,0.3); }
+  			50% { background-color: transparent; }
+  			100% { background-color: rgba(255,255,255,0.3); }
+				}
+			.tjtopic
+			{
+				font-size:16px;
+				color:#FFCC00;
+				float:left;
+				height:20px;
+				letter-spacing: 1px;
+				}
+		</style>
+	
+	</head>
+	<body>
+		<div  id="mq_main">
+			<div id="mq_mainL">
+			<center>
+					<div style="height:60px; width:50%;margin-top:30px;">
+					<div style="display:none;" id="ssbtn"></div>
+					<input type="text" id="inputTxt"/><button id="QPointSelect" class="btn3">查询</button>
+					<button id="zengjia" class="btn3">新建</button>
+					</div>
+					<div id="jbaobiao"></div>
+			</center>					
+				</div>
+			<div id="mq_mainR"></div>
+		</div>
+	</body>
+	
+	
+	<script	type="text/javascript">
+		//server
+		var MServer = "http://10.10.98.51/test/sys/";
+					//时间
+			function getLangDate(item){
+				var dateObj = new Date();
+				var year = dateObj.getFullYear();
+				var month = dateObj.getMonth()+1;
+				var date = dateObj.getDate();
+				var day = dateObj.getDay();
+				var weeks = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+				var week = weeks[day];
+				var hour = dateObj.getHours();
+				var minute = dateObj.getMinutes();
+				var second = dateObj.getSeconds();
+				if(month<10){month="0"+month;}
+				if(date<10){date="0"+date;}
+				if(hour<10){hour="0"+hour;}
+				if(minute<10){minute="0"+minute;}
+				if(second<10){second="0"+second;}
+				//var newDate = year+"年"+month+"月"+date+"日 "+hour+":"+minute+":"+second+" "+week;
+				if(item=='systime'){
+				var newDate ="<font class='ttext'>"+year+"年"+month+"月"+date+"日 "+hour+":"+minute+":"+second+" "+week+"</font>";
+				document.getElementById("home_main_rbottom1_colr").innerHTML = newDate;
+				setTimeout("getLangDate('systime')",1000);//每隔1秒重新调用一次该函数
+					}
+				else{
+				var newDate = year.toString()+month.toString()+date.toString();
+				var newMonth = year.toString()+month.toString();
+				var newDate1 = year+"-"+month+"-"+date;
+				return eval(item);
+				}
+			}
+		
+		
+		//屏蔽右键事件
+			document.oncontextmenu=function(){return	false;}
+		$(document).ready(function (){
+			// 获取当前页面的URL参数
+			const params = new URLSearchParams(window.location.search);
+			// 获取指定参数的值
+			Q14123101 = params.get('par');
+			$("#QPointSelect").click();
+			
+			})
+	
+			// 生成一个不重复的ID
+			function GenNonDuplicateID(randomLength){
+				return Number(Math.random().toString().substr(3,randomLength) + Date.now()).toString(36)
+			}
+			//警示消息
+			function WarnMessage(content){
+				var sid=GenNonDuplicateID(1);	
+				$("body").append('<div class="Warn"><div class="WarnB" id="WarnB_'+sid+'"></div><div class="WarnM"><button id="Yes" class="WarnMButton"> 好的 </button></div></div>');
+				$("#WarnB_"+sid).html(content);
+				}
+
+			//自定义右键上下文
+			function oncontextmenu(){
+				
+			var obAdd={text:"回复",func:function(){
+				var trid =$(this).attr("id");
+				var cid = trid.replace('tn_','');
+				var sbid = $('#sbid_'+cid).html();
+				var tkuang  = '<center><div class="BGcontent"><div id="sbid" style="display:none;">'+sbid+'</div><div class="BGcontentT" >';
+						tkuang += '<div style="font-size:16px;float:left;height:20px;letter-spacing:1px;">主题：</div>';
+						tkuang += '<div id="tjtopic" class="tjtopic">策略研究</div>';
+						tkuang += '<div style="font-size:16px;float:left;margin-left:5px;height:20px;letter-spacing:1px;">标题：</div>';
+						tkuang += '<div id="tjtopic1" class="tjtopic1" contenteditable="true"></div>';
+						tkuang += '<div class="BGcontentX">';
+						tkuang += '<span>作者：</span><span id="Author">'+Q14123101+'</span>&nbsp;&nbsp;';
+						tkuang += '<span>时间：</span><span id="newcontentTime">'+getLangDate('newDate')+'</span>&nbsp;&nbsp;';
+						tkuang += '<input id="tjSubmit1" type="button" class="WarnMButton" value="发布">';
+						tkuang += '</div>';
+						tkuang += '</div>';
+						tkuang += '<div class="BGcontentB" id="editor_DIV" contenteditable="true"></div>';
+						tkuang += '</div></center>';
+						$(this).after(tkuang);
+			}
+			};
+			var obUp={text:"修改",func:function(){
+				//$(this).
+				var trid =$(this).attr("id");
+				var cid = trid.replace('tn_','');
+				$('#tj_'+cid).css('display','inline');
+				$('#tjtopic1_'+cid).attr('contenteditable', 'true').css('border-bottom','1px solid	#16C0FF');
+				$('#editor_DIV_'+cid).attr('contenteditable', 'true');	
+				$('#newcontentTime_'+cid).html(getLangDate('newDate'));
+				$('#Author_'+cid).html(Q14123101);
+				
+			}
+			};
+			var obDel={text:"删除",func:function(){
+				
+				var trid =$(this).attr("id");
+				var cid = trid.replace('tn_','');
+				var sbid = $('#sbid_'+cid).html();
+				if (cid==sbid){
+					var nid='n_'+cid;
+					$.ajax({
+						type: "POST",
+						url: MServer+"qq/channel/ch008C.php",
+						data:{
+							qflag:"QNOTE",
+							sflag:"ArticleText_03_01",
+							sid:nid,
+							},
+						async:false,
+						success: function(data){
+							//查询列表更新
+							$("#QPointSelect").click();
+						}
+						})
+					}
+				else{
+					//alert(trid);
+					$.ajax({
+						type: "POST",
+						url: MServer+"qq/channel/ch008C.php",
+						data:{
+							qflag:"QNOTE",
+							sflag:"ArticleText_03",
+							sid:trid,
+							},
+						async:false,
+						success: function(data){
+							$("#"+trid).remove();
+						}
+						})
+					}
+					
+				
+			}
+		};
+			var obDels={text:"删除",func:function(){
+				
+				var trid =$(this).attr("id");
+				//alert(trid);
+				$.ajax({
+					type: "POST",
+					url: MServer+"qq/channel/ch008C.php",
+					data:{
+						qflag:"QNOTE",
+						sflag:"ArticleText_03_01",
+						sid:trid,
+						},
+					async:false,
+					success: function(data){
+						//查询列表更新
+						$("#QPointSelect").click();
+					}
+					})	
+			}
+			};
+			
+			var mailMenuData = [[obAdd,obUp,obDel]];
+			$(".BGcontent").smartMenu(mailMenuData, {
+				name: "mail",
+				beforeShow: function() {
+				$.smartMenu.remove();
+				}
+			});
+			var mailMenuDatas = [[obDels]];
+			$(".PointTr").smartMenu(mailMenuDatas, {
+				name: "mail",
+				beforeShow: function() {
+				$.smartMenu.remove();
+				}
+			});
+		}
+//新增
+$(document).off('click',"#zengjia").on('click',"#zengjia", function(){
+	var tkuang  = '<center><div class="BGcontent"><div id="sbid" style="display:none;"></div><div class="BGcontentT" >';
+			tkuang += '<div style="font-size:20px;float:left;height:20px;">主题：</div>';
+			tkuang += '<div id="tjtopic" class="tjtopic">策略研究</div>';
+			tkuang += '<div style="font-size:20px;float:left;margin-left:5px;height:20px;">标题：</div>';
+			tkuang += '<div id="tjtopic1" class="tjtopic1" contenteditable="true"></div>';
+			tkuang += '<div class="BGcontentX">';
+			tkuang += '<span>作者：</span><span id="Author">'+Q14123101+'</span>&nbsp;&nbsp;';
+			tkuang += '<span>时间：</span><span id="newcontentTime">'+getLangDate('newDate')+'</span>&nbsp;&nbsp;';
+			tkuang += '<input id="tjSubmit" type="button" class="WarnMButton" value="发布">';
+			tkuang += '</div>';
+			tkuang += '</div>';
+			tkuang += '<div class="BGcontentB" id="editor_DIV" contenteditable="true"></div>';
+			tkuang += '</div></center>';
+			$("#mq_mainR").html(tkuang);
+	})
+
+$(document).off('click','#tjSubmit').on('click','#tjSubmit', function(){
+	$.ajax({
+	type: "POST",
+	url: MServer+"qq/channel/ch008C.php",
+	data:{
+		qflag:"QNOTE",
+		sflag:"ArticleText_01",
+		tjr : $("#Author").html(),
+		zht : $("#tjtopic").html(),
+		bt : $("#tjtopic1").html(),
+		nr : $("#editor_DIV").html(),
+		},
+	async:false,
+	success: function(data1){
+		WarnMessage(data1);
+		$(document).off('click',"#Yes").on('click',"#Yes",function(){
+			$(this).parent().parent().remove();
+			//查询列表更新
+			$("#QPointSelect").click();
+			})
+	}
+	})
+});
+
+
+$(document).off('click','#tjSubmit1').on('click','#tjSubmit1', function(){
+	var sbid = $('#sbid').html();
+	var CId="n_"+sbid;
+	$.ajax({
+	type: "POST",
+	url: MServer+"qq/channel/ch008C.php",
+	data:{
+		qflag:"QNOTE",
+		sflag:"ArticleText_01_01",
+		sbid:sbid,
+		tjr : $("#Author").html(),
+		zht : $("#tjtopic").html(),
+		bt : $("#tjtopic1").html(),
+		nr : $("#editor_DIV").html(),
+		},
+	async:false,
+	success: function(data1){
+		WarnMessage(data1);
+		$(document).off('click',"#Yes").on('click',"#Yes",function(){
+			$(this).parent().parent().remove();
+			$.ajax({
+				type: "POST",
+				url: MServer+"qq/channel/ch008C.php",
+				data:{
+					qflag:"QNOTE",
+					sflag:'ArticleText_04',
+					sid:CId,
+					},
+					async:false,
+					success: function(data1){
+						var allcon ='';
+						var JchanCon = JSON.parse(data1);
+						for(var i0=0;i0<JchanCon.length;i0++){
+							var cx = JchanCon[i0][0];
+							var tjr = JchanCon[i0][1];
+							var sbid = JchanCon[i0][2];
+							var zht = JchanCon[i0][3];
+							var bt = JchanCon[i0][4];
+							var nr = JchanCon[i0][5];
+							var gtime = JchanCon[i0][6];
+							
+						var tkuang  = '<center><div class="BGcontent" id="tn_'+cx+'"><div id="sbid_'+cx+'" style="display:none;">'+sbid+'</div><div class="BGcontentT" >';
+								tkuang += '<div style="font-size:20px;float:left;height:20px;">主题：</div>';
+								tkuang += '<div id="tjtopic_'+cx+'" class="tjtopic">'+zht+'</div>';
+								tkuang += '<div style="font-size:20px;float:left;margin-left:5px;height:20px;">标题：</div>';
+								tkuang += '<div id="tjtopic1_'+cx+'" class="tjtopic1" style="border:0;">'+bt+'</div>';
+								tkuang += '<div class="BGcontentX">';
+								tkuang += '<span>作者：</span><span id="Author_'+cx+'">'+tjr+'</span>&nbsp;&nbsp;';
+								tkuang += '<span>时间：</span><span id="newcontentTime_'+cx+'">'+gtime+'</span>&nbsp;&nbsp;';
+								tkuang += '<input id="tj_'+cx+'" type="button" class="TJButton" style="display:none;" value="提交">';
+								tkuang += '</div>';
+								tkuang += '</div>';
+								tkuang += '<div class="BGcontentB" id="editor_DIV_'+cx+'">'+nr+'</div>';
+								tkuang += '</div></center>';
+						allcon+=tkuang;
+						}
+						$("#mq_mainR").html(allcon);
+						oncontextmenu();
+						}
+					});
+			})
+	}
+	})
+});
+
+//-------------------------------------------------------------每日观点查询1--
+$(document).off('click',"#QPointSelect").on('click',"#QPointSelect", function(){
+	var sKey="标题";
+	var sTxt=$("#inputTxt").val();
+	$.post(MServer+"qq/channel/ch008C.php",
+	{	qflag:"QNOTE",
+		sflag:"_04",
+		sKey:sKey,
+		sTxt:sTxt,
+		},
+		function(data1){
+			$("#jbaobiao").html(data1);
+			oncontextmenu();
+			$("#mq_mainR").html("");
+			});
+	})
+
+//查看文档
+$(document).off('dblclick',".PointTr").on('dblclick',".PointTr",function(){
+	$('.PointTr').css("background","transparent");
+	$(this).css("background","rgba(255,255,255,0.3)");
+	var CId=$(this).attr('id');
+	$("#ssbtn").html(CId);
+	$.ajax({
+		type: "POST",
+		url: MServer+"qq/channel/ch008C.php",
+		data:{
+			qflag:"QNOTE",
+			sflag:'ArticleText_04',
+			sid:CId,
+			},
+			async:false,
+			success: function(data1){
+				var allcon ='';
+				var JchanCon = JSON.parse(data1);
+				for(var i0=0;i0<JchanCon.length;i0++){
+					var cx = JchanCon[i0][0];
+					var tjr = JchanCon[i0][1];
+					var sbid = JchanCon[i0][2];
+					var zht = JchanCon[i0][3];
+					var bt = JchanCon[i0][4];
+					var nr = JchanCon[i0][5];
+					var gtime = JchanCon[i0][6];
+					
+				var tkuang  = '<center><div class="BGcontent" id="tn_'+cx+'"><div id="sbid_'+cx+'" style="display:none;">'+sbid+'</div><div class="BGcontentT" >';
+						tkuang += '<div style="font-size:20px;float:left;height:20px;">主题：</div>';
+						tkuang += '<div id="tjtopic_'+cx+'" class="tjtopic">'+zht+'</div>';
+						tkuang += '<div style="font-size:20px;float:left;margin-left:5px;height:20px;">标题：</div>';
+						tkuang += '<div id="tjtopic1_'+cx+'" class="tjtopic1" style="border:0;">'+bt+'</div>';
+						tkuang += '<div class="BGcontentX">';
+						tkuang += '<span>作者：</span><span id="Author_'+cx+'">'+tjr+'</span>&nbsp;&nbsp;';
+						tkuang += '<span>时间：</span><span id="newcontentTime_'+cx+'">'+gtime+'</span>&nbsp;&nbsp;';
+						tkuang += '<input id="tj_'+cx+'" type="button" class="TJButton" style="display:none;" value="提交">';
+						tkuang += '</div>';
+						tkuang += '</div>';
+						tkuang += '<div class="BGcontentB" id="editor_DIV_'+cx+'">'+nr+'</div>';
+						tkuang += '</div></center>';
+				allcon+=tkuang;
+				}
+				$("#mq_mainR").html(allcon);
+				oncontextmenu();
+				}
+			});
+	})
+	
+//查看文档
+$(document).off('click',".TJButton").on('click',".TJButton",function(){
+		var trid =$(this).attr("id");
+		var cid = trid.replace('tj_','');
+
+		$.ajax({
+			type: "POST",
+			url: MServer+"qq/channel/ch008C.php",
+			data:{
+				qflag:"QNOTE",
+				sflag:"ArticleText_02",
+				sid: 'tn_'+cid,
+				tjr : $("#Author_"+cid).html(),
+				sbid: $('#sbid_'+cid).html(),
+				zht : $("#tjtopic_"+cid).html(),
+				bt : $("#tjtopic1_"+cid).html(),
+				nr : $("#editor_DIV_"+cid).html(),
+				},
+			async:false,
+			success: function(data1){
+				WarnMessage(data1);
+				$(document).off('click',"#Yes").on('click',"#Yes",function(){
+					$(this).parent().parent().remove();
+					$('#tjtopic1_'+cid).attr('contenteditable', 'false').css('border-bottom','0');
+					$('#editor_DIV_'+cid).attr('contenteditable', 'false');
+					
+					})
+			}
+			})
+	})
+		</script>
+</html>
+

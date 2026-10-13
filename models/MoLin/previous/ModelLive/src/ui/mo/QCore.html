@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>QCore · 复合决策层 | 策略复合 · 动态调度 · 统一执行</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ========== 全局滚动条样式（深色科技风，与页面背景协调） ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background-color: #101010;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 0px;
+            transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16C0FF;
+        }
+        ::-webkit-scrollbar-corner {
+            background-color: #101010;
+        }
+        /* Firefox 滚动条 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333333 #1a1a1a;
+        }
+
+        /* ========== 下拉框统一样式（深色科技商务风） ========== */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0px;
+            padding: 10px 32px 10px 14px;
+            font-size: 0.85rem;
+            font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316C0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+        select:hover {
+            border-color: var(--primary);
+            background-color: #2a2a2a;
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary-transparent);
+        }
+        select option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 8px;
+        }
+
+        /* 模态框内下拉框样式保持一致 */
+        .modal-select {
+            width: 100%;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.1);
+            --bg-primary: #101010;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #4AD2FF;
+            --text-tertiary: #808080;
+            --border-color: #333333;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', 'JetBrains Mono', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--primary-transparent) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-transparent) 1px, transparent 1px);
+            background-size: 42px 42px;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .poster {
+            max-width: 1180px;
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .poster:hover {
+            border-color: var(--primary);
+            box-shadow: 0 28px 56px -14px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--primary-transparent);
+        }
+
+        .top-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--bg-secondary), var(--primary), var(--primary-light), var(--primary), var(--bg-secondary));
+            width: 100%;
+        }
+
+        .content {
+            padding: 2.4rem 2.8rem 2.8rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .logo h1 .en-name {
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .logo h1 .chinese-name {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            margin-left: 0.25rem;
+        }
+
+        .subtitle {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            font-weight: 400;
+            margin-top: 0.2rem;
+        }
+
+        .subtitle i {
+            color: var(--primary-light);
+            font-style: normal;
+        }
+
+        .pill {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hero {
+            margin: 1.5rem 0 2rem;
+        }
+
+        .hero .eyebrow {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.4rem 0.8rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-title .title-main {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            letter-spacing: -0.01em;
+        }
+
+        .hero-sub {
+            font-size: 1rem;
+            color: var(--text-tertiary);
+            margin-bottom: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        .hero .desc {
+            font-size: 1rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+            max-width: 85%;
+            border-left: 2px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        @media (max-width: 780px) {
+            .hero-title .title-main {
+                font-size: 1.8rem;
+            }
+            .hero .desc {
+                max-width: 100%;
+            }
+        }
+
+        /* 三层架构图 */
+        .strategy-architecture {
+            margin: 2rem 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .arch-layer {
+            margin-bottom: 1.2rem;
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .arch-layer h4 {
+            font-size: 0.85rem;
+            color: var(--primary-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .arch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .arch-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 0.8rem;
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .arch-item i {
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        /* 复合策略模式 */
+        .composite-modes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .mode-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+        .mode-card:hover {
+            border-color: var(--primary);
+        }
+
+        .mode-card i {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+        }
+
+        .mode-card h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .mode-card p {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            line-height: 1.4;
+        }
+
+        /* 核心能力标签 */
+        .capabilities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 1.5rem 0;
+            justify-content: center;
+        }
+
+        .cap-tag {
+            background: var(--primary-transparent);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin: 1.5rem 0 1rem;
+            letter-spacing: 1px;
+            border-left: 2px solid var(--primary);
+            padding-left: 0.8rem;
+        }
+
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .value-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .value-card i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .value-card .value-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .value-card .value-desc {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            margin-top: 0.3rem;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            letter-spacing: 0.3px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .beta-meaning {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            text-align: right;
+            margin-top: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        /* 模态框样式（用于演示下拉框） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+        }
+        .modal-content h3 {
+            color: var(--primary-light);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        .modal-content p {
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+        }
+        .modal-content select {
+            width: 100%;
+            margin: 0.8rem 0 1.2rem;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .modal-buttons button {
+            padding: 0.5rem 1.2rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .modal-buttons button:first-child {
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+        .modal-buttons button:first-child:hover {
+            background: var(--primary-transparent);
+        }
+        .modal-buttons button:last-child:hover {
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 800px) {
+            .content {
+                padding: 1.5rem;
+            }
+            .logo h1 {
+                font-size: 2rem;
+            }
+            .logo h1 .chinese-name {
+                font-size: 1.2rem;
+            }
+            .composite-modes {
+                grid-template-columns: 1fr;
+            }
+            .value-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="poster">
+    <div class="top-line"></div>
+    <div class="content">
+        <div class="header">
+            <div class="logo">
+                <h1>
+                    <span class="en-name">QCore</span>
+                    <span class="chinese-name"> · 复合决策层</span>
+                </h1>
+                <div class="subtitle">⚡ <i>复合决策 · 基础策略 + 复合策略</i> | 动态调度 · 统一执行引擎</div>
+            </div>
+            <div class="pill">
+                <i class="fas fa-layer-group"></i> 复合决策 · 策略复合
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="eyebrow">QCore · 复合决策层</div>
+            <div class="hero-title">
+                <span class="title-main">复合决策 · 策略复合 · 动态调度</span>
+            </div>
+            <div class="hero-sub">基于态势感知的环境识别 · 动态策略调度与权重分配</div>
+            <div class="desc">复合决策层：基于态势感知的环境识别，动态调度策略与权重 — 主观+量化 · 纯量化复合 · AI模拟主观，三种模式一套体系</div>
+        </div>
+
+        <!-- 演示下拉框 - 复合策略模式选择（深色协调风格） -->
+        <div style="display: flex; justify-content: flex-end; margin: 0 0 1rem 0;">
+            <select id="compositeModeSelect" style="width: auto; min-width: 220px;">
+                <option value="subjective_quant">主观 + 量化复合模式</option>
+                <option value="pure_quant">纯量化复合模式</option>
+                <option value="ai_subjective">AI模拟主观 + 量化模式</option>
+                <option value="adaptive">自适应动态切换模式</option>
+            </select>
+        </div>
+
+        <!-- 三层架构 -->
+        <div class="strategy-architecture">
+            <div class="arch-layer">
+                <h4><i class="fas fa-cube"></i> L1 · 基础策略单元</h4>
+                <div class="arch-grid">
+                    <div class="arch-item"><i class="fas fa-chart-line"></i> 趋势跟踪策略</div>
+                    <div class="arch-item"><i class="fas fa-chart-pie"></i> 统计套利策略</div>
+                    <div class="arch-item"><i class="fas fa-chart-bar"></i> 因子选股策略</div>
+                    <div class="arch-item"><i class="fas fa-chart-simple"></i> 高频做市策略</div>
+                    <div class="arch-item"><i class="fas fa-chart-line"></i> 事件驱动策略</div>
+                    <div class="arch-item"><i class="fas fa-chart-pie"></i> 宏观对冲策略</div>
+                </div>
+            </div>
+            <div class="arch-layer">
+                <h4><i class="fas fa-layer-group"></i> L2 · 复合决策引擎</h4>
+                <div class="arch-grid">
+                    <div class="arch-item"><i class="fas fa-code-branch"></i> 策略叠加 · 多策略并行</div>
+                    <div class="arch-item"><i class="fas fa-chart-line"></i> 信号融合 · 多因子合成</div>
+                    <div class="arch-item"><i class="fas fa-chart-pie"></i> 动态权重 · 自适应分配</div>
+                    <div class="arch-item"><i class="fas fa-chart-bar"></i> 策略路由 · 条件触发选择</div>
+                </div>
+            </div>
+            <div class="arch-layer">
+                <h4><i class="fas fa-bolt"></i> L3 · 统一交易执行</h4>
+                <div class="arch-grid">
+                    <div class="arch-item"><i class="fas fa-chart-line"></i> 订单聚合 · 合并/拆分执行</div>
+                    <div class="arch-item"><i class="fas fa-chart-pie"></i> 资金分配 · 策略级/复合级</div>
+                    <div class="arch-item"><i class="fas fa-chart-bar"></i> 风控穿透 · 底层逐层监控</div>
+                    <div class="arch-item"><i class="fas fa-chart-simple"></i> 绩效归因 · 单策略/复合级</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 三种复合模式 -->
+        <div class="section-title"><i class="fas fa-microchip" style="margin-right: 0.5rem;"></i> 复合决策 · 三种模式</div>
+        <div class="composite-modes">
+            <div class="mode-card">
+                <i class="fas fa-user-tie"></i>
+                <i class="fas fa-chart-line" style="font-size: 1.2rem; margin-left: -0.3rem;"></i>
+                <h4>主观 + 量化复合</h4>
+                <p>人类判断 + 量化信号共同决策 · 方向判断与数据验证互补 · 风控与策略协同</p>
+            </div>
+            <div class="mode-card">
+                <i class="fas fa-chart-line"></i>
+                <i class="fas fa-chart-pie"></i>
+                <h4>纯量化复合</h4>
+                <p>多策略叠加 · 多因子融合 · 动态权重分配 · 完全由模型驱动执行</p>
+            </div>
+            <div class="mode-card">
+                <i class="fas fa-brain"></i>
+                <i class="fas fa-chart-line"></i>
+                <h4>AI模拟主观 + 量化</h4>
+                <p>α24+ Agent模拟人类分析师决策逻辑 · 与量化信号深度融合 · 规模化主观智慧</p>
+            </div>
+        </div>
+
+        <!-- 核心能力 -->
+        <div class="capabilities">
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 单策略独立运行</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 复合策略协同运行</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 交易端统一支持</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 策略级/复合级归因</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 动态权重调整</span>
+        </div>
+
+        <!-- 与上下层的关系 -->
+        <div class="section-title"><i class="fas fa-code-branch" style="margin-right: 0.5rem;"></i> 系统体系 · 各层协同</div>
+        <div class="value-grid">
+            <div class="value-card">
+                <i class="fas fa-brain"></i>
+                <div class="value-title">α24+ → QCore</div>
+                <div class="value-desc">Agent决策观点作为复合策略输入源 · AI模拟主观信号</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-database"></i>
+                <div class="value-title">β9- → QCore</div>
+                <div class="value-desc">因子数据/回测验证支撑策略构建 · 自动化报告</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-project-diagram"></i>
+                <div class="value-title">Γ → QCore</div>
+                <div class="value-desc">知识融合层研究成果转化为策略单元 · 知识驱动策略迭代</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-chart-line"></i>
+                <div class="value-title">态势感知 → QCore</div>
+                <div class="value-desc">市场状态标签驱动动态权重与策略路由 · 环境自适应决策</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-bolt"></i>
+                <div class="value-title">QCore → 交易端</div>
+                <div class="value-desc">统一订单接口 · 复合决策拆解执行 · 风控穿透</div>
+            </div>
+        </div>
+
+        <!-- 复合决策的核心价值 -->
+        <div class="section-title"><i class="fas fa-chart-line" style="margin-right: 0.5rem;"></i> 复合决策 · 核心价值</div>
+        <div class="value-grid">
+            <div class="value-card">
+                <i class="fas fa-chart-line"></i>
+                <div class="value-title">风险分散</div>
+                <div class="value-desc">多策略低相关性组合 · 平滑收益曲线</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-chart-pie"></i>
+                <div class="value-title">超额叠加</div>
+                <div class="value-desc">不同alpha来源互补 · 提升整体收益</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-chart-bar"></i>
+                <div class="value-title">自适应市场</div>
+                <div class="value-desc">动态调整策略权重 · 适应不同市场环境</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-brain"></i>
+                <div class="value-title">人机协同</div>
+                <div class="value-desc">主观判断与量化执行深度融合</div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            QCore · 复合决策层 | 策略复合 · 动态调度 · 统一执行<br>
+            单策略能跑 · 复合策略能跑 · 基于态势感知的动态决策 — 主观+量化 · 纯量化 · AI模拟主观，三种模式，一套体系
+        </div>
+        <div class="beta-meaning">
+            QCore · 核心决策 · 复合 · 执行
+        </div>
+    </div>
+    <div class="top-line" style="background: var(--border-color); height: 1px;"></div>
+</div>
+
+<!-- 演示模态框（包含下拉框，展示协调样式） -->
+<div id="contactModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-chart-line"></i> 复合决策方案咨询</h3>
+        <p>请选择您的策略复合需求，架构师将为您定制QCore层部署方案</p>
+        <select id="scenarioSelect">
+            <option value="single">单一策略 · 独立运行</option>
+            <option value="multi">多策略并行 · 简单复合</option>
+            <option value="adaptive">自适应权重 · 动态调度</option>
+            <option value="full">全模式支持 · 企业级部署</option>
+        </select>
+        <div class="modal-buttons">
+            <button id="modalConfirm">提交咨询</button>
+            <button id="modalClose">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const poster = document.querySelector('.poster');
+        if (poster) {
+            poster.addEventListener('mousemove', (e) => {
+                const rect = poster.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const intensity = 0.1 + (Math.abs(x - 0.5) * 0.15);
+                poster.style.borderColor = `rgba(22, 192, 255, ${0.4 + intensity * 0.3})`;
+                poster.style.boxShadow = `0 24px 48px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(22, 192, 255, ${0.1 + intensity * 0.15})`;
+            });
+            poster.addEventListener('mouseleave', () => {
+                poster.style.borderColor = '#333333';
+                poster.style.boxShadow = '0 24px 48px -12px rgba(0, 0, 0, 0.8)';
+            });
+        }
+
+        // 演示下拉框交互
+        const compositeSelect = document.getElementById('compositeModeSelect');
+        if (compositeSelect) {
+            compositeSelect.addEventListener('change', (e) => {
+                const mode = e.target.options[e.target.selectedIndex]?.text;
+                const toast = document.createElement('div');
+                toast.innerText = `🔄 复合模式切换: ${mode}`;
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.left = '20px';
+                toast.style.backgroundColor = '#1a1a1a';
+                toast.style.color = '#4AD2FF';
+                toast.style.padding = '0.4rem 1rem';
+                toast.style.fontSize = '0.7rem';
+                toast.style.border = '1px solid #16C0FF';
+                toast.style.zIndex = '999';
+                toast.style.fontFamily = "'Inter', sans-serif";
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(() => toast.remove(), 350);
+                }, 1800);
+            });
+        }
+
+        // 模态框逻辑（演示用）
+        const modal = document.getElementById('contactModal');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalClose = document.getElementById('modalClose');
+
+        if (modalConfirm && modalClose && modal) {
+            modalConfirm.addEventListener('click', () => {
+                const selectVal = document.getElementById('scenarioSelect');
+                const selectedText = selectVal.options[selectVal.selectedIndex]?.text || '';
+                alert(`✅ 咨询已提交！QCore架构师将为您提供「${selectedText}」复合决策方案。`);
+                modal.style.display = 'none';
+                if (selectVal) selectVal.selectedIndex = 0;
+            });
+            modalClose.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
+    })();
+</script>
+</body>
+</html>

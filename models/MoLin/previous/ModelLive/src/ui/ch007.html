@@ -1,0 +1,169 @@
+	<!DOCTYPE html>
+		<html lang="zh-CN">
+		<head>
+		<meta	http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+		<link	type="text/css"	rel="stylesheet"	href="./css/smartMenu.css"/>
+		<script	type="text/javascript"	src="./js/jquery.min.js"></script>
+		<script	type="text/javascript"	src="./js/echarts.min.js"></script>
+		<script	type="text/javascript"	src="./js/echarts-gl.min.js"></script>
+		<script	type="text/javascript"	src="./js/mqcharts.js"></script>
+		<script	type="text/javascript"	src="./js/jquery-smartMenu.js"></script>
+	
+		<style type="text/css">
+				html,body
+				{
+					font-family:Open Sans,Arial,sans-serif;
+					font-weight:400;
+					font-size:14px;
+					line-height:1.3em;
+					width:100%;
+					height:100%;
+					color:#16C0FF;
+					background:#101010;
+					margin:0;
+					padding:0;
+				}
+				#bkuang
+				{
+					width:1500px;
+					height:350px;
+					/*border:solid 0px #16C0FF;*/
+					float:left;
+					margin-left:100px;
+					top:50px;
+					position:absolute;
+					}
+				#top
+				{
+					width:100%;
+					height:58px;
+					/*border-bottom:solid 0px #16C0FF;*/
+					box-sizing:border-box;
+					/*background:#fff102;*/
+					
+					}
+				#boardL,#boardR
+				{
+					width:48%;
+					height:600px;
+					float:left;
+					margin-left:3px;
+					box-sizing:border-box;
+					border:solid 1px #16C0FF;
+					}
+				#selslide
+				{
+					width:100%;
+					height:50px;
+					padding-top:10px;
+					/*background:#ff0000;*/
+					
+					}
+				.mq_top_T
+				{
+					width:auto;
+					padding:0;
+					margin:0;
+					height:58px;
+				}
+				.mq_top_T	li
+				{
+					float:left;
+					list-style-type:none;
+					width:auto;
+					height:58px;
+					line-height:80px;
+					padding:0 0	0	0;
+					text-align:center;
+					font-weight:bold;
+					font-size:34px;
+				  background: linear-gradient(to right, red, blue);
+				  -webkit-background-clip: text;
+				  color:transparent;
+				}
+									
+					
+		</style>
+	
+	</head>
+	<body>
+		    <div style="position:absolute;top:3px;right:5px;background:transparent; margin:0;">
+        <input type="text" id="key"  value="">
+        <a id="submit" class="act" style="cursor:pointer;"><i></i>搜索</a>
+        </div>
+		<div id="bkuang"> 
+			<div id="top">
+		<div	style="height:58px;width:auto;position:absolute;left:24px;">
+		<ul	id="mq_top_T1" class="mq_top_T"><li>Q<span style="font-size:15px;color:#888888;">的投资笔记</span></li></ul>
+			</div>
+				<center><text style="font-size:40px;line-height:40px;">MDCF估值</text></center>
+				<div style="position:absolute;top:0;right:58px;width:58px;height:58px;background:#ff0000;"><img src="./assets/images/WePay.png" style="width:100%;height:100%;"></div>
+			</div>
+			<center><div id="boardL"></div><div id="boardR"></div></center>
+			<!--
+			<div id="selslide">
+				<center>
+        <input type="text" id="key"  value="" style="background:transparent;color:#16C0FF;border:1px	#16C0FF solid;">
+        <a id="submit" class="act" style="cursor:pointer;"><i></i>搜索</a>
+        </center>
+			</div>
+			-->
+		</div>
+		
+	<script	type="text/javascript">
+		//server
+		var MServer = "http://10.10.98.51/test/sys/";
+			//屏蔽右键事件
+			document.oncontextmenu=function(){return	false;}
+			//var MDCFT0 = MDCFT[0];		
+			function MDCFfuc(MDCFT1){
+						var MDCFT2 = "0";
+						var MDCFT3 = "1";
+						$.ajax({
+							type: "POST",
+							url: MServer+"qq/channel/ch007C.php",
+							data:{
+								qflag:"MDCF",
+								sflag:"_04",
+								MDCFT1:MDCFT1,
+								MDCFT2:MDCFT2,
+								},
+							async:false,
+							success: function(data){
+								//alert(data);
+								Surface3D('boardL',data);
+							}
+							})
+							$.ajax({
+							type: "POST",
+							url: MServer+"qq/channel/ch007C.php",
+							data:{
+								qflag:"MDCF",
+								sflag:"_04",
+								MDCFT1:MDCFT1,
+								MDCFT2:MDCFT3,
+								},
+							async:false,
+							success: function(data){
+								//alert(data);
+								Surface3D('boardR',data);
+							}
+							})
+				}		
+			
+			
+	$(document).off('click',"#submit").on('click',"#submit", function(){
+			//alert($layer)
+			var sTxt=$("#key").val();
+			if(sTxt==''){
+				alert("请输入查询代码，格式：SXXXXXXX");
+				}
+			else if(sTxt!=''){
+				MDCFfuc(sTxt);
+			}
+		});
+	
+	</script>
+	</body>	
+</html>
+

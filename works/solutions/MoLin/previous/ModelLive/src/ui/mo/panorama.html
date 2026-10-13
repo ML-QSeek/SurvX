@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>摹林 · 全景系统 | 从数据到决策 · 从研究到交易 · 一体化量化投研与执行体系</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ========== 自定义滚动条样式 - 深色科技风 ========== */
+        /* 适用于整个页面以及所有可滚动容器 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background-color: #0A0A0F;  /* 与背景同色系 */
+        }
+        ::-webkit-scrollbar-track {
+            background: #111117;        /* 轨道深色背景 */
+            border-radius: 0px;
+            margin: 2px 0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A2A35;        /* 滑块深灰 */
+            border-radius: 0px;
+            transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16C0FF;         /* 悬停时科技蓝 */
+            box-shadow: 0 0 2px rgba(22,192,255,0.3);
+        }
+        ::-webkit-scrollbar-corner {
+            background-color: #0A0A0F;
+        }
+        /* Firefox 滚动条样式 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #2A2A35 #111117;
+        }
+        /* 确保所有可能滚动的区域都继承该样式 */
+        body, html, .poster, .content, .arch-grid, .two-columns, .col, .flow-bar {
+            scrollbar-width: thin;
+            scrollbar-color: #2A2A35 #111117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.12);
+            --bg-primary: #0A0A0F;
+            --bg-secondary: #111117;
+            --bg-tertiary: #18181f;
+            --text-primary: #FFFFFF;
+            --text-secondary: #4AD2FF;
+            --text-tertiary: #9A9AAC;
+            --border-color: #2A2A35;
+            --c-qbase: #00CC66;
+            --c-qlens: #2ECC71;
+            --c-qfield: #1ABC9C;
+            --c-qmulti: #8B5CF6;
+            --c-qforge: #FF6B35;
+            --c-qskills: #3498DB;
+            --c-qseek: #E83E8C;
+            --c-qfuse: #16C0FF;
+            --c-qsense: #FFC016;
+            --c-qcore: #9B59B6;
+            --c-qflow: #FF8C00;
+            --c-model: #E74C3C;
+            --c-real: #C0392B;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', 'JetBrains Mono', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .poster {
+            max-width: 1400px;
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .poster:hover {
+            border-color: var(--primary);
+            box-shadow: 0 28px 56px -14px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--primary-transparent);
+        }
+
+        .top-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--bg-secondary), var(--primary), var(--primary-light), var(--primary), var(--bg-secondary));
+            width: 100%;
+        }
+
+        .content {
+            padding: 2rem 2.4rem 2.4rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .logo h1 .system-name {
+            color: var(--primary);
+            font-weight: 800;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .logo h1 .system-name:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .system-desc {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            letter-spacing: 0.5px;
+        }
+
+        .pill {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hero {
+            margin: 1rem 0 1.8rem;
+            text-align: center;
+        }
+
+        .hero-eyebrow {
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+        }
+
+        .hero-title .highlight {
+            color: var(--primary-light);
+        }
+
+        .hero-sub {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            margin-top: 0.6rem;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .arch-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .layer-row {
+            display: flex;
+            width: 100%;
+        }
+
+        .arch-card-full {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0px;
+            padding: 1rem 1.2rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .arch-card-full:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            background: #1f1f2a;
+        }
+
+        .arch-card-full::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .arch-card-full[data-layer="qbase"]::before { background: var(--c-qbase); }
+        .arch-card-full[data-layer="qlens"]::before { background: var(--c-qlens); }
+        .arch-card-full[data-layer="qfield"]::before { background: var(--c-qfield); }
+        .arch-card-full[data-layer="qmulti"]::before { background: var(--c-qmulti); }
+        .arch-card-full[data-layer="qskills"]::before { background: var(--c-qskills); }
+        .arch-card-full[data-layer="qforge"]::before { background: var(--c-qforge); }
+        .arch-card-full[data-layer="qseek"]::before { background: var(--c-qseek); }
+        .arch-card-full[data-layer="qfuse"]::before { background: var(--c-qfuse); }
+        .arch-card-full[data-layer="qsense"]::before { background: var(--c-qsense); }
+        .arch-card-full[data-layer="qcore"]::before { background: var(--c-qcore); }
+        .arch-card-full[data-layer="qflow"]::before { background: var(--c-qflow); }
+        .arch-card-full[data-layer="model"]::before { background: var(--c-model); }
+        .arch-card-full[data-layer="real"]::before { background: var(--c-real); }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .card-icon {
+            font-size: 1.3rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+        }
+
+        .card-sub {
+            font-size: 0.7rem;
+            color: var(--primary-light);
+            font-family: 'JetBrains Mono', monospace;
+            margin-left: auto;
+            background: rgba(22,192,255,0.1);
+            padding: 0.2rem 0.6rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+            margin-bottom: 0.6rem;
+        }
+
+        .card-desc strong {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.6rem;
+            color: var(--text-tertiary);
+            font-family: monospace;
+        }
+
+        .flow-bar {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .flow-steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .flow-step .code {
+            color: var(--primary-light);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .arrow {
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        .capabilities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .cap-tag {
+            background: var(--primary-transparent);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 1.2rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin: 1.5rem 0 1rem;
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .two-columns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .col {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+        }
+
+        .col h4 {
+            font-size: 1rem;
+            color: var(--primary-light);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .col ul {
+            list-style: none;
+        }
+
+        .col li {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            padding-left: 1.2rem;
+            position: relative;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .col li::before {
+            content: "▹";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.2rem;
+        }
+
+        button, .poster, .arch-card-full, .flow-bar, .col, .cap-tag, .pill, .tag, .card-sub {
+            border-radius: 0px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        /* 新增 QSeek 核心理念区块样式 */
+        .qseek-philosophy {
+            background: rgba(232, 62, 140, 0.08);
+            border-left: 4px solid var(--c-qseek);
+            padding: 1rem 1.2rem;
+            margin: 1rem 0 1.5rem;
+        }
+
+        .qseek-philosophy p {
+            font-size: 0.85rem;
+            color: #c0c0c0;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+        }
+
+        .qseek-philosophy .qseek-tagline {
+            color: var(--c-qseek);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @media (max-width: 1000px) {
+            .content {
+                padding: 1.5rem;
+            }
+            .hero-title {
+                font-size: 1.4rem;
+            }
+            .hero-sub {
+                max-width: 100%;
+            }
+            .card-title {
+                font-size: 1rem;
+            }
+            .card-desc {
+                font-size: 0.75rem;
+            }
+            .tag {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="poster">
+    <div class="top-line"></div>
+    <div class="content">
+        <div class="header">
+            <div class="logo">
+                <h1>
+                    <a href="./diagram.html" style="text-decoration: none; color: inherit; display: inline-block;">
+                        <span class="system-name">摹林 · 全景</span>
+                    </a>
+                </h1>
+                <div class="system-desc">从数据到决策 · 从研究到交易 · 一体化量化投研与执行体系</div>
+            </div>
+            <div class="pill">
+                <i class="fas fa-layer-group"></i> Q系列 · 十三层统一命名空间
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="hero-eyebrow">MOLIN · 全分离量化生态 | QBase → QLens → QField → QMulti → QSkills → Q FORGE → QSeek → QFuse → QSense → QCore → QFlow → ModelLive → ModelLive Real</div>
+            <div class="hero-title">
+                <span class="highlight">基础设施(QBase/QLens/QField) → AI引擎(QMulti/QSkills/Q FORGE/QSeek) → 业务核心(QFuse/QSense/QCore/QFlow) → 执行闭环(ModelLive/Real)</span>
+            </div>
+            <div class="hero-sub">
+                十三大独立层 · QMulti多重宇宙AI基础 · Q FORGE工程治理框架 · QSeek约束边界Agent范式 · 四段式全景架构 · 统一Q命名体系 · 点击任意模块跳转详情
+            </div>
+        </div>
+
+        <!-- 全景架构：从下往上 (基础设施在最底部，执行层在顶部) -->
+        <div class="arch-grid">
+            <!-- 执行层 ModelLive Real (最顶部) -->
+            <div class="layer-row">
+                <a href="./ModelLiveReal.html" style="width:100%; text-decoration:none; display:block;">
+                    <div class="arch-card-full" data-layer="real">
+                        <div class="card-header">
+                            <i class="fas fa-bolt card-icon" style="color: var(--c-real);"></i>
+                            <span class="card-title">执行层 · ModelLive Real</span>
+                            <span class="card-sub">实盘交易引擎 · 契约执行</span>
+                        </div>
+                        <div class="card-desc">
+                            生产级实盘交易执行，多通道券商直连，<strong>穿透式实时风控拦截</strong>，绩效归因与盈亏分解。
+                            隐含<strong>贡献者权益分配</strong>——每笔交易的盈亏自动归因到策略与人员，成为绩效考量的数据源头。
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">实盘交易通道 · 券商直连</span>
+                            <span class="tag">穿透风控 · 实时拦截</span>
+                            <span class="tag">绩效归因 · 贡献量化</span>
+                            <span class="tag">低延迟执行</span>
+                            <span class="tag">权益分配数据源</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 执行层 ModelLive -->
+            <div class="layer-row">
+                <a href="./ModelLive.html" style="width:100%; text-decoration:none; display:block;">
+                    <div class="arch-card-full" data-layer="model">
+                        <div class="card-header">
+                            <i class="fas fa-desktop card-icon" style="color: var(--c-model);"></i>
+                            <span class="card-title">执行层 · ModelLive</span>
+                            <span class="card-sub">仿真环境 · 集成验证 · 契约入口</span>
+                        </div>
+                        <div class="card-desc">
+                            策略仿真环境，集成部署验证，模拟交易执行，全链路压力测试，风险预演。
+                            <strong>体系与人的接口</strong>——策略上线前的最后一道验证关卡，也是贡献者接入体系的入口。
+                            通过仿真即获得实盘资格，<strong>输出质量是唯一的评判标准</strong>。
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">摹林桌面程序/OA集成</span>
+                            <span class="tag">模拟执行通道</span>
+                            <span class="tag">实盘模拟双环境</span>
+                            <span class="tag">风险预演</span>
+                            <span class="tag">策略准入门槛</span>
+                            <span class="tag">贡献验证</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- ═══════ 业务层 · 核心链路 ═══════ -->
+            <div style="margin: 1.5rem 0 0.8rem; border: 1px dashed rgba(255,255,255,0.15); padding: 1.5rem 0.8rem 0.6rem; position: relative;">
+                <div style="position: absolute; left: 1.2rem; top: -0.7rem; background: var(--bg-secondary); padding: 0 0.8rem; font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 1.5px;">
+                    <i class="fas fa-cubes" style="margin-right: 6px;"></i>业务层 · 核心链路
+                </div>
+
+                <!-- QFlow 募集层 -->
+                <div class="layer-row" style="margin-top: 0.3rem;">
+                    <a href="./QFlow.html" style="width:100%; text-decoration:none; display:block;">
+                        <div class="arch-card-full" data-layer="qflow">
+                            <div class="card-header">
+                                <i class="fas fa-hand-holding-usd card-icon" style="color: var(--c-qflow);"></i>
+                                <span class="card-title">业务层 · QFlow</span>
+                                <span class="card-sub">资金聚合 · 容量管理</span>
+                            </div>
+                            <div class="card-desc">资金聚合，策略分发，高净值客户分层服务，容量红绿灯机制，产品定制。</div>
+                            <div class="card-tags">
+                                <span class="tag">S/A级分层服务</span>
+                                <span class="tag">核心+卫星策略配置</span>
+                                <span class="tag">容量红绿灯·动态封盘</span>
+                                <span class="tag">相关性分析定制</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- QCore 决策层 -->
+                <div class="layer-row">
+                    <a href="./QCore.html" style="width:100%; text-decoration:none; display:block;">
+                        <div class="arch-card-full" data-layer="qcore">
+                            <div class="card-header">
+                                <i class="fas fa-microchip card-icon" style="color: var(--c-qcore);"></i>
+                                <span class="card-title">业务层 · QCore</span>
+                                <span class="card-sub">复合决策引擎</span>
+                            </div>
+                            <div class="card-desc">多策略协同，信号融合，动态权重调整，策略路由，统一调度量化+主观+Agent信号。</div>
+                            <div class="card-tags">
+                                <span class="tag">策略叠加 · 多策略并行</span>
+                                <span class="tag">信号融合 · 多因子合成</span>
+                                <span class="tag">动态权重 · 自适应分配</span>
+                                <span class="tag">策略路由 · 条件触发</span>
+                                <span class="tag">QSeek 信号接入</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- QSense 态势感知层 -->
+                <div class="layer-row">
+                    <a href="./QSense.html" style="width:100%; text-decoration:none; display:block;">
+                        <div class="arch-card-full" data-layer="qsense">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line card-icon" style="color: var(--c-qsense);"></i>
+                                <span class="card-title">业务层 · QSense</span>
+                                <span class="card-sub">态势感知 · 因子生产</span>
+                            </div>
+                            <div class="card-desc">实时采集市场数据，因子生产与特征工程，多维度监控预警，异常检测。</div>
+                            <div class="card-tags">
+                                <span class="tag">数据采集 · WebSocket/API</span>
+                                <span class="tag">因子生产 · 实时/批量</span>
+                                <span class="tag">因子评价 · IC/IR/分层</span>
+                                <span class="tag">市场监控 · 极端预警</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- QFuse 知识融合层 -->
+                <div class="layer-row">
+                    <a href="./QFuse.html" style="width:100%; text-decoration:none; display:block;">
+                        <div class="arch-card-full" data-layer="qfuse">
+                            <div class="card-header">
+                                <i class="fas fa-brain card-icon" style="color: var(--c-qfuse);"></i>
+                                <span class="card-title">业务层 · QFuse</span>
+                                <span class="card-sub">知识融合 · 课题生态</span>
+                            </div>
+                            <div class="card-desc">课题生态，研究成果沉淀，知识确权，内部协同与外部研究成果融合，投研知识图谱。</div>
+                            <div class="card-tags">
+                                <span class="tag">知识融合 · 图谱构建</span>
+                                <span class="tag">课题生态 · 确权机制</span>
+                                <span class="tag">自动化研报生成</span>
+                                <span class="tag">研究协作平台</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <!-- ═══════ 业务层结束 ═══════ -->
+
+            <!-- QSeek 智能体层 (基于约束边界的Agent范式重构) -->
+            <div class="layer-row">
+                <a href="./QSeek.html" style="width:100%; text-decoration:none; display:block;">
+                    <div class="arch-card-full" data-layer="qseek">
+                        <div class="card-header">
+                            <i class="fas fa-robot card-icon" style="color: var(--c-qseek);"></i>
+                            <span class="card-title">AI层 · QSeek 智索</span>
+                            <span class="card-sub">约束边界Agent · 吝啬世界 · 反思填空</span>
+                        </div>
+                        <div class="card-desc">
+                            <strong>核心范式：在约束围成的可行域里自己填空、反思、走出路。</strong> 
+                            大模型是平行宇宙的规则接口，只给后果不给建议。Agent在实体间建立关系，以存在代价验证偏差，用经历编织贝叶斯网络。
+                            提供持久化性格/情绪/记忆，模拟主观决策，独立产出投研观点与策略建议。
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">吝啬原则 · 只给后果</span>
+                            <span class="tag">关系填空驱动 · 思考即抉择</span>
+                            <span class="tag">Entity六层统一模型(S/C/R/O/F/G)</span>
+                            <span class="tag">贝叶斯网络 · 经历可解释</span>
+                            <span class="tag">双重判定 · 混合宇宙反馈</span>
+                            <span class="tag">偏差即个性 · 存在即代价</span>
+                            <span class="tag">反思填空 · 异步双进程</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Q FORGE 工程治理层 -->
+            <div class="layer-row">
+                <a href="./QForge.html" style="width:100%; text-decoration:none; display:block;">
+                    <div class="arch-card-full" data-layer="qforge">
+                        <div class="card-header">
+                            <i class="fas fa-hammer card-icon" style="color: var(--c-qforge);"></i>
+                            <span class="card-title">AI层 · Q FORGE</span>
+                            <span class="card-sub">工程治理 · 锻造准则</span>
+                        </div>
+                        <div class="card-desc">
+                            上部预防（F.O.R.G.E.）：心搏代码区 · 决策存证 · 考古检查 · 知识库 · 施行纪律<br>
+                            下部治理（G.O.V.）：技术债地图探明 · 模块档案绘制 · 微创手术验证入库
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">Fortify设防 · 心搏代码</span>
+                            <span class="tag">Observe存证 · 五要素</span>
+                            <span class="tag">Refine提炼 · 考古检查</span>
+                            <span class="tag">Gather沉淀 · 知识库</span>
+                            <span class="tag">Enforce施行 · CI审计</span>
+                            <span class="tag">Gauge探明 · 技术债地图</span>
+                            <span class="tag">Outline绘制 · 模块档案</span>
+                            <span class="tag">Verify & Vault · 微创手术</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- QMulti · AI基础层 -->
+            <div class="layer-row">
+                <a href="./QMulti.html" style="width:100%; text-decoration:none; display:block;">
+                    <div class="arch-card-full" data-layer="qmulti">
+                        <div class="card-header">
+                            <i class="fas fa-cube card-icon" style="color: var(--c-qmulti);"></i>
+                            <span class="card-title">AI层 · QMulti</span>
+                            <span class="card-sub">多重意义宇宙 · 演化思辨底座</span>
+                        </div>
+                        <div class="card-desc">AI基础层，多重模型统一接入，混合世界规则引擎，多角色思辨框架，持久化记忆系统，元认知监控，跨宇宙穿梭与对比，反脆弱性制衡。</div>
+                        <div class="card-tags">
+                            <span class="tag">Multi · 多重宇宙接入</span>
+                            <span class="tag">混合世界 · 双重反馈</span>
+                            <span class="tag">我之为我 · 自洽涌现</span>
+                            <span class="tag">演化思辨 · 元认知</span>
+                            <span class="tag">跨模型穿梭</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- QField 统一网关 -->
+            <div class="layer-row">
+                <a href="./QField.html" style="width:100%; text-decoration:none; display:block;">
+                    <div class="arch-card-full" data-layer="qfield">
+                        <div class="card-header">
+                            <i class="fas fa-network-wired card-icon" style="color: var(--c-qfield);"></i>
+                            <span class="card-title">基础设施层 · QField</span>
+                            <span class="card-sub">统一网关API</span>
+                        </div>
+                        <div class="card-desc">全系统API网关，服务路由，鉴权限流，协议转换，连接各层标准化通信。</div>
+                        <div class="card-tags">
+                            <span class="tag">API网关 · 动态路由</span>
+                            <span class="tag">统一鉴权 · JWT/OAuth</span>
+                            <span class="tag">限流熔断</span>
+                            <span class="tag">服务网格/可观测性</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- QLens 算力集群 -->
+            <div class="layer-row">
+                <a href="./QLens.html" style="width:100%; text-decoration:none; display:block;">
+                    <div class="arch-card-full" data-layer="qlens">
+                        <div class="card-header">
+                            <i class="fas fa-microchip card-icon" style="color: var(--c-qlens);"></i>
+                            <span class="card-title">基础设施层 · QLens</span>
+                            <span class="card-sub">K3s算力集群</span>
+                        </div>
+                        <div class="card-desc">弹性算力调度，分布式任务引擎，机器学习训练/回测加速，资源动态编排。</div>
+                        <div class="card-tags">
+                            <span class="tag">K3s集群 · GPU调度</span>
+                            <span class="tag">任务队列 · Airflow/Argo</span>
+                            <span class="tag">算力弹性伸缩</span>
+                            <span class="tag">分布式回测引擎</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- QBase 数据与存储 (最底层) -->
+            <div class="layer-row">
+                <a href="./QBase.html" style="width:100%; text-decoration:none; display:block;">
+                    <div class="arch-card-full" data-layer="qbase">
+                        <div class="card-header">
+                            <i class="fas fa-database card-icon" style="color: var(--c-qbase);"></i>
+                            <span class="card-title">基础设施层 · QBase</span>
+                            <span class="card-sub">统一数据底座</span>
+                        </div>
+                        <div class="card-desc">统一数据存储底座，分布式KV+时序+关系存储混合，冷热分离架构，支撑全量量化数据。</div>
+                        <div class="card-tags">
+                            <span class="tag">KV存储 · TiKV/Redis</span>
+                            <span class="tag">时序存储 · ClickHouse</span>
+                            <span class="tag">关系存储 · TiDB/PG</span>
+                            <span class="tag">冷数据 · MinIO/S3</span>
+                            <span class="tag">水平扩展 · 多租户</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 数据流向闭环（从下至上） -->
+        <div class="flow-bar">
+            <div class="flow-steps">
+                <span class="code">QBase</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code">QLens</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code">QField</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code" style="color: var(--c-qmulti);">QMulti</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code" style="color: var(--c-qskills);">QSkills</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code" style="color: var(--c-qforge);">Q FORGE</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code" style="color: var(--c-qseek);">QSeek</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code">QFuse</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code">QSense</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code">QCore</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code">QFlow</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code">ModelLive</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code">Real执行</span> <i class="fas fa-arrow-right arrow"></i>
+                <span class="code">市场闭环</span>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.8rem;">
+                四段式全景架构 · 基础设施(QBase/QLens/QField) → AI引擎(QMulti/QSkills/Q FORGE/QSeek) → 业务核心(QFuse/QSense/QCore/QFlow) → 执行闭环(ModelLive/ModelLive Real)  |  点击任意卡片跳转详情页
+            </div>
+        </div>
+
+        <!-- QSeek 核心理念区块（深度整合） -->
+        <div class="qseek-philosophy">
+            <p><i class="fas fa-quote-left" style="color: var(--c-qseek); margin-right: 8px;"></i> <span class="qseek-tagline">吝啬的世界 · 约束即边界，填空即思考，路径即智慧</span><br>
+            QSeek Agent遵循“吝啬原则”：环境与大模型只提供客观规则与必然反馈，从不直接给出答案。Agent在实体之间建立关系——填空的过程就是思考、筛选与行为抉择。偏差即个性，存在即代价。</p>
+            <p>Entity统一模型（S结构层/C计算层/R关系层/O约束层/F特征层/G目标层）承载Agent演化。经历驱动的贝叶斯网络取代黑箱，每条关系都能溯源。反思扫描+关系填空+大模型双重判定+混合宇宙构成吝啬宇宙的四大引擎。</p>
+            <p style="font-size:0.75rem; margin-top:6px;">产出：叙事层｜关系层｜个性层｜群体层 → 多Agent合并为可传承的判断模型，直接赋能QCore决策引擎。</p>
+        </div>
+
+        <!-- 核心能力标签 -->
+        <div class="capabilities">
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 四段式全景架构 · 基础设施 → AI → 业务 → 执行</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> QMulti · 多重意义宇宙基础层</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> Q FORGE 工程治理 · 预防+治理</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> QSeek 约束边界Agent · 吝啬世界范式</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> QSkills原子技能库</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> QLens算力+QField网关</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> ModelLive双擎 · 仿真验证+实盘执行</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 业务层 · QFuse→QSense→QCore→QFlow</span>
+            <span class="cap-tag"><i class="fas fa-check-circle"></i> 纯输出导向 · 贡献即评判</span>
+        </div>
+
+        <!-- 两栏深度说明：更新为QSeek与ModelLive融合视角 -->
+        <div class="two-columns">
+            <div class="col">
+                <h4><i class="fas fa-brain" style="color: var(--c-qseek);"></i> QSeek · 约束边界的Agent范式</h4>
+                <ul>
+                    <li><strong>吝啬原则</strong>：世界只给后果不给建议，杜绝幻觉，建立信任基础</li>
+                    <li><strong>关系填空驱动</strong>：Agent在实体间建立关系，填空过程即为思考与抉择</li>
+                    <li><strong>Entity六层模型(S/C/R/O/F/G)</strong>：统一数据架构，经历驱动贝叶斯网络可解释</li>
+                    <li><strong>反思填空机制</strong>：扫描序列与经历表，修正约束层/关系层，持续演化</li>
+                    <li><strong>混合宇宙反馈</strong>：大模型规则+物理世界硬约束，Agent生存代价验证</li>
+                    <li><strong>四层产出接入QCore</strong>：叙事/关系/个性/群体层 → 策略信号与风控判断</li>
+                </ul>
+            </div>
+            <div class="col">
+                <h4><i class="fas fa-desktop" style="color: var(--c-model);"></i> ModelLive · 体系与人的契约接口</h4>
+                <ul>
+                    <li><strong>仿真即准入门槛</strong>：策略必须通过ModelLive仿真验证才能上线实盘，不考核人，只验证输出</li>
+                    <li><strong>输出质量唯一评判标准</strong>：不关注过程、工时、文化认同，只看策略在仿真和实盘中的表现</li>
+                    <li><strong>贡献自动归因</strong>：每笔交易盈亏追溯到具体策略和贡献者，ModelLive Real 自动生成绩效数据</li>
+                    <li><strong>权益分配数据源</strong>：归因结果可直接作为收益分配依据，不靠主观评价</li>
+                    <li><strong>自由接入，自然筛选</strong>：能持续输出高质量策略的人自然留存，无需人为管理机制</li>
+                    <li><strong>QSeek信号集成</strong>：Agent独立观点经ModelLive验证后成为实盘有效信号</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            摹林 · 全景量化投研与交易体系 | Q系列统一命名 · QBase → QLens → QField → QMulti → QSkills → Q FORGE → QSeek → QFuse → QSense → QCore → QFlow → ModelLive → ModelLive Real<br>
+            所有模块无圆角 · 直角刚毅风格 · 独立演进 · 不管理只连接 · 纯输出导向 · 点击卡片跳转详情<br>
+            <span style="color: var(--c-qseek);">QSeek核心：约束边界里的自我觉察与路径填空 · 吝啬反馈 | 实体六层模型 | 经历即贝叶斯网络</span>
+        </div>
+    </div>
+    <div class="top-line" style="background: var(--border-color); height: 1px;"></div>
+</div>
+
+<script>
+    (function() {
+        const poster = document.querySelector('.poster');
+        if (poster) {
+            poster.addEventListener('mousemove', (e) => {
+                const rect = poster.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const intensity = 0.1 + (Math.abs(x - 0.5) * 0.15);
+                poster.style.borderColor = `rgba(22, 192, 255, ${0.4 + intensity * 0.3})`;
+                poster.style.boxShadow = `0 24px 48px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(22, 192, 255, ${0.1 + intensity * 0.15})`;
+            });
+            poster.addEventListener('mouseleave', () => {
+                poster.style.borderColor = '#2A2A35';
+                poster.style.boxShadow = '0 24px 48px -12px rgba(0, 0, 0, 0.8)';
+            });
+        }
+    })();
+</script>
+</body>
+</html>

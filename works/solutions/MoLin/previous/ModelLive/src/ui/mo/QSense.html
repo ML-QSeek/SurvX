@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>QSense · 态势感知层 | 实时采集 · 特征分析 · 全维监控</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ========== 全局滚动条样式（深色科技风，与页面背景协调） ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background-color: #101010;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 0px;
+            transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16C0FF;
+        }
+        ::-webkit-scrollbar-corner {
+            background-color: #101010;
+        }
+        /* Firefox 滚动条 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333333 #1a1a1a;
+        }
+
+        /* ========== 下拉框统一样式（深色科技商务风） ========== */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0px;
+            padding: 10px 32px 10px 14px;
+            font-size: 0.85rem;
+            font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316C0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+        select:hover {
+            border-color: var(--primary);
+            background-color: #2a2a2a;
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary-transparent);
+        }
+        select option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 8px;
+        }
+
+        /* 模态框内下拉框样式保持一致 */
+        .modal-select {
+            width: 100%;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.1);
+            --bg-primary: #101010;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #4AD2FF;
+            --text-tertiary: #808080;
+            --border-color: #333333;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', 'JetBrains Mono', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--primary-transparent) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-transparent) 1px, transparent 1px);
+            background-size: 42px 42px;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .poster {
+            max-width: 1280px;
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .poster:hover {
+            border-color: var(--primary);
+            box-shadow: 0 28px 56px -14px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--primary-transparent);
+        }
+
+        .top-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--bg-secondary), var(--primary), var(--primary-light), var(--primary), var(--bg-secondary));
+            width: 100%;
+        }
+
+        .content {
+            padding: 2.4rem 2.8rem 2.8rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .logo h1 .en-name {
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .logo h1 .chinese-name {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            margin-left: 0.25rem;
+        }
+
+        .subtitle {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            font-weight: 400;
+            margin-top: 0.2rem;
+        }
+
+        .subtitle i {
+            color: var(--primary-light);
+            font-style: normal;
+        }
+
+        .pill {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hero {
+            margin: 1.5rem 0 2rem;
+        }
+
+        .hero .eyebrow {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.4rem 0.8rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-title .title-main {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            letter-spacing: -0.01em;
+        }
+
+        .hero-sub {
+            font-size: 1rem;
+            color: var(--text-tertiary);
+            margin-bottom: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        .hero .desc {
+            font-size: 1rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+            max-width: 90%;
+            border-left: 2px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        @media (max-width: 780px) {
+            .hero-title .title-main {
+                font-size: 1.8rem;
+            }
+            .hero .desc {
+                max-width: 100%;
+            }
+        }
+
+        /* 数据源分类 */
+        .data-sources {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .source-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+        .source-card:hover {
+            border-color: var(--primary);
+        }
+
+        .source-card i {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 0.6rem;
+        }
+
+        .source-card h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .source-card p {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            line-height: 1.3;
+        }
+
+        /* 四层模块 */
+        .sensing-modules {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .module-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+        .module-card:hover {
+            border-color: var(--primary);
+        }
+
+        .module-card i {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 0.6rem;
+        }
+
+        .module-card h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .module-card p {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            line-height: 1.3;
+        }
+
+        /* 数据流向 */
+        .data-flow {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .flow-steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .flow-step {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .flow-step i {
+            color: var(--primary);
+        }
+
+        .flow-arrow {
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        @media (max-width: 800px) {
+            .data-sources {
+                grid-template-columns: 1fr 1fr;
+            }
+            .sensing-modules {
+                grid-template-columns: 1fr 1fr;
+            }
+            .flow-steps {
+                flex-direction: column;
+            }
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* 特征指标 */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+
+        .feature-tag {
+            background: var(--primary-transparent);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.6rem;
+            font-size: 0.65rem;
+            color: var(--primary-light);
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin: 1.8rem 0 1rem;
+            letter-spacing: 1px;
+            border-left: 2px solid var(--primary);
+            padding-left: 0.8rem;
+        }
+
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .value-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .value-card i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .value-card .value-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .value-card .value-desc {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            margin-top: 0.3rem;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            letter-spacing: 0.3px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .beta-meaning {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            text-align: right;
+            margin-top: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        /* 模态框样式（用于演示下拉框） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+        }
+        .modal-content h3 {
+            color: var(--primary-light);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        .modal-content p {
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+        }
+        .modal-content select {
+            width: 100%;
+            margin: 0.8rem 0 1.2rem;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .modal-buttons button {
+            padding: 0.5rem 1.2rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .modal-buttons button:first-child {
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+        .modal-buttons button:first-child:hover {
+            background: var(--primary-transparent);
+        }
+        .modal-buttons button:last-child:hover {
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 800px) {
+            .content {
+                padding: 1.5rem;
+            }
+            .logo h1 {
+                font-size: 2rem;
+            }
+            .logo h1 .chinese-name {
+                font-size: 1.2rem;
+            }
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .value-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="poster">
+    <div class="top-line"></div>
+    <div class="content">
+        <div class="header">
+            <div class="logo">
+                <h1>
+                    <span class="en-name">QSense</span>
+                    <span class="chinese-name"> · 态势感知层</span>
+                </h1>
+                <div class="subtitle">📡 <i>全维实时感知</i> | 市场 · 基本面 · 事件 · 另类数据</div>
+            </div>
+            <div class="pill">
+                <i class="fas fa-chart-line"></i> 实时态势感知 · QSense
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="eyebrow">QSense · 态势感知层</div>
+            <div class="hero-title">
+                <span class="title-main">全维实时感知 · 动态特征分析</span>
+            </div>
+            <div class="hero-sub">QSense = 变化 · 捕捉市场内外的每一刻变化</div>
+            <div class="desc">态势感知层是我们的实时全维感知系统，负责多源动态数据的采集、特征分析、状态识别与异常监控，为上层复合决策提供完整的环境认知基础。</div>
+        </div>
+
+        <!-- 演示下拉框 - 感知策略选择（深色协调风格） -->
+        <div style="display: flex; justify-content: flex-end; margin: 0 0 1rem 0;">
+            <select id="sensingStrategySelect" style="width: auto; min-width: 220px;">
+                <option value="full">全维感知 · 市场+基本面+事件</option>
+                <option value="market">高频优先 · 市场微观结构</option>
+                <option value="fundamental">基本面驱动 · 财报/估值监控</option>
+                <option value="event">事件驱动 · 新闻/公告实时预警</option>
+            </select>
+        </div>
+
+        <!-- 数据源分类 -->
+        <div class="section-title"><i class="fas fa-database" style="margin-right: 0.5rem;"></i> 感知数据源 · 全维度覆盖</div>
+        <div class="data-sources">
+            <div class="source-card">
+                <i class="fas fa-chart-line"></i>
+                <h4>市场数据</h4>
+                <p>行情 · 订单簿 · 成交量 · 波动率 · 资金流</p>
+            </div>
+            <div class="source-card">
+                <i class="fas fa-chart-pie"></i>
+                <h4>基本面数据</h4>
+                <p>财务报告 · 业绩预告 · 估值指标 · 盈利预测</p>
+            </div>
+            <div class="source-card">
+                <i class="fas fa-newspaper"></i>
+                <h4>事件数据</h4>
+                <p>公司公告 · 政策发布 · 宏观数据 · 新闻资讯</p>
+            </div>
+            <div class="source-card">
+                <i class="fas fa-chart-simple"></i>
+                <h4>另类数据</h4>
+                <p>舆情情绪 · 产业链数据 · 卫星图像 · 搜索热度</p>
+            </div>
+        </div>
+
+        <!-- 四个核心模块 -->
+        <div class="section-title"><i class="fas fa-cogs" style="margin-right: 0.5rem;"></i> 核心能力 · 感知流水线</div>
+        <div class="sensing-modules">
+            <div class="module-card">
+                <i class="fas fa-cloud-download-alt"></i>
+                <h4>数据采集</h4>
+                <p>爬虫 · WebSocket · API网关 · 代理管理 · 动态抓取</p>
+            </div>
+            <div class="module-card">
+                <i class="fas fa-filter"></i>
+                <h4>数据处理</h4>
+                <p>流处理 · 清洗对齐 · 数据校验 · 标准化输出</p>
+            </div>
+            <div class="module-card">
+                <i class="fas fa-chart-line"></i>
+                <h4>特征工程</h4>
+                <p>波动率 · 相关性 · 流动性 · 情绪指标 · 微观结构</p>
+            </div>
+            <div class="module-card">
+                <i class="fas fa-bell"></i>
+                <h4>监控预警</h4>
+                <p>状态识别 · 异常检测 · 阈值告警 · 标签输出</p>
+            </div>
+        </div>
+
+        <!-- 数据流向 -->
+        <div class="data-flow">
+            <div class="flow-steps">
+                <div class="flow-step"><i class="fas fa-globe"></i> 全维数据源</div>
+                <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="flow-step"><i class="fas fa-cloud-download-alt"></i> 实时采集</div>
+                <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="flow-step"><i class="fas fa-chart-line"></i> 特征分析</div>
+                <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="flow-step"><i class="fas fa-tag"></i> 状态标签</div>
+                <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="flow-step"><i class="fas fa-brain"></i> Σ 复合决策层</div>
+            </div>
+        </div>
+
+        <!-- 输出特征指标 -->
+        <div class="section-title"><i class="fas fa-chart-simple" style="margin-right: 0.5rem;"></i> 核心输出 · 特征与状态标签</div>
+        <div class="feature-grid">
+            <div class="feature-tag">市场波动率 / 隐含波动率</div>
+            <div class="feature-tag">波动率曲面偏度</div>
+            <div class="feature-tag">跨资产相关性矩阵</div>
+            <div class="feature-tag">流动性深度与买卖价差</div>
+            <div class="feature-tag">订单流不平衡度</div>
+            <div class="feature-tag">成交量分布与量价关系</div>
+            <div class="feature-tag">市场情绪指数</div>
+            <div class="feature-tag">新闻事件冲击评分</div>
+            <div class="feature-tag">市场状态标签</div>
+            <div class="feature-tag">风格切换信号</div>
+            <div class="feature-tag">异常波动/流动性预警</div>
+            <div class="feature-tag">宏观-微观背离度</div>
+        </div>
+
+        <!-- 与上下游的关系 -->
+        <div class="section-title"><i class="fas fa-code-branch" style="margin-right: 0.5rem;"></i> 系统体系 · 各层协同</div>
+        <div class="value-grid">
+            <div class="value-card">
+                <i class="fas fa-database"></i>
+                <div class="value-title">β9- → QSense</div>
+                <div class="value-desc">数据底座提供历史数据与因子库 · 支撑特征工程基准</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-brain"></i>
+                <div class="value-title">α24+ ↔ QSense</div>
+                <div class="value-desc">Agent订阅态势标签 · 观点生成可注入感知层</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-project-diagram"></i>
+                <div class="value-title">QFuse → QSense</div>
+                <div class="value-desc">知识融合层提供历史模式参考 · 辅助状态识别</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-layer-group"></i>
+                <div class="value-title">QSense → Σ</div>
+                <div class="value-desc">态势标签驱动复合决策层 · 动态权重与策略路由</div>
+            </div>
+        </div>
+
+        <!-- 核心价值 -->
+        <div class="section-title"><i class="fas fa-chart-line" style="margin-right: 0.5rem;"></i> 态势感知 · 核心价值</div>
+        <div class="value-grid">
+            <div class="value-card">
+                <i class="fas fa-tachometer-alt"></i>
+                <div class="value-title">实时性</div>
+                <div class="value-desc">毫秒级采集与特征计算 · 捕捉市场内外瞬间变化</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-chart-line"></i>
+                <div class="value-title">结构化</div>
+                <div class="value-desc">将杂乱原始数据转化为标准化特征与状态标签</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-bell"></i>
+                <div class="value-title">预警能力</div>
+                <div class="value-desc">异常检测与阈值告警 · 提前识别风险信号</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-cogs"></i>
+                <div class="value-title">决策驱动</div>
+                <div class="value-desc">为复合决策层提供环境认知基础 · 实现自适应交易</div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            QSense · 态势感知层 | 全维实时感知 · 动态特征分析 · 市场状态识别<br>
+            市场数据 · 基本面 · 事件 · 另类数据 — 感知一切，驱动决策
+        </div>
+        <div class="beta-meaning">
+            QSense · 变化 · 全维 · 实时 · 驱动决策
+        </div>
+    </div>
+    <div class="top-line" style="background: var(--border-color); height: 1px;"></div>
+</div>
+
+<!-- 演示模态框（包含下拉框，展示协调样式） -->
+<div id="contactModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-chart-line"></i> 态势感知方案咨询</h3>
+        <p>请选择您的感知需求，架构师将为您定制QSense层数据采集与特征工程方案</p>
+        <select id="perceptionScenarioSelect">
+            <option value="market">市场微观结构 · 高频行情监控</option>
+            <option value="fundamental">基本面分析 · 财报/估值实时追踪</option>
+            <option value="event">事件驱动 · 新闻/公告智能预警</option>
+            <option value="full">全维感知 · 企业级态势感知平台</option>
+        </select>
+        <div class="modal-buttons">
+            <button id="modalConfirm">提交咨询</button>
+            <button id="modalClose">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const poster = document.querySelector('.poster');
+        if (poster) {
+            poster.addEventListener('mousemove', (e) => {
+                const rect = poster.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const intensity = 0.1 + (Math.abs(x - 0.5) * 0.15);
+                poster.style.borderColor = `rgba(22, 192, 255, ${0.4 + intensity * 0.3})`;
+                poster.style.boxShadow = `0 24px 48px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(22, 192, 255, ${0.1 + intensity * 0.15})`;
+            });
+            poster.addEventListener('mouseleave', () => {
+                poster.style.borderColor = '#333333';
+                poster.style.boxShadow = '0 24px 48px -12px rgba(0, 0, 0, 0.8)';
+            });
+        }
+
+        // 演示下拉框交互
+        const sensingSelect = document.getElementById('sensingStrategySelect');
+        if (sensingSelect) {
+            sensingSelect.addEventListener('change', (e) => {
+                const mode = e.target.options[e.target.selectedIndex]?.text;
+                const toast = document.createElement('div');
+                toast.innerText = `📡 感知策略切换: ${mode}`;
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.left = '20px';
+                toast.style.backgroundColor = '#1a1a1a';
+                toast.style.color = '#4AD2FF';
+                toast.style.padding = '0.4rem 1rem';
+                toast.style.fontSize = '0.7rem';
+                toast.style.border = '1px solid #16C0FF';
+                toast.style.zIndex = '999';
+                toast.style.fontFamily = "'Inter', sans-serif";
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(() => toast.remove(), 350);
+                }, 1800);
+            });
+        }
+
+        // 模态框逻辑
+        const modal = document.getElementById('contactModal');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalClose = document.getElementById('modalClose');
+
+        if (modalConfirm && modalClose && modal) {
+            modalConfirm.addEventListener('click', () => {
+                const selectVal = document.getElementById('perceptionScenarioSelect');
+                const selectedText = selectVal.options[selectVal.selectedIndex]?.text || '';
+                alert(`✅ 咨询已提交！QSense架构师将为您提供「${selectedText}」态势感知方案。`);
+                modal.style.display = 'none';
+                if (selectVal) selectVal.selectedIndex = 0;
+            });
+            modalClose.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
+
+        if (modal) modal.style.display = 'none';
+    })();
+</script>
+</body>
+</html>

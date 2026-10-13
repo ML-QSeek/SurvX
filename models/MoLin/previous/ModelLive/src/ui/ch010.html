@@ -1,0 +1,2121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head type="text/javascript">
+		<meta	http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+		<script	type="text/javascript"	src="js/jquery.min.js"></script>
+		<script	type="text/javascript"	src="js/laydate/laydate.js"></script>
+		<style type="text/css">
+			:root {
+				--primary: #16C0FF;
+				--primary-dark: #0EA8E0;
+				--primary-light: #4AD2FF;
+				--primary-transparent: rgba(22, 192, 255, 0.1);
+				--bg-primary: #101010;
+				--bg-secondary: #1a1a1a;
+				--bg-tertiary: #252525;
+				--text-primary: #FFFFFF;
+				--text-secondary: #B0B0B0;
+				--text-tertiary: #808080;
+				--border-color: #333333;
+				--error-color: #FF4D4D;
+				--success-color: #00CC66;
+				--warning-yellow: #FFC016;
+			}
+			
+			html,body
+			{
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+				font-weight:400;
+				font-size:14px;
+				line-height:1.3em;
+				width:100%;
+				height:100%;
+				color: var(--text-secondary);
+				background: var(--bg-primary);
+				margin:0;
+				padding:0;
+			}
+			::-webkit-scrollbar
+			{
+				width:0px;
+				height:0px;
+			}
+			
+			pre,code
+			{
+			   white-space: pre-wrap;     /* 保留空格，但自动换行 */
+			   word-wrap: break-word;      /* 长单词或URL换行 */
+			   word-break: break-all;      /* 强制换行（可选） */
+			  }
+			
+			img
+			{
+				width:100%;
+				height:100%:
+				padding: 0;
+				}
+			[contenteditable="true"] {
+			  outline: none; /* 去除默认的轮廓 */
+			  background-color: transparent; /* 设置为透明背景 */
+			  border: none; /* 去除边框 */
+			  color: var(--text-secondary);
+			}
+			.eitem:hover,.jkzbm:hover,#zhuceSub:hover,#zhuce:hover,#denglu:hover,#PetTalkCR:hover,#PetTalkSel:hover,#PetTalkSave:hover,
+			#PetTalkSaveF:hover,#PetTalkSaveD:hover,#topicselpHSel:hover,#PetTalkData:hover,#PetTalkConclusion:hover,#PetTalkDataCsel:hover,#PetTalkDataOK:hover,#PetTalkDataselpBdSel:hover,
+			.aiitem0:hover,.aiitem1:hover,.aidata0:hover,.aidata1:hover
+			{
+				cursor:pointer !important;
+				background-color: rgba(22, 192, 255, 0.15) !important;
+				font:bold !important;
+				color: var(--primary-light) !important;
+			}
+			#stoleft:hover,#storight:hover
+			{
+				font-weight:bold;
+				color: var(--text-primary);
+				cursor:pointer !important;
+				font-size:18px;
+				font:bold !important;
+				}
+			#pet:hover{
+				background:transparent !important;
+			}
+			.detailtopicsel:hover,.detailtopicselversion:hover
+			{
+				cursor:pointer !important;
+				color: var(--text-primary) !important;
+				}
+			#aitopicsubmit:hover
+			{
+				background-color: rgba(255, 192, 22, 0.5);
+				font-size:26px !important;
+				}
+			
+			#mq_main
+			{
+				width:100%;
+				position:absolute;
+				top:0px;
+				bottom:0px;
+				border-top:1px var(--primary) solid;
+				box-sizing:border-box;
+				display: flex;
+			}
+			#Red
+			{
+				width:20px;
+				height:20px;
+				z-index:99999;
+				background-color: var(--error-color);
+				position:fixed;
+				display:none;
+				border-radius:50%;
+				top:10px;
+				left:130px;
+				cursor:pointer;
+			}	
+			#mq_main_rj
+			{
+				width:120px;
+				height:100%;
+				overflow-y:auto;
+				display: flex;
+				flex-direction: column;
+				border-right:1px solid var(--border-color);
+				border-left:1px solid var(--border-color);
+				background: rgba(26, 26, 26, 0.8);
+			}
+			#mq_main_lj
+			{
+				height:100%;
+				flex-grow:1;
+				display: flex;
+				flex-direction: column;
+			}
+			#mq_main_ljH
+			{
+				height:50px;
+				width:100%;
+				font-size:26px;
+				color: var(--warning-yellow);
+				font-weight:bold;
+				cursor:pointer;
+				display: flex;
+			  justify-content: center; /* 水平居中 */
+			  align-items: center;  /*垂直居中 */
+			}
+			#mq_main_ljB
+			{
+				flex-grow:1;
+				display: flex;
+				flex-direction: column;
+			  justify-content: center; /* 水平居中 */
+			  align-items: center;  /*垂直居中 */
+				overflow-y:auto;
+			}
+			#mq_main_lC
+			{
+				display:flex;
+				width:100%;
+				height:80px;
+				}
+				
+			#talkzimutouxiang
+			{
+				width:80px;
+				}
+			#mq_main_lC1
+			{
+				display:flex;
+				flex-grow:1;
+			  justify-content: center; /* 水平居中 */
+			  align-items: center;  /* 垂直居中 */
+				font-size:45px;
+				color: rgba(22, 192, 255, 0.7);
+				}
+			.eitem
+			{
+				background:transparent;
+				color: var(--primary);
+				height:24px;
+				display: flex;
+				justify-content: center; /* 水平居中 */
+			  align-items: center; /*垂直居中 */
+			  border-bottom:1px solid var(--border-color);
+				}
+			.jkzbm
+			{
+				display: flex;
+				justify-content: center; /* 水平居中 */
+			  align-items: center; /*垂直居中 */
+				flex-direction: column;
+				padding-top:5px;
+				border-bottom:1px solid var(--border-color);
+				}
+			.jkzbmT
+			{
+				width:100px;
+				height:100px;
+				}
+			.jkzbmB
+			{
+				width:100px;
+				height:20px;
+				display: flex;
+				justify-content: center; /* 水平居中 */
+			  align-items: center; /*垂直居中 */
+				color: var(--warning-yellow);
+				}
+			#mq_main_ljBM
+			{
+				display: flex;
+				flex-grow:1;
+				width:100%;
+				}
+			
+			#aidash
+			{
+				display: flex;
+				flex-grow:1;
+				height:100%;
+				background: rgba(14, 32, 45, 0.7);
+				}
+			.aippt
+			{
+				width:100%;
+				height:100%;
+				display:none;
+				justify-content: center; /* 水平居中 */
+				align-items: center; /*垂直居中 */
+				flex-direction: column;
+				background-repeat:no-repeat;
+				background-size:100% 100%;
+				background-image:url('./assets/images/abg1.jpg');
+				}
+			#aitopicDiv
+			{
+				height:100px;
+				display: flex;
+				justify-content: center; /* 水平居中 */
+				align-items: center; /*垂直居中 */
+				}
+			#aitopicDiv div
+			{
+				font-size:30px;
+				color: rgba(255, 192, 22, 0.7);
+				}	
+			#aitopic,#aititle
+			{
+				border-bottom: 1px solid rgba(255, 192, 22, 0.7);
+				width:200px;
+				height:32px;
+				display: flex;
+				justify-content: left; /* 水平居中 */
+				align-items: center; /* 垂直居中 */
+				font-size:26px !important;
+				color: var(--text-primary) !important;
+				}
+			#aitopicsubmit
+			{
+				display: flex;
+				justify-content: center; /* 水平居中 */
+				align-items: center; /* 垂直居中 */
+				font-size:24px !important;
+				width:100px;
+				height:32px;
+				border: 1px solid rgba(255, 192, 22, 0.7) !important;
+				background-color: rgba(255, 192, 22, 0.7);
+				color: var(--text-primary) !important;
+				cursor:pointer;
+				}
+			#aipptcDiv
+			{
+				width:50%;
+				height:240px;
+				color: #FFAA00;
+				font-weight:500;
+				}
+			#aipptcDivTopic
+			{
+				justify-content: left; /* 水平居中 */
+				align-items: center; /* 垂直居中 */
+				width:100%;
+				height:80px;
+				font-size:45px;
+				}
+			#aipptcDivTitle
+			{
+				justify-content: center; /* 水平居中 */
+				align-items: center; /* 垂直居中 */
+				width:100%;
+				height:100px;
+				font-size:60px;
+				}
+			#aipptcDivBottom
+			{
+				width:100%;
+				height:60px;
+				justify-content: center; /* 水平居中 */
+				align-items:flex-end;
+				font-size:26px;
+				}
+			#warn
+			{
+				display:true;
+				width:90%;
+				margin-left:1px;
+				margin-top:15px;
+				height:30px;
+				text-align:left;
+				padding-left:1px;
+				font-size:15px;
+			}
+			.shut1
+			{
+				width:30px;
+				height:30px;
+				position:absolute;
+				top:-10px;
+				right:-10px;
+				cursor:pointer;
+			}
+			.shut
+			{
+				width:auto;
+				height:auto;
+				position:absolute;
+				right:3px;
+				bottom:148px;
+				cursor:pointer;
+			}
+			.shut2
+			{
+				width:auto;
+				height:auto;
+				position:absolute;
+				top:0px;
+				right:0px;
+				cursor:pointer;
+			}
+			.shut3
+			{
+				width:auto;
+				height:auto;
+				position:absolute;
+				top:0px;
+				right:0px;
+				cursor:pointer;
+			}
+			
+			.shut4
+			{
+				width:auto;
+				height:auto;
+					position:absolute;
+				top:0px;
+				right:0px;
+				cursor:pointer;
+			}
+			
+			#PetTalk
+			{
+				background-color: rgba(14, 32, 45, 1);
+				border:1px solid var(--primary);
+				width:600px;
+				height:auto;
+				z-index:99999;
+				position:fixed;
+				top:10%;
+				right:5%;
+			}
+			#PetTalkH
+			{
+				border-bottom:1px solid var(--border-color);
+				width:100%;
+				height:34px;
+				text-align:left;
+				cursor:pointer;
+				color: var(--text-secondary);
+			}
+			#PetTalkB
+			{
+				height:374px;
+				width:600px;
+				border-bottom:1px solid var(--border-color);
+				overflow-y:auto;
+				overflow-x:hidden;
+				display:none;
+			}
+			#PetTalkC
+			{
+				height:134px;
+				width:600px;
+			}
+			#PetTalkCL
+			{
+				height:100px;
+				width:600px;
+				float:left;
+				border-bottom:1px solid var(--border-color);
+				padding:3px;
+				box-sizing:border-box;
+				outline:none;
+				overflow-y:auto;
+				color: var(--text-secondary);
+			}
+			#PetTalkCR,#PetTalkSel,#PetTalkSave,#PetTalkSaveF,#PetTalkSaveD,#PetTalkData,#PetTalkConclusion
+			{
+				height:34px;
+				float:right;
+				text-align:center;
+				font-size:12px;
+				font-weight:bold;
+				line-height:34px;
+				box-sizing:border-box;
+				color: var(--primary);
+			}
+			#PetTalkCR
+			{
+				width:130px;
+				}
+			#PetTalkData,#PetTalkConclusion
+			{
+				width:35px;
+				border-right:1px solid var(--border-color)
+				}
+			#PetTalkSel,#PetTalkSave,#PetTalkSaveF,#PetTalkSaveD
+			{
+				width:100px;
+				border-right:1px solid var(--border-color);
+			}
+			
+			.TalkDiv
+			{
+				height:auto;
+				width:600px;
+				overflow:hidden;
+				padding:0;
+				margin:0;
+			}
+			.UserTalkDiv
+			{
+				box-sizing:border-box;
+				float:left;
+				height:auto;
+				width:550px;
+				overflow:hidden;
+				padding:0;
+				margin:0;
+				word-break:break-all;
+				word-wrap: break-word;      /* 允许长单词换行 */
+  			white-space: normal;        /* 默认值，自动换行 */
+			}
+			.UserTalkTouXiang
+			{
+				box-sizing:border-box;
+				height:50px;
+				width:50px;
+				float:right;
+				padding:0;
+				margin:0;
+			}
+			.jUserTalkTouXiang
+			{
+				box-sizing:border-box;
+				margin:5px;
+				height:40px;
+				width:40px;
+				border-radius:5px;
+				padding:0;
+			}
+			.UserTalk
+			{
+				border:1px solid var(--border-color);
+				height:auto;
+				width:auto;
+				padding:5px;
+				margin-top:10px;
+				margin-left:5px;
+				border-radius:8px;
+				word-break:break-all;
+				word-wrap: break-word;      /* 允许长单词换行 */
+  			white-space: normal;        /* 默认值，自动换行 */
+				float:right;
+				text-align:left;
+				font-size:12px;
+				color: var(--text-secondary);
+				background: rgba(255, 255, 255, 0.03);
+			}
+			.PetTalkDiv
+			{
+				box-sizing:border-box;
+				float:right;
+				height:auto;
+				width:550px;
+				overflow:hidden;
+				padding:0;
+				margin:0;
+			}
+			.PetTalkTouXiang
+			{
+				box-sizing:border-box;
+				height:50px;
+				width:50px;
+				float:left;
+				padding:0;
+				margin:0;
+			}
+			.jPetTalkTouXiang
+			{
+				box-sizing:border-box;
+				margin:5px;
+				height:40px;
+				width:40px;
+				border-radius: 5px;
+				padding:0;
+			}
+			.PetTalk
+			{
+				border:1px solid var(--border-color);
+				height:auto;
+				width:auto;
+				padding:5px;
+				margin-top:10px;
+				margin-right:5px;
+				border-radius:8px;
+				word-break:break-all;
+				float:left;
+				text-align:left;
+				font-size:12px;
+				color: var(--text-secondary);
+				background: rgba(22, 192, 255, 0.03);
+			}		
+			.Warn
+			{
+				border:1px solid var(--primary);
+				background: rgba(14, 32, 45, 1);
+				width:400px;
+				height:160px;
+				z-index:99999999;
+				position:fixed;
+				top:50%;
+				left:50%;
+				margin-top:-80px;
+				margin-left:-200px;
+				box-sizing:border-box;
+				box-shadow: 0 0 30px rgba(22, 192, 255, 0.15);
+			}
+			.WarnB
+			{
+				width:100%;
+				height:114px;
+				text-align:center;
+				font-size:12px;
+				line-height:-6px;
+				padding:10px;
+				line-height:124px;
+				color: var(--text-secondary);
+			}
+			.WarnM
+			{
+				width:100%;
+				height:26px;
+				text-align:center;
+				line-height:-6px;
+			}
+			.WarnMButton
+			{
+				background:transparent;
+				border:1px solid var(--primary);
+				color: var(--primary);
+				width:50px;
+				height:22px;
+				text-align:center;
+				font-size:12px;
+				cursor:pointer;
+				margin:1px;
+				transition: all 0.3s;
+			}
+			.WarnMButton:hover {
+				background: rgba(22, 192, 255, 0.1);
+				color: var(--primary-light);
+			}
+			
+			#Client
+			{
+				padding-left:50px;
+				margin-left:3px;
+				text-align:left;
+				font-size:14px;
+			}
+
+			.mq_main_l_Frame
+			{
+				width:100%;
+				height:100%;
+				border:0;
+				margin:0;
+				background-color: var(--text-primary);
+				scrolling:no;
+				allowtransparency:yes;
+			}
+
+
+			#topicselp,#PetTalkDataselp
+			{
+				background: rgba(14, 32, 45, 1);
+				color: var(--primary);
+				width:800px;
+				height:500px;
+				border:1px solid var(--primary);
+				z-index:99999;
+				position:absolute;
+				right:50%;
+				top:50%;
+				margin-right:-400px;
+				margin-top:-250px;
+				box-sizing:border-box;
+				box-shadow: 0 0 40px rgba(22, 192, 255, 0.1);
+				}
+			#topicselpH,#PetTalkDataselpH
+			{
+				display:flex;
+				justify-content: center; /* 水平居中 */
+			  align-items: center; /* 垂直居中 */
+				height:28px;
+				width:800px;
+				font-size:16px;
+				border-bottom:1px solid var(--border-color);
+				color: var(--text-primary);
+				}
+			#topicselpB
+			{
+				display:flex;
+				height:470px;
+				width:800px;
+				}
+			#PetTalkDataselpB
+			{
+				display:flex;
+				height:470px;
+				width:800px;
+				flex-direction: column;
+				}
+			#topicselpBR
+			{
+				padding:3px;
+				width:500px;
+				height:470px;
+				border-left:1px solid var(--border-color);
+				display: flex;
+				flex-direction: column;
+				box-sizing:border-box;
+				color: var(--text-secondary);
+				}
+			#topicselpBL
+			{
+				width:300px;
+				height:470px;
+				display:flex;
+				flex-direction: column;
+				}
+			#topicselpBLt
+			{
+				padding:3px;
+				width:300px;
+				height:440px;
+				border-bottom:1px solid var(--border-color);
+				display: flex;
+				flex-direction: column;
+				box-sizing:border-box;
+				color: var(--text-secondary);
+				}
+			#topicselpBLb
+			{
+				width:300px;
+				height:30px;
+				display: flex;
+				font-size:16px;
+				}
+			@keyframes changeColor {
+  			0% { background-color: var(--error-color); }
+  			50% { background-color: transparent; }
+  			100% { background-color: var(--error-color); }
+				}
+				#topicselpHCon
+				{
+					width:240px;
+					height:30px;
+					justify-content: left; /* 水平居中 */
+					align-items:center;
+					color: var(--text-secondary);
+					}
+				#topicselpHSel
+				{
+					width:60px;
+					height:30px;
+					border-left:1px solid var(--border-color);
+					justify-content: center; /* 水平居中 */
+					align-items:center;
+					color: var(--primary);
+					}
+				#topicselpHSel,#topicselpHCon,#aipptcDivBottom,#aipptcDivTitle,#aipptcDivTopic,#PetTalkDataselpBb0,#PetTalkDataOK,#PetTalkDataCsel,#PetTalkDataselpBd
+				,#PetTalkDataselpBdCon,#PetTalkDataselpBdSel,#PetTalkDataselpBd0,#PetTalkDataselpBd1,#PetTalkDataselpBd2,#PetTalkDataselpBd3,#shedingdate,#aistartdate,#aienddate,#hangxian
+				{
+					display: flex;
+					}
+					
+				#PetTalkDataselpBd
+				{
+					width:800px;
+					height:440px;
+					}
+				#PetTalkDataselpBb0
+				{
+					width:800px;
+					height:30px;
+					}
+					
+				#PetTalkDataOK
+				{
+					justify-content: center; /* 水平居中 */
+					align-items:center;
+					width:60px;
+					border:1px solid var(--primary);
+					height:20px;
+					color: var(--primary);
+					}
+				#aistartdate,#aienddate
+				{
+					justify-content: center; /* 水平居中 */
+					align-items:center;
+					border:1px solid var(--border-color);
+					height:20px;
+					color: var(--primary);
+					}
+				#shedingdate,#hangxian
+				{
+					justify-content: center; /* 水平居中 */
+					align-items:center;
+					height:24px;
+					color: var(--text-secondary);
+					}
+				#PetTalkDataCsel
+				{
+					justify-content: center; /* 水平居中 */
+					align-items:center;
+					width:60px;
+					border:1px solid var(--primary);
+					height:20px;
+					color: var(--primary);
+					}
+				#PetTalkDataselpBdCon
+				{
+					justify-content: left; /* 水平居中 */
+					align-items:center;
+					border:1px solid var(--border-color);
+					width:183px;
+					height:20px;
+					margin-left:3px;
+					color: var(--text-secondary);
+					}
+				#PetTalkDataselpBdSel
+				{
+					justify-content: center; /* 水平居中 */
+					align-items:center;
+					border:1px solid var(--primary);
+					width:60px;
+					height:20px;
+					margin-left:3px;
+					color: var(--primary);
+					}
+				
+				#PetTalkDataselpBd0,#PetTalkDataselpBd1,#PetTalkDataselpBd3
+				{
+					margin-top:3px;
+					width:249px;
+					height:430px;
+					flex-direction: column;
+					overflow-y:auto;
+					padding-top:1px;
+					padding-left:2px;
+					box-sizing:border-box;
+					color: var(--text-secondary);
+					}
+				#PetTalkDataselpBd0
+				{
+					margin-left:3px;
+					}
+				
+				#PetTalkDataselpBd1,#PetTalkDataselpBd3
+				{
+					border:1px solid var(--border-color);
+					}
+				#PetTalkDataselpBd3
+				{
+					margin-right:3px;
+					}
+				#PetTalkDataselpBd0
+				{
+					border-left:1px solid var(--border-color);
+					border-top:1px solid var(--border-color);
+					border-bottom:1px solid var(--border-color);
+					}
+				#PetTalkDataselpBd2
+				{
+					flex-direction: column;
+					margin-top:3px;
+					justify-content: center; /* 水平居中 */
+					align-items:center;
+					width:40px;
+					height:430px;
+					color: var(--primary);
+					}
+				.aiitem0
+				{
+					font-weight:600;
+					color: var(--text-primary);
+					}
+				.aiitem0,.aiitem1,.aidata0,.aidata1
+				{
+					width:249px;
+					}
+				.aiitem1
+				{
+					text-indent: 2ch;
+					display:none;
+					color: var(--text-secondary);
+					}
+				#BG1
+				{
+					width:100%;
+					height:100%;
+					background: rgba(0, 0, 0, 0.85);
+					opacity: 1;
+					position:absolute;
+					overflow-y:scroll;
+					z-index:999;
+					top:0px;
+					left:0px;
+					}
+				#BGcontent
+				{
+					background-color: rgba(14, 32, 45, 1);
+					width:600px;
+					height:400px;
+					position:absolute;
+					top:50%;
+					right:50%;
+					margin-top:-200px;
+					margin-right:-300px;
+					padding:46px;
+					text-align:left;
+					border:1px var(--primary) solid;
+					box-sizing:border-box;
+					box-shadow: 0 0 40px rgba(22, 192, 255, 0.1);
+				}
+				.PeriodReport
+				{
+					width:600px;
+					height:auto;
+					background: var(--error-color);
+					border-radius: 4px;
+					padding:10px;
+					box-sizing:border-box;
+					}
+				.PeriodReportH
+				{
+					width:580px;
+					height:40px;
+					color: var(--text-primary);
+					font-size:26px;
+					font-weight:bold;
+				  display: flex;
+				  justify-content: center;
+				  align-items: center;
+				  box-sizing:border-box;
+					}	
+				._PeriodReport
+				{
+					width:580px;
+					height:auto;
+					background: var(--text-primary);
+					color: var(--error-color);
+					margin-top:5px;
+					padding-left:10px;
+					padding-top:3px;
+					padding-bottom:2px;
+					font-size:14px;
+					font-weight:bold;
+					box-sizing:border-box;
+					display:flex;
+					}
+				.PeriodReportM
+				{
+					width:580px;
+					min-height:30px;
+					height:auto;
+					background: var(--text-primary);
+					padding-left:10px;
+					padding-right:10px;
+					color: #2C3E50;
+					font-size:14px;
+					box-sizing:border-box;
+					line-height:18px;
+					text-indent: 2em;
+					}			
+				#_toimg
+				{
+					cursor:pointer;
+					color: var(--primary);
+					}		
+				._PeriodReportbcolor
+				{
+					width:auto;
+					height:auto;
+					background: var(--text-primary);
+					}
+				.reRole
+				{
+					border-radius:15px;
+					width:30px;
+					height:30px;
+					padding:0;
+					overflow: hidden;
+					}
+				.reRoleMsg	
+				{
+					font-size:12px;
+					display:flex;
+					flex-grow: 1;
+					color: #AAAAAA;
+			  	justify-content: left; /* 水平居中 */
+			  	align-items: flex-end;
+					}
+				.reRoleMsgt
+				{
+					font-size:12px;
+					font-weight:normal;
+					color: #AAAAAA;
+					display:flex;
+					justify-content: right;
+					align-items: flex-end;
+					}
+				#aidashCtr
+				{
+					height:20px;
+					display:flex;
+					align-items: center;
+					}	
+				#ToSub
+				{
+					width:18px;
+					height:18px;
+					background-image:url("./assets/images/sub.png");
+					background-repeat:no-repeat;
+					background-size:100% 100%;
+					cursor:pointer;
+				}
+				#ToSave
+				{
+					width:18px;
+					height:18px;
+					background-image:url("./assets/images/stop.png");
+					background-repeat:no-repeat;
+					background-size:100% 100%;
+					cursor:pointer;
+				}
+				#ToLeft
+				{
+					width:18px;
+					height:18px;
+					background-image:url("./assets/images/left.png");
+					background-repeat:no-repeat;
+					background-size:100% 100%;
+					cursor:pointer;
+				}
+				#ToRight
+				{
+					width:18px;
+					height:18px;
+					background-image:url("./assets/images/right.png");
+					background-repeat:no-repeat;
+					background-size:100% 100%;
+					cursor:pointer;
+				}
+
+		</style>
+	</head>
+	<body>
+		<div	id="mq_main">
+		<div id="Red" name="go"><audio id ="audiok" style="display:none;"></audio></div>
+		<div	id="mq_main_rj">
+				<div class="eitem" id="aimodsel" name="mod0">交互</div>
+				<div class="eitem" id="aiaudio">语音</div>
+				<div class="eitem" id="ainet" name="net0">内网</div>
+				<div class="jkzbm" name="阿萨"><div class="jkzbmT"><img src="./assets/images/阿萨.jpg"/></div><div class="jkzbmB">市场研究：阿萨</div></div>
+				<div class="jkzbm" name="娜娜" id="娜娜"><div class="jkzbmT"><img src="./assets/images/娜娜.jpg"/></div><div class="jkzbmB">综合评估：娜娜</div></div>
+				<div class="jkzbm" name="竹丹"><div  class="jkzbmT"><img src="./assets/images/竹丹.jpg"/></div><div class="jkzbmB">投资经理：竹丹</div></div>
+				<div class="jkzbm" name="小李"><div class="jkzbmT"><img src="./assets/images/小李.jpg"/></div><div class="jkzbmB">IT技术：小李</div></div>
+				<div class="jkzbm" name="李华"><div class="jkzbmT"><img src="./assets/images/李华.jpg"/></div><div class="jkzbmB">量化研究：李华</div></div>
+				<div class="jkzbm" name="老张"><div class="jkzbmT"><img src="./assets/images/老张.jpg" /></div><div class="jkzbmB">主观研究：老张</div></div>
+				<div class="eitem" id="topiclist">主题</div>
+				<div class="eitem" id="aireport">报告</div>
+				<div class="eitem" id="workspace">创建</div>
+			</div>
+		<div id="mq_main_lj">
+			<div id="mq_main_ljH" name="None"></div>
+			<div id="mq_main_ljB">
+				<div id="mq_main_ljBM">
+					<div style="width:20px;"></div>
+					<div id="aidash" name="addgraph"></div>
+					<div style="width:20px;"></div>
+					</div>
+				<div id="aidashCtr"><div id="ToSub"></div><div style="width:3px;"></div><div id="ToSave"></div><div style="width:3px;"></div><div id="ToLeft"></div><div style="width:3px;"></div><div id="ToRight"></div></div>
+				</div>
+			<div id="mq_main_lC">
+				<div style="width:50px;"></div>
+				<div id="talkzimutouxiang"><img src="./assets/images/娜娜.jpg" style="border-radius:5px;"/></div>
+				<div id="mq_main_lC1"></div>
+			</div>
+			<div style="height:20px;"></div>
+			</div>
+		</div>
+		
+	<script	type="text/javascript">
+		//server
+		var MServer = "http://10.10.98.51/test/sys/";
+		var hrecordlist = [];
+		var chat = [];
+		var ihtmllist = [];
+		//屏蔽右键事件
+		document.oncontextmenu=function(){return	false;}
+		$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+		//时间
+		function getLangDate(item){
+			var dateObj = new Date();
+			var year = dateObj.getFullYear();
+			var month = dateObj.getMonth()+1;
+			var date = dateObj.getDate();
+			var day = dateObj.getDay();
+			var weeks = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+			var week = weeks[day];
+			var hour = dateObj.getHours();
+			var minute = dateObj.getMinutes();
+			var second = dateObj.getSeconds();
+			if(month<10){month="0"+month;}
+			if(date<10){date="0"+date;}
+			if(hour<10){hour="0"+hour;}
+			if(minute<10){minute="0"+minute;}
+			if(second<10){second="0"+second;}
+			//var newDate = year+"年"+month+"月"+date+"日 "+hour+":"+minute+":"+second+" "+week;
+			if(item=='systime'){
+			var newDate ="<font class='ttext'>"+year+"年"+month+"月"+date+"日 "+hour+":"+minute+":"+second+" "+week+"</font>";
+			document.getElementById("home_main_rbottom1_colr").innerHTML = newDate;
+			setTimeout("getLangDate('systime')",1000);//每隔1秒重新调用一次该函数
+				}
+			else{
+			var newDate = year.toString()+month.toString()+date.toString();
+			var newDatetime = year.toString()+month.toString()+date.toString()+hour.toString()+minute.toString()+second.toString();
+			var newMonth = year.toString()+month.toString();
+			var newDate1 = year+"-"+month+"-"+date;
+			var times  = hour.toString()+':'+minute.toString()+':'+second.toString();
+			return eval(item);
+			}
+		}
+		function GenNonDuplicateID(randomLength){return Number(Math.random().toString().substr(3,randomLength) + Date.now()).toString(36)}
+		$(document).on("click",".shut",function(){$(this).parent().css('display','none');})
+		$(document).on("click",".shut3",function(){$(this).parent().remove();})
+		$(document).on("click",".shut1",function(){$(this).parent().parent().remove();})
+		$(document).on("click",".shut2",function(){$(this).parent().parent().remove();})
+		$(document).on("click",".shut4",function(){$(this).parent().remove();})
+		
+		//警示消息
+		function WarnMessage(content){
+			//alert(22222);
+			var sid=GenNonDuplicateID(1);	
+			$("body").append('<div class="Warn"><div class="WarnB" id="WarnB_'+sid+'"></div><div class="WarnM"><button id="Yes" class="WarnMButton"> 好的 </button></div></div>');
+			$("#WarnB_"+sid).html(content);
+			}
+	function trim(str){return str.replace(/(^\s*)|(\s*$)/g,"");}
+	$(document).off('click',".jkzbm").on('click',".jkzbm",function(){
+			var chatname = $(this).attr('name');
+			if (chat.indexOf(chatname) > -1 && chatname!=='娜娜'){
+				$(this).css("background","transparent");
+				chat.splice(chat.indexOf(chatname),1);
+				var t = "";
+				for (j=0;j<chat.length;j++){
+					t += '<div style="margin-top:2px;margin-right:2px;width:30px;height:30px;padding:0;float:left;"><img src="./assets/images/'+chat[j]+'.jpg" style="width:100%;height:100%;border-radius:50%;"/></div>';
+					}
+					
+				var talkres='{"娜娜":{"Dash":"无","Res":"'+chatname+'离开会场。"}}';
+				hrecordlist.push(talkres);
+				talkres = JSON.parse(talkres);//JSON.stringify()
+				var talkpeople = '娜娜';
+				var talkcon = talkres["娜娜"].Res;
+				$("#PetTalkB").append('<div class="TalkDiv" name="'+talkpeople+'"><div class="PetTalkDiv"><div class="PetTalk" name="talkcon">'+talkcon+'</div></div><div class="PetTalkTouXiang"><div class="jPetTalkTouXiang" style="background-image:url(./assets/images/'+talkpeople+'.jpg); background-size :100% 100%;"></div></div></div>');
+				$("#talkzimutouxiang img").attr('src', './assets/images/'+talkpeople+'.jpg');
+				$("#mq_main_lC1").css('color','rgba(255,204,0,0.7)').html(talkcon);
+				
+				$('#PetTalkH').html('<div style="padding-top:10px;font-size:15px;box-sizing:border-box;width:auto;float:left;">参加聊天的人：</div>'+t)
+				$("#PetTalkCL").focus();
+				}
+			else if(chatname!=='娜娜') {
+				$(this).css("background","rgba(22, 192, 255, 0.15)");
+				chat.push(chatname);
+				var t = "";
+				for (j=0;j<chat.length;j++){
+					t += '<div style="margin-top:2px;margin-right:2px;width:30px;height:30px;padding:0;float:left;"><img src="./assets/images/'+chat[j]+'.jpg" style="width:100%;height:100%;border-radius:50%;"/></div>';
+					}
+				var talkres='{"娜娜":{"Dash":"无","Res":"'+chatname+'进入会场。"}}';
+				hrecordlist.push(talkres);
+				talkres = JSON.parse(talkres);
+				var talkpeople = '娜娜';
+				var talkcon = talkres["娜娜"].Res;
+				$("#PetTalkB").append('<div class="TalkDiv" name="'+talkpeople+'"><div class="PetTalkDiv"><div class="PetTalk" name="talkcon">'+talkcon+'</div></div><div class="PetTalkTouXiang"><div class="jPetTalkTouXiang" style="background-image:url(./assets/images/'+talkpeople+'.jpg); background-size :100% 100%;"></div></div></div>');
+				$("#talkzimutouxiang img").attr('src', './assets/images/'+talkpeople+'.jpg');
+				$("#mq_main_lC1").css('color','rgba(255,204,0,0.7)').html(talkcon);
+				$('#PetTalkH').html('<div style="padding-top:10px;font-size:15px;box-sizing:border-box;width:auto;float:left;">参加聊天的人：</div>'+t)
+				$("#PetTalkCL").focus();
+				}
+			})
+	$(document).off('click',"#PetTalkSel").on('click',"#PetTalkSel",function(){
+		var gtxt = $("#PetTalkSel").html();
+		if (gtxt=="历史记录"){
+			$("#PetTalkB").slideDown();
+			$("#PetTalkSel").html("关闭记录")
+			}
+		else {
+			$("#PetTalkB").slideUp();
+			$("#PetTalkSel").html("历史记录")
+			}
+			})
+		//令某个模块可以被拖拽
+	function	divmove(DivId1,DivId2){
+		var _move=false;
+		var _x,_y;
+		$('#'+DivId1).click(function(){
+			}).mousedown(function(e){
+				_move=true;
+				_x=e.pageX-parseInt($('#'+DivId2).css("left"));
+				_y=e.pageY-parseInt($('#'+DivId2).css("top"));
+				});
+			$(document).mousemove(function(e){
+				if(_move){
+					var x=e.pageX-_x;
+					var y=e.pageY-_y;
+					$('#'+DivId2).css({top:y,left:x});
+				}
+			}).mouseup(function(){
+			_move=false;
+			});
+		}
+	function AddPetTalk(topic0){
+		$("#PetTalk").remove();
+		chat.length = 0;
+		chat.push('娜娜');
+		$('.jkzbm').css("background","transparent");
+		$('#娜娜').css("background","rgba(22, 192, 255, 0.15)");
+		$("#mq_main_ljH").attr('name','None').html(topic0);
+						var txt ='<div id="PetTalk">';
+								txt +='<div id="PetTalkB"></div>';
+								txt +='<div id="PetTalkH"><span id="PetTalkFlag" style="display:none;"></span></div>';
+								txt +='<div class="shut"><img src="./assets/images/Close2.png"/></div>';
+								txt +='<div id="PetTalkC">';
+								txt +='<div id="PetTalkCL" contenteditable="true"></div>';
+								txt +='<div id="PetTalkCR">发送</div><div id="PetTalkConclusion">汇</div><div id="PetTalkData">数</div><div id="PetTalkSel">历史记录</div><div id="PetTalkSave">覆盖保存</div><div id="PetTalkSaveD">创建保存</div><div id="PetTalkSaveF">提炼保存</div>';
+								txt +='</div></div>';
+							$('body').append(txt);
+			$('#PetTalkCL').unbind().keypress(function(event){  
+			var keynum = (event.keyCode ? event.keyCode : event.which);  
+			if(keynum == '13' && event.shiftKey){
+				}
+			else if(keynum == '13'){
+				event.cancelBubble=true;
+				event.preventDefault();
+				event.stopPropagation();
+				$('#PetTalkCR').click();
+				}
+			}); 
+			var t = "";
+			for (j=0;j<chat.length;j++){
+				t += '<div style="margin-top:2px;margin-right:2px;width:30px;height:30px;padding:0;float:left;"><img src="./assets/images/'+chat[j]+'.jpg" style="width:100%;height:100%;border-radius:50%;"/></div>';
+				}
+			$('#PetTalkH').html('<div style="padding-top:10px;font-size:15px;box-sizing:border-box;width:auto;float:left;">参加聊天的人：</div>'+t)
+			$("#PetTalkCL").focus();
+
+		divmove("PetTalkH","PetTalk");
+		var talkres=eval('[{"娜娜":{"Dash":"无","Res":"娜娜进入会场。"}},{"娜娜":{"Dash":"无","Res":"你好，欢迎进入会议。"}}]');
+		for(var i=0;i<talkres.length;i++){
+			hrecordlist.push(JSON.stringify(talkres[i]));
+			tres=talkres[i];
+			var talkpeople = Object.keys(tres)[0];;
+			var talkcon = tres[talkpeople].Res;
+			$("#PetTalkB").append('<div class="TalkDiv" name="'+talkpeople+'"><div class="PetTalkDiv"><div class="PetTalk" name="talkcon">'+talkcon+'</div></div><div class="PetTalkTouXiang"><div class="jPetTalkTouXiang" style="background-image:url(./assets/images/'+talkpeople+'.jpg); background-size :100% 100%;"></div></div></div>');
+			$("#talkzimutouxiang img").attr('src', './assets/images/'+talkpeople+'.jpg');
+			$("#mq_main_lC1").css('color','rgba(255,204,0,0.7)').html(talkcon);
+		
+		}
+	}
+		//查看主题
+		$(document).off('click','#topiclist').on('click','#topiclist', function(){
+			$('#topicselp').remove();
+				var txt = '<div id="topicselp">';
+						txt+=  '<div class="shut3"><img src="./assets/images/Close2.png"/></div>';
+						txt+=  '<div id="topicselpH">主题</div>';
+						txt+=  '<div id="topicselpB"> <div id="topicselpBL"><div id="topicselpBLt"></div> <div id="topicselpBLb"><div contenteditable="true" id="topicselpHCon"></div><div id="topicselpHSel">查询</div></div></div><div id="topicselpBR"></div></div>';
+						txt+= '</div>';
+				$("#mq_main").append(txt);
+				divmove("topicselpH","topicselp")
+				$.post(MServer+"qq/channel/ch010C.php",{
+					qflag:"topiclist",
+					sflag:'_04_01',
+					tuser:Q14123101,
+					},
+					function(data){
+						$("#topicselpBLt").html(data);
+					});
+			})
+		
+		$(document).off('click','.detailtopicsel').on('click','.detailtopicsel', function(){
+			var thiscon = $(this).html().split(':');
+			var thistopic = thiscon[0];
+			var thisbiaoti = thiscon[1];
+			$.post(MServer+"qq/channel/ch010C.php",{
+					qflag:"detailtopicsel",
+					sflag:'_04_01',
+					tuser:Q14123101,
+					ttopic:thistopic,
+					tbiaoti:thisbiaoti,
+					},
+					function(data){
+						$("#topicselpBR").html(data);
+					});
+			})
+		$(document).off('click','#topicselpHSel').on('click','#topicselpHSel', function(){
+			var thiscon = $("#topicselpHCon").html();
+			if(thiscon!==''){
+				$.post(MServer+"qq/channel/ch010C.php",{
+						qflag:"topicselpHSel",
+						sflag:'_04_01',
+						tuser:Q14123101,
+						tcon:thiscon,
+						},
+						function(data){
+							$("#topicselpBLt").html(data);
+						});
+				}
+			})
+		$(document).off('click','.detailtopicselversion').on('click','.detailtopicselversion', function(){
+			var thisid= $(this).attr('id').split('_')[1];
+			var thiscon = $(this).html().split(':');
+			var thistopic = thiscon[0];
+			var thisbiaoti = thiscon[1];
+			var thisversion = thiscon[2];
+			$("#mq_main_lC1").html('');
+			$("#talkzimutouxiang img").attr('src', './assets/images/Client.jpg');
+			$.post(MServer+"qq/channel/ch010C.php",{
+					qflag:"detailtopicselversion",
+					sflag:'_04_01',
+					tid:thisid,
+					ttopic:thistopic,
+					},
+					function(data){
+						//console.log(data);
+						$("#PetTalk").remove();
+						chat.length = 0;
+						//查看会议记录只有娜娜在场，其他人员需另外邀请
+						chat.push('娜娜');
+						hrecordlist.length = 0;
+						ihtmllist.length = 0;
+						var tlist = JSON.parse(data);
+						//加载背景先放这里;
+						hrecordlist.push('{"背景要求":"'+tlist[0]+'"}');
+						//alert(hrecordlist);
+						$('.jkzbm').css("background","transparent");
+						$("#mq_main_ljH").attr('name',thistopic+'_'+thisbiaoti+'_'+thisversion).html(thistopic+':'+thisbiaoti);
+						//添加PPT
+						var tvar = '<div id ="aipptc" class="aippt" style="background-image:url(\'./assets/images/abg1.jpg\');">';
+								tvar+= '<div id="aipptcDiv"><div id="aipptcDivTopic">'+thistopic+'</div><div id="aipptcDivTitle">'+thisbiaoti+'</div><div id="aipptcDivBottom">主持人：娜娜 &nbsp;&nbsp;日期：'+getLangDate('newDate1')+'</div></div>';
+								tvar+= '</div>';
+						$("#aidash").html(tvar);
+						$("#aipptc").css('display','flex').fadeIn();
+						
+						//增加聊天记录
+						var txtlist = tlist[1];
+						//console.log(txtlist);
+						var txt  ='<div id="PetTalk">';
+								txt +='<div id="PetTalkB"></div>';
+								txt +='<div id="PetTalkH"><span id="PetTalkFlag" style="display:none;"></span></div>';
+								txt +='<div class="shut"><img src="./assets/images/Close2.png"/></div>';
+								txt +='<div id="PetTalkC">';
+								txt +='<div id="PetTalkCL" contenteditable="true"></div>';
+								txt +='<div id="PetTalkCR">发送</div><div id="PetTalkConclusion">汇</div><div id="PetTalkData">数</div><div id="PetTalkSel">历史记录</div><div id="PetTalkSave">覆盖保存</div><div id="PetTalkSaveD">创建保存</div><div id="PetTalkSaveF">提炼保存</div>';
+								txt +='</div></div>';
+							$('body').append(txt);
+								$('#PetTalkCL').unbind().keypress(function(event){  
+								var keynum = (event.keyCode ? event.keyCode : event.which);  
+								if(keynum == '13' && event.shiftKey){
+									}
+								else if(keynum == '13'){
+									event.cancelBubble=true;
+									event.preventDefault();
+									event.stopPropagation();
+									$('#PetTalkCR').click();
+									}
+								});
+							for(var i=0;i<txtlist.length;i++){
+								if (!txtlist[i].includes('_图像')){hrecordlist.push(txtlist[i]);}
+								//console.log(txtlist[i]);
+								tres=JSON.parse(txtlist[i]);
+								var talkpeople = Object.keys(tres)[0];;
+								var talkcon = tres[talkpeople].Res;
+								if (talkpeople==Q14123101){
+									if (talkcon.substring(0, 3)=='_数据' || talkcon.substring(0, 3)=='_图像' ){var dtvar='style="display:none;"';}else {var dtvar=''}
+									$("#PetTalkB").append('<div class="TalkDiv" '+dtvar+'name="'+Q14123101+'"><div class="UserTalkDiv"><div class="UserTalk" name="talkcon">'+talkcon+'</div></div><div class="UserTalkTouXiang"><div class="jUserTalkTouXiang" style="background-image:url(./assets/images/Client.jpg); background-size :100% 100%;"></div></div></div>');
+									$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+									//如果开头是图像，则要把名称推送到
+									if(talkcon.substring(0, 3)=='_图像'){
+										//alert(talkcon.substring(3));
+										ihtmllist.push(talkcon.substring(3));
+										}
+									}else{
+											if(chat.indexOf(talkpeople) == -1){
+												chat.push(talkpeople);
+											}
+											if (talkcon.substring(0, 3)=='_数据'){var dtvar='style="display:none;"';}else {var dtvar=''}
+											$("#PetTalkB").append('<div class="TalkDiv" '+dtvar+'name="'+talkpeople+'"><div class="PetTalkDiv"><div class="PetTalk" name="talkcon">'+talkcon+'</div></div><div class="PetTalkTouXiang"><div class="jPetTalkTouXiang" style="background-image:url(./assets/images/'+talkpeople+'.jpg); background-size :100% 100%;"></div></div></div>');
+											$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+									}
+								}
+								
+								var t = "";
+								for (j=0;j<chat.length;j++){
+									//$('#娜娜').css("background","rgba(20,177,235,0.3)");
+									t += '<div style="margin-top:2px;margin-right:2px;width:30px;height:30px;padding:0;float:left;"><img src="./assets/images/'+chat[j]+'.jpg" style="width:100%;height:100%;border-radius:50%;"/></div>';
+									}
+								$('#PetTalkH').html('<div style="padding-top:10px;font-size:15px;box-sizing:border-box;width:auto;float:left;">参加聊天的人：</div>'+t)
+								//如果ihtmllist中有元素，则取最后一个元素
+								if (ihtmllist.length>0){
+									const lastElement = ihtmllist[ihtmllist.length - 1];
+									var tvar = '<iframe class="mq_main_l_Frame" runat="server" src="'+MServer+'qq/channel/ailib/'+lastElement+'.php"></iframe>';
+									$("#aidash").attr('name',lastElement).html(tvar);
+									}
+								
+								$("#PetTalkCL").focus();
+
+							divmove("PetTalkH","PetTalk");
+							$("#topicselp").remove();
+							
+					});
+		})
+		$(document).off('click','#PetTalkCR').on('click','#PetTalkCR', function(){
+			var ClientTalk = $("#PetTalkCL").html();
+			//alert(ClientTalk);
+				if(ClientTalk.includes('#')){
+						var _prex	= ClientTalk.split('#')[0]
+						var prex_ = ClientTalk.split('#')[1]
+						if(_prex=='addgraph'){
+							$("#aidash").attr('name','addgraph');
+							var tvar = '<iframe class="mq_main_l_Frame" runat="server" src="'+MServer+'qq/channel/ailib/'+prex_+'.php"></iframe>';
+							$("#aidash").html(tvar);
+							}
+					}
+				else if(ClientTalk!=''){
+				hrecordlist.push('{"'+Q14123101+'":{"Dash":"无","Res":"'+ClientTalk+'"}}');
+				
+				$("#PetTalkB").append('<div class="TalkDiv" name="'+Q14123101+'"><div class="UserTalkDiv"><div class="UserTalk" name="talkcon">'+ClientTalk+'</div></div><div class="UserTalkTouXiang"><div class="jUserTalkTouXiang" style="background-image:url(./assets/images/Client.jpg); background-size :100% 100%;"></div></div></div>');
+				$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+				$("#PetTalkCL").html('');
+				$("#talkzimutouxiang img").attr('src', './assets/images/Client.jpg');
+				$("#mq_main_lC1").css('color','rgba(20,177,235,0.7)').html(ClientTalk);
+				if($("#aimodsel").attr('name')=='mod0'){
+        $.ajax({
+            url: 'http://10.10.98.51:3214/api/submit',
+            type: 'POST',
+            data:{
+							//qflag:"getresponse",
+							//sflag:'_04_01',
+							//username:Q14123101,							
+							content:JSON.stringify(hrecordlist),
+							isaudio:isAudio,
+						},
+						async:true,
+            success: function(Jdata) {
+                if (Jdata.status === 'success') {
+										var audiot = Jdata.audio;
+										var thisnote =Jdata.note;
+										//$("#aidash").html(thisnote);
+										
+										console.log(typeof(thisnote));
+										var note0 = thisnote.replace("[","_#").replace("]","_#");
+										var note1 = thisnote.replace("<!DOCTYPE html>","@#@").replace("</html>","@#@");
+										console.log(note1);
+										const regex0 = new RegExp(`${"_#"}([\\s\\S]*?)${"_#"}`, 'g');
+										const regex1 = new RegExp(`${"@#@"}([\\s\\S]*?)${"@#@"}`, 'g');
+										const result0 = regex0.exec(note0);
+										const result1 = regex1.exec(note1);
+										const substr0 = result0 ? result0[1] : ""; // 如果有匹配到结果则取第一个分组的内容
+										const substr1 = result1 ? result1[1] : ""; // 如果有匹配到结果则取第一个分组的内容
+										alert(substr1);
+										var htxt0= "["+substr0+"]"
+										var htxt1= "<!DOCTYPE html>"+substr1+"</html>"
+										console.log(htxt0);
+										console.log(htxt1);							
+										var talklist = eval(htxt0);
+										for (let i = 0; i < talklist.length; i++) {
+											var talkres=talklist[i];
+											hrecordlist.push(JSON.stringify(talkres));
+											var talkpeople = Object.keys(talkres)[0];
+											var talkcon = talkres[talkpeople].Res;
+											if (['阿萨','娜娜','竹丹','小李','李华','老张'].includes(talkpeople)){
+													$("#PetTalkB").append('<div class="TalkDiv" name="'+talkpeople+'"><div class="PetTalkDiv"><div class="PetTalk" name="talkcon">'+talkcon+'</div></div><div class="PetTalkTouXiang"><div class="jPetTalkTouXiang" style="background-image:url(./assets/images/'+talkpeople+'.jpg); background-size :100% 100%;"></div></div></div>');
+													$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+													$("#talkzimutouxiang img").attr('src', './assets/images/'+talkpeople+'.jpg');
+													if (htxt1.length>30){
+														$("#aidash").attr('name','addgraph');
+														var tvar = '<iframe class="mq_main_l_Frame" runat="server" id="myFrame"></iframe>';
+														$("#aidash").html(tvar);
+														var iframe = document.getElementById('myFrame');
+														var doc = iframe.contentWindow.document;
+														doc.open();
+														doc.write(htxt1);
+														doc.close();
+														}
+													toprint(talkcon);
+													if(isAudio==1){
+														audio = document.getElementById('audiok');
+														audio.src =audiot;
+														audio.load();
+								    				audio.play();
+														//audio.pause();
+													}
+												}
+											else{
+												$("#PetTalkB").append('<div class="TalkDiv" name="娜娜"><div class="PetTalkDiv"><div class="PetTalk" name="talkcon">报错了，要不你再试一次？</div></div><div class="PetTalkTouXiang"><div class="jPetTalkTouXiang" style="background-image:url(./assets/images/娜娜.jpg); background-size :100% 100%;"></div></div></div>');
+												$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+											}
+										
+									}
+											$("#PetTalkCL").focus();
+                } else {
+										//这块要处理，哪些是字幕显示，哪些是大屏展示
+										$("#PetTalkB").append('<div class="TalkDiv" name="娜娜"><div class="PetTalkDiv"><div class="PetTalk" name="talkcon">报错了，要不你再试一次？</div></div><div class="PetTalkTouXiang"><div class="jPetTalkTouXiang" style="background-image:url(./assets/images/娜娜.jpg); background-size :100% 100%;"></div></div></div>');
+										$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+                    $("#PetTalkCL").focus();
+                }
+            },
+            error: function(xhr, status, error) {
+								var tvar = '<div id ="aipptc" class="aippt">';
+										tvar+= '<div id="aipptcDiv">'+'错误: ' + error + '\n状态: ' + xhr.status+'</div>';
+										tvar+= '</div>';
+								$("#aidash").html(tvar);
+								$("#aipptc").css('display','flex').fadeIn();  	
+            }
+        });
+			}	
+			}
+		});
+function delay(time) {return new Promise(resolve => setTimeout(resolve, time));}
+async function toprint(txt){
+			var notetlist = txt.split('。'); 
+			for (let i = 0; i < notetlist.length; i++) {
+				if (notetlist[i].length>1){
+					$("#mq_main_lC1").css('color','rgba(255,204,0,0.7)').html(notetlist[i]);
+					await delay(1500);
+				}
+			}
+}
+//交互方式，交互：是和ai对话，记录就是单纯记录自己的观点
+$(document).off('click',"#aimodsel").on('click',"#aimodsel",function(){
+	var thisname = $(this).attr('name');
+	if (thisname=='mod0'){
+		$("#aimodsel").attr('name','mod1').html('记录').css('color','#FFCC00');
+		}
+	else{
+		$("#aimodsel").attr('name','mod0').html('交互').css('color','#16C0FF');
+		}
+})
+//交互方式，交互：是和ai对话，记录就是单纯记录自己的观点
+$(document).off('click',"#ainet").on('click',"#ainet",function(){
+	var thisname = $(this).attr('name');
+	if (thisname=='net0'){
+		$("#ainet").attr('name','net1').html('联网').css('color','#00FF00');
+		}
+	else{
+		$("#ainet").attr('name','net0').html('内网').css('color','#16C0FF');
+		}
+})
+//语音
+var isAudio = 0;
+$(document).off('click',"#aiaudio").on('click',"#aiaudio",function(){
+	var aiaudiotxt = $(this).text();
+	if (aiaudiotxt=='语音'){
+		$(this).html('关闭语音');
+		isAudio = 1;
+		$("#Red").css({'display':'block','animation':'changeColor 1s infinite'});
+		}
+	else if (aiaudiotxt=='关闭语音'){
+		$(this).html('语音');
+		$("#Red").css({'animation':'transparent','display':'none'});
+		isAudio = 0;
+		}
+	})
+$(document).off('click',"#Red").on('click',"#Red",function(){
+	var thisname = $(this).attr('name');
+	if (thisname=='go'){
+		$("#Red").attr('name','stop').css({'border-radius':'0','animation':'transparent'});
+		}
+	else{
+		$("#Red").attr('name','go').css({'border-radius':'50%','animation':'changeColor 1s infinite'});
+		}
+})
+
+//可编辑
+$(document).off('click',".PetTalk").on('click',".PetTalk",function(){$(this).attr('contenteditable','true');	})
+//删除
+$(document).off('dblclick',".PetTalk").on('dblclick',".PetTalk",function(){$(this).parent().parent().remove();})
+//可编辑
+$(document).off('click',".UserTalk").on('click',".UserTalk",function(){$(this).attr('contenteditable','true');	})
+//删除
+$(document).off('dblclick',".UserTalk").on('dblclick',".UserTalk",function(){$(this).parent().parent().remove();})
+$(document).off('click',"#mq_main_ljH").on('click',"#mq_main_ljH",function(){$(this).attr('contenteditable','true');})
+//覆盖保存
+$(document).off('click',"#PetTalkSave").on('click',"#PetTalkSave",function(){
+	var tlist =[];
+	$('#PetTalkB').find('.TalkDiv').each(function() {
+    var thisname = $(this).attr('name');
+		var thiscon = $(this).find('div[name="talkcon"]').html();
+		var dtxt = thisname+'#{"'+thisname+'":{"Res":"'+thiscon+'"}}';
+		tlist.push(dtxt);
+		});
+	var historytxt = JSON.stringify(tlist);
+	var tnow = $("#mq_main_ljH").attr('name').split('_')[2];
+	var ttopic = $("#mq_main_ljH").html().split(":")[0];
+	var tbiaoti = $("#mq_main_ljH").html().split(":")[1];
+	//alert (historytxt);
+	$.post(MServer+"qq/channel/ch010C.php",{
+			qflag:"updatetopic",
+			sflag:'_01_01',
+			tuser:Q14123101,
+			tdate:tnow,
+			ttopic:ttopic,
+			tbiaoti:tbiaoti,
+			tcon:historytxt,
+			},
+			function(data){
+				WarnMessage('覆盖保存成功！');
+				$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+			});
+	})
+//提炼保存
+$(document).off('click',"#PetTalkSaveF").on('click',"#PetTalkSaveF",function(){
+	var tlist =[];
+	$('#PetTalkB').find('.TalkDiv').each(function() {
+    var thisname = $(this).attr('name');
+		var thiscon = $(this).find('div[name="talkcon"]').html();
+		var dtxt = thisname+'#{"'+thisname+'":{"Res":"'+thiscon+'"}}';
+		tlist.push(dtxt);
+		});
+	var historytxt = JSON.stringify(tlist);
+	var tnow = getLangDate('newDatetime');
+	var ttopic = $("#mq_main_ljH").html().split(":")[0];
+	var tbiaoti = $("#mq_main_ljH").html().split(":")[1];
+	//alert (historytxt);
+	$.post(MServer+"qq/channel/ch010C.php",{
+			qflag:"tiliantopic",
+			sflag:'_01_01',
+			tuser:Q14123101,
+			tdate:tnow,
+			ttopic:ttopic,
+			tbiaoti:tbiaoti,
+			tcon:historytxt,
+			},
+			function(data){
+				WarnMessage('提炼保存成功！');
+				$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+			});
+	})
+//创建保存
+$(document).off('click',"#PetTalkSaveD").on('click',"#PetTalkSaveD",function(){
+	var ttopic = $("#mq_main_ljH").html().split(":")[0];
+	var tbiaoti = $("#mq_main_ljH").html().split(":")[1];
+	if (ttopic=='主题xxx' || tbiaoti=='标题xxx'){
+				WarnMessage('请填写明确的主题和标题，并用英文的":"分割！');
+				$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+		}
+	else {
+		var tlist =[];
+		$('#PetTalkB').find('.TalkDiv').each(function() {
+	    var thisname = $(this).attr('name');
+			var thiscon = $(this).find('div[name="talkcon"]').html();
+			var dtxt = thisname+'#{"'+thisname+'":{"Res":"'+thiscon+'"}}';
+			tlist.push(dtxt);
+			});
+		var historytxt = JSON.stringify(tlist);
+		//alert(historytxt);
+		var tnow = getLangDate('newDatetime');
+		$.post(MServer+"qq/channel/ch010C.php",{
+				qflag:"createtopic",
+				sflag:'_01_01',
+				tuser:Q14123101,
+				tdate:tnow,
+				ttopic:ttopic,
+				tbiaoti:tbiaoti,
+				tcon:historytxt,
+				},
+				function(data){
+					WarnMessage('创建保存成功！');
+					$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+				});
+		}
+	})
+	$(document).off('click','#workspace').on('click','#workspace',function(){
+		var tvar = '<div id ="aishouye" class="aippt" style="background-image:url(\'./assets/images/abg0.jpg\');"><div style="flex-grow:1;";></div>';
+				tvar+= '<div id="aitopicDiv"><div>请输入主题</div><div style="width:3px;"></div><div id="aitopic" contenteditable="true"></div><div style="width:3px;"></div><div>请输入标题</div><div style="width:3px;"></div><div id="aititle" contenteditable="true"></div><div style="width:3px;"></div><div id="aitopicsubmit">提交</div></div>';
+				tvar+= '<div style="height:80px;"></div></div>';
+		$("#aidash").attr('name','addgraph').html(tvar);
+		$("#aishouye").css('display','flex').fadeIn();
+		var talkcon ='你好，请创建主题，或者在左侧主题中选择已有主题。';
+		$("#mq_main_lC1").css({'color':'rgba(255,204,0,0.7)','display':'none'}).html(talkcon).fadeIn();
+		$("#mq_main_ljH").attr('name','None').html('');
+
+		})
+	$(document).off('click',"#mq_main_lC1").on('click',"#mq_main_lC1",function(){
+		$("#PetTalk").css('display','block');
+		})
+	
+	$(document).ready(function(){
+		// 获取当前页面的URL参数
+		const params = new URLSearchParams(window.location.search);
+		// 获取指定参数的值
+		Q14123101 = params.get('par');
+		$("#workspace").click();
+		});
+	$(document).off('click',"#aitopicsubmit").on('click',"#aitopicsubmit",function(){
+		var aitopic = $("#aitopic").html();
+		var aititle = $("#aititle").html();
+		if (aitopic=='' || aititle==''){
+				WarnMessage('请填写完整的主题和标题!');
+				$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+			}else{
+				$.post(MServer+"qq/channel/ch010C.php",{
+					qflag:"aitopicbak",
+					sflag:'_04_01',
+					ttopic:aitopic,
+					},
+					function(data1){
+						hrecordlist.length = 0;
+						ihtmllist.length = 0;
+						hrecordlist.push('{"背景要求":"'+data1+'"}');
+						//alert(data1);
+					});
+				var tvar = '<div id ="aipptc" class="aippt">';
+						tvar+= '<div id="aipptcDiv"><div id="aipptcDivTopic">'+aitopic+'</div><div id="aipptcDivTitle">'+aititle+'</div><div id="aipptcDivBottom">主持人：娜娜 &nbsp;&nbsp;日期：'+getLangDate('newDate1')+'</div></div>';
+						tvar+= '</div>';
+				$("#aidash").attr('name','addgraph').html(tvar);
+				$("#aipptc").css('display','flex').fadeIn();
+				AddPetTalk(aitopic+':'+aititle);
+				}
+		})
+	
+//申请数据
+$(document).off('click',"#PetTalkData").on('click',"#PetTalkData",function(){
+			$('#PetTalkDataselp').remove();
+				var txt = '<div id="PetTalkDataselp">';
+						txt+=  '<div class="shut3"><img src="./assets/images/Close2.png"/></div>';
+						txt+=  '<div id="PetTalkDataselpH">数据</div>';
+						txt+=  '<div id="PetTalkDataselpB">';
+						txt+=  '<div id="PetTalkDataselpBd"><div id="PetTalkDataselpBd0"></div><div id="PetTalkDataselpBd1"></div><div id="PetTalkDataselpBd2">';
+						txt+=  '<div style="height:155px;"></div><div id="stoleft" style="height:40px;font-size:16px;">>></div><div style="height:40px;"></div><div id="storight" style="height:40px;font-size:16px;"><<</div><div style="height:155px;"></div>';
+						txt+=  '</div><div id="PetTalkDataselpBd3"></div></div>';
+						txt+=  '<div id="PetTalkDataselpBb0"><div contenteditable="true" id="PetTalkDataselpBdCon"></div><div id="PetTalkDataselpBdSel">查询</div>';
+						txt+=  '<div style="width:137px;"></div><div style="width:60px;" id="shedingdate">设定时间</div><div style="width:100px;" id="aistartdate"></div><div style="width:3px;"></div><div style="width:5px;" id="hangxian">-</div><div style="width:3px;"></div><div style="width:100px;" id="aienddate"></div>';
+						txt+=  '<div style="width:3px;"></div><div id="PetTalkDataOK">确定</div><div style="width:3px;"></div><div id="PetTalkDataCsel">A选</div><div style="width:4px;"></div></div></div>';
+						txt+= '</div>';
+				$("#mq_main").append(txt);
+				divmove("PetTalkDataselpH","PetTalkDataselp");
+				$.post(MServer+"qq/channel/ch010C.php",{
+					qflag:"aidatai0_1",
+					sflag:'_04_01',
+					},
+					function(data1){
+						var Jdata = JSON.parse(data1);
+						var jtxt ="";
+						for (j=0;j<Jdata.length;j++){
+							if (j==0){
+								jtxt+='<div class="aiitem"><div class="aiitem0" name="0">'+Jdata[j][0]+'</div>';
+								jtxt+='<div class="aiitem1" id="'+Jdata[j][1]+'">'+Jdata[j][1]+'</div>';
+							}else if (Jdata[j][0]!==Jdata[j-1][0]){
+								jtxt+='</div><div class="aiitem"><div class="aiitem0" name="0">'+Jdata[j][0]+'</div>';
+								jtxt+='<div class="aiitem1" id="'+Jdata[j][1]+'">'+Jdata[j][1]+'</div>';
+								}
+							else{jtxt+='<div class="aiitem1" id="'+Jdata[j][1]+'">'+Jdata[j][1]+'</div>';}
+								}
+							jtxt+='</div>';
+							//alert(jtxt);
+						$("#PetTalkDataselpBd0").html(jtxt);
+						$("#aienddate").html(getLangDate('newDate1'));
+					});	
+})
+
+
+$(document).off('click',"#aistartdate").on('click','#aistartdate',function(){laydate.reset();laydate({elem:'#aistartdate'});$(this).css("background","rgba(22, 192, 255, 0.15)");});
+$(document).off('click',"#aienddate").on('click','#aienddate',function(){laydate.reset();laydate({elem:'#aienddate'});$(this).css("background","rgba(22, 192, 255, 0.15)");});
+$(document).off('click',".aiitem0").on('click',".aiitem0",function(){
+	if($(this).attr('name')=='0'){
+		$(this).attr('name','1');
+		$(this).parent().find('.aiitem1').css('display','flex');
+		}else{
+			$(this).attr('name','0');
+			$(this).parent().find('.aiitem1').css('display','none');
+			}
+	})
+$(document).off('click',".aiitem1").on('click',".aiitem1",function(){
+	var thisid = $(this).attr('id');
+	$.post(MServer+"qq/channel/ch010C.php",{
+		qflag:"aidataj",
+		sflag:'_04_01',
+		sname:thisid,
+		},
+		function(data1){
+			//alert(data1);
+			var Jdata = JSON.parse(data1);
+			var jtxt ="";
+			for (j=0;j<Jdata.length;j++){
+				jtxt+='<div class="aidata0" id="'+Jdata[j][0]+'">'+Jdata[j][1]+'</div>';
+					}
+				//alert(jtxt);
+			$("#PetTalkDataselpBd1").html(jtxt);
+		});	
+	})
+//双击选入候选栏
+$(document).off('dblclick',".aidata0").on('dblclick',".aidata0",function(){
+	//去重
+	var thisid = $(this).attr('id');
+	var thisname = $(this).html();
+	if ($("#PetTalkDataselpBd3").find('#'+thisid).length > 0) {
+				WarnMessage('"'+thisname+'"：已存在！');
+				$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+		}else{
+			var jtxt = '<div class="aidata1" id="'+thisid+'">'+thisname+'</div>';
+			$("#PetTalkDataselpBd3").append(jtxt);
+			}
+})
+//全部选入候选栏
+$(document).off('click',"#stoleft").on('click',"#stoleft",function(){
+	$("#PetTalkDataselpBd1").children('div').each(function(){
+		//去重
+		var thisid = $(this).attr('id');
+		var thisname = $(this).html();
+		if ($("#PetTalkDataselpBd3").find('#'+thisid).length > 0) {
+					;
+			}else{
+				var jtxt = '<div class="aidata1" id="'+thisid+'">'+thisname+'</div>';
+				$("#PetTalkDataselpBd3").append(jtxt);
+				}
+	})
+})
+//候选栏全部删除
+$(document).off('click',"#storight").on('click',"#storight",function(){
+	$("#PetTalkDataselpBd3").html('');
+})
+//从候选栏中删除
+$(document).off('dblclick',".aidata1").on('dblclick',".aidata1",function(){$(this).remove();})
+//查询数据
+$(document).off('click','#PetTalkDataselpBdSel').on('click','#PetTalkDataselpBdSel', function(){
+	var thiscon = $("#PetTalkDataselpBdCon").html();
+	if(thiscon!==''){
+		$.post(MServer+"qq/channel/ch010C.php",{
+				qflag:"PetTalkDataselpBd",
+				sflag:'_04_01',
+				tcon:thiscon,
+				},
+				function(data1){
+					//alert(data1);
+					var Jdata = JSON.parse(data1);
+					var jtxt ="";
+					for (j=0;j<Jdata.length;j++){
+						jtxt+='<div class="aidata0" id="'+Jdata[j][0]+'">'+Jdata[j][1]+'</div>';
+							}
+						//alert(jtxt);
+					$("#PetTalkDataselpBd1").html(jtxt);
+				});
+		}
+})
+//提交数据,这里只提交一个数据项到历史语料中，等下次提交语料的时候，再到后端解析
+$(document).off('click','#PetTalkDataOK').on('click','#PetTalkDataOK', function(){
+	var sdate = $("#aistartdate").html().replace(/-/g,'');
+	var edate = $("#aienddate").html().replace(/-/g,'');
+	var datalist = [sdate,edate];
+	if ($("#PetTalkDataselpBd3").html()==''){;}
+	else{
+	$("#PetTalkDataselpBd3").children('div').each(function(){
+		var thisid = $(this).attr('id');
+		datalist.push(thisid);
+	})
+	var tnow = getLangDate('newDatetime');
+	var ClientTalk= '_数据'+datalist.join('&');
+	hrecordlist.push('{"'+Q14123101+'":{"Dash":"无","Res":"'+ClientTalk+'"}}');
+	//alert(hrecordlist);
+	$("#PetTalkB").append('<div class="TalkDiv" style="display:none;" name="'+Q14123101+'"><div class="UserTalkDiv"><div class="UserTalk" name="talkcon">'+ClientTalk+'</div></div><div class="UserTalkTouXiang"><div class="jUserTalkTouXiang" style="background-image:url(./assets/images/Client.jpg); background-size :100% 100%;"></div></div></div>');
+	$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+	$('#PetTalkDataselp').remove();
+	}		
+})
+//提交数据选项，而不是具体数据
+$(document).off('click',"#PetTalkDataCsel").on('click',"#PetTalkDataCsel",function(){
+	var datalist = [];
+	if ($("#PetTalkDataselpBd3").html()==''){;}
+	else{
+	$("#PetTalkDataselpBd3").children('div').each(function(){
+		var thisname = $(this).html();
+		datalist.push(thisname);
+	})
+	var tnow = getLangDate('newDatetime');
+	var ClientTalk= datalist.join('#')+'：从这些数据中选择一下，回答下面的问题，回复格式使用"数据请求模板"';
+	hrecordlist.push('{"'+Q14123101+'":{"Dash":"无","Res":"'+ClientTalk+'"}}');
+	//alert(hrecordlist);
+	$("#PetTalkB").append('<div class="TalkDiv" style="display:none;" name="'+Q14123101+'"><div class="UserTalkDiv"><div class="UserTalk" name="talkcon">'+ClientTalk+'</div></div><div class="UserTalkTouXiang"><div class="jUserTalkTouXiang" style="background-image:url(./assets/images/Client.jpg); background-size :100% 100%;"></div></div></div>');
+	$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+	$('#PetTalkDataselp').remove();
+	}
+	
+	})
+
+
+
+//双击聊天面板，显示隐藏数据
+$(document).off('dblclick','#PetTalkB').on('dblclick','#PetTalkB', function(){$('.TalkDiv').css('display','block');})
+//双击上边框，聊天记录生成会议记录或报告
+$(document).off('click','#aireport').on('click','#aireport', function(){
+	if (!$("#mq_main_ljH").html().includes(":")){
+		WarnMessage('还没有主题！');
+		$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+		return;
+		}
+	var tbiaoti = $("#mq_main_ljH").html().split(":")[1];
+					$("#mq_main").append('<div id="BG1"><div class="shut4"><img src="./assets/images/Close2.png"/></div><center><div id="BGcontentxx" style="width:800px;min-height:500px;height:auto;margin-top:30px;background:#FFFFFF;padding:9px;text-align:left;"></div></center></div>');
+					var vtxt ='<div id="_toimg" >>>下载图片>>></div>';
+							vtxt+= '<div class="PeriodReport" name="_PeriodReport" id="WeeklyReport">';
+							vtxt+='<div class="PeriodReportH">'+tbiaoti+'（'+getLangDate('newDate1')+'）</div>';
+							vtxt+='<div class="_PeriodReportbcolor">';
+							vtxt+='<div class="_PeriodReport" style="font-weight:normal;"><div class="reRole"><img src="./assets/images/娜娜.jpg"/></div><div style="width:5px;"></div><div class="reRoleMsg">娜娜<span style="color:#FF4D4D;">@主持人</span></div><div class="reRoleMsgt">'+getLangDate("times")+'</div><div style="width:5px;"></div></div>';
+							vtxt+='<div class="_PeriodReport">新闻梳理：</div>';
+							vtxt+='<div class="PeriodReportM" contenteditable="true"></div>';
+							vtxt+='</div>';
+							
+							vtxt+='<div class="_PeriodReportbcolor">';
+							vtxt+='<div class="_PeriodReport" style="font-weight:normal;"><div class="reRole"><img src="./assets/images/竹丹.jpg"/></div><div style="width:5px;"></div><div class="reRoleMsg">竹丹<span style="color:#FF4D4D;">@投资经理</span></div><div class="reRoleMsgt">'+getLangDate("times")+'</div><div style="width:5px;"></div></div>';
+							vtxt+='<div class="_PeriodReport">观点分享：</div>';
+							vtxt+='<div class="PeriodReportM" contenteditable="true"></div>';
+							vtxt+='<div class="_PeriodReport">投资组合：</div>';
+							vtxt+='<div class="PeriodReportM" contenteditable="true"></div>';
+							vtxt+='</div>';
+									
+							vtxt+='<div class="_PeriodReportbcolor">';
+							vtxt+='<div class="_PeriodReport" style="font-weight:normal;"><div class="reRole"><img src="./assets/images/小李.jpg"/></div><div style="width:5px;"></div><div class="reRoleMsg">小李<span style="color:#FF4D4D;">@TMT研究</span></div><div class="reRoleMsgt">'+getLangDate("times")+'</div><div style="width:5px;"></div></div>';
+							vtxt+='<div class="_PeriodReport">市场分析：</div>';
+							vtxt+='<div class="PeriodReportM" contenteditable="true"></div>';
+							vtxt+='</div>';
+									
+							vtxt+='<div class="_PeriodReportbcolor">';
+							vtxt+='<div class="_PeriodReport" style="font-weight:normal;"><div class="reRole"><img src="./assets/images/老张.jpg"/></div><div style="width:5px;"></div><div class="reRoleMsg">老张<span style="color:#FF4D4D;">@主观研究</span></div><div class="reRoleMsgt">'+getLangDate("times")+'</div><div style="width:5px;"></div></div>';
+							vtxt+='<div class="_PeriodReport">宏观研判：</div>';
+							vtxt+='<div class="PeriodReportM" contenteditable="true"></div>';
+							vtxt+='<div class="_PeriodReport">行业视角：</div>';
+							vtxt+='<div class="PeriodReportM" contenteditable="true"></div>';
+							vtxt+='<div class="_PeriodReport">个股分析：</div>';
+							vtxt+='<div class="PeriodReportM" contenteditable="true"></div>';
+							vtxt+='</div>';
+							
+							vtxt+='<div class="_PeriodReportbcolor">';
+							vtxt+='<div class="_PeriodReport" style="font-weight:normal;"><div class="reRole"><img src="./assets/images/李华.jpg"/></div><div style="width:5px;"></div><div class="reRoleMsg">李华<span style="color:#FF4D4D;">@量化研究</span></div><div class="reRoleMsgt">'+getLangDate("times")+'</div><div style="width:5px;"></div></div>';
+							vtxt+='<div class="_PeriodReport">市场分析：</div>';
+							vtxt+='<div class="PeriodReportM" contenteditable="true"></div>';
+							vtxt+='</div>';
+							
+							vtxt+='<div class="_PeriodReportbcolor">';
+							vtxt+='<div class="_PeriodReport" style="font-weight:normal;"><div class="reRole"><img src="./assets/images/阿萨.jpg"/></div><div style="width:5px;"></div><div class="reRoleMsg">阿萨<span style="color:#FF4D4D;">@市场研究</span></div><div class="reRoleMsgt">'+getLangDate("times")+'</div><div style="width:5px;"></div></div>';
+							vtxt+='<div class="_PeriodReport">市场观察：</div>';
+							vtxt+='<div class="PeriodReportM" contenteditable="true"></div>';
+							vtxt+='<div class="_PeriodReport">业内观察：</div>';
+							vtxt+='<div class="PeriodReportM" contenteditable="true"></div>';
+							vtxt+='</div>';
+							
+							vtxt+='<div class="_PeriodReportbcolor">';
+							vtxt+='<div class="_PeriodReport">α24+智能投研：一个全天候寻找超额收益的、不断进化的智能团队。</div>';
+							vtxt+='<div class="PeriodReportM" style="color:#999999">';
+							vtxt+='α (Alpha): 超越市场的智慧与回报；24: 7x24小时永不疲倦的深度工作；+: 超越极限，持续进化。';
+							vtxt+='</div>';
+							vtxt+='<div class="PeriodReportM">';
+							vtxt+='我们基于自研的"角色模拟算法"，尝试构建一个能够持续运转、协同高效的数字投研团队。通过为每位AI分析师配置不同的专业背景、职能角色乃至模拟性格，我们力求塑造其相对独特的投资视角，并引导他们在多维数据环境中展开深度思辨与观点互动。这一机制的设计，旨在使最终生成的分析报告，不仅能够较为准确地捕捉市场动态，更致力于融合不同立场下的逻辑推演，从而为用户提供更具前瞻洞察与战略一致性的决策参考。我们期望通过这种方式，在传统的数据整合与真正的智慧决策之间，探索一条更具深度与实用价值的路径。';
+							vtxt+='</div>';
+							vtxt+='</div>';
+							vtxt+='<div class="_PeriodReportbcolor">';
+							vtxt+='<div class="_PeriodReport" style="color:#999999;font-size:12px;">免责声明</div>';
+							vtxt+='<div class="PeriodReportM" style="color:#999999;font-size:12px;">本人所提供的所有信息（包括但不限于分析、预测、建议、数据等）仅供参考，不保证其准确性、完整性或时效性。该等信息不应被视为任何形式的投资建议或决策依据。投资者依据此等信息做出的任何投资决策，其产生的全部风险与后果均由投资者自行承担，本人不承担任何法律责任。投资有风险，入市须谨慎。</div>';
+							vtxt+='<div class="PeriodReportM" style="text-indent:0;">';
+							vtxt+='<img src="./assets/images/WePay.png" />';
+							vtxt+='</div>';	
+					    vtxt+='</div>';
+					$("#BGcontentxx").css('background','transparent').append(vtxt);
+	})
+
+//双击删除特定模块
+$(document).off('dblclick',"._PeriodReportbcolor").on('dblclick',"._PeriodReportbcolor",function(){$(this).remove();})
+
+/*//下载方法
+function savePic(base64) {
+	var arr = base64.split(',');
+	var bytes = atob(arr[1]);
+	let ab = new ArrayBuffer(bytes.length);
+	let ia = new Uint8Array(ab);
+	for (let i = 0; i < bytes.length; i++) {
+		ia[i] = bytes.charCodeAt(i);
+	}
+	var blob = new Blob([ab], { type: 'application/octet-stream' });
+	var url = URL.createObjectURL(blob);
+	var a = document.createElement('a');
+	a.href = url;
+	a.download = new Date().valueOf() + ".png";
+	var e = document.createEvent('MouseEvents');
+	e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+	a.dispatchEvent(e);
+	URL.revokeObjectURL(url);
+}
+//下载图片
+$(document).off('click',"#_toimg").on('click',"#_toimg",function(){
+	$.getScript("js/html2canvas.min.js",function(){
+		html2canvas(document.querySelector('[name="_PeriodReport"]')).then(canvas => {
+			document.body.appendChild(canvas)
+			let imageURL = canvas.toDataURL("image/png");    //canvas转base64图片
+			savePic(imageURL);
+			document.body.removeChild(canvas)
+			});
+		});
+	})
+
+*/
+
+function savePic(base64) {
+    // 检查是否在 pywebview 环境中
+    if (typeof parent.pywebview !== 'undefined' && parent.pywebview.api) {
+        // 在 pywebview 中，将 base64 传递给 Python 处理
+        parent.pywebview.api.download_image(base64);
+    } else {
+        // 普通浏览器环境，保持原有逻辑
+        var arr = base64.split(',');
+        var bytes = atob(arr[1]);
+        let ab = new ArrayBuffer(bytes.length);
+        let ia = new Uint8Array(ab);
+        for (let i = 0; i < bytes.length; i++) {
+            ia[i] = bytes.charCodeAt(i);
+        }
+        var blob = new Blob([ab], { type: 'application/octet-stream' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = new Date().valueOf() + ".png";
+        var e = document.createEvent('MouseEvents');
+        e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        a.dispatchEvent(e);
+        URL.revokeObjectURL(url);
+    }
+}
+
+//下载图片
+$(document).off('click',"#_toimg").on('click',"#_toimg",function(){
+	$.getScript("./js/html2canvas.min.js",function(){
+		html2canvas(document.querySelector('[name="_PeriodReport"]')).then(canvas => {
+			document.body.appendChild(canvas)
+			let imageURL = canvas.toDataURL("image/png");    //canvas转base64图片
+			savePic(imageURL);
+			document.body.removeChild(canvas)
+			});
+		});
+	})
+	
+//前一个图像
+$(document).off('click',"#ToLeft").on('click',"#ToLeft",function(){
+	var thisname = $("#aidash").attr('name');
+	if (thisname=='addgraph'){
+		var thisnamenum = ihtmllist.length;
+		}else{
+			var thisnamenum = ihtmllist.lastIndexOf(thisname);
+			}
+	if (thisnamenum==0){
+		WarnMessage('已经是第一张图像了!');
+		$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+		}
+	else{
+		const lastElement = ihtmllist[thisnamenum-1];
+		var tvar = '<iframe class="mq_main_l_Frame" runat="server" src="'+MServer+'qq/channel/ailib/'+lastElement+'.php"></iframe>';
+		$("#aidash").css('display','none').attr('name',lastElement).html(tvar).fadeIn();
+		}
+	})
+//后一个图像
+$(document).off('click',"#ToRight").on('click',"#ToRight",function(){
+	var thisname = $("#aidash").attr('name');
+	if (thisname=='addgraph'){;}else{
+		const thisnamenum = ihtmllist.lastIndexOf(thisname);
+		if (thisnamenum==ihtmllist.length-1){
+			WarnMessage('已经是最后一张图像了!');
+			$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+			}
+		else{
+			const lastElement = ihtmllist[thisnamenum+1];
+			var tvar = '<iframe class="mq_main_l_Frame" runat="server" src="'+MServer+'qq/channel/ailib/'+lastElement+'.php"></iframe>';
+			$("#aidash").css('display','none').attr('name',lastElement).html(tvar).fadeIn();
+			}
+		}
+	})
+//保存一个图像
+$(document).off('dblclick',"#ToSave").on('dblclick',"#ToSave",function(){
+	if ($("#aidash").find('iframe').length && $("#aidash").attr('name')=='addgraph') {
+    var iframeHtml ='<html>'+$("#aidash").find('iframe').contents().find('html').html()+'</html>';
+    alert(iframeHtml);
+    //console.log(iframeHtml);
+		$.post(MServer+"qq/channel/ch010C.php",{
+				qflag:"savegraph",
+				sflag:'_01_01',
+				tcon:iframeHtml,
+				},
+				function(data1){
+					if (data1=='文件写入失败！'){console.log(data1);}
+					else {
+						//console.log(data1);
+						ihtmllist.push(data1);
+						$("#aidash").attr('name',data1);
+						var ClientTalk= '_图像'+data1;
+						//alert(hrecordlist);
+						//console.log(ClientTalk);
+						$("#PetTalkB").append('<div class="TalkDiv" style="display:none;" name="'+Q14123101+'"><div class="UserTalkDiv"><div class="UserTalk" name="talkcon">'+ClientTalk+'</div></div><div class="UserTalkTouXiang"><div class="jUserTalkTouXiang" style="background-image:url(./assets/images/Client.jpg); background-size :100% 100%;"></div></div></div>');
+						$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+						WarnMessage('图像已归档！');
+						$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+						}
+					
+				});
+		}else{
+			WarnMessage('没有可保存的图像或者已经图像已存在！');
+			$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+		}
+	})
+
+
+// 完整的 HTML 实体转换
+function htmlEncodeFull(str) {
+  return str.replace(/[&<>"']/g, function(match) {
+    const entities = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
+    return entities[match];
+  });
+}
+//const encodedHtml = htmlEncodeFull(htmlCode);
+//document.getElementById('code-container').innerHTML = `<pre><code>${encodedHtml}</code></pre>`;
+	
+//提交一段代码
+$(document).off('click',"#ToSub").on('click',"#ToSub",function(){
+		const iframeSrc = $("#aidash").find('iframe').attr('src');
+		if (iframeSrc) {
+		    // 使用 AJAX 获取源代码
+		    $.ajax({
+		        url: iframeSrc, // a.php
+		        type: 'GET',
+		        dataType: 'text', // 重要：设置为text以获取原始代码
+		        cache: false, // 避免缓存
+		        success: function(sourceCode) {
+		        	
+		        	const htmlCode = sourceCode.replace(/\r?\n|\r/g, '').replace(/\s+/g, ' ');
+		        	const encodedHtml = htmlEncodeFull(htmlCode);
+		        	//alert(encodedHtml);
+							//var ClientTalk= '```'+encodedHtml+'```';
+							var ClientTalk= '<pre><code>'+encodedHtml+'</code></pre>';
+							hrecordlist.push('{"'+Q14123101+'":{"Dash":"无","Res":"'+ClientTalk+'"}}');
+							console.log(hrecordlist);
+							$("#PetTalkB").append('<div class="TalkDiv" style="display:none;" name="'+Q14123101+'"><div class="UserTalkDiv"><div class="UserTalk" name="talkcon">'+ClientTalk+'</div></div><div class="UserTalkTouXiang"><div class="jUserTalkTouXiang" style="background-image:url(./assets/images/Client.jpg); background-size :100% 100%;"></div></div></div>');
+							$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+		        
+		        },
+		        error: function(xhr, status, error) {
+		            console.error('AJAX 获取失败:', error);
+		            console.log('状态码:', xhr.status);
+		        }
+		    });	
+		}
+		else if ($("#aidash").find('iframe').contents().find('html').html()) {
+		    var iframeHtml =$("#aidash").find('iframe').contents().find('html').html();
+		    iframeHtml = iframeHtml.replace(/\r?\n|\r/g, '').replace(/\s+/g, ' ');
+		    const encodedHtml = htmlEncodeFull(iframeHtml);
+		    //alert(iframeHtml);
+		    var ClientTalk= '<pre><code><html>'+encodedHtml+'</html></code></pre>';
+				hrecordlist.push('{"'+Q14123101+'":{"Dash":"无","Res":"'+ClientTalk+'"}}');
+				$("#PetTalkB").append('<div class="TalkDiv" style="display:none;" name="'+Q14123101+'"><div class="UserTalkDiv"><div class="UserTalk" name="talkcon">'+ClientTalk+'</div></div><div class="UserTalkTouXiang"><div class="jUserTalkTouXiang" style="background-image:url(./assets/images/Client.jpg); background-size :100% 100%;"></div></div></div>');
+				$("#PetTalkB").scrollTop( $("#PetTalkB")[0].scrollHeight );
+			}
+		else{
+				WarnMessage('没有可修改的素材！');
+				$(document).off('click',"#Yes").on('click',"#Yes",function(){$(this).parent().parent().remove();})
+			}
+			
+	})
+	
+//汇报总结
+$(document).off('click',"#PetTalkConclusion").on('click',"#PetTalkConclusion",function(){
+	alert(11111);
+	})
+	
+//对话部分右键事件
+$(document).off('contextmenu', "**").on('contextmenu', "#targetArea", function(){
+    alert(11111);
+})
+	
+	</script>
+	</body>	
+</html>

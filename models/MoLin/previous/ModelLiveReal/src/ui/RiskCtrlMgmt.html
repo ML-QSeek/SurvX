@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风险控制监控系统</title>
+		<link rel="stylesheet" href="./css/all.min.css">
+    <script	type="text/javascript"	src="./js/jquery.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #4A90E2; /* 主蓝色 */
+            --primary-blue-dark: #3A7BC8; /* 深蓝色 */
+            --primary-blue-light: #5CA2FF; /* 浅蓝色 */
+            --primary-blue-transparent: rgba(74, 144, 226, 0.1);
+            --white: #FFFFFF;
+            --light-gray: #F5F7FA;
+            --gray: #E1E5EB;
+            --dark-gray: #7B8A9E;
+            --text-dark: #2C3E50;
+            --text-gray: #5D6D7E;
+            --border-color: #D1D9E6;
+            --error-color: #FF6B6B;
+            --success-color: #1DD1A1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+		        font-weight: 300;
+		        font-size: 13px;
+		        line-height: 1.4em;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        body {
+            background: linear-gradient(135deg, #F5F7FA 0%, #E4E9F2 100%);
+            display: flex;
+            flex-direction: column;
+        }
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(74, 144, 226, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(74, 144, 226, 0.03) 0%, transparent 40%);
+            z-index: 0;
+        }
+        
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+		    ::-webkit-scrollbar  
+		    {  
+		        width: 0px;  
+		        height: 0px;  
+		        background-color: #F5F7FA;  
+		    }  
+				
+        /* 图例 */
+        .legend {
+            height:40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--white);
+            flex-shrink: 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            margin-right: 6px;
+            border: 1px solid;
+        }
+        
+        .legend-text {
+            font-size: 13px;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+        
+        .dashboard {
+        	display:flex;
+          position:absolute;
+          top:0;
+          left:0;
+          right:0;
+          bottom:0;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            transform-origin: center;
+            transition: transform 0.3s;
+            overflow-y: auto !important;
+            background: var(--white);
+        }
+        
+        .metrics-panel {
+            width: 300px;
+            padding: 3px;
+            border-left: 1px solid var(--border-color);
+            overflow-y: auto !important;
+            background: var(--white);
+        }
+           
+        .metric-item {
+            margin-bottom: 3px;
+            padding: 12px;
+            background: var(--light-gray);
+            border-left: 2px solid var(--primary-blue);
+        }
+        
+        .metric-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+        
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        
+        .metric-trend {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        .trend-up {
+            color: var(--success-color);
+        }
+        
+        .trend-down {
+            color: var(--error-color);
+        }
+        
+        .node {
+            position: absolute;
+            width: 150px;
+            height: 80px;
+            color: var(--text-dark);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            z-index: 10;
+            user-select: none;
+            padding: 6px;
+            flex-direction: column;
+            border: 1px solid var(--primary-blue);
+            background: var(--white);
+            transition: all 0.3s;
+        }
+        
+        .node:hover {
+            transform: translateY(-3px);
+            z-index: 100;
+            border-color: var(--primary-blue-dark);
+        }
+        
+        /* 风险控制专用节点样式 - 更新配色 */
+        .node .risk-identification {
+            border-color: #FF6B6B;
+            background: #FFF5F5;
+            border-radius: 12px;
+        }
+        
+        .node.risk-assessment {
+            border-color: #FFD166;
+            background: #FFFBF0;
+            border-radius: 12px;
+        }
+        
+        .node.risk-mitigation {
+            border-color: var(--success-color);
+            background: #F0FDF9;
+            border-radius: 12px;
+        }
+        
+        .node.risk-monitoring {
+            border-color: #4ECDC4;
+            background: #F0FDFC;
+            border-radius: 12px;
+        }
+        
+        .node.risk-reporting {
+            border-color: #8A2BE2;
+            background: #F8F5FF;
+            border-radius: 12px;
+        }
+        
+        .node.risk-compliance {
+            border-color: #FF9E00;
+            background: #FFF8F0;
+            border-radius: 12px;
+        }
+        
+        /* 个股风控专用节点样式 */
+        .node.stock-risk {
+            border-color: #9D4EDD;
+            background: #F8F5FF;
+            border-radius: 12px;
+        }
+        
+        /* 关键节点样式 */
+        .node.critical {
+            border-width: 2px;
+            border-color: var(--primary-blue-dark);
+        }
+        
+        /* 闪烁动画关键帧 */
+        @keyframes blink {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.6); }
+            100% { filter: brightness(1); }
+        }
+        
+        .node.blink {
+            animation: blink 1.5s infinite;
+        }
+        
+        .node-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 3px;
+            letter-spacing: 0.5px;
+            color: var(--text-dark);
+        }
+        
+        .node-subtitle {
+            font-size: 13px;
+            font-weight: normal;
+            opacity: 0.85;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            max-height: 30px;
+            color: var(--text-gray);
+        }
+        
+        .jtk-connector {
+            z-index: 5;
+            stroke: var(--primary-blue);
+            stroke-width: 2;
+        }
+        
+        .jtk-endpoint {
+            z-index: 6;
+            fill: var(--primary-blue);
+        }
+        
+        .jtk-hover {
+            z-index: 7;
+        }
+                
+        /* 自定义箭头样式 */
+        .flow-arrow {
+            fill: var(--primary-blue);
+            animation: flow 2s infinite linear;
+        }
+        
+        @keyframes flow {
+            0% {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+        }
+        
+        /* 连接线动画 */
+        .animated-connector {
+            stroke-dasharray: 10 5;
+            animation: dash 1s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -15;
+            }
+        }
+        
+        /* 脉冲效果 */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                r: 4;
+                opacity: 1;
+            }
+            50% {
+                r: 6;
+                opacity: 0.7;
+            }
+            100% {
+                r: 4;
+                opacity: 1;
+            }
+        }
+        
+        /* 节点详情面板 */
+        .node-detail {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 350px;
+            background: var(--white);
+            padding: 10px;
+            z-index: 1000;
+            border: 1px solid var(--primary-blue-dark);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12),0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        .node-detail.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .detail-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .detail-content {
+            line-height: 1.7;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+            display: block;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            color: var(--text-dark);
+            font-size: 16px;
+        }
+        
+        
+        /* 关键节点标记 */
+        .critical-mark {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--white);
+            z-index: 11;
+        }
+        
+        /* 风险级别指示器 */
+        .risk-level {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: var(--white);
+            z-index: 11;
+        }
+        
+        .risk-high {
+            background: var(--error-color);
+        }
+        
+        .risk-medium {
+            background: #FFD166;
+        }
+        
+        .risk-low {
+            background: var(--success-color);
+        }
+        
+        /* 层次标题 */
+        .layer-title {
+            position: absolute;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-align: center;
+            width: 100%;
+            z-index: 1;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+    </style>
+</head>
+<body>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FFF5F5; border-color: #FF6B6B;"></div>
+                <div class="legend-text">风险识别</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FFFBF0; border-color: #FFD166;"></div>
+                <div class="legend-text">风险评估</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #F0FDF9; border-color: var(--success-color);"></div>
+                <div class="legend-text">风险缓解</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #F0FDFC; border-color: #4ECDC4;"></div>
+                <div class="legend-text">风险监控</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #F8F5FF; border-color: #8A2BE2;"></div>
+                <div class="legend-text">风险报告</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FFF8F0; border-color: #FF9E00;"></div>
+                <div class="legend-text">合规管理</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #F8F5FF; border-color: #9D4EDD;"></div>
+                <div class="legend-text">个股风控</div>
+            </div>
+            <div class="legend-item">
+                <div class="critical-mark" style="position: static; margin-right: 8px; background: var(--primary-blue);"></div>
+                <div class="legend-text">关键节点</div>
+            </div>
+        </div>
+        <div style="flex:1;position:relative;">
+        <div class="dashboard">
+            <div class="chart-container" id="chart-container">
+                <!-- 层次标题 -->
+                <div class="layer-title" style="top: 40px;">风险识别</div>
+                <div class="layer-title" style="top: 190px;">风险评估</div>
+                <div class="layer-title" style="top: 340px;">风险缓解</div>
+                <div class="layer-title" style="top: 490px;">风险监控</div>
+                <div class="layer-title" style="top: 640px;">风险报告</div>
+                <div class="layer-title" style="top: 790px;">合规管理</div>
+                <div class="layer-title" style="top: 40px; left: 80%;">个股风控</div>
+                
+                <!-- 节点详情面板 -->
+                <div class="node-detail">
+                    <div class="detail-header">
+                        <div class="detail-title">节点详情</div>
+                    </div>
+                    <div class="detail-content"></div>
+                </div>
+            </div>
+            
+            <div class="metrics-panel">                
+                <div class="metric-item">
+                    <div class="metric-name">VaR (在险价值)</div>
+                    <div class="metric-value">-2.34%</div>
+                    <div class="metric-trend trend-up">+0.15%</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-name">最大回撤</div>
+                    <div class="metric-value">-8.2%</div>
+                    <div class="metric-trend trend-down">-1.1%</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-name">波动率</div>
+                    <div class="metric-value">15.8%</div>
+                    <div class="metric-trend trend-down">-0.5%</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-name">Beta系数</div>
+                    <div class="metric-value">1.05</div>
+                    <div class="metric-trend trend-up">+0.02</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-name">夏普比率</div>
+                    <div class="metric-value">1.45</div>
+                    <div class="metric-trend trend-up">+0.08</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-name">压力测试通过率</div>
+                    <div class="metric-value">92.5%</div>
+                    <div class="metric-trend trend-up">+2.3%</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-name">风险敞口</div>
+                    <div class="metric-value">18.7%</div>
+                    <div class="metric-trend trend-down">-1.2%</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-name">风险预警触发次数</div>
+                    <div class="metric-value">3</div>
+                    <div class="metric-trend trend-down">-2次</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-name">黑名单股票数量</div>
+                    <div class="metric-value">12</div>
+                    <div class="metric-trend trend-up">+2只</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-name">AI监控覆盖率</div>
+                    <div class="metric-value">95.3%</div>
+                    <div class="metric-trend trend-up">+1.5%</div>
+                </div>
+            </div>
+        </div>
+				</div>
+    <!-- 引入jsPlumb库 -->
+    <script src="./js/jsplumb.min.js"></script>
+    <script>
+        // 初始化jsPlumb实例
+        const jsPlumbInstance = jsPlumb.getInstance({
+            Connector: ["Flowchart", {cornerRadius: 10}],
+            Anchors: ['Right', 'Left', 'Top', 'Bottom'],
+            Endpoint: ["Dot", { radius: 2 }],
+            EndpointStyle: { fill: "var(--primary-blue)" },
+            PaintStyle: { 
+                stroke: "var(--primary-blue)", 
+                strokeWidth: 1,
+                strokeDasharray: "10 5"
+            },
+            HoverPaintStyle: { stroke: "var(--primary-blue-dark)", strokeWidth: 4 },
+            Container: "chart-container"
+        });
+        const bias = ($('#chart-container').width()-900-150-150)*0.5;
+        // 风险控制节点数据 - 优化布局
+        const nodes = [
+            // 风险识别层
+            { id: "market-risk", name: "市场风险识别", type: "risk-identification", x: bias+150, y: 80, 
+              description: "识别市场波动、利率变化等风险", critical: true, riskLevel: "high" },
+            { id: "credit-risk", name: "信用风险识别", type: "risk-identification", x: bias+400, y: 80, 
+              description: "识别交易对手违约风险", critical: false, riskLevel: "" },
+            { id: "liquidity-risk", name: "流动性风险识别", type: "risk-identification", x: bias+650, y: 80, 
+              description: "识别资产变现困难等风险", critical: false, riskLevel: "" },
+
+            // 风险评估层
+            { id: "risk-quantification", name: "风险量化", type: "risk-assessment", x: bias+150, y: 230, 
+              description: "计算VaR、CVaR等风险指标", critical: true, riskLevel: "high" },
+            { id: "scenario-analysis", name: "情景分析", type: "risk-assessment", x: bias+400, y: 230, 
+              description: "分析不同市场情景下的风险", critical: true, riskLevel: "medium" },
+            { id: "stress-testing", name: "压力测试", type: "risk-assessment", x: bias+650, y: 230, 
+              description: "极端市场条件下的风险测试", critical: false, riskLevel: "" },
+
+            // 风险缓解层
+            { id: "hedging-strategy", name: "对冲策略", type: "risk-mitigation", x: bias+150, y: 380, 
+              description: "制定和执行风险对冲策略", critical: true, riskLevel: "medium" },
+            { id: "position-sizing", name: "仓位管理", type: "risk-mitigation", x: bias+400, y: 380, 
+              description: "根据风险控制规则确定仓位", critical: false, riskLevel: "high" },
+            { id: "stop-loss", name: "止损机制", type: "risk-mitigation", x: bias+650, y: 380, 
+              description: "设置止损点，控制单次损失", critical: true, riskLevel: "" },
+
+            // 风险监控层
+            { id: "real-time-monitoring", name: "实时监控", type: "risk-monitoring", x: bias+150, y: 530, 
+              description: "实时监控风险指标和阈值", critical: true, riskLevel: "high" },
+            { id: "risk-thresholds", name: "风险阈值管理", type: "risk-monitoring", x: bias+400, y: 530, 
+              description: "设置和管理风险预警阈值", critical: true, riskLevel: "high" },
+            { id: "alert-system", name: "预警系统", type: "risk-monitoring", x: bias+650, y: 530, 
+              description: "异常情况自动预警", critical: false, riskLevel: "high" },
+
+            // 风险报告层
+            { id: "risk-reporting", name: "风险报告生成", type: "risk-reporting", x: bias+250, y: 680, 
+              description: "生成风险报告和管理层汇报", critical: false, riskLevel: "medium" },
+            { id: "regulatory-reporting", name: "监管报告", type: "risk-reporting", x: bias+550, y: 680, 
+              description: "生成监管要求的风险报告", critical: false, riskLevel: "medium" },
+
+            // 合规管理层
+            { id: "compliance-check", name: "合规检查", type: "risk-compliance", x: bias+150, y: 830, 
+              description: "检查风险控制措施合规性", critical: true, riskLevel: "medium" },
+            { id: "policy-update", name: "政策更新", type: "risk-compliance", x: bias+400, y: 830, 
+              description: "更新风险控制政策和流程", critical: false, riskLevel: "medium" },
+            { id: "audit-trail", name: "审计跟踪", type: "risk-compliance", x: bias+650, y: 830, 
+              description: "记录风险控制决策和操作", critical: false, riskLevel: "low" },
+            
+            // 个股风控模块
+            { id: "blacklist-management", name: "黑名单管理", type: "stock-risk", x: bias+900, y: 80, 
+              description: "管理量化策略中的黑名单股票", critical: true, riskLevel: "high" },
+            { id: "ai-stock-monitoring", name: "AI个股监控", type: "stock-risk", x: bias+900, y: 230, 
+              description: "利用大模型实时监控持仓股票", critical: true, riskLevel: "high" },
+            { id: "risk-stock-filter", name: "风险股票筛选", type: "stock-risk", x: bias+900, y: 380, 
+              description: "根据风险指标筛选高风险股票", critical: true, riskLevel: "medium" },
+            { id: "exclusion-mechanism", name: "排除机制", type: "stock-risk", x: bias+900, y: 530, 
+              description: "自动排除高风险股票", critical: true, riskLevel: "high" },
+            { id: "stock-risk-report", name: "个股风险报告", type: "stock-risk", x: bias+900, y: 680, 
+              description: "生成个股风险分析报告", critical: false, riskLevel: "medium" }
+        ];
+        
+        // 定义连接配置数组
+        const connectionConfigs = [
+            // 风险识别流程
+            {from: "market-risk", to: "risk-quantification", anchors: ["Bottom", "Top"], color: "#FF6B6B", width: 2, style: "solid"},
+            {from: "credit-risk", to: "risk-quantification", anchors: ["Bottom", "Top"], color: "#FF6B6B", width: 2, style: "solid"},
+            {from: "liquidity-risk", to: "risk-quantification", anchors: ["Bottom", "Top"], color: "#FF6B6B", width: 2, style: "solid"},
+            
+            // 风险评估流程
+            {from: "risk-quantification", to: "scenario-analysis", anchors: ["Right", "Left"], color: "#FFD166", width: 2, style: "solid"},
+            {from: "scenario-analysis", to: "stress-testing", anchors: ["Right", "Left"], color: "#FFD166", width: 2, style: "solid"},
+            
+            // 风险缓解流程
+            {from: "stress-testing", to: "hedging-strategy", anchors: ["Bottom", "Top"], color: "#06D6A0", width: 2, style: "solid"},
+            {from: "hedging-strategy", to: "position-sizing", anchors: ["Right", "Left"], color: "#06D6A0", width: 2, style: "solid"},
+            {from: "position-sizing", to: "stop-loss", anchors: ["Right", "Left"], color: "#06D6A0", width: 2, style: "solid"},
+            
+            // 风险监控流程
+            {from: "stop-loss", to: "real-time-monitoring", anchors: ["Bottom", "Top"], color: "#4ECDC4", width: 2, style: "solid"},
+            {from: "real-time-monitoring", to: "risk-thresholds", anchors: ["Right", "Left"], color: "#4ECDC4", width: 2, style: "solid"},
+            {from: "risk-thresholds", to: "alert-system", anchors: ["Right", "Left"], color: "#4ECDC4", width: 2, style: "solid"},
+            
+            // 风险报告流程
+            {from: "alert-system", to: "risk-reporting", anchors: ["Bottom", "Top"], color: "#8A2BE2", width: 2, style: "solid"},
+            {from: "risk-reporting", to: "regulatory-reporting", anchors: ["Right", "Left"], color: "#8A2BE2", width: 2, style: "solid"},
+            
+            // 合规管理流程
+            {from: "regulatory-reporting", to: "compliance-check", anchors: ["Bottom", "Top"], color: "#FF9E00", width: 2, style: "solid"},
+            {from: "compliance-check", to: "policy-update", anchors: ["Right", "Left"], color: "#FF9E00", width: 2, style: "solid"},
+            {from: "policy-update", to: "audit-trail", anchors: ["Right", "Left"], color: "#FF9E00", width: 2, style: "solid"},
+            
+            // 个股风控流程
+            {from: "blacklist-management", to: "ai-stock-monitoring", anchors: ["Bottom", "Top"], color: "#9D4EDD", width: 2, style: "solid"},
+            {from: "ai-stock-monitoring", to: "risk-stock-filter", anchors: ["Bottom", "Top"], color: "#9D4EDD", width: 2, style: "solid"},
+            {from: "risk-stock-filter", to: "exclusion-mechanism", anchors: ["Bottom", "Top"], color: "#9D4EDD", width: 2, style: "solid"},
+            {from: "exclusion-mechanism", to: "stock-risk-report", anchors: ["Bottom", "Top"], color: "#9D4EDD", width: 2, style: "solid"},
+            
+            // 个股风控与主流程的连接
+            {from: "risk-quantification", to: "blacklist-management", anchors: ["Right", "Left"], color: "#9D4EDD", width: 2, style: "dashed"},
+            {from: "ai-stock-monitoring", to: "real-time-monitoring", anchors: ["Left", "Right"], color: "#9D4EDD", width: 2, style: "dashed"},
+            {from: "exclusion-mechanism", to: "position-sizing", anchors: ["Left", "Right"], color: "#9D4EDD", width: 2, style: "dashed"},
+            {from: "stock-risk-report", to: "risk-reporting", anchors: ["Left", "Right"], color: "#9D4EDD", width: 2, style: "dashed"},
+            
+            // 反馈循环
+            {from: "audit-trail", to: "market-risk", anchors: ["Right","Top"], color: "#FF6B6B", width: 2, style: "dotted"},
+            {from: "risk-reporting", to: "risk-quantification", anchors: ["Left","Left"], color: "#FF6B6B", width: 2, style: "dotted"},
+            {from: "alert-system", to: "hedging-strategy", anchors: ["Bottom","Top"], color: "#FF6B6B", width: 2, style: "dotted"},
+            {from: "stock-risk-report", to: "blacklist-management", anchors: ["Right","Right"], color: "#9D4EDD", width: 2, style: "dotted"}
+        ];
+        
+        // 存储所有连接对象
+        let connectionObjects = [];
+        let animationsEnabled = true;
+        let blinkingEnabled = false;
+        let currentScale = 1;
+        let criticalHighlighted = false;
+        
+        // 添加节点函数
+        function addNode(node) {
+            const nodeElement = document.createElement("div");
+            nodeElement.id = node.id;
+            nodeElement.className = `node ${node.type}`;
+            
+            // 添加风险级别指示器
+            let riskLevelIndicator = '';
+            if (node.riskLevel) {
+                riskLevelIndicator = `<div class="risk-level risk-${node.riskLevel}">${node.riskLevel.charAt(0).toUpperCase()}</div>`;
+            }
+            
+            // 如果是关键节点，添加标记
+            if (node.critical) {
+                nodeElement.classList.add('critical');
+                nodeElement.innerHTML = `
+                    <div class="critical-mark">!</div>
+                    ${riskLevelIndicator}
+                    <div class="node-title">${node.name}</div>
+                    <div class="node-subtitle">${node.description}</div>
+                `;
+            } else {
+                nodeElement.innerHTML = `
+                    ${riskLevelIndicator}
+                    <div class="node-title">${node.name}</div>
+                    <div class="node-subtitle">${node.description}</div>
+                `;
+            }
+            
+            // 设置位置
+            nodeElement.style.left = `${node.x}px`;
+            nodeElement.style.top = `${node.y}px`;
+            
+            // 添加到容器
+            document.getElementById("chart-container").appendChild(nodeElement);
+            
+            // 使节点可拖拽
+            jsPlumbInstance.draggable(nodeElement, {containment: "parent"});
+            
+            // 双击编辑节点名称
+            nodeElement.addEventListener("dblclick", function() {
+                const currentName = this.querySelector(".node-title").textContent;
+                const newName = prompt("请输入节点名称:", currentName);
+                if (newName !== null && newName.trim() !== "") {
+                    this.querySelector(".node-title").textContent = newName;
+                    
+                    // 更新数据
+                    const nodeData = nodes.find(n => n.id === this.id);
+                    if (nodeData) nodeData.name = newName;
+                }
+            });
+            
+            // 右键查看节点详情
+            nodeElement.addEventListener("contextmenu", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showNodeDetail(this.id);
+            });
+            
+            return nodeElement;
+        }
+        
+        function createSingleConnection(config, index) {
+            const sourceNode = document.getElementById(config.from);
+            const targetNode = document.getElementById(config.to);
+
+            if (!sourceNode || !targetNode) return;
+
+            const conn = {
+                id: `conn-${index}`,
+                source: config.from,
+                target: config.to,
+                color: config.color || "var(--primary-blue)",
+                width: config.width || 2,
+                style: config.style || "solid",
+                animation: config.animation || "dash",
+                arrow: config.arrow !== false,
+                anchors: config.anchors
+            };
+
+            const connection = jsPlumbInstance.connect({
+                source: sourceNode,
+                target: targetNode,
+                anchors: conn.anchors,
+                paintStyle: getConnectionStyle(conn),
+                overlays: conn.arrow ? [
+                    ["Custom", { 
+                        create: function(component) {
+                            // 创建自定义箭头
+                            const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            arrow.setAttribute("points", "0,0 10,5 0,10");
+                            arrow.setAttribute("class", "flow-arrow");
+                            arrow.style.fill = conn.color;
+                            return arrow;
+                        },
+                        location: 0.5,
+                        id: "customArrow"
+                    }]
+                ] : []
+            });
+
+            connectionObjects.push({
+                jsPlumbConnection: connection,
+                metadata: conn
+            });
+
+            applyConnectionAnimation(connection, conn.animation);
+        }
+
+        // 获取连接线样式
+        function getConnectionStyle(conn) {
+            let dashstyle = "";
+            if (conn.style === "dashed") {
+                dashstyle = "5 5";
+            } else if (conn.style === "dotted") {
+                dashstyle = "2 2";
+            }
+            
+            return {
+                stroke: conn.color,
+                strokeWidth: conn.width,
+                strokeDasharray: dashstyle
+            };
+        }
+        
+        // 应用连接线动画
+        function applyConnectionAnimation(connection, animationType) {
+            const connector = connection.connector.canvas;
+            if (!connector) return;
+            
+            // 移除所有动画类
+            connector.classList.remove("animated-connector", "pulse");
+            
+            if (animationType === "dash") {
+                connector.classList.add("animated-connector");
+            } else if (animationType === "pulse") {
+                connector.classList.add("pulse");
+            }
+        }
+        
+        // 显示节点详情
+        function showNodeDetail(nodeId) {
+            const node = nodes.find(n => n.id === nodeId);
+            if (!node) return;
+            
+            const detailPanel = document.querySelector(".node-detail");
+            const detailContent = detailPanel.querySelector(".detail-content");
+            
+            const criticalText = node.critical ? "是" : "否";
+            const riskLevelText = getRiskLevelName(node.riskLevel);
+            
+            detailContent.innerHTML = `
+                <div class="detail-item">
+                    <span class="detail-label">节点ID:</span>
+                    <span class="detail-value">${node.id}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">节点名称:</span>
+                    <span class="detail-value">${node.name}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">节点类型:</span>
+                    <span class="detail-value">${getNodeTypeName(node.type)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">关键节点:</span>
+                    <span class="detail-value">${criticalText}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">风险级别:</span>
+                    <span class="detail-value">${riskLevelText}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">节点描述:</span>
+                    <span class="detail-value">${node.description}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">位置坐标:</span>
+                    <span class="detail-value">(${node.x}, ${node.y})</span>
+                </div>
+            `;
+            
+            // 显示面板
+            detailPanel.classList.add("active");
+        }
+
+        // 获取节点类型名称
+        function getNodeTypeName(type) {
+            const typeNames = {
+                "risk-identification": "风险识别",
+                "risk-assessment": "风险评估",
+                "risk-mitigation": "风险缓解",
+                "risk-monitoring": "风险监控",
+                "risk-reporting": "风险报告",
+                "risk-compliance": "合规管理",
+                "stock-risk": "个股风控"
+            };
+            return typeNames[type] || "其他";
+        }
+        
+        // 获取风险级别名称
+        function getRiskLevelName(level) {
+            const levelNames = {
+                "high": "高风险",
+                "medium": "中等风险",
+                "low": "低风险"
+            };
+            return levelNames[level] || "未知";
+        }
+                
+        // 切换动画
+        function toggleAnimations() {
+            animationsEnabled = !animationsEnabled;
+            
+            connectionObjects.forEach(conn => {
+                const connector = conn.jsPlumbConnection.connector.canvas;
+                if (connector) {
+                    if (animationsEnabled) {
+                        applyConnectionAnimation(conn.jsPlumbConnection, conn.metadata.animation);
+                    } else {
+                        connector.classList.remove("animated-connector", "pulse");
+                    }
+                }
+            });
+            
+            document.getElementById("toggle-animations").classList.toggle("active", animationsEnabled);
+        }
+        
+        // 切换闪烁
+        function toggleBlinking() {
+            blinkingEnabled = !blinkingEnabled;
+            const nodes = document.querySelectorAll('.node');
+            
+            nodes.forEach(node => {
+                if (blinkingEnabled) {
+                    node.classList.add('blink');
+                } else {
+                    node.classList.remove('blink');
+                }
+            });
+            
+            document.getElementById("toggle-blinking").classList.toggle("active", blinkingEnabled);
+        }
+        
+        // 重置节点位置
+        function resetPositions() {
+            nodes.forEach(node => {
+                const nodeElement = document.getElementById(node.id);
+                if (nodeElement) {
+                    nodeElement.style.left = `${node.x}px`;
+                    nodeElement.style.top = `${node.y}px`;
+                    jsPlumbInstance.revalidate(nodeElement);
+                }
+            });
+        }
+        
+        // 高亮关键节点
+        function highlightCritical() {
+            criticalHighlighted = !criticalHighlighted;
+            const criticalNodes = document.querySelectorAll('.node.critical');
+            
+            criticalNodes.forEach(node => {
+                if (criticalHighlighted) {
+                    node.style.borderColor = 'var(--primary-blue-dark)';
+                    node.style.zIndex = '100';
+                } else {
+                    node.style.borderColor = '';
+                }
+            });
+            
+            document.getElementById("highlight-critical").classList.toggle("active", criticalHighlighted);
+        }
+                
+        // 点击空白处关闭详情面板
+        document.addEventListener("click", function(e) {
+            if (!e.target.closest('.node-detail') && !e.target.closest('.node')) {
+                document.querySelector(".node-detail").classList.remove("active");
+            }
+        });
+        
+        // 初始化架构图
+        function initializeChart() {
+            nodes.forEach(node => {addNode(node);});
+            setTimeout(() => {               
+              for (let i1=0;i1<connectionConfigs.length;i1++){
+                createSingleConnection(connectionConfigs[i1], i1);
+              }
+            }, 100);
+        }
+        
+        // 页面加载完成后初始化
+        window.onload = function(){
+            initializeChart();
+            /*
+            // 添加事件监听器
+            document.getElementById("toggle-animations").addEventListener("click", toggleAnimations);
+            document.getElementById("toggle-blinking").addEventListener("click", toggleBlinking);
+            document.getElementById("reset-positions").addEventListener("click", resetPositions);
+            document.getElementById("zoom-in").addEventListener("click", zoomIn);
+            document.getElementById("zoom-out").addEventListener("click", zoomOut);
+            document.getElementById("highlight-critical").addEventListener("click", highlightCritical);
+            */
+        };
+    </script>
+</body>
+</html>

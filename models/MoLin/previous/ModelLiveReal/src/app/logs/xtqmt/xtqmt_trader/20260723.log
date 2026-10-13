@@ -1,0 +1,52 @@
+2026-07-23 15:25:46,110 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-07-23 15:25:46,112 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-07-23 15:25:46,113 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-07-23 15:25:46,137 - ScriptMain.xtqmt_trader - INFO - 交易工作线程启动
+2026-07-23 15:25:46,138 - ScriptMain.xtqmt_trader - INFO - 数据发送线程启动
+2026-07-23 15:25:46,139 - ScriptMain.xtqmt_trader - INFO - 数据接收线程启动
+2026-07-23 15:25:46,140 - ScriptMain.xtqmt_trader - INFO - 监控线程启动
+2026-07-23 15:25:46,140 - ScriptMain.xtqmt_trader - INFO - 已启动 4 个工作线程
+2026-07-23 15:25:46,146 - ScriptMain.xtqmt_trader - INFO - 迅投QMT交易脚本启动成功
+2026-07-23 15:25:46,149 - ScriptMain.xtqmt_trader - INFO - SocketIO连接已建立
+2026-07-23 15:25:46,150 - ScriptMain.xtqmt_trader - INFO - 已连接到SocketIO服务器: http://10.10.98.51:3211
+2026-07-23 15:25:46,168 - ScriptMain.xtqmt_trader - INFO - mqReceiver连接已建立
+2026-07-23 15:25:46,170 - ScriptMain.xtqmt_trader - INFO - 已连接到mqReceiver服务器: http://10.10.98.51:3210
+2026-07-23 15:27:06,481 - ScriptMain.xtqmt_trader - INFO - 收到交易指令
+2026-07-23 15:27:06,483 - ScriptMain.xtqmt_trader - INFO - 开始处理交易指令，队列剩余: 0
+2026-07-23 15:27:06,509 - ScriptMain.xtqmt_trader - INFO - 处理类型20：指定买卖指令
+2026-07-23 15:27:06,535 - ScriptMain.xtqmt_trader - INFO - 开始执行交易: 卖出0只, 买入1只
+2026-07-23 15:27:06,552 - ScriptMain.xtqmt_trader - INFO - 收盘前5分钟，强制停止
+2026-07-23 15:27:06,553 - ScriptMain.xtqmt_trader - ERROR - 处理交易数据异常: cannot access local variable 'sell_final_list' where it is not associated with a value
+2026-07-23 15:27:06,554 - ScriptMain.xtqmt_trader - INFO - 交易指令处理完成
+2026-07-23 15:30:23,297 - ScriptMain.xtqmt_trader - INFO - 清理脚本资源...
+2026-07-23 15:30:23,328 - ScriptMain.xtqmt_trader - INFO - 从mqReceiver服务器断开连接
+2026-07-23 15:30:23,329 - ScriptMain.xtqmt_trader - INFO - 数据接收线程停止
+2026-07-23 15:30:24,007 - ScriptMain.xtqmt_trader - INFO - 交易工作线程退出
+2026-07-23 16:04:14,543 - ScriptMain.xtqmt_trader - INFO - 初始化迅投QMT交易脚本: 小市值01
+2026-07-23 16:04:14,545 - ScriptMain.xtqmt_trader - INFO - 账号: 2018134, 用户: quruyi0101
+2026-07-23 16:04:14,545 - ScriptMain.xtqmt_trader - INFO - 数据目录: D:/迅投模拟盘/export_data/, 输出目录: D:/迅投模拟盘/export_data/
+2026-07-23 16:04:14,546 - ScriptMain.xtqmt_trader - INFO - SocketIO发送地址: http://10.10.98.51:3211
+2026-07-23 16:04:14,546 - ScriptMain.xtqmt_trader - INFO - SocketIO接收地址: http://10.10.98.51:3210
+2026-07-23 16:04:14,546 - ScriptMain.xtqmt_trader - INFO - 多进程环境: False
+2026-07-23 16:04:14,569 - ScriptMain.xtqmt_trader - INFO - 权限验证成功
+2026-07-23 16:04:14,569 - ScriptMain.xtqmt_trader - INFO - 交易工作线程启动
+2026-07-23 16:04:14,571 - ScriptMain.xtqmt_trader - INFO - 数据发送线程启动
+2026-07-23 16:04:14,572 - ScriptMain.xtqmt_trader - INFO - 数据接收线程启动
+2026-07-23 16:04:14,572 - ScriptMain.xtqmt_trader - INFO - 监控线程启动
+2026-07-23 16:04:14,572 - ScriptMain.xtqmt_trader - INFO - 已启动 4 个工作线程
+2026-07-23 16:04:14,577 - ScriptMain.xtqmt_trader - INFO - 迅投QMT交易脚本启动成功
+2026-07-23 16:04:14,583 - ScriptMain.xtqmt_trader - INFO - mqReceiver连接已建立
+2026-07-23 16:04:14,584 - ScriptMain.xtqmt_trader - INFO - SocketIO连接已建立
+2026-07-23 16:04:14,585 - ScriptMain.xtqmt_trader - INFO - 已连接到mqReceiver服务器: http://10.10.98.51:3210
+2026-07-23 16:04:14,586 - ScriptMain.xtqmt_trader - INFO - 已连接到SocketIO服务器: http://10.10.98.51:3211
+2026-07-23 16:04:20,040 - ScriptMain.xtqmt_trader - INFO - 收到交易指令: 小市值01-调仓目标-20260723160419:20#[['SH601899'#'B'#12.98#2.0]]
+2026-07-23 16:04:20,066 - ScriptMain.xtqmt_trader - INFO - 开始处理交易指令，队列剩余: 0
+2026-07-23 16:04:20,142 - ScriptMain.xtqmt_trader - ERROR - 处理交易数据异常: cannot access local variable 'sell_final_list' where it is not associated with a value
+2026-07-23 16:04:20,143 - ScriptMain.xtqmt_trader - INFO - 交易指令处理完成
+2026-07-23 16:10:36,793 - ScriptMain.xtqmt_trader - INFO - 清理脚本资源...
+2026-07-23 16:10:36,794 - ScriptMain.xtqmt_trader - INFO - 正在停止迅投QMT交易脚本...
+2026-07-23 16:10:36,892 - ScriptMain.xtqmt_trader - INFO - 从服务器断开连接
+2026-07-23 16:10:36,893 - ScriptMain.xtqmt_trader - INFO - 数据发送线程停止
+2026-07-23 16:10:37,089 - ScriptMain.xtqmt_trader - INFO - 交易工作线程退出
+2026-07-23 16:10:37,794 - ScriptMain.xtqmt_trader - INFO - 从mqReceiver服务器断开连接
+2026-07-23 16:10:37,795 - ScriptMain.xtqmt_trader - INFO - 数据接收线程停止

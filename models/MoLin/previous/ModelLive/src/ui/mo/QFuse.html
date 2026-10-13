@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>QFuse · 知识融合层 | 课题生态 · 知识确权 · 协同投研</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ========== 全局滚动条样式（深色科技风，与页面背景协调） ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background-color: #101010;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 0px;
+            transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16C0FF;
+        }
+        ::-webkit-scrollbar-corner {
+            background-color: #101010;
+        }
+        /* Firefox 滚动条 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333333 #1a1a1a;
+        }
+
+        /* ========== 下拉框统一样式（深色科技商务风） ========== */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0px;
+            padding: 10px 32px 10px 14px;
+            font-size: 0.85rem;
+            font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316C0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+        select:hover {
+            border-color: var(--primary);
+            background-color: #2a2a2a;
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary-transparent);
+        }
+        select option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 8px;
+        }
+
+        /* 模态框内下拉框样式保持一致 */
+        .modal-select {
+            width: 100%;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.1);
+            --bg-primary: #101010;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #4AD2FF;
+            --text-tertiary: #808080;
+            --border-color: #333333;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', 'JetBrains Mono', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--primary-transparent) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-transparent) 1px, transparent 1px);
+            background-size: 42px 42px;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .poster {
+            max-width: 1280px;
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .poster:hover {
+            border-color: var(--primary);
+            box-shadow: 0 28px 56px -14px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--primary-transparent);
+        }
+
+        .top-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--bg-secondary), var(--primary), var(--primary-light), var(--primary), var(--bg-secondary));
+            width: 100%;
+        }
+
+        .content {
+            padding: 2.4rem 2.8rem 2.8rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .logo h1 .en-name {
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .logo h1 .chinese-name {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            margin-left: 0.25rem;
+        }
+
+        .subtitle {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            font-weight: 400;
+            margin-top: 0.2rem;
+        }
+
+        .subtitle i {
+            color: var(--primary-light);
+            font-style: normal;
+        }
+
+        .pill {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hero {
+            margin: 1.5rem 0 2rem;
+        }
+
+        .hero .eyebrow {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.4rem 0.8rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-title .title-main {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            letter-spacing: -0.01em;
+        }
+
+        .hero-sub {
+            font-size: 1rem;
+            color: var(--text-tertiary);
+            margin-bottom: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        .hero .desc {
+            font-size: 1rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+            max-width: 90%;
+            border-left: 2px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        @media (max-width: 780px) {
+            .hero-title .title-main {
+                font-size: 1.8rem;
+            }
+            .hero .desc {
+                max-width: 100%;
+            }
+        }
+
+        /* 内外交互核心区 */
+        .interaction-core {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            border: 1px solid var(--primary);
+            padding: 1.8rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .interaction-core::before {
+            content: "⟡ 知识融合 · 内外动态交互核心 ⟡";
+            position: absolute;
+            top: -0.7rem;
+            left: 1.5rem;
+            background: var(--bg-secondary);
+            padding: 0 0.8rem;
+            font-size: 0.7rem;
+            color: var(--primary);
+            letter-spacing: 2px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .interaction-flow {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .flow-side {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+        }
+
+        .flow-side h4 {
+            font-size: 0.85rem;
+            color: var(--primary-light);
+            margin-bottom: 0.8rem;
+            text-align: center;
+        }
+
+        .flow-center {
+            flex: 1.5;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            position: relative;
+        }
+
+        .flow-center h4 {
+            font-size: 0.85rem;
+            color: var(--primary-light);
+            margin-bottom: 0.8rem;
+            text-align: center;
+        }
+
+        .contrib-item {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            padding: 0.3rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .contrib-item i {
+            color: var(--primary);
+            width: 1.2rem;
+        }
+
+        .pipeline-mini {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .pipeline-step-mini {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            padding: 0.3rem;
+            border-left: 2px solid var(--primary);
+        }
+
+        .pipeline-step-mini i {
+            color: var(--primary);
+            width: 1.2rem;
+        }
+
+        /* 课题生态 */
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin: 1.5rem 0 1rem;
+            letter-spacing: 1px;
+            border-left: 2px solid var(--primary);
+            padding-left: 0.8rem;
+        }
+
+        .topic-ecosystem {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .topic-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem;
+            transition: 0.2s;
+        }
+
+        .topic-card:hover {
+            border-color: var(--primary);
+        }
+
+        .topic-card .topic-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 0.3rem;
+        }
+
+        .topic-card .topic-outputs {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            margin: 0.3rem 0;
+        }
+
+        .topic-card .downstream {
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-top: 0.3rem;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 0.3rem;
+        }
+
+        /* 确权与激励区块 */
+        .rights-block {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem 1.5rem;
+            margin: 1.5rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .rights-left {
+            flex: 2;
+        }
+
+        .rights-left h4 {
+            color: var(--primary-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .rights-left p {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+
+        .rights-tags {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .rights-tag {
+            background: var(--primary-transparent);
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.8rem;
+            font-size: 0.7rem;
+            color: var(--primary-light);
+        }
+
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .value-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .value-card i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .value-card .value-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .value-card .value-desc {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            margin-top: 0.3rem;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            letter-spacing: 0.3px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .beta-meaning {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            text-align: right;
+            margin-top: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        /* 模态框样式（用于演示下拉框） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+        }
+        .modal-content h3 {
+            color: var(--primary-light);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        .modal-content p {
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+        }
+        .modal-content select {
+            width: 100%;
+            margin: 0.8rem 0 1.2rem;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .modal-buttons button {
+            padding: 0.5rem 1.2rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .modal-buttons button:first-child {
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+        .modal-buttons button:first-child:hover {
+            background: var(--primary-transparent);
+        }
+        .modal-buttons button:last-child:hover {
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 800px) {
+            .content {
+                padding: 1.5rem;
+            }
+            .logo h1 {
+                font-size: 2rem;
+            }
+            .logo h1 .chinese-name {
+                font-size: 1.2rem;
+            }
+            .topic-ecosystem {
+                grid-template-columns: 1fr;
+            }
+            .interaction-flow {
+                flex-direction: column;
+            }
+            .value-grid {
+                grid-template-columns: 1fr;
+            }
+            .rights-block {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="poster">
+    <div class="top-line"></div>
+    <div class="content">
+        <div class="header">
+            <div class="logo">
+                <h1>
+                    <span class="en-name">QFuse</span>
+                    <span class="chinese-name"> · 知识融合层</span>
+                </h1>
+                <div class="subtitle">🔄 <i>知识融合 · 内外动态交互</i> | 课题生态 · 知识确权 · 协同投研</div>
+            </div>
+            <div class="pill">
+                <i class="fas fa-project-diagram"></i> 知识融合 · 课题生态
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="eyebrow">QFuse · 知识融合层</div>
+            <div class="hero-title">
+                <span class="title-main">知识融合 · 课题生态 · 内外协同</span>
+            </div>
+            <div class="hero-sub">历史经验沉淀 · 多源知识融合 · 确权激励</div>
+            <div class="desc">知识融合层：以课题为单元，实现多源研究成果的融合、沉淀与下游复用 · 知识可生长，确权可追溯 · 维持创新活力</div>
+        </div>
+
+        <!-- 演示下拉框 - 知识融合策略选择（深色协调风格） -->
+        <div style="display: flex; justify-content: flex-end; margin: 0 0 1rem 0;">
+            <select id="fusionStrategySelect" style="width: auto; min-width: 220px;">
+                <option value="full">全量融合 · 内外协同模式</option>
+                <option value="internal_first">内部主导 · 外部补充模式</option>
+                <option value="external_innovation">外部创新驱动 · 内部验证模式</option>
+                <option value="ai_enhanced">AI增强融合 · 自动化知识沉淀</option>
+            </select>
+        </div>
+
+        <!-- 内外交互核心区 -->
+        <div class="interaction-core">
+            <div class="interaction-flow">
+                <div class="flow-side">
+                    <h4><i class="fas fa-cloud-upload-alt"></i> 外部投研资源</h4>
+                    <div class="contrib-item"><i class="fas fa-code"></i> 提交代码 · 因子/策略/数据</div>
+                    <div class="contrib-item"><i class="fas fa-comment-dots"></i> 提交观点 · 观察/假设/失效分析</div>
+                    <div class="contrib-item"><i class="fas fa-chart-line"></i> 选择课题 · 或发起新课题</div>
+                    <div class="contrib-item"><i class="fas fa-certificate"></i> 贡献确权 · 终身受益</div>
+                </div>
+                <div class="flow-center">
+                    <h4><i class="fas fa-cogs"></i> 知识融合 · AI协同分析</h4>
+                    <div class="pipeline-mini">
+                        <div class="pipeline-step-mini"><i class="fas fa-check-circle"></i> 验证 · 可复现性与可靠性</div>
+                        <div class="pipeline-step-mini"><i class="fas fa-align-left"></i> 对齐 · 标准化与术语统一</div>
+                        <div class="pipeline-step-mini"><i class="fas fa-folder-tree"></i> 归入课题 · 研究成果结构化</div>
+                        <div class="pipeline-step-mini"><i class="fas fa-link"></i> 连接下游 · 自动关联复用</div>
+                        <div class="pipeline-step-mini"><i class="fas fa-bolt"></i> 激活 · 决策场景智能调用</div>
+                    </div>
+                </div>
+                <div class="flow-side">
+                    <h4><i class="fas fa-building"></i> 内部投研体系</h4>
+                    <div class="contrib-item"><i class="fas fa-chart-line"></i> 核心策略 · 内部主导</div>
+                    <div class="contrib-item"><i class="fas fa-chart-pie"></i> 风控决策 · 内部把控</div>
+                    <div class="contrib-item"><i class="fas fa-chart-bar"></i> 课题方向 · 内部定义</div>
+                    <div class="contrib-item"><i class="fas fa-certificate"></i> 内部贡献 · 确权激励</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 核心价值：创新维持 -->
+        <div class="value-grid">
+            <div class="value-card">
+                <i class="fas fa-lightbulb"></i>
+                <div class="value-title">维持创新活力</div>
+                <div class="value-desc">多视角观点注入 · 避免内部思维固化 · 持续吸收新想法</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-chart-line"></i>
+                <div class="value-title">聚焦核心策略</div>
+                <div class="value-desc">外部研究力量动态补充 · 内部团队聚焦高价值方向</div>
+            </div>
+        </div>
+
+        <!-- 课题生态核心 -->
+        <div class="section-title"><i class="fas fa-project-diagram" style="margin-right: 0.5rem;"></i> 课题生态 · 知识融合与下游复用</div>
+        <div class="topic-ecosystem">
+            <div class="topic-card">
+                <div class="topic-name">📊 低频因子挖掘</div>
+                <div class="topic-outputs">成果: 因子表达式 · 数据处理方案 · 失效观察</div>
+                <div class="downstream">↓ 下游: 因子有效性验证 · 组合构建</div>
+            </div>
+            <div class="topic-card">
+                <div class="topic-name">⚠️ 风险归因</div>
+                <div class="topic-outputs">成果: 风险模型 · 压力测试框架 · 回撤案例库</div>
+                <div class="downstream">↓ 下游: 组合风控 · 绩效归因</div>
+            </div>
+            <div class="topic-card">
+                <div class="topic-name">🌍 市场微观结构</div>
+                <div class="topic-outputs">成果: 订单流模式 · 冲击成本模型 · 流动性指标</div>
+                <div class="downstream">↓ 下游: 算法交易 · 执行优化</div>
+            </div>
+        </div>
+        <div style="margin-top: -0.5rem; margin-bottom: 1rem; font-size: 0.65rem; color: var(--primary); text-align: center;">
+            <i class="fas fa-exchange-alt"></i> 课题之间可交叉引用 · 知识融合驱动下游自然流动
+        </div>
+
+        <!-- 确权与货币体系（特色但不展开） -->
+        <div class="rights-block">
+            <div class="rights-left">
+                <h4><i class="fas fa-certificate"></i> 知识确权 · 终身受益</h4>
+                <p>内部/外部研究贡献均纳入确权体系 · 基于贡献度的持续收益分配机制</p>
+                <p style="font-size: 0.7rem; margin-top: 0.3rem;">代码贡献 · 观点贡献 · 课题成果 · 下游复用追踪</p>
+            </div>
+            <div class="rights-tags">
+                <span class="rights-tag"><i class="fas fa-coins"></i> 贡献度计量</span>
+                <span class="rights-tag"><i class="fas fa-chart-line"></i> 终身收益分成</span>
+                <span class="rights-tag"><i class="fas fa-check-circle"></i> 内外统一确权</span>
+            </div>
+        </div>
+
+        <!-- 主观+AI 协同 -->
+        <div class="section-title"><i class="fas fa-brain" style="margin-right: 0.5rem;"></i> 主观 + AI 协同知识融合</div>
+        <div class="value-grid">
+            <div class="value-card">
+                <i class="fas fa-user-tie"></i>
+                <div class="value-title">主观判断</div>
+                <div class="value-desc">方向判断 · 逻辑推演 · 课题定义 · 战略定调</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-microchip"></i>
+                <div class="value-title">AI分析</div>
+                <div class="value-desc">数据处理 · 因子计算 · 回测验证 · 知识结构化</div>
+            </div>
+        </div>
+
+        <!-- 与α24+、β9-的关系 -->
+        <div class="section-title"><i class="fas fa-code-branch" style="margin-right: 0.5rem;"></i> 系统体系 · 各层定位</div>
+        <div class="value-grid">
+            <div class="value-card">
+                <i class="fas fa-brain"></i>
+                <div class="value-title">α24+ · 智能投研Agent</div>
+                <div class="value-desc">个体Agent的记忆/性格/情绪 · 多角色思辨与观点生成</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-database"></i>
+                <div class="value-title">β9- · 量化研究知识底座</div>
+                <div class="value-desc">数据工程 · 因子计算 · 回测自动化 · 报告生成</div>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-project-diagram"></i>
+                <div class="value-title">QFuse · 知识融合层</div>
+                <div class="value-desc">知识融合 · 课题生态 · 内外交互 · 确权激励</div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            QFuse · 知识融合层 | 以课题为单元，实现多源知识的融合、沉淀与下游复用<br>
+            知识确权体系 · 贡献终身受益 · 内外统一激励机制
+        </div>
+        <div class="beta-meaning">
+            QFuse · 生长 · 连接 · 融合 · 确权
+        </div>
+    </div>
+    <div class="top-line" style="background: var(--border-color); height: 1px;"></div>
+</div>
+
+<!-- 演示模态框（包含下拉框，展示协调样式） -->
+<div id="contactModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-project-diagram"></i> 知识融合咨询</h3>
+        <p>请选择您的知识管理需求，架构师将为您定制QFuse层融合方案</p>
+        <select id="knowledgeScenarioSelect">
+            <option value="internal">内部知识沉淀 · 确权体系建设</option>
+            <option value="external">外部研究接入 · 课题生态搭建</option>
+            <option value="hybrid">内外协同融合 · 全链路知识管理</option>
+            <option value="ai_fusion">AI驱动自动化知识融合</option>
+        </select>
+        <div class="modal-buttons">
+            <button id="modalConfirm">提交咨询</button>
+            <button id="modalClose">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const poster = document.querySelector('.poster');
+        if (poster) {
+            poster.addEventListener('mousemove', (e) => {
+                const rect = poster.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const intensity = 0.1 + (Math.abs(x - 0.5) * 0.15);
+                poster.style.borderColor = `rgba(22, 192, 255, ${0.4 + intensity * 0.3})`;
+                poster.style.boxShadow = `0 24px 48px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(22, 192, 255, ${0.1 + intensity * 0.15})`;
+            });
+            poster.addEventListener('mouseleave', () => {
+                poster.style.borderColor = '#333333';
+                poster.style.boxShadow = '0 24px 48px -12px rgba(0, 0, 0, 0.8)';
+            });
+        }
+
+        // 演示下拉框交互
+        const fusionSelect = document.getElementById('fusionStrategySelect');
+        if (fusionSelect) {
+            fusionSelect.addEventListener('change', (e) => {
+                const mode = e.target.options[e.target.selectedIndex]?.text;
+                const toast = document.createElement('div');
+                toast.innerText = `🔄 知识融合策略切换: ${mode}`;
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.left = '20px';
+                toast.style.backgroundColor = '#1a1a1a';
+                toast.style.color = '#4AD2FF';
+                toast.style.padding = '0.4rem 1rem';
+                toast.style.fontSize = '0.7rem';
+                toast.style.border = '1px solid #16C0FF';
+                toast.style.zIndex = '999';
+                toast.style.fontFamily = "'Inter', sans-serif";
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(() => toast.remove(), 350);
+                }, 1800);
+            });
+        }
+
+        // 模态框逻辑
+        const modal = document.getElementById('contactModal');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalClose = document.getElementById('modalClose');
+
+        if (modalConfirm && modalClose && modal) {
+            modalConfirm.addEventListener('click', () => {
+                const selectVal = document.getElementById('knowledgeScenarioSelect');
+                const selectedText = selectVal.options[selectVal.selectedIndex]?.text || '';
+                alert(`✅ 咨询已提交！QFuse架构师将为您提供「${selectedText}」知识融合方案。`);
+                modal.style.display = 'none';
+                if (selectVal) selectVal.selectedIndex = 0;
+            });
+            modalClose.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
+
+        if (modal) modal.style.display = 'none';
+    })();
+</script>
+</body>
+</html>

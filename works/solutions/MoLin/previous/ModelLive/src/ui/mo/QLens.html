@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>QLens · Q镜 | 量化算力集群 弹性混合云方案</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ========== 全局滚动条样式（深色科技风，与页面背景协调） ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background-color: #101010;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 0px;
+            transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16C0FF;
+        }
+        ::-webkit-scrollbar-corner {
+            background-color: #101010;
+        }
+        /* Firefox 滚动条 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333333 #1a1a1a;
+        }
+
+        /* ========== 下拉框统一样式（深色科技商务风） ========== */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0px;
+            padding: 10px 32px 10px 14px;
+            font-size: 0.85rem;
+            font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316C0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+        select:hover {
+            border-color: var(--primary);
+            background-color: #2a2a2a;
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary-transparent);
+        }
+        select option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 8px;
+        }
+
+        /* 模态框内下拉框样式保持一致 */
+        .modal-select {
+            width: 100%;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.1);
+            --bg-primary: #101010;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #4AD2FF;
+            --text-tertiary: #808080;
+            --border-color: #333333;
+            --error-color: #FF4D4D;
+            --success-color: #00CC66;
+            --warning-yellow: #FFC016;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', 'JetBrains Mono', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* 硬朗网格背景 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--primary-transparent) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-transparent) 1px, transparent 1px);
+            background-size: 42px 42px;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        /* 主容器 — 直角，干净边框 */
+        .poster {
+            max-width: 1180px;
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .poster:hover {
+            border-color: var(--primary);
+            box-shadow: 0 28px 56px -14px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--primary-transparent);
+        }
+
+        /* 顶部细线装饰 */
+        .top-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--bg-secondary), var(--primary), var(--primary-light), var(--primary), var(--bg-secondary));
+            width: 100%;
+        }
+
+        .content {
+            padding: 2.4rem 2.8rem 2.8rem;
+        }
+
+        /* 头部区域 — 直角，硬朗分割 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .logo h1 .en-name {
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .logo h1 .chinese-name {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            margin-left: 0.25rem;
+        }
+
+        .subtitle {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            font-weight: 400;
+            margin-top: 0.2rem;
+        }
+
+        .subtitle i {
+            color: var(--primary-light);
+            font-style: normal;
+        }
+
+        .pill {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill i {
+            font-size: 0.75rem;
+        }
+
+        /* 主标题区 — 优化排版，更富层次感 */
+        .hero {
+            margin: 1.5rem 0 2rem;
+        }
+
+        .hero .eyebrow {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        /* 标题容器：弹性布局，支持优雅换行但视觉整齐 */
+        .hero-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.4rem 0.8rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-title .title-prefix {
+            font-size: 2.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .hero-title .title-strong {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            letter-spacing: -0.01em;
+            border-bottom: 2px solid var(--primary);
+            display: inline-block;
+        }
+
+        .hero-title .title-suffix {
+            font-size: 2.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .hero .desc {
+            font-size: 1rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+            max-width: 85%;
+            border-left: 2px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 780px) {
+            .hero-title .title-prefix,
+            .hero-title .title-strong,
+            .hero-title .title-suffix {
+                font-size: 1.8rem;
+            }
+            .hero .desc {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .hero-title {
+                flex-direction: column;
+                gap: 0.2rem;
+            }
+            .hero-title .title-prefix,
+            .hero-title .title-strong,
+            .hero-title .title-suffix {
+                font-size: 1.6rem;
+            }
+        }
+
+        /* 数据卡片 — 直角 */
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2.5rem 0 2rem;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem 1rem;
+            transition: 0.2s;
+            min-width: 150px;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+            background: #2a2a2a;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary-light);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-tertiary);
+            margin-top: 0.4rem;
+        }
+
+        .stat-note {
+            font-size: 0.7rem;
+            color: #6a6a6a;
+            margin-top: 0.4rem;
+        }
+
+        /* 特性网格 */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.2rem;
+            margin: 2rem 0;
+        }
+
+        .feature {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--primary);
+            border-right: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 1rem;
+            transition: 0.2s;
+        }
+
+        .feature i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.7rem;
+            display: inline-block;
+        }
+
+        .feature h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .feature p {
+            font-size: 0.8rem;
+            color: #b0b0b0;
+            line-height: 1.4;
+        }
+
+        /* 混合云 + 动态伸缩区块 */
+        .cloud-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 1.3rem 1.8rem;
+            margin: 1.5rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cloud-left {
+            flex: 2;
+        }
+
+        .cloud-left h4 {
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .cloud-left p {
+            color: #b0b0b0;
+            font-size: 0.85rem;
+        }
+
+        .tech-tags {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-top: 0.7rem;
+        }
+
+        .tech-tags span {
+            background: var(--primary-transparent);
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .cloud-icons {
+            flex: 1;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            font-size: 1.6rem;
+            color: var(--primary);
+        }
+
+        /* 定时任务专用条 */
+        .task-bar {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.9rem 1.5rem;
+            margin: 1rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+        }
+
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .schedule-badge {
+            background: var(--primary-transparent);
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .task-desc {
+            font-size: 0.85rem;
+            color: #b0b0b0;
+        }
+
+        /* 团队适配与CTA区域 */
+        .team-cta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .team-info {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .team-info i {
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .team-info span {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .cta-button {
+            background: transparent;
+            border: 1px solid var(--primary);
+            padding: 0.6rem 1.8rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .cta-button:hover {
+            background: var(--primary-transparent);
+            border-color: var(--primary-light);
+            color: var(--primary-light);
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            letter-spacing: 0.3px;
+        }
+
+        /* 模态框样式（用于演示下拉框） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+        }
+        .modal-content h3 {
+            color: var(--primary-light);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        .modal-content p {
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+        }
+        .modal-content select {
+            width: 100%;
+            margin: 0.8rem 0 1.2rem;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .modal-buttons button {
+            padding: 0.5rem 1.2rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .modal-buttons button:first-child {
+            border-color: var(--primary);
+            color: var(--primary-light);
+        }
+        .modal-buttons button:first-child:hover {
+            background: var(--primary-transparent);
+        }
+        .modal-buttons button:last-child:hover {
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 800px) {
+            .content {
+                padding: 1.5rem;
+            }
+            .cloud-icons {
+                justify-content: flex-start;
+                margin-top: 1rem;
+            }
+            .cloud-block {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .logo h1 {
+                font-size: 2rem;
+            }
+            .logo h1 .chinese-name {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="poster">
+    <div class="top-line"></div>
+    <div class="content">
+        <!-- 头部，英文名QLens在前，中文名Q镜在后 -->
+        <div class="header">
+            <div class="logo">
+                <h1>
+                    <span class="en-name">QLens</span>
+                    <span class="chinese-name"> · Q镜</span>
+                </h1>
+                <div class="subtitle">⚡ <i>智能透镜 · 透视量化算力</i> | 弹性混合云集群</div>
+            </div>
+            <div class="pill">
+                <i class="fas fa-eye"></i> 算力透镜引擎
+            </div>
+        </div>
+
+        <!-- 主视觉：大标题优化排版，弹性组合一行/多行都自然 -->
+        <div class="hero">
+            <div class="eyebrow">QLens · 智能透镜架构</div>
+            <div class="hero-title">
+                <span class="title-prefix">算力随行 ·</span>
+                <span class="title-strong">QLens集群</span>
+                <span class="title-suffix">为研究与实盘而生</span>
+            </div>
+            <div class="desc">面向中等规模量化团队的弹性算力方案 · 混合云架构 · 动态节点伸缩 · 精准调度研究与生产任务</div>
+        </div>
+
+        <!-- 演示下拉框 - 算力策略选择（深色协调风格） -->
+        <div style="display: flex; justify-content: flex-end; margin: 0 0 1rem 0;">
+            <select id="computeStrategySelect" style="width: auto; min-width: 220px;">
+                <option value="balanced">均衡模式 · 研究生产兼顾</option>
+                <option value="research_first">研究优先 · 回测加速模式</option>
+                <option value="production_first">生产优先 · 实盘保障模式</option>
+                <option value="cost_saving">成本优化 · 弹性伸缩模式</option>
+            </select>
+        </div>
+
+        <!-- 关键指标卡片 -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-number">10~200+</div>
+                <div class="stat-label">弹性节点规模</div>
+                <div class="stat-note">根据负载自动伸缩，杜绝资源浪费</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">秒级调度</div>
+                <div class="stat-label">任务响应</div>
+                <div class="stat-note">量化回测/因子计算快速分发</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">混合云</div>
+                <div class="stat-label">无缝协同</div>
+                <div class="stat-note">本地IDC + 公有云 统一算力视图</div>
+            </div>
+        </div>
+
+        <!-- 四大核心特性 -->
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-expand-arrows-alt"></i>
+                <h4>动态节点伸缩</h4>
+                <p>研究低谷期自动回收资源，回测高峰秒级扩容，完美匹配量化团队的波状算力需求，成本直降40%+。</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-cloud-moon"></i>
+                <h4>混合云原生亲和</h4>
+                <p>统一管控私有集群与云节点，数据本地化优先，突发任务弹性溢出至公有云，合规与弹性兼得。</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-chart-simple"></i>
+                <h4>量化任务智能路由</h4>
+                <p>识别因子挖掘、回测、高频模拟等任务特征，自动分配CPU/GPU/高IO实例，最大化研究效率。</p>
+            </div>
+            <div class="feature">
+                <i class="far fa-clock"></i>
+                <h4>定时任务引擎</h4>
+                <p>支持盘前数据拉取、盘后归因、周度重训练等复杂定时流程，自带依赖感知与失败重试。</p>
+            </div>
+        </div>
+
+        <!-- 混合云+动态伸缩深度展示 -->
+        <div class="cloud-block">
+            <div class="cloud-left">
+                <h4><i class="fas fa-eye" style="margin-right: 0.4rem;"></i> QLens 自适应混合算力层</h4>
+                <p>Q镜通过智能透镜实时透视集群负载、数据热度与任务优先级，动态调整混合云节点池。研究环境、离线回测、实时因子生产统一调度，内置针对量化框架 (backtrader, zipline, 自研回测) 的数据亲和调度。</p>
+                <div class="tech-tags">
+                    <span>秒级弹性</span>
+                    <span>数据本地缓存</span>
+                    <span>混合云网关</span>
+                    <span>QLens透视调度</span>
+                </div>
+            </div>
+            <div class="cloud-icons">
+                <i class="fas fa-server"></i>
+                <i class="fas fa-cloud-upload-alt"></i>
+                <i class="fas fa-random"></i>
+                <i class="fas fa-search" style="color: var(--primary-light);"></i>
+            </div>
+        </div>
+
+        <!-- 定时任务调度中枢 -->
+        <div class="task-bar">
+            <div class="task-left">
+                <i class="fas fa-tasks" style="color: var(--primary); font-size: 1.2rem;"></i>
+                <span class="schedule-badge">⏱️ 定时任务调度中枢</span>
+                <div class="task-desc">
+                    支持Cron表达式 + 事件触发 · 策略预热 · 因子日度刷新 · 自动重平衡
+                </div>
+            </div>
+            <div style="font-size: 0.7rem; color: var(--text-tertiary);">
+                <i class="fas fa-check-circle"></i> 可观测性面板
+            </div>
+        </div>
+
+        <!-- 团队适配 + CTA -->
+        <div class="team-cta">
+            <div class="team-info">
+                <i class="fas fa-users"></i>
+                <span>5~30人研究团队 · 算力自由扩展</span>
+                <i class="fas fa-arrow-right" style="font-size: 0.8rem; color: var(--primary);"></i>
+                <span style="font-size: 0.75rem; color: var(--text-tertiary);">从单机原型到百核集群平滑演进</span>
+            </div>
+            <button class="cta-button" id="inquiryBtn"><i class="fas fa-chalkboard-user"></i> 获取集群方案白皮书</button>
+        </div>
+
+        <div class="footer-note">
+            * QLens · Q镜 智能透镜架构 | 支持私有化/混合云部署 | 针对高频回测、因子库、策略组合提供精细化QoS | 按需付费，降低TCO
+        </div>
+    </div>
+    <div class="top-line" style="background: var(--border-color); height: 1px;"></div>
+</div>
+
+<!-- 演示模态框（包含下拉框，展示协调样式） -->
+<div id="contactModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-eye"></i> QLens 算力方案咨询</h3>
+        <p>请选择您的团队规模与算力需求，架构师将为您定制弹性集群拓扑</p>
+        <select id="teamScaleSelect">
+            <option value="small">小型团队 · 5-10人 · 基础算力</option>
+            <option value="medium">中型团队 · 10-30人 · 弹性混合云</option>
+            <option value="large">大型团队 · 30-100人 · 企业级集群</option>
+            <option value="hybrid">混合云专项 · 本地+公有云统一调度</option>
+        </select>
+        <div class="modal-buttons">
+            <button id="modalConfirm">提交咨询</button>
+            <button id="modalClose">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const btn = document.getElementById('inquiryBtn');
+        const modal = document.getElementById('contactModal');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalClose = document.getElementById('modalClose');
+
+        if (btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (modal) modal.style.display = 'flex';
+                else {
+                    const toast = document.createElement('div');
+                    toast.innerHTML = '🔍 QLens · Q镜 方案资料已准备 · 架构师将为您定制弹性算力拓扑 🔍';
+                    toast.style.position = 'fixed';
+                    toast.style.bottom = '30px';
+                    toast.style.left = '50%';
+                    toast.style.transform = 'translateX(-50%)';
+                    toast.style.backgroundColor = '#1a1a1a';
+                    toast.style.color = '#4AD2FF';
+                    toast.style.padding = '0.8rem 1.6rem';
+                    toast.style.fontSize = '0.85rem';
+                    toast.style.fontWeight = '500';
+                    toast.style.border = '1px solid #16C0FF';
+                    toast.style.fontFamily = "'Inter', sans-serif";
+                    toast.style.zIndex = '1000';
+                    toast.style.backdropFilter = 'blur(12px)';
+                    document.body.appendChild(toast);
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        toast.style.transition = 'opacity 0.35s';
+                        setTimeout(() => toast.remove(), 450);
+                    }, 3000);
+                }
+            });
+        }
+
+        // 演示下拉框交互
+        const computeSelect = document.getElementById('computeStrategySelect');
+        if (computeSelect) {
+            computeSelect.addEventListener('change', (e) => {
+                const mode = e.target.options[e.target.selectedIndex]?.text;
+                const toast = document.createElement('div');
+                toast.innerText = `⚡ 算力策略切换: ${mode}`;
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.left = '20px';
+                toast.style.backgroundColor = '#1a1a1a';
+                toast.style.color = '#4AD2FF';
+                toast.style.padding = '0.4rem 1rem';
+                toast.style.fontSize = '0.7rem';
+                toast.style.border = '1px solid #16C0FF';
+                toast.style.zIndex = '999';
+                toast.style.fontFamily = "'Inter', sans-serif";
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(() => toast.remove(), 350);
+                }, 1800);
+            });
+        }
+
+        // 模态框逻辑
+        if (modalConfirm && modalClose && modal) {
+            modalConfirm.addEventListener('click', () => {
+                const selectVal = document.getElementById('teamScaleSelect');
+                const selectedText = selectVal.options[selectVal.selectedIndex]?.text || '';
+                alert(`✅ 咨询已提交！QLens架构师将为您提供「${selectedText}」算力方案。`);
+                modal.style.display = 'none';
+                if (selectVal) selectVal.selectedIndex = 0;
+            });
+            modalClose.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
+
+        if (modal) modal.style.display = 'none';
+
+        const poster = document.querySelector('.poster');
+        if (poster) {
+            poster.addEventListener('mousemove', (e) => {
+                const rect = poster.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const intensity = 0.1 + (Math.abs(x - 0.5) * 0.15);
+                poster.style.borderColor = `rgba(22, 192, 255, ${0.4 + intensity * 0.3})`;
+                poster.style.boxShadow = `0 24px 48px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(22, 192, 255, ${0.1 + intensity * 0.15})`;
+            });
+            poster.addEventListener('mouseleave', () => {
+                poster.style.borderColor = '#333333';
+                poster.style.boxShadow = '0 24px 48px -12px rgba(0, 0, 0, 0.8)';
+            });
+        }
+    })();
+</script>
+</body>
+</html>

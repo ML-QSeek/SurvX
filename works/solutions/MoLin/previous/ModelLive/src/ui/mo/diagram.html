@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>摹林 · 全景系统 | 十三层量化投研与执行体系流程图</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #16C0FF;
+            --primary-blue-dark: #0EA8E0;
+            --primary-blue-light: #4AD2FF;
+            --primary-blue-transparent: rgba(22, 192, 255, 0.12);
+            --bg-dark: #0A0A0F;
+            --bg-panel: #111117;
+            --bg-card: #18181f;
+            --light-gray: rgba(22, 192, 255, 0.05);
+            --gray: #2A2A35;
+            --text-dark: #FFFFFF;
+            --text-gray: #9A9AAC;
+            --border-color: #2A2A35;
+            --error-color: #FF6B6B;
+            --success-color: #00CC66;
+            
+            /* 全景十三层专属色 (与全景图一致) */
+            --c-qbase: #00CC66;
+            --c-qlens: #2ECC71;
+            --c-qfield: #1ABC9C;
+            --c-qmulti: #8B5CF6;
+            --c-qskills: #3498DB;
+            --c-qforge: #FF6B35;
+            --c-qseek: #E83E8C;
+            --c-qfuse: #16C0FF;
+            --c-qsense: #FFC016;
+            --c-qcore: #9B59B6;
+            --c-qflow: #FF8C00;
+            --c-model: #E74C3C;
+            --c-real: #C0392B;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', 'PingFang SC', system-ui, sans-serif;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(22, 192, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(22, 192, 255, 0.03) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 自定义滚动条 - 深色科技风 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            background-color: var(--bg-dark);
+        }
+        ::-webkit-scrollbar-track {
+            background: #111117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A2A35;
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-blue);
+        }
+        
+        /* 图例栏 */
+        .legend {
+            height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(4px);
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 0 16px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 2px;
+        }
+        
+        .legend-text {
+            font-size: 11px;
+            color: var(--text-gray);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        
+        .dashboard {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .chart-container {
+            position: relative;
+            flex: 1;
+            overflow: auto !important;
+            background: rgba(10, 10, 15, 0.4);
+            scroll-behavior: smooth;
+        }
+        
+        .metrics-panel {
+            width: 260px;
+            border-left: 1px solid var(--border-color);
+            overflow-y: auto;
+            background: rgba(17, 17, 23, 0.9);
+            backdrop-filter: blur(4px);
+        }
+        
+        .metric-item {
+            margin: 8px 12px;
+            padding: 12px;
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary-blue);
+            transition: 0.2s;
+        }
+        
+        .metric-name {
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--text-gray);
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+        
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .metric-trend {
+            font-size: 0.7rem;
+            margin-top: 6px;
+            color: var(--text-gray);
+        }
+        
+        .trend-up { color: var(--success-color); }
+        
+        /* 节点样式 - 直角刚毅风格 */
+        .node {
+            position: absolute;
+            width: 180px;
+            height: 78px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            user-select: none;
+            padding: 10px 12px;
+            flex-direction: column;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        
+        .node:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-blue);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            z-index: 20;
+        }
+        
+        /* 各层专属左侧光条效果 */
+        .node::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-blue);
+        }
+        .node.qbase::before { background: var(--c-qbase); }
+        .node.qlens::before { background: var(--c-qlens); }
+        .node.qfield::before { background: var(--c-qfield); }
+        .node.qmulti::before { background: var(--c-qmulti); }
+        .node.qskills::before { background: var(--c-qskills); }
+        .node.qforge::before { background: var(--c-qforge); }
+        .node.qseek::before { background: var(--c-qseek); }
+        .node.qfuse::before { background: var(--c-qfuse); }
+        .node.qsense::before { background: var(--c-qsense); }
+        .node.qcore::before { background: var(--c-qcore); }
+        .node.qflow::before { background: var(--c-qflow); }
+        .node.modellive::before { background: var(--c-model); }
+        .node.real::before { background: var(--c-real); }
+        
+        .node-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.3px;
+            color: var(--text-dark);
+        }
+        
+        .node-subtitle {
+            font-size: 10px;
+            font-weight: 400;
+            opacity: 0.7;
+            line-height: 1.3;
+            text-align: center;
+            color: var(--text-gray);
+        }
+        
+        /* jsPlumb 连线样式 */
+        .jtk-connector {
+            z-index: 5;
+        }
+        .jtk-endpoint {
+            z-index: 6;
+            fill: var(--primary-blue);
+        }
+        
+        .layer-badge {
+            position: absolute;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary-blue-light);
+            background: rgba(0,0,0,0.6);
+            padding: 2px 12px;
+            border-left: 2px solid var(--primary-blue);
+            letter-spacing: 1px;
+            z-index: 8;
+            pointer-events: none;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+            background: rgba(17,17,23,0.8);
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+        }
+        
+        .btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-gray);
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            background: var(--primary-blue-transparent);
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+        
+        .node-detail {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            width: 320px;
+            background: rgba(17, 17, 23, 0.96);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            z-index: 200;
+            transform: translateX(20px);
+            opacity: 0;
+            transition: all 0.25s ease;
+            pointer-events: none;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+        }
+        
+        .node-detail.active {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        
+        .detail-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+        
+        .close-detail {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 18px;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-detail:hover { color: var(--error-color); }
+        
+        .detail-content { line-height: 1.6; }
+        .detail-item { margin-bottom: 12px; }
+        .detail-label { font-weight: 600; color: var(--primary-blue-light); font-size: 11px; display: block; margin-bottom: 4px; }
+        .detail-value { font-size: 12px; color: var(--text-dark); }
+        
+        @keyframes dash {
+            to { stroke-dashoffset: -20; }
+        }
+        .animated-flow {
+            stroke-dasharray: 6 4;
+            animation: dash 0.8s linear infinite;
+        }
+    </style>
+</head>
+<body>
+<div class="legend">
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qbase);"></div><div class="legend-text">QBase 存储</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qlens);"></div><div class="legend-text">QLens 算力</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qfield);"></div><div class="legend-text">QField 网关</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qmulti);"></div><div class="legend-text">QMulti 多重宇宙</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qskills);"></div><div class="legend-text">QSkills 技能库</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qforge);"></div><div class="legend-text">Q FORGE 工程治理</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qseek);"></div><div class="legend-text">QSeek 约束Agent</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qfuse);"></div><div class="legend-text">QFuse 知识融合</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qsense);"></div><div class="legend-text">QSense 态势感知</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qcore);"></div><div class="legend-text">QCore 决策引擎</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-qflow);"></div><div class="legend-text">QFlow 资金聚合</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-model);"></div><div class="legend-text">ModelLive 仿真</div></div>
+    <div class="legend-item"><div class="legend-color" style="background: var(--c-real);"></div><div class="legend-text">Real 实盘执行</div></div>
+</div>
+
+<div class="dashboard">
+    <div class="chart-container" id="chart-container">
+        <!-- 层次标识 (四段式) -->
+        <div class="layer-badge" style="top: 40px; left: 30px;">🏗️ 基础设施层 · QBase / QLens / QField</div>
+        <div class="layer-badge" style="top: 210px; left: 30px;">🧠 AI引擎层 · QMulti / QSkills / Q FORGE / QSeek</div>
+        <div class="layer-badge" style="top: 400px; left: 30px;">⚙️ 业务核心层 · QFuse / QSense / QCore / QFlow</div>
+        <div class="layer-badge" style="top: 580px; left: 30px;">🔁 执行闭环层 · ModelLive → Real</div>
+        
+        <!-- 节点详情面板 -->
+        <div class="node-detail">
+            <div class="detail-header">
+                <div class="detail-title">📌 模块详情</div>
+                <button class="close-detail">&times;</button>
+            </div>
+            <div class="detail-content"></div>
+        </div>
+    </div>
+    
+    <div class="metrics-panel">
+        <div class="metric-item"><div class="metric-name">QBase 数据规模</div><div class="metric-value">PB级混合存储</div><div class="metric-trend trend-up">冷热分离 · 时序+KV</div></div>
+        <div class="metric-item"><div class="metric-name">QLens 算力集群</div><div class="metric-value">K3s + GPU池</div><div class="metric-trend trend-up">弹性调度 · 分布式回测</div></div>
+        <div class="metric-item"><div class="metric-name">QSeek 观点准确率</div><div class="metric-value">73.6%</div><div class="metric-trend trend-up">吝啬世界 · 反思填空</div></div>
+        <div class="metric-item"><div class="metric-name">Q FORGE 技术债</div><div class="metric-value">-37%</div><div class="metric-trend trend-up">微创手术 · 模块档案</div></div>
+        <div class="metric-item"><div class="metric-name">QCore 复合夏普</div><div class="metric-value">1.68</div><div class="metric-trend trend-up">多策略融合 · 动态权重</div></div>
+        <div class="metric-item"><div class="metric-name">QFlow 募集规模</div><div class="metric-value">21.3 亿</div><div class="metric-trend trend-up">容量红绿灯 · S/A分层</div></div>
+        <div class="metric-item"><div class="metric-name">ModelLive 仿真通过率</div><div class="metric-value">68%</div><div class="metric-trend trend-up">输出唯一评判</div></div>
+        <div class="metric-item"><div class="metric-name">Real 实盘成交率</div><div class="metric-value">99.84%</div><div class="metric-trend trend-up">穿透风控 · 权益归因</div></div>
+    </div>
+</div>
+
+<div class="controls">
+    <button class="btn" id="reset-pos"><i class="fas fa-sync-alt"></i> 重置位置</button>
+    <button class="btn" id="toggle-flow"><i class="fas fa-water"></i> 流动动画</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsPlumb/2.15.6/js/jsplumb.min.js"></script>
+<script>
+    // === 根据全景图定义十三层模块（完整映射）===
+    const nodesData = [
+        // 基础设施层 (QBase, QLens, QField)
+        { id: "qbase", name: "QBase · 统一数据底座", type: "qbase", x: 80, y: 70, desc: "分布式KV + 时序存储 + 关系存储 · 冷热分离 · 多租户水平扩展" },
+        { id: "qlens", name: "QLens · 算力集群", type: "qlens", x: 320, y: 70, desc: "K3s GPU调度 · 分布式回测引擎 · 任务队列弹性伸缩" },
+        { id: "qfield", name: "QField · 统一网关", type: "qfield", x: 560, y: 70, desc: "API网关 · 鉴权限流 · 服务网格 · 协议转换" },
+        
+        // AI引擎层 (QMulti, QSkills, QForge, QSeek)
+        { id: "qmulti", name: "QMulti · 多重意义宇宙", type: "qmulti", x: 80, y: 240, desc: "多重模型接入 · 混合世界规则 · 演化思辨底座 · 元认知监控" },
+        { id: "qskills", name: "QSkills · 技能库", type: "qskills", x: 320, y: 240, desc: "因子算子库 · 策略原子组件 · 技能市场与版本管理" },
+        { id: "qforge", name: "Q FORGE · 工程治理", type: "qforge", x: 560, y: 240, desc: "上部预防(FORGE) + 下部治理(GOV) · 心搏代码 · 技术债地图" },
+        { id: "qseek", name: "QSeek · 约束边界Agent", type: "qseek", x: 800, y: 240, desc: "吝啬原则 · 关系填空驱动 · Entity六层(S/C/R/O/F/G) · 贝叶斯网络经历可解释" },
+        
+        // 业务核心层 (QFuse, QSense, QCore, QFlow)
+        { id: "qfuse", name: "QFuse · 知识融合", type: "qfuse", x: 80, y: 430, desc: "课题生态 · 研究成果沉淀 · 知识确权 · 自动化研报生成" },
+        { id: "qsense", name: "QSense · 态势感知", type: "qsense", x: 320, y: 430, desc: "实时采集/因子生产 · IC/IR评价 · 市场极端预警" },
+        { id: "qcore", name: "QCore · 复合决策引擎", type: "qcore", x: 560, y: 430, desc: "多策略协同 · 信号融合 · 动态权重 · 策略路由(量化+主观+Agent)" },
+        { id: "qflow", name: "QFlow · 资金聚合", type: "qflow", x: 800, y: 430, desc: "资金聚合分发 · S/A级分层服务 · 容量红绿灯动态封盘" },
+        
+        // 执行闭环层 (ModelLive, Real)
+        { id: "modellive", name: "ModelLive · 仿真验证", type: "modellive", x: 200, y: 610, desc: "仿真环境 · 集成验证 · 契约入口 · 策略准入门槛 · 输出唯一评判" },
+        { id: "real", name: "ModelLive Real · 实盘执行", type: "real", x: 520, y: 610, desc: "生产级实盘交易 · 穿透风控 · 绩效归因 · 贡献者权益分配" }
+    ];
+    
+    // 连线配置（依据全景图数据流向）
+    const connections = [
+        // 基础设施 -> AI层
+        { from: "qbase", to: "qmulti", anchors: ["Bottom", "Top"], color: "#00CC66", style: "solid" },
+        { from: "qlens", to: "qskills", anchors: ["Bottom", "Top"], color: "#2ECC71", style: "solid" },
+        { from: "qfield", to: "qforge", anchors: ["Bottom", "Top"], color: "#1ABC9C", style: "solid" },
+        { from: "qbase", to: "qsense", anchors: ["Right", "Left"], color: "#00CC66", style: "dashed" },
+        
+        // AI引擎内部互联 (QMulti → QSkills → QForge → QSeek)
+        { from: "qmulti", to: "qskills", anchors: ["Right", "Left"], color: "#8B5CF6", style: "solid", arrow: true },
+        { from: "qskills", to: "qforge", anchors: ["Right", "Left"], color: "#3498DB", style: "solid", arrow: true },
+        { from: "qforge", to: "qseek", anchors: ["Right", "Left"], color: "#FF6B35", style: "solid", arrow: true },
+        
+        // AI层 → 业务核心层
+        { from: "qseek", to: "qcore", anchors: ["Bottom", "Top"], color: "#E83E8C", style: "solid", arrow: true },
+        { from: "qmulti", to: "qfuse", anchors: ["Bottom", "Top"], color: "#8B5CF6", style: "dashed" },
+        { from: "qskills", to: "qsense", anchors: ["Bottom", "Top"], color: "#3498DB", style: "dashed" },
+        { from: "qforge", to: "qcore", anchors: ["Bottom", "Right"], color: "#FF6B35", style: "dashed" },
+        
+        // 业务核心内部串联
+        { from: "qfuse", to: "qsense", anchors: ["Right", "Left"], color: "#16C0FF", style: "solid", arrow: true },
+        { from: "qsense", to: "qcore", anchors: ["Right", "Left"], color: "#FFC016", style: "solid", arrow: true },
+        { from: "qcore", to: "qflow", anchors: ["Right", "Left"], color: "#9B59B6", style: "solid", arrow: true },
+        
+        // 业务 → 执行层
+        { from: "qflow", to: "modellive", anchors: ["Bottom", "Top"], color: "#FF8C00", style: "solid", arrow: true },
+        { from: "qcore", to: "modellive", anchors: ["Bottom", "Left"], color: "#9B59B6", style: "dashed" },
+        
+        // 仿真 → 实盘
+        { from: "modellive", to: "real", anchors: ["Right", "Left"], color: "#E74C3C", style: "solid", arrow: true },
+        
+        // 实盘反馈闭环：绩效归因回传至QBase和QFuse
+        { from: "real", to: "qbase", anchors: ["Top", "Bottom"], color: "#C0392B", style: "dotted", arrow: true },
+        { from: "real", to: "qfuse", anchors: ["Top", "Right"], color: "#C0392B", style: "dotted" },
+        { from: "modellive", to: "qskills", anchors: ["Top", "Bottom"], color: "#E74C3C", style: "dotted" }
+    ];
+    
+    let jsPlumbInstance = null;
+    let animationEnabled = true;
+    let connectionObjects = [];
+    
+    function initJsPlumb() {
+        jsPlumbInstance = jsPlumb.getInstance({
+            Connector: ["Flowchart", { cornerRadius: 6 }],
+            Anchors: ['Right', 'Left', 'Top', 'Bottom'],
+            Endpoint: ["Dot", { radius: 4 }],
+            EndpointStyle: { fill: "#16C0FF", outlineStroke: "#111117", outlineWidth: 1 },
+            PaintStyle: { stroke: "#16C0FF", strokeWidth: 2 },
+            HoverPaintStyle: { stroke: "#4AD2FF", strokeWidth: 2.5 },
+            Container: "chart-container"
+        });
+        jsPlumbInstance.ready(() => {
+            nodesData.forEach(node => addNodeToCanvas(node));
+            setTimeout(() => {
+                connections.forEach(conn => createConnection(conn));
+                applyAnimationToConnectors();
+            }, 100);
+        });
+    }
+    
+    function addNodeToCanvas(node) {
+        const container = document.getElementById("chart-container");
+        const el = document.createElement("div");
+        el.id = node.id;
+        el.className = `node ${node.type}`;
+        el.innerHTML = `<div class="node-title">${node.name}</div><div class="node-subtitle">${node.desc.substring(0, 38)}${node.desc.length > 38 ? '…' : ''}</div>`;
+        el.style.left = `${node.x}px`;
+        el.style.top = `${node.y}px`;
+        container.appendChild(el);
+        
+        jsPlumbInstance.draggable(el, { containment: "parent", grid: [5,5] });
+        
+        el.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            showNodeDetail(node);
+        });
+        el.addEventListener("dblclick", (e) => {
+            const newName = prompt("重命名模块:", node.name);
+            if(newName && newName.trim()) {
+                const titleDiv = el.querySelector(".node-title");
+                if(titleDiv) titleDiv.innerText = newName.trim();
+                node.name = newName.trim();
+            }
+        });
+    }
+    
+    function getPaintStyle(conn) {
+        let dash = "";
+        if (conn.style === "dashed") dash = "8 6";
+        else if (conn.style === "dotted") dash = "2 4";
+        return {
+            stroke: conn.color,
+            strokeWidth: 2,
+            strokeDasharray: dash
+        };
+    }
+    
+    function createConnection(conn) {
+        const source = document.getElementById(conn.from);
+        const target = document.getElementById(conn.to);
+        if (!source || !target) return;
+        const paintStyle = getPaintStyle(conn);
+        const overlays = (conn.arrow !== false) ? [
+            ["Arrow", { width: 12, length: 10, location: 0.85, foldback: 0.7, fill: conn.color }]
+        ] : [];
+        
+        const connection = jsPlumbInstance.connect({
+            source: source,
+            target: target,
+            anchors: conn.anchors || ["AutoDefault"],
+            paintStyle: paintStyle,
+            overlays: overlays
+        });
+        connectionObjects.push({ connection, config: conn });
+    }
+    
+    function applyAnimationToConnectors() {
+        if (!jsPlumbInstance) return;
+        const allConnections = jsPlumbInstance.getAllConnections();
+        allConnections.forEach(conn => {
+            const canvasElem = conn.canvas;
+            if(canvasElem) {
+                if(animationEnabled && conn.getPaintStyle().strokeDasharray !== "") {
+                    canvasElem.classList.add("animated-flow");
+                } else {
+                    canvasElem.classList.remove("animated-flow");
+                }
+            }
+        });
+    }
+    
+    function toggleFlowAnimation() {
+        animationEnabled = !animationEnabled;
+        const allConnections = jsPlumbInstance.getAllConnections();
+        allConnections.forEach(conn => {
+            const canvasElem = conn.canvas;
+            if(canvasElem) {
+                if(animationEnabled && conn.getPaintStyle().strokeDasharray !== "") {
+                    canvasElem.classList.add("animated-flow");
+                } else {
+                    canvasElem.classList.remove("animated-flow");
+                }
+            }
+        });
+        const btn = document.getElementById("toggle-flow");
+        if(btn) btn.innerHTML = animationEnabled ? '<i class="fas fa-water"></i> 流动动画' : '<i class="fas fa-water"></i> 动画关闭';
+    }
+    
+    function resetPositions() {
+        nodesData.forEach(node => {
+            const el = document.getElementById(node.id);
+            if(el) {
+                el.style.left = `${node.x}px`;
+                el.style.top = `${node.y}px`;
+                if(jsPlumbInstance) jsPlumbInstance.revalidate(el);
+            }
+        });
+    }
+    
+    function showNodeDetail(node) {
+        const panel = document.querySelector(".node-detail");
+        const content = panel.querySelector(".detail-content");
+        const typeMap = {
+            qbase:"QBase 数据底座", qlens:"QLens 算力集群", qfield:"QField 网关", qmulti:"QMulti 多重宇宙",
+            qskills:"QSkills 技能库", qforge:"Q FORGE 工程治理", qseek:"QSeek 约束边界Agent",
+            qfuse:"QFuse 知识融合", qsense:"QSense 态势感知", qcore:"QCore 决策引擎",
+            qflow:"QFlow 资金聚合", modellive:"ModelLive 仿真验证", real:"ModelLive Real 实盘执行"
+        };
+        content.innerHTML = `
+            <div class="detail-item"><span class="detail-label">模块名称</span><span class="detail-value">${node.name}</span></div>
+            <div class="detail-item"><span class="detail-label">层级归属</span><span class="detail-value">${typeMap[node.type] || node.type}</span></div>
+            <div class="detail-item"><span class="detail-label">核心描述</span><span class="detail-value">${node.desc}</span></div>
+            <div class="detail-item"><span class="detail-label">Q系列命名空间</span><span class="detail-value">${node.id}</span></div>
+        `;
+        panel.classList.add("active");
+    }
+    
+    document.querySelector(".close-detail")?.addEventListener("click", () => {
+        document.querySelector(".node-detail").classList.remove("active");
+    });
+    document.addEventListener("click", (e) => {
+        if(!e.target.closest('.node-detail') && !e.target.closest('.node')) {
+            document.querySelector(".node-detail")?.classList.remove("active");
+        }
+    });
+    
+    window.onload = () => {
+        initJsPlumb();
+        document.getElementById("reset-pos")?.addEventListener("click", resetPositions);
+        document.getElementById("toggle-flow")?.addEventListener("click", toggleFlowAnimation);
+    };
+    
+    window.addEventListener('resize', () => {
+        if(jsPlumbInstance) jsPlumbInstance.setContainer("chart-container");
+    });
+</script>
+</body>
+</html>

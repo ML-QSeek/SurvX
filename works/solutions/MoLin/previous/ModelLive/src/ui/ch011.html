@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link type="text/css" rel="stylesheet" href="./css/smartMenu.css"/>
+<script type="text/javascript" src="./js/jquery.min.js"></script>
+<script type="text/javascript" src="./js/jquery-smartMenu.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style type="text/css">
+	html,body
+	{
+		font-family:'Courier New', 'Microsoft YaHei', 'Open Sans', monospace;
+		font-weight:400;
+		font-size:15px;
+		line-height:1.4em;
+		width:100%;
+		height:100%;
+		color:#00eaff;
+		background:#0a0f12;
+		margin:0;
+		padding:0;
+		overflow-x:auto;
+	}
+	#mq_main
+	{
+		width:100%;
+		position:absolute;
+		top:0px;
+		bottom:0px;
+		box-sizing:border-box;
+		padding:0 24px;
+	}
+	#mq_mainL
+	{
+		float:left;
+		height:100%;
+		width:50%;
+		box-sizing:border-box;
+	}
+	#mq_mainR
+	{
+		float:left;
+		height:100%;
+		width:50%;
+		padding:20px;
+		box-sizing:border-box;
+	}			
+	#mq_notes
+	{
+		height:100%;
+		width:100%;
+		padding:20px;
+		background: rgba(0,234,255,0.05);
+		box-sizing:border-box;
+		border:1px solid #00eaff33;
+		}
+	.sbtn
+	{                        
+    color: #00eaff;             
+    background-color: transparent;
+		font-size:13px;
+		border:none;
+		cursor: pointer;
+		height:28px;
+		padding:0 8px;
+		}
+	.sbtn:hover
+	{
+		cursor:pointer !important;
+		background-color:rgba(0,234,255,0.2) !important;
+		}
+	#inputTxt{
+		padding:0 10px;
+		margin:0;
+		width:70%;
+		height:34px;
+		float:left;
+	  border: 1px solid #00eaff;
+	  outline:none;
+		text-transform:uppercase;
+		background: transparent;
+		color:#00eaff;
+		font-size:13px;
+		font-family:monospace;
+		}
+	.btn3 {                        
+	    background-color: transparent;
+	    height: 34px;  
+	    width:14%;
+	    border: 1px solid #00eaff;
+	    float:left;
+	    border-radius: 0px;    
+			font-size:13px;
+			color:#00eaff;
+			margin-left:2px;
+			font-family:monospace;
+	}                             
+	.btn3:hover {  
+			cursor:pointer !important;
+			background-color:rgba(0,234,255,0.2) !important;
+	}
+	.ttext{
+		font-size:13px;
+		font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif,"宋体";
+		color:#272727;
+		}
+	b{
+		font-size:13px;
+		font-family:"Microsoft YaHei",Arial,Helvetica,sans-serif,"宋体";
+		color:#272727;
+		}      
+	@media screen and (max-height:200px){
+		.ttext{font-size:11px;} 
+		}
+	.inputTxt1{
+		padding:0;
+		margin:0;
+		width:98%;
+		height:30px;
+		float:left;
+	  outline:none;
+		text-transform:uppercase;
+		}
+	#jbaobiao{
+		width:100%;
+		min-height:500px;
+		margin-top:20px;
+		}
+	.Warn
+		{
+			border:1px solid #00eaff;
+			background:#0a0f12;
+			width:400px;
+			height:160px;
+			z-index:99999999;
+			position:fixed;
+			top:50%;
+			left:50%;
+			margin-top:-80px;
+			margin-left:-200px;
+			box-sizing:border-box;
+		}
+	.WarnB
+		{
+			width:100%;
+			height:114px;
+			text-align:center;
+			font-size:13px;
+			padding:10px;
+			line-height:124px;
+		}
+	.WarnM
+		{
+			width:100%;
+			height:26px;
+			text-align:center;
+		}
+	.WarnMButton
+		{
+			background:transparent;
+			border:1px solid #00eaff;
+			color:#00eaff;
+			width:50px;
+			height:22px;
+			text-align:center;
+			font-size:12px;
+			cursor:pointer;
+			margin:1px;
+		}
+	table.altrowstable
+	{
+		margin-top:20px;
+		border:1px solid #00eaff;
+		border-collapse:collapse;
+		padding:0;
+		width:100%;
+		table-layout:fixed;
+	}
+	table.altrowstable th
+	{
+		border:1px solid #00eaff;
+		text-align:center;
+		background:#0a0f12;
+		color:#00eaff;
+		padding:10px;
+		font-size:13px;
+	}
+	table.altrowstable td
+	{
+		border:1px solid #00eaff;
+		text-align:center;
+		white-space: nowrap;
+		overflow: auto;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+		padding-left:8px;
+		padding-right:8px;
+		color:#ccc;
+		font-size:12px;
+	}	
+	
+		/* ========= 自定义滚动条 - 科技感 ========= */
+	::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+		background: #0a0f12;
+	}
+	::-webkit-scrollbar-track {
+		background: rgba(0,234,255,0.05);
+		border: 1px solid #00eaff22;
+	}
+	::-webkit-scrollbar-thumb {
+		background: #00eaff;
+		border-radius: 0;
+		min-height: 30px;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background: #66f5ff;
+	}
+	::-webkit-scrollbar-corner {
+		background: #0a0f12;
+	}
+	/* Firefox 滚动条 */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: #00eaff rgba(0,234,255,0.05);
+	}
+	
+	.QDATATr:hover
+	{
+		cursor:pointer !important;
+		background-color:rgba(0,234,255,0.15) !important;
+	}
+	@keyframes changeColor {
+  		0% { background-color: rgba(0,234,255,0.2); }
+  		50% { background-color: transparent; }
+  		100% { background-color: rgba(0,234,255,0.2); }
+		}
+		
+	.dashb
+		{
+			background:#0a0f12;
+			width:600px;
+			height:auto;
+			border:1px solid #00eaff;
+			display:block;
+			z-index: 999999;
+    	line-height: 30px;
+    	text-align: center;
+			position: fixed;
+			top:50%;
+			left:50%;
+			transform: translate(-50%, -50%);
+			}
+		.dashbt
+		{
+			width:100%;
+			height:30px;
+    	text-align: center;
+    	line-height: 30px;
+			background:#0a0f12;
+			border-bottom:1px solid #00eaff;
+			font-size:13px;
+			}
+		.shut
+		{
+			float:right;
+			}
+		.FactorTr:hover
+		{
+			cursor:pointer !important;
+			background-color:rgba(0,234,255,0.15) !important;
+			}
+		.shut:hover
+		{
+			cursor:pointer !important;
+			opacity:0.8;
+			}
+		
+	/* ========= 科技感驾驶舱样式 - 无圆角，大字体 ========= */
+	.dashboard-container {
+		width: 100%;
+		animation: fadeIn 0.3s ease;
+	}
+	@keyframes fadeIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+	/* KPI 网格 - 9个指标 */
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 10px;
+		margin-bottom: 24px;
+	}
+	.stat-card {
+		background: rgba(0,234,255,0.03);
+		border: 1px solid #00eaff33;
+		padding: 12px 8px;
+		text-align: center;
+		transition: all 0.2s;
+		position: relative;
+		overflow: hidden;
+	}
+	.stat-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, #00eaff, transparent);
+		transition: left 0.5s;
+	}
+	.stat-card:hover::before {
+		left: 100%;
+	}
+	.stat-card:hover {
+		border-color: #00eaff;
+		background: rgba(0,234,255,0.08);
+	}
+	.stat-number {
+		font-size: 28px;
+		font-weight: bold;
+		color: #00eaff;
+		margin-bottom: 6px;
+		font-family: monospace;
+		letter-spacing: 1px;
+	}
+	.stat-label {
+		font-size: 12px;
+		color: #8cc9ff;
+		letter-spacing: 0.5px;
+		text-transform: uppercase;
+	}
+	.stat-trend {
+		font-size: 11px;
+		margin-top: 6px;
+		font-family: monospace;
+	}
+	.trend-up { color: #00ff88; }
+	.trend-down { color: #ff4466; }
+	.trend-steady { color: #ffaa44; }
+	
+	/* 双图区域 */
+	.chart-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 14px;
+		margin-bottom: 20px;
+	}
+	.chart-box {
+		background: rgba(0,234,255,0.02);
+		border: 1px solid #00eaff22;
+		padding: 10px;
+		height: 210px;
+	}
+	.chart-box:hover {
+		border-color: #00eaff55;
+	}
+	
+	/* 左右并排双列表区域 */
+	.double-list {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 14px;
+		margin-top: 12px;
+	}
+	.factor-list {
+		background: rgba(0,234,255,0.02);
+		border: 1px solid #00eaff22;
+		padding: 12px;
+	}
+	.factor-list h4 {
+		margin: 0 0 12px 0;
+		color: #00eaff;
+		font-size: 14px;
+		text-align: left;
+		border-left: 3px solid #00eaff;
+		padding-left: 10px;
+		font-family: monospace;
+		letter-spacing: 1px;
+	}
+	.factor-item {
+		display: flex;
+		justify-content: space-between;
+		padding: 8px 6px;
+		border-bottom: 1px solid #00eaff11;
+		font-size: 12px;
+	}
+	.factor-name {
+		color: #b8e6ff;
+		font-family: monospace;
+		font-size: 12px;
+	}
+	.factor-value {
+		color: #00eaff;
+		font-weight: bold;
+		font-family: monospace;
+		font-size: 12px;
+	}
+	.badge {
+		background: rgba(0,234,255,0.15);
+		padding: 2px 8px;
+		font-size: 10px;
+		margin-left: 8px;
+		font-family: monospace;
+	}
+	
+	/* 信号面板 */
+	.signal-panel {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 14px;
+		margin-top: 14px;
+		margin-bottom: 14px;
+	}
+	.signal-box {
+		border: 1px solid #00eaff22;
+		padding: 12px;
+		background: rgba(0,234,255,0.02);
+	}
+	.signal-box h4 {
+		margin: 0 0 10px 0;
+		font-size: 13px;
+		color: #00eaff;
+		border-bottom: 1px solid #00eaff33;
+		padding-bottom: 6px;
+		font-family: monospace;
+	}
+	.signal-item {
+		font-size: 12px;
+		padding: 6px 0;
+		display: flex;
+		justify-content: space-between;
+		font-family: monospace;
+	}
+	.signal-warn { color: #ffaa44; }
+	.signal-good { color: #00ff88; }
+	.signal-bad { color: #ff4466; }
+	
+	/* 进度条 */
+	.progress-bar {
+		height: 2px;
+		background: #00eaff33;
+		margin-top: 6px;
+	}
+	.progress-fill {
+		height: 2px;
+		background: #00eaff;
+		width: 0%;
+	}
+	
+	/* 轮动强度内部的进度条样式 */
+	.factor-item .progress-bar {
+		width: 60px;
+		margin-left: auto;
+		margin-top: 4px;
+	}
+	
+	@media (max-width: 900px) {
+		.stats-grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+		.chart-row {
+			grid-template-columns: 1fr;
+		}
+		.signal-panel {
+			grid-template-columns: 1fr;
+		}
+		.double-list {
+			grid-template-columns: 1fr;
+		}
+		#mq_main {
+			padding: 0 12px;
+		}
+	}
+</style>
+</head>
+<body>
+	<div id="mq_main">
+		<center>
+			<div style="height:60px; width:50%;">
+				<div style="height:27px; width:98%;text-align:left;">
+					<input id="编码" class="sbtn" type="button" value="编码" />
+					<input id="因子种类" class="sbtn" type="button" value="因子种类" />
+					<input id="因子名称" class="sbtn" type="button" value="因子名称" />
+					<input id="适用" class="sbtn" type="button" value="适用" />
+				</div>
+				<div style="display:none;" id="ssbtn"></div>
+				<input type="text" id="inputTxt"/><button id="dataSelect" class="btn3">查询</button>
+			</div>
+			<div id="jbaobiao"></div>
+		</center>
+	</div>
+	
+	<script type="text/javascript">
+		document.oncontextmenu=function(){return false;}
+		function GenNonDuplicateID(randomLength){
+			return Number(Math.random().toString().substr(3,randomLength) + Date.now()).toString(36)
+		}
+		function trim(str){return str.replace(/(^\s*)|(\s*$)/g,"");}
+		
+		var MServer = "http://10.10.98.51/test/sys/";
+		
+		function WarnMessage(content){
+			var sid=GenNonDuplicateID(1);	
+			$("body").append('<div class="Warn"><div class="WarnB" id="WarnB_'+sid+'"></div><div class="WarnM"><button id="Yes" class="WarnMButton"> 好的 </button></div></div>');
+			$("#WarnB_"+sid).html(content);
+		}
+		function divmove(DivId1,DivId2){
+			var _move=false;
+			var _x,_y;
+			$('#'+DivId1).click(function(){}).mousedown(function(e){
+				_move=true;
+				_x=e.pageX-parseInt($('#'+DivId2).css("left"));
+				_y=e.pageY-parseInt($('#'+DivId2).css("top"));
+			});
+			$(document).mousemove(function(e){
+				if(_move){
+					var x=e.pageX-_x;
+					var y=e.pageY-_y;
+					$('#'+DivId2).css({top:y,left:x});
+				}
+			}).mouseup(function(){ _move=false; });
+		}
+		$(document).on("click",".shut",function(){ $(this).parent().parent().remove(); })
+		
+		function oncontextmenu(){
+			var obAdd={text:"新增",func:function(){
+				var trNew = '<tr class="FactorTr" id ="x_new"><td style="text-align:center;" id="x_new_0">---</td><td class="xnew" id="x_new_1">...</td><td class="xnew" id="x_new_2">...</td><td class="xnew" id="x_new_3">...</td>';
+				trNew+='<td class="xnew" id="x_new_4">...</td><td class="xnew" id="x_new_5">...</td><td class="xnew" id="x_new_6">...</td><td class="xnew" id="x_new_7">...</td>';
+				trNew+='<td class="xnew" id="x_new_8">...</td><td class="xnew" id="x_new_9">...</td><td class="xnew" id="x_new_10">...</td></tr>';
+				$(this).after(trNew);
+				$(".xnew").attr('contenteditable', 'true').css({'animation':'changeColor 1s infinite','text-align':'left'});
+				oncontextmenu();
+			}};
+			var obUp={text:"修改",func:function(){
+				var trid =$(this).attr("id");
+				$('#'+trid).css('animation','changeColor 1s infinite');
+				$('#'+trid+'_3').attr('contenteditable', 'true');
+				$('#'+trid+'_4').attr('contenteditable', 'true');
+				$('#'+trid+'_5').attr('contenteditable', 'true');
+				$('#'+trid+'_6').attr('contenteditable', 'true');
+				$('#'+trid+'_7').attr('contenteditable', 'true');
+				$('#'+trid+'_8').attr('contenteditable', 'true');
+				$('#'+trid+'_9').attr('contenteditable', 'true');
+				$('#'+trid+'_10').attr('contenteditable', 'true');
+			}};
+			var obSave={text:"保存",func:function(){
+				var trid =$(this).attr("id");
+				if (trid=="x_new"){
+					var ts1 = $('#'+trid+'_1').html(), ts2 = $('#'+trid+'_2').html(), ts3 = $('#'+trid+'_3').html(), ts4 = $('#'+trid+'_4').html(), ts5 = $('#'+trid+'_5').html();
+					var ts6 = $('#'+trid+'_6').html(), ts7 = $('#'+trid+'_7').html(), ts8 = $('#'+trid+'_8').html(), ts9 = $('#'+trid+'_9').html(), ts10 = $('#'+trid+'_10').html();
+					$.ajax({ type: "POST", url: MServer+"qq/channel/ch011C.php", data: { qflag:"QFCRE", sflag:"_01", s1:ts1,s2:ts2,s3:ts3,s4:ts4,s5:ts5,s6:ts6,s7:ts7,s8:ts8,s9:ts9,s10:ts10 }, async:false,
+						success: function(data1){
+							data1 = trim(data1);
+							if(data1=='0'){ WarnMessage('数据编码已存在！'); $(document).off('click',"#Yes").on('click',"#Yes",function(){ $(this).parent().parent().remove(); })}
+							else if(data1=='1'){ WarnMessage("保存失败，请检查数据后重新保存!"); $(document).off('click',"#Yes").on('click',"#Yes",function(){ $(this).parent().parent().remove(); })}
+							else{ $("#x_new").after(data1); $("#x_new").remove(); oncontextmenu(); }
+						}
+					})
+				} else {
+					var ts1 = $('#'+trid+'_1').html(), ts2 = $('#'+trid+'_2').html(), ts3 = $('#'+trid+'_3').html(), ts4 = $('#'+trid+'_4').html(), ts5 = $('#'+trid+'_5').html();
+					var ts6 = $('#'+trid+'_6').html(), ts7 = $('#'+trid+'_7').html(), ts8 = $('#'+trid+'_8').html(), ts9 = $('#'+trid+'_9').html(), ts10 = $('#'+trid+'_10').html();
+					$.ajax({ type: "POST", url: MServer+"qq/channel/ch011C.php", data: { qflag:"QFCRE", sflag:"_03", trid:trid, s1:ts1,s2:ts2,s3:ts3,s4:ts4,s5:ts5,s6:ts6,s7:ts7,s8:ts8,s9:ts9,s10:ts10 }, async:false,
+						success: function(data1){
+							$("#"+trid).css("animation-name","none");
+							$('#'+trid+'_3').attr('contenteditable', 'false'); $('#'+trid+'_4').attr('contenteditable', 'false');
+							$('#'+trid+'_5').attr('contenteditable', 'false'); $('#'+trid+'_6').attr('contenteditable', 'false');
+							$('#'+trid+'_7').attr('contenteditable', 'false'); $('#'+trid+'_8').attr('contenteditable', 'false');
+							$('#'+trid+'_9').attr('contenteditable', 'false'); $('#'+trid+'_10').attr('contenteditable', 'false');
+						}
+					})
+				}
+			}};
+			var obDel={text:"删除",func:function(){
+				var trid =$(this).attr("id");
+				$.ajax({ type: "POST", url: MServer+"qq/channel/ch011C.php", data: { qflag:"QFCRE", sflag:"_02", trid:trid }, async:false, success: function(data){ $("#dataSelect").click(); } })
+			}};
+			var mailMenuData = [[obAdd,obUp,obSave,obDel]];
+			$(".FactorTr").smartMenu(mailMenuData, { name: "mail", beforeShow: function() { $.smartMenu.remove(); } });
+		}
+		
+		// 驾驶舱渲染 - 字体放大 + 底部双列表并排
+		function renderDashboard() {
+			const totalFactors = 487;
+			const totalCategories = 12;
+			const activeFactors = 412;
+			const coverage = 84.6;
+			const avgIC = 0.127;
+			const sharpe = 2.34;
+			const turnover = 18.7;
+			const maxDrawdown = -8.3;
+			const recentReturn = 15.8;
+			const alpha = 9.2;
+			
+			const categoryData = [
+				{ name: '动量', count: 89, efficiency: 86 },
+				{ name: '价值', count: 76, efficiency: 79 },
+				{ name: '成长', count: 68, efficiency: 83 },
+				{ name: '质量', count: 59, efficiency: 75 },
+				{ name: '情绪', count: 51, efficiency: 71 },
+				{ name: '波动率', count: 47, efficiency: 68 },
+				{ name: '流动性', count: 43, efficiency: 65 },
+				{ name: '技术', count: 54, efficiency: 72 }
+			];
+			
+			const topFactors = [
+				{ name: 'RSI背离强度', category: '动量', ic: 0.203, trend: 'up' },
+				{ name: 'EBIT/EV', category: '价值', ic: 0.187, trend: 'up' },
+				{ name: 'SUE超预期', category: '成长', ic: 0.176, trend: 'up' },
+				{ name: '特质收益率', category: '质量', ic: 0.159, trend: 'steady' },
+				{ name: '聪明钱流向', category: '情绪', ic: 0.148, trend: 'up' }
+			];
+			
+			const signals = [
+				{ name: '动量因子信号', status: 'strong', value: '+2.3σ' },
+				{ name: '价值因子信号', status: 'neutral', value: '+0.7σ' },
+				{ name: '成长因子预警', status: 'warning', value: '-1.2σ' },
+				{ name: '市场情绪', status: 'positive', value: '+1.8σ' }
+			];
+			
+			// 轮动强度数据（按效率排序前6）
+			const rotationData = [...categoryData].sort((a,b)=>b.efficiency - a.efficiency).slice(0,6);
+			
+			let html = `<div class="dashboard-container">
+				<div class="stats-grid">
+					<div class="stat-card"><div class="stat-number">${totalFactors}</div><div class="stat-label">因子总库</div><div class="stat-trend">+32 本周新增</div></div>
+					<div class="stat-card"><div class="stat-number">${totalCategories}</div><div class="stat-label">因子种类</div><div class="stat-trend">覆盖全策略</div></div>
+					<div class="stat-card"><div class="stat-number">${activeFactors}</div><div class="stat-label">活跃因子</div><div class="stat-trend">使用率 ${coverage}%</div></div>
+					<div class="stat-card"><div class="stat-number">${avgIC}</div><div class="stat-label">平均IC</div><div class="stat-trend trend-up">同比 +0.023 ▲</div></div>
+					<div class="stat-card"><div class="stat-number">${sharpe}</div><div class="stat-label">组合夏普</div><div class="stat-trend trend-up">近30日 +0.31</div></div>
+					<div class="stat-card"><div class="stat-number">${recentReturn}%</div><div class="stat-label">多因子收益(YTD)</div><div class="stat-trend trend-up">超额 ${alpha}%</div></div>
+					<div class="stat-card"><div class="stat-number">${turnover}%</div><div class="stat-label">换手率(月)</div><div class="stat-trend trend-steady">稳定区间</div></div>
+					<div class="stat-card"><div class="stat-number">${maxDrawdown}%</div><div class="stat-label">最大回撤</div><div class="stat-trend trend-up">优于基准3.2%</div></div>
+					<div class="stat-card"><div class="stat-number">98.3%</div><div class="stat-label">因子有效性</div><div class="stat-trend trend-up">历史新高</div></div>
+				</div>
+				<div class="chart-row">
+					<div class="chart-box" id="categoryChart" style="height: 200px;"></div>
+					<div class="chart-box" id="efficiencyChart" style="height: 200px;"></div>
+				</div>
+				<div class="signal-panel">
+					<div class="signal-box"><h4>⚡ 实时因子信号</h4>
+						${signals.map(s => `<div class="signal-item"><span>${s.name}</span><span class="${s.status==='strong'?'signal-good':s.status==='warning'?'signal-warn':'signal-good'}">${s.value}</span></div>`).join('')}
+						<div class="progress-bar"><div class="progress-fill" style="width:76%"></div></div>
+						<div class="signal-item" style="margin-top:8px;"><span>综合置信度</span><span class="signal-good">76.4%</span></div>
+					</div>
+					<div class="signal-box"><h4>📊 因子拥挤度预警</h4>
+						<div class="signal-item"><span>动量因子</span><span class="signal-warn">拥挤 82%</span></div>
+						<div class="signal-item"><span>价值因子</span><span>拥挤 45%</span></div>
+						<div class="signal-item"><span>成长因子</span><span class="signal-good">拥挤 31%</span></div>
+						<div class="signal-item"><span>小市值因子</span><span class="signal-bad">拥挤 91%</span></div>
+					</div>
+				</div>
+				<div class="double-list">
+					<div class="factor-list"><h4>🏆 因子IC有效性排名 (月度Top5)</h4>
+						${topFactors.map(f => `<div class="factor-item"><span class="factor-name">${f.name} <span class="badge">${f.category}</span></span><span class="factor-value ${f.trend === 'up' ? 'trend-up' : (f.trend==='down'?'trend-down':'trend-steady')}">IC: ${f.ic.toFixed(3)} ${f.trend === 'up' ? '↑' : (f.trend==='down'?'↓':'→')}</span></div>`).join('')}
+					</div>
+					<div class="factor-list"><h4>📈 因子种类轮动强度</h4>
+						${rotationData.map(c => `<div class="factor-item"><span class="factor-name">${c.name}</span><span class="factor-value">强度: ${c.efficiency}%</span><div class="progress-bar" style="width:50px; margin-left:8px;"><div class="progress-fill" style="width:${c.efficiency}%"></div></div></div>`).join('')}
+					</div>
+				</div>
+			</div>`;
+			
+			$("#jbaobiao").html(html);
+			
+			setTimeout(function() {
+				var categoryChart = echarts.init(document.getElementById('categoryChart'));
+				categoryChart.setOption({
+					backgroundColor: 'transparent',
+					tooltip: { trigger: 'item', textStyle: { color: '#00eaff', fontSize: 12 } },
+					legend: { textStyle: { color: '#00eaff', fontSize: 11 }, left: 'left', itemWidth: 14, itemHeight: 10 },
+					series: [{
+						type: 'pie', radius: ['35%', '60%'], avoidLabelOverlap: false,
+						data: categoryData.map(c => ({ name: c.name, value: c.count })),
+						itemStyle: { borderColor: '#0a0f12', borderWidth: 1, color: '#00eaff' },
+						label: { show: true, color: '#8cc9ff', fontSize: 11, formatter: '{b}' }
+					}]
+				});
+				
+				var effChart = echarts.init(document.getElementById('efficiencyChart'));
+				effChart.setOption({
+					backgroundColor: 'transparent',
+					grid: { left: '12%', right: '3%', top: 18, bottom: 8, containLabel: true },
+					xAxis: { type: 'category', data: categoryData.map(c => c.name), axisLabel: { rotate: 35, color: '#8cc9ff', fontSize: 10, interval: 0 } },
+					yAxis: { type: 'value', name: '有效性%', nameTextStyle: { color: '#00eaff', fontSize: 11 }, axisLabel: { color: '#8cc9ff', fontSize: 10 } },
+					series: [{ data: categoryData.map(c => c.efficiency), type: 'bar', barWidth: '55%', itemStyle: { color: '#00eaff', borderRadius: 0 }, label: { show: true, position: 'top', color: '#00eaff', fontSize: 10 } }]
+				});
+				
+				$(window).off('resize.dashboard').on('resize.dashboard', function() { categoryChart.resize(); effChart.resize(); });
+			}, 50);
+		}
+		
+		$(document).ready(function() { renderDashboard(); });
+		
+		$(document).off('click',"#dataSelect").on('click',"#dataSelect", function(){
+			var sKey=$("#ssbtn").text().substr(0);
+			var sTxt=$("#inputTxt").val();
+			if(sTxt==''){ WarnMessage("请输入查询对象！"); $(document).off('click',"#Yes").on('click',"#Yes",function(){ $(this).parent().parent().remove(); })}
+			else if(sTxt!=''){
+				$.post(MServer+"qq/channel/ch011C.php", { qflag:"QFCRE", sflag:"_04", sKey:sKey, sTxt:sTxt }, function(data1){ $("#jbaobiao").html(data1); oncontextmenu(); });
+			}
+		});
+		
+		$(document).ready(function (){ $("#因子名称").css({'background':'rgba(0,234,255,0.2)'}); $("#ssbtn").html("因子名称"); })
+		$(document).off('click',".sbtn").on('click',".sbtn", function(){ $(".sbtn").css({'background':'transparent'}); $(this).css({'background':'rgba(0,234,255,0.2)'}); $("#ssbtn").html($(this).attr('id')); })
+		
+		$(document).off('dblclick',".cimg").on('dblclick',".cimg", function(){
+			let text = $(this).html();
+			let pattern = /image(.*?)png/;
+			let match = text.match(pattern);
+			if (match) {
+				let tevar=match[1].replace('/','').replace('.','');
+				let tmg = MServer+'qq/channel/img/image/'+tevar+'.png';
+				if($("#tt"+tevar).length>0){alert("此图已存在！");}
+				else{
+					$("#mq_main").append("<div class='dashb' id='tt"+tevar+"'><div class='dashbt'>"+tevar+"<img class='shut' src='./assets/images/close3.png'></div><div class='dashbb'><img style='width:100%;height:100%;' src='"+tmg+"' onerror=src='./assets/images/default.png' alt='' ></div></div>");
+					var x = $("#tt"+tevar).position().top+Math.random()*50;
+					var y=$("#tt"+tevar).position().left+Math.random()*50;
+					$("#tt"+tevar).css({top:x, left:y})
+					divmove("tt"+tevar,"tt"+tevar);
+				}
+			}
+		})
+	</script>
+</body>	
+</html>

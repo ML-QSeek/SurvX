@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>量化投资系统 · 用户行为监控</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js">
+    </script>
+    <style>
+        :root {
+            --primary: #F5A623;
+            --primary-dark: #E09515;
+            --primary-light: #FFB84D;
+            --primary-transparent: rgba(245, 166, 35, 0.08);
+            --primary-glow: rgba(245, 166, 35, 0.25);
+            --bg-primary: #0B0B0B;
+            --bg-secondary: #151515;
+            --bg-tertiary: #202020;
+            --bg-card: rgba(18, 18, 20, 0.92);
+            --text-primary: #FFFFFF;
+            --text-secondary: #FFD89C;
+            --text-light: #FFE0AF;
+            --text-muted: #A0A0A0;
+            --border-color: rgba(245, 166, 35, 0.3);
+            --border-soft: rgba(245, 166, 35, 0.18);
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --purple: #9F7AEA;
+            --blue: #60A5FA;
+        }
+
+        /* ========== 全局滚动条 - Webkit (Chrome/Edge/Safari) ========== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border: 1px solid rgba(245, 166, 35, 0.08);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(245, 166, 35, 0.35);
+            border: 1px solid rgba(245, 166, 35, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(245, 166, 35, 0.6);
+            border-color: var(--primary-light);
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: var(--bg-primary);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-family: 'Segoe UI', 'Inter', 'Microsoft YaHei', sans-serif;
+            line-height: 1.5;
+            overflow-x: hidden;
+            /* Firefox 滚动条 */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(245, 166, 35, 0.35) rgba(11, 11, 11, 0.5);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(245, 166, 35, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 85% 75%, rgba(245, 166, 35, 0.03) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 240px;
+            background: rgba(10, 10, 12, 0.9);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-soft);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            letter-spacing: 1px;
+            margin-bottom: 32px;
+            padding-left: 10px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .nav-section {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 16px 0 8px 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .nav-item .icon {
+            font-size: 1.1rem;
+            width: 22px;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .nav-item.active {
+            color: var(--primary-light);
+            background: rgba(245, 166, 35, 0.08);
+            border-left: 3px solid var(--primary);
+        }
+
+        .nav-item:hover:not(.active) {
+            color: #e0c08c;
+            background: rgba(245, 166, 35, 0.04);
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--primary-transparent);
+            border: 1px solid var(--border-color);
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            color: var(--primary-light);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            max-height: 100vh;
+            /* Firefox 滚动条 */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(245, 166, 35, 0.35) rgba(11, 11, 11, 0.5);
+        }
+
+        .page-title {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 600;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border-soft);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-title .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-soft);
+            padding: 18px 20px;
+            transition: 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-light);
+            background: rgba(20, 20, 24, 0.95);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            line-height: 1;
+        }
+
+        .stat-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .stat-change.up {
+            color: var(--success);
+        }
+
+        .stat-change.down {
+            color: var(--danger);
+        }
+
+        /* 图表行 */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 16px;
+        }
+
+        .charts-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .chart-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-soft);
+            padding: 16px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 12px;
+        }
+
+        .chart-header h3 {
+            color: var(--primary-light);
+            font-size: 0.95rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* ========== 自定义下拉框样式 ========== */
+        .custom-select {
+            position: relative;
+            display: inline-block;
+            min-width: 115px;
+            user-select: none;
+            z-index: 50;
+        }
+
+        .select-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            padding: 6px 10px;
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .select-trigger:hover {
+            border-color: var(--primary-light);
+            background: #1e1e1e;
+        }
+
+        .select-trigger .arrow {
+            font-size: 0.55rem;
+            transition: transform 0.2s;
+            color: var(--primary);
+        }
+
+        .custom-select.open .select-trigger .arrow {
+            transform: rotate(180deg);
+        }
+
+        .custom-select.open .select-trigger {
+            border-color: var(--primary-light);
+        }
+
+        .select-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 3px;
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            z-index: 100;
+            display: none;
+            max-height: 180px;
+            overflow-y: auto;
+            /* Firefox 滚动条 */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(245, 166, 35, 0.35) #1a1a1a;
+        }
+
+        .custom-select.open .select-options {
+            display: block;
+        }
+
+        .select-option {
+            padding: 7px 10px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            border-bottom: 1px solid rgba(245, 166, 35, 0.06);
+        }
+
+        .select-option:last-child {
+            border-bottom: none;
+        }
+
+        .select-option:hover {
+            background: rgba(245, 166, 35, 0.1);
+            color: var(--primary-light);
+        }
+
+        .select-option.selected {
+            color: var(--primary-light);
+            background: rgba(245, 166, 35, 0.12);
+            border-left: 2px solid var(--primary);
+        }
+
+        /* 表格 */
+        .table-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-soft);
+            padding: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 10px;
+            color: #FFD58C;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 10px 10px;
+            border-bottom: 1px solid rgba(245, 166, 35, 0.06);
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border: 1px solid;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-internal {
+            color: var(--primary-light);
+            border-color: var(--border-color);
+        }
+
+        .badge-external {
+            color: var(--purple);
+            border-color: rgba(159, 122, 234, 0.4);
+        }
+
+        .badge-module {
+            color: var(--blue);
+            border-color: rgba(96, 165, 250, 0.4);
+            background: rgba(96, 165, 250, 0.06);
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background: var(--success);
+            box-shadow: 0 0 5px var(--success);
+            margin-right: 5px;
+        }
+
+        .status-dot.offline {
+            background: #555;
+            box-shadow: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+            padding: 5px 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-transparent);
+            border-color: var(--primary-light);
+            color: var(--primary-light);
+        }
+
+        .heat-high {
+            color: #F5A623;
+            border-left: 3px solid #F5A623;
+            padding-left: 8px;
+        }
+
+        .heat-mid {
+            color: #FFB84D;
+            border-left: 3px solid #FFB84D;
+            padding-left: 8px;
+        }
+
+        .heat-low {
+            color: #A0A0A0;
+            border-left: 3px solid #555;
+            padding-left: 8px;
+        }
+
+        @media (max-width: 1100px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .charts-row,
+            .charts-row-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">量化·行为监控</div>
+            <div class="nav-section">用户分析</div>
+            <div class="nav-item active"><span class="icon">📊</span> 行为总览</div>
+            <div class="nav-item"><span class="icon">👤</span> 用户画像</div>
+            <div class="nav-item"><span class="icon">🔄</span> 操作路径</div>
+            <div class="nav-section">模块分析</div>
+            <div class="nav-item"><span class="icon">📦</span> 模块热度</div>
+            <div class="nav-item"><span class="icon">⏱️</span> 使用时长</div>
+            <div class="nav-item"><span class="icon">🔍</span> 功能漏斗</div>
+            <div class="nav-section">管理</div>
+            <div class="nav-item"><span class="icon">👥</span> 用户权限 <span class="nav-badge">42</span></div>
+            <div class="nav-item"><span class="icon">📋</span> 操作日志</div>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="main-content">
+            <div class="page-title"><span class="dot"></span> 用户行为总览 · 实时监控</div>
+
+            <!-- 统计卡片 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">当前在线用户</div>
+                    <div class="stat-value" id="onlineCount">187</div>
+                    <div class="stat-sub">内部 142 · 外部 45</div>
+                    <div class="stat-change up">↑ 12% vs 昨日</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">今日活跃用户</div>
+                    <div class="stat-value" id="activeToday">1,284</div>
+                    <div class="stat-sub">会话数 2,401</div>
+                    <div class="stat-change up">↑ 8% vs 昨日</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">模块使用次数</div>
+                    <div class="stat-value" id="moduleCalls">15.2k</div>
+                    <div class="stat-sub">策略回测占比最高</div>
+                    <div class="stat-change up">↑ 5% vs 昨日</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">异常行为告警</div>
+                    <div class="stat-value" style="color:#EF4444;" id="alertCount">3</div>
+                    <div class="stat-sub">频繁请求 · 权限越界</div>
+                    <div class="stat-change down">↓ 1 vs 昨日</div>
+                </div>
+            </div>
+
+            <!-- 图表行 -->
+            <div class="charts-row">
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h3>📈 用户活跃度趋势 (按用户类型)</h3>
+                        <div class="chart-actions">
+                            <div class="custom-select" id="trendRangeSelect">
+                                <div class="select-trigger">
+                                    <span class="select-text">最近30天</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="select-options">
+                                    <div class="select-option" data-value="7">最近7天</div>
+                                    <div class="select-option selected" data-value="30">最近30天</div>
+                                    <div class="select-option" data-value="90">最近90天</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper" id="activityChart" style="height:250px;"></div>
+                </div>
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h3>🧩 模块使用分布</h3>
+                    </div>
+                    <div class="chart-wrapper" id="modulePieChart" style="height:250px;"></div>
+                </div>
+            </div>
+
+            <!-- 第二行 -->
+            <div class="charts-row-3">
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h3>🔗 高频操作路径 Top5</h3>
+                    </div>
+                    <div style="padding: 10px; color: var(--text-light); font-size: 0.85rem;">
+                        <div style="margin-bottom: 12px;">
+                            <span class="heat-high">登录 → 策略回测 → 结果分析</span>
+                            <span style="float:right; color:#FFD58C;">32%</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <span class="heat-mid">登录 → 数据查看 → 下载报告</span>
+                            <span style="float:right; color:#FFD58C;">24%</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <span class="heat-mid">登录 → 风险监控 → 预警设置</span>
+                            <span style="float:right; color:#FFD58C;">18%</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <span class="heat-low">登录 → 数据分析 → 可视化</span>
+                            <span style="float:right; color:#FFD58C;">15%</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <span class="heat-low">登录 → 系统设置 → 权限管理</span>
+                            <span style="float:right; color:#FFD58C;">11%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h3>👥 用户类型构成</h3>
+                    </div>
+                    <div class="chart-wrapper-sm" id="userTypeChart" style="height:200px;"></div>
+                </div>
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h3>⏰ 时段活跃分布</h3>
+                    </div>
+                    <div class="chart-wrapper-sm" id="hourlyChart" style="height:200px;"></div>
+                </div>
+            </div>
+
+            <!-- 用户行为表格 -->
+            <div class="table-box">
+                <div class="chart-header" style="margin-bottom: 12px;">
+                    <h3>📋 实时用户行为流</h3>
+                    <div class="chart-actions">
+                        <div class="custom-select" id="userTypeFilterSelect">
+                            <div class="select-trigger">
+                                <span class="select-text">全部用户</span>
+                                <span class="arrow">▼</span>
+                            </div>
+                            <div class="select-options">
+                                <div class="select-option selected" data-value="all">全部用户</div>
+                                <div class="select-option" data-value="internal">内部用户</div>
+                                <div class="select-option" data-value="external">外部用户</div>
+                            </div>
+                        </div>
+                        <div class="custom-select" id="moduleFilterSelect">
+                            <div class="select-trigger">
+                                <span class="select-text">全部模块</span>
+                                <span class="arrow">▼</span>
+                            </div>
+                            <div class="select-options">
+                                <div class="select-option selected" data-value="all">全部模块</div>
+                                <div class="select-option" data-value="backtest">策略回测</div>
+                                <div class="select-option" data-value="data">数据分析</div>
+                                <div class="select-option" data-value="risk">风险监控</div>
+                                <div class="select-option" data-value="report">报告下载</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>用户</th>
+                            <th>类型</th>
+                            <th>操作模块</th>
+                            <th>行为描述</th>
+                            <th>耗时</th>
+                            <th>状态</th>
+                            <th>时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="behaviorTableBody">
+                        <tr>
+                            <td>张明 <span style="color:#666;">ID:1001</span></td>
+                            <td><span class="badge badge-internal">内部</span></td>
+                            <td><span class="badge badge-module">策略回测</span></td>
+                            <td>执行MACD策略回测</td>
+                            <td>2.3s</td>
+                            <td><span class="status-dot"></span>在线</td>
+                            <td>14:32:15</td>
+                        </tr>
+                        <tr>
+                            <td>李华 <span style="color:#666;">ID:1002</span></td>
+                            <td><span class="badge badge-internal">内部</span></td>
+                            <td><span class="badge badge-module">数据分析</span></td>
+                            <td>沪深300成分分析</td>
+                            <td>5.1s</td>
+                            <td><span class="status-dot"></span>在线</td>
+                            <td>14:31:48</td>
+                        </tr>
+                        <tr>
+                            <td>王强 <span style="color:#666;">ID:2001</span></td>
+                            <td><span class="badge badge-external">外部</span></td>
+                            <td><span class="badge badge-module">数据查看</span></td>
+                            <td>查看持仓明细</td>
+                            <td>0.8s</td>
+                            <td><span class="status-dot"></span>在线</td>
+                            <td>14:30:22</td>
+                        </tr>
+                        <tr>
+                            <td>赵敏 <span style="color:#666;">ID:1005</span></td>
+                            <td><span class="badge badge-internal">内部</span></td>
+                            <td><span class="badge badge-module">风险监控</span></td>
+                            <td>设置VaR预警阈值</td>
+                            <td>1.5s</td>
+                            <td><span class="status-dot offline"></span>离线</td>
+                            <td>14:28:05</td>
+                        </tr>
+                        <tr>
+                            <td>陈雷 <span style="color:#666;">ID:2003</span></td>
+                            <td><span class="badge badge-external">外部</span></td>
+                            <td><span class="badge badge-module">报告下载</span></td>
+                            <td>下载周度报告</td>
+                            <td>3.2s</td>
+                            <td><span class="status-dot"></span>在线</td>
+                            <td>14:25:40</td>
+                        </tr>
+                        <tr>
+                            <td>周涛 <span style="color:#666;">ID:1008</span></td>
+                            <td><span class="badge badge-internal">内部</span></td>
+                            <td><span class="badge badge-module">策略回测</span></td>
+                            <td>RSI策略参数优化</td>
+                            <td>8.7s</td>
+                            <td><span class="status-dot"></span>在线</td>
+                            <td>14:24:11</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        (function() {
+            // ========== 自定义下拉框逻辑 ==========
+            function initCustomSelect(selectId, onChangeCallback) {
+                const selectEl = document.getElementById(selectId);
+                if (!selectEl) return;
+
+                const trigger = selectEl.querySelector('.select-trigger');
+                const textSpan = selectEl.querySelector('.select-text');
+                const options = selectEl.querySelectorAll('.select-option');
+
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isOpen = selectEl.classList.contains('open');
+                    document.querySelectorAll('.custom-select.open').forEach(el => {
+                        if (el !== selectEl) el.classList.remove('open');
+                    });
+                    if (isOpen) {
+                        selectEl.classList.remove('open');
+                    } else {
+                        selectEl.classList.add('open');
+                    }
+                });
+
+                options.forEach(option => {
+                    option.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const value = this.dataset.value;
+                        const text = this.textContent;
+                        textSpan.textContent = text;
+                        options.forEach(o => o.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectEl.classList.remove('open');
+                        if (onChangeCallback) {
+                            onChangeCallback(value, text);
+                        }
+                    });
+                });
+            }
+
+            document.addEventListener('click', function() {
+                document.querySelectorAll('.custom-select.open').forEach(el => {
+                    el.classList.remove('open');
+                });
+            });
+
+            // ========== 初始化图表 ==========
+            const activityChart = echarts.init(document.getElementById('activityChart'));
+            const modulePieChart = echarts.init(document.getElementById('modulePieChart'));
+            const userTypeChart = echarts.init(document.getElementById('userTypeChart'));
+            const hourlyChart = echarts.init(document.getElementById('hourlyChart'));
+
+            const darkAxisLine = { lineStyle: { color: '#F5A623', width: 1 } };
+            const darkAxisLabel = { color: '#FFD89C' };
+            const darkSplitLine = { lineStyle: { color: '#F5A623', width: 0.4, type: 'dotted' } };
+
+            const activityOption = {
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'axis' },
+                legend: {
+                    textStyle: { color: '#FFD89C', fontSize: 11 },
+                    data: ['内部用户', '外部用户', '总会话数'],
+                    top: 5
+                },
+                grid: { left: '3%', right: '4%', top: 40, bottom: 5, containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: ['10/08', '10/12', '10/16', '10/20', '10/24', '10/28', '11/01', '11/04'],
+                    axisLine: darkAxisLine,
+                    axisLabel: darkAxisLabel
+                },
+                yAxis: [{
+                    type: 'value',
+                    name: '用户数',
+                    nameTextStyle: { color: '#FFD89C', fontSize: 10 },
+                    axisLine: { show: true, ...darkAxisLine },
+                    axisLabel: darkAxisLabel,
+                    splitLine: darkSplitLine
+                }, {
+                    type: 'value',
+                    name: '会话数',
+                    nameTextStyle: { color: '#A0A0A0', fontSize: 10 },
+                    axisLine: { show: true, lineStyle: { color: '#555' } },
+                    axisLabel: { color: '#A0A0A0' },
+                    splitLine: { show: false }
+                }],
+                series: [{
+                    name: '内部用户',
+                    type: 'line',
+                    smooth: true,
+                    data: [130, 145, 152, 148, 158, 162, 168, 172],
+                    lineStyle: { color: '#F5A623', width: 2 },
+                    itemStyle: { color: '#F5A623' },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0,
+                            y: 0,
+                            x2: 0,
+                            y2: 1,
+                            colorStops: [{ offset: 0, color: 'rgba(245,166,35,0.25)' }, { offset: 1,
+                                color: 'rgba(245,166,35,0.02)' }
+                            ]
+                        }
+                    }
+                }, {
+                    name: '外部用户',
+                    type: 'line',
+                    smooth: true,
+                    data: [30, 35, 38, 42, 40, 44, 46, 48],
+                    lineStyle: { color: '#9F7AEA', width: 2 },
+                    itemStyle: { color: '#9F7AEA' },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0,
+                            y: 0,
+                            x2: 0,
+                            y2: 1,
+                            colorStops: [{ offset: 0, color: 'rgba(159,122,234,0.2)' }, { offset: 1,
+                                color: 'rgba(159,122,234,0.02)' }
+                            ]
+                        }
+                    }
+                }, {
+                    name: '总会话数',
+                    type: 'bar',
+                    yAxisIndex: 1,
+                    data: [320, 380, 410, 430, 450, 470, 490, 510],
+                    itemStyle: { color: 'rgba(245,166,35,0.35)', borderColor: '#F5A623',
+                        borderWidth: 0.5 },
+                    barWidth: 12
+                }]
+            };
+
+            const modulePieOption = {
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'item', formatter: '{b}: {c}次 ({d}%)' },
+                legend: {
+                    orient: 'vertical',
+                    right: 5,
+                    top: 'center',
+                    textStyle: { color: '#A0A0A0', fontSize: 10 },
+                    itemWidth: 10,
+                    itemHeight: 10
+                },
+                series: [{
+                    name: '模块调用',
+                    type: 'pie',
+                    radius: ['42%', '68%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: { borderColor: '#0B0B0B', borderWidth: 2 },
+                    label: { show: false },
+                    emphasis: { label: { show: true, color: '#F5A623', fontSize: 14 } },
+                    data: [
+                        { value: 4820, name: '策略回测', itemStyle: { color: '#F5A623' } },
+                        { value: 3210, name: '数据分析', itemStyle: { color: '#E09515' } },
+                        { value: 2180, name: '风险监控', itemStyle: { color: '#FFB84D' } },
+                        { value: 1650, name: '报告下载', itemStyle: { color: '#10B981' } },
+                        { value: 1420, name: '数据查看', itemStyle: { color: '#9F7AEA' } },
+                        { value: 1920, name: '其他', itemStyle: { color: '#F59E0B' } }
+                    ]
+                }]
+            };
+
+            const userTypeOption = {
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'item' },
+                series: [{
+                    name: '用户类型',
+                    type: 'pie',
+                    radius: ['50%', '72%'],
+                    itemStyle: { borderColor: '#0B0B0B', borderWidth: 2 },
+                    label: { show: true, position: 'outside', color: '#FFD89C', fontSize: 10,
+                        formatter: '{b}\n{d}%' },
+                    data: [
+                        { value: 640, name: '策略研究员', itemStyle: { color: '#F5A623' } },
+                        { value: 380, name: '数据分析师', itemStyle: { color: '#FFB84D' } },
+                        { value: 210, name: '风控专员', itemStyle: { color: '#E09515' } },
+                        { value: 180, name: '外部客户', itemStyle: { color: '#9F7AEA' } },
+                        { value: 90, name: '管理员', itemStyle: { color: '#10B981' } }
+                    ]
+                }]
+            };
+
+            const hourlyOption = {
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'axis' },
+                grid: { left: '3%', right: '3%', top: 15, bottom: 5, containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: ['0h', '2h', '4h', '6h', '8h', '10h', '12h', '14h', '16h', '18h', '20h',
+                        '22h'
+                    ],
+                    axisLine: darkAxisLine,
+                    axisLabel: { ...darkAxisLabel, fontSize: 9 }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '请求量',
+                    nameTextStyle: { color: '#FFD89C', fontSize: 9 },
+                    axisLine: { show: true, ...darkAxisLine },
+                    axisLabel: darkAxisLabel,
+                    splitLine: darkSplitLine
+                },
+                series: [{
+                    type: 'bar',
+                    data: [80, 45, 30, 55, 320, 680, 850, 920, 780, 560, 340, 180],
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#F5A623' }, { offset: 1,
+                            color: 'rgba(245,166,35,0.2)' }
+                        ])
+                    },
+                    barWidth: 10
+                }]
+            };
+
+            activityChart.setOption(activityOption);
+            modulePieChart.setOption(modulePieOption);
+            userTypeChart.setOption(userTypeOption);
+            hourlyChart.setOption(hourlyOption);
+
+            window.addEventListener('resize', () => {
+                activityChart.resize();
+                modulePieChart.resize();
+                userTypeChart.resize();
+                hourlyChart.resize();
+            });
+
+            // ========== 初始化自定义下拉框 ==========
+            initCustomSelect('trendRangeSelect', function(value, text) {
+                console.log('趋势时间范围切换为:', text);
+            });
+
+            initCustomSelect('userTypeFilterSelect', function(value, text) {
+                filterTable();
+            });
+
+            initCustomSelect('moduleFilterSelect', function(value, text) {
+                filterTable();
+            });
+
+            function filterTable() {
+                const userTypeSelect = document.getElementById('userTypeFilterSelect');
+                const moduleSelect = document.getElementById('moduleFilterSelect');
+                const userTypeValue = userTypeSelect.querySelector('.select-option.selected')?.dataset
+                    .value || 'all';
+                const moduleValue = moduleSelect.querySelector('.select-option.selected')?.dataset.value ||
+                    'all';
+
+                const rows = document.querySelectorAll('#behaviorTableBody tr');
+                rows.forEach(row => {
+                    const typeBadge = row.querySelector('.badge-internal, .badge-external');
+                    const moduleBadge = row.querySelector('.badge-module');
+                    if (!typeBadge || !moduleBadge) return;
+
+                    const isInternal = typeBadge.classList.contains('badge-internal');
+                    const moduleText = moduleBadge.textContent.trim();
+                    let show = true;
+                    if (userTypeValue === 'internal' && !isInternal) show = false;
+                    if (userTypeValue === 'external' && isInternal) show = false;
+
+                    const moduleMap = {
+                        'backtest': '策略回测',
+                        'data': '数据分析',
+                        'risk': '风险监控',
+                        'report': '报告下载'
+                    };
+                    if (moduleValue !== 'all' && moduleText !== moduleMap[moduleValue]) show = false;
+                    row.style.display = show ? '' : 'none';
+                });
+            }
+
+            // ========== 动态更新 ==========
+            function updateOnlineCount() {
+                const count = Math.floor(Math.random() * 30) + 170;
+                document.getElementById('onlineCount').textContent = count;
+                document.getElementById('activeToday').textContent = (Math.floor(Math.random() *
+                    200) + 1180).toLocaleString();
+                document.getElementById('moduleCalls').textContent = (Math.floor(Math.random() *
+                    1500) + 14200).toLocaleString();
+            }
+            setInterval(updateOnlineCount, 15000);
+
+            function addBehaviorRow() {
+                const users = [
+                    { name: '张明', id: '1001', type: 'internal', typeLabel: '内部', module: '策略回测',
+                        action: '执行MACD策略回测', time: '2.3s' },
+                    { name: '李华', id: '1002', type: 'internal', typeLabel: '内部', module: '数据分析',
+                        action: '沪深300成分分析', time: '5.1s' },
+                    { name: '王强', id: '2001', type: 'external', typeLabel: '外部', module: '数据查看',
+                        action: '查看持仓明细', time: '0.8s' },
+                    { name: '赵敏', id: '1005', type: 'internal', typeLabel: '内部', module: '风险监控',
+                        action: '设置VaR预警阈值', time: '1.5s' },
+                    { name: '陈雷', id: '2003', type: 'external', typeLabel: '外部', module: '报告下载',
+                        action: '下载周度报告', time: '3.2s' },
+                    { name: '周涛', id: '1008', type: 'internal', typeLabel: '内部', module: '策略回测',
+                        action: 'RSI策略参数优化', time: '8.7s' },
+                    { name: '吴芳', id: '2005', type: 'external', typeLabel: '外部', module: '数据查看',
+                        action: '导出CSV数据', time: '1.1s' },
+                ];
+                const u = users[Math.floor(Math.random() * users.length)];
+                const now = new Date();
+                const timeStr = now.toTimeString().split(' ')[0];
+                const tbody = document.getElementById('behaviorTableBody');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${u.name} <span style="color:#666;">ID:${u.id}</span></td>
+                    <td><span class="badge badge-${u.type === 'internal' ? 'internal' : 'external'}">${u.typeLabel}</span></td>
+                    <td><span class="badge badge-module">${u.module}</span></td>
+                    <td>${u.action}</td>
+                    <td>${u.time}</td>
+                    <td><span class="status-dot"></span>在线</td>
+                    <td>${timeStr}</td>
+                `;
+                if (tbody.firstChild) {
+                    tbody.insertBefore(row, tbody.firstChild);
+                } else {
+                    tbody.appendChild(row);
+                }
+                if (tbody.children.length > 12) {
+                    tbody.removeChild(tbody.lastChild);
+                }
+                filterTable();
+            }
+            setInterval(addBehaviorRow, 8000);
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove(
+                        'active'));
+                    this.classList.add('active');
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

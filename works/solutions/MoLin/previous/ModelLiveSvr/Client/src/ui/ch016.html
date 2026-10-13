@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT硬件设备架构图</title>
+    <link rel="stylesheet" href="./css/all.min.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <style>
+        :root {
+            --primary: #F5A623;
+            --primary-dark: #E09515;
+            --primary-light: #FFB84D;
+            --primary-transparent: rgba(245, 166, 35, 0.1);
+            --primary-glow: rgba(245, 166, 35, 0.35);
+            --bg-primary: #0B0B0B;
+            --bg-secondary: #151515;
+            --bg-tertiary: #202020;
+            --bg-transparent: rgba(18, 18, 20, 0.8);
+            --text-primary: #FFFFFF;
+            --text-secondary: #FFD89C;
+            --text-gray: #D0D0D0;
+            --text-muted: #808080;
+            --border-color: rgba(245, 166, 35, 0.3);
+            --error-color: #FF6B6B;
+            --success-color: #06D6A0;
+            --server-blue: #16C0FF;
+            --network-red: #FF6B6B;
+            --storage-teal: #4ECDC4;
+            --security-yellow: #FFD166;
+            --client-purple: #8A2BE2;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            font-weight: 300;
+            font-size: 13px;
+            line-height: 1.4em;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            position: relative;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(245, 166, 35, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(245, 166, 35, 0.04) 0%, transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        ::-webkit-scrollbar {  
+            width: 0px;  
+            height: 0px;  
+            background-color: var(--bg-primary);  
+        }
+        
+        /* 图例 */
+        .legend {
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid rgba(245, 166, 35, 0.25);
+            background: rgba(18, 18, 18, 0.96);
+            backdrop-filter: blur(12px);
+            flex-shrink: 0;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 0 18px rgba(245, 166, 35, 0.08);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            margin-right: 6px;
+            border: 1px solid;
+        }
+        
+        .legend-text {
+            font-size: 13px;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+        
+        .dashboard {
+            display: flex;
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            transform-origin: center;
+            transition: transform 0.3s;
+            overflow-y: auto !important;
+            background: var(--bg-transparent);
+        }
+        
+        .metrics-panel {
+            width: 300px;
+            padding: 3px;
+            border-left: 1px solid rgba(245, 166, 35, 0.25);
+            overflow-y: auto !important;
+            background: var(--bg-transparent);
+        }
+           
+        .metric-item {
+            margin-bottom: 3px;
+            padding: 12px;
+            background: var(--primary-transparent);
+            border-left: 2px solid var(--primary);
+        }
+        
+        .metric-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+        
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            text-shadow: 0 0 8px rgba(245, 166, 35, 0.3);
+        }
+        
+        .metric-trend {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        .trend-up {
+            color: var(--success-color);
+        }
+        
+        .trend-down {
+            color: var(--error-color);
+        }
+        
+        .node {
+            position: absolute;
+            width: 150px;
+            height: 80px;
+            color: var(--text-primary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            z-index: 10;
+            user-select: none;
+            padding: 6px;
+            flex-direction: column;
+            border: 1px solid var(--primary);
+            background: rgba(18, 18, 20, 0.9);
+            transition: all 0.3s;
+        }
+        
+        .node:hover {
+            transform: translateY(-3px);
+            z-index: 100;
+            border-color: var(--primary-light);
+            box-shadow: 0 10px 25px rgba(245, 166, 35, 0.4);
+        }
+        
+        /* 节点类型专用样式 - 保留各类型标志色 */
+        .node.server {
+            border-color: var(--server-blue);
+            background: rgba(22, 192, 255, 0.08);
+            border-radius: 12px;
+        }
+        
+        .node.network {
+            border-color: var(--network-red);
+            background: rgba(255, 107, 107, 0.08);
+            border-radius: 12px;
+        }
+        
+        .node.storage {
+            border-color: var(--storage-teal);
+            background: rgba(78, 205, 196, 0.08);
+            border-radius: 12px;
+        }
+        
+        .node.security {
+            border-color: var(--security-yellow);
+            background: rgba(255, 209, 102, 0.08);
+            border-radius: 12px;
+        }
+        
+        .node.client {
+            border-color: var(--client-purple);
+            background: rgba(138, 43, 226, 0.08);
+            border-radius: 12px;
+        }
+        
+        /* 关键节点样式 */
+        .node.critical {
+            border-width: 2px;
+            border-color: gold;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        
+        /* 闪烁动画关键帧 */
+        @keyframes blink {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.6); }
+            100% { filter: brightness(1); }
+        }
+        
+        .node.blink {
+            animation: blink 1.5s infinite;
+        }
+        
+        .node-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+            color: var(--text-primary);
+        }
+        
+        .node-subtitle {
+            font-size: 13px;
+            font-weight: normal;
+            opacity: 0.85;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            max-height: 24px;
+            color: var(--text-gray);
+        }
+        
+        .jtk-connector {
+            z-index: 5;
+            stroke: var(--primary);
+            stroke-width: 2;
+        }
+        
+        .jtk-endpoint {
+            z-index: 6;
+            fill: var(--primary);
+        }
+        
+        .jtk-hover {
+            z-index: 7;
+        }
+                
+        /* 自定义箭头样式 */
+        .flow-arrow {
+            fill: var(--primary);
+            animation: flow 2s infinite linear;
+        }
+        
+        @keyframes flow {
+            0% {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+        }
+        
+        /* 连接线动画 */
+        .animated-connector {
+            stroke-dasharray: 10 5;
+            animation: dash 1s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -15;
+            }
+        }
+        
+        /* 脉冲效果 */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                r: 4;
+                opacity: 1;
+            }
+            50% {
+                r: 6;
+                opacity: 0.7;
+            }
+            100% {
+                r: 4;
+                opacity: 1;
+            }
+        }
+        
+        /* 节点详情面板 */
+        .node-detail {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 350px;
+            background: rgba(18, 18, 20, 0.96);
+            padding: 10px;
+            z-index: 1000;
+            border: 1px solid var(--primary);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 25px rgba(245, 166, 35, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .node-detail.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(245, 166, 35, 0.25);
+        }
+        
+        .detail-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-light);
+            text-shadow: 0 0 10px rgba(245, 166, 35, 0.3);
+        }
+        
+        .close-detail {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-detail:hover {
+            background: rgba(255, 68, 68, 0.15);
+            color: var(--error-color);
+        }
+        
+        .detail-content {
+            line-height: 1.7;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+            display: block;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        
+        /* 关键节点标记 */
+        .critical-mark {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: gold;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            z-index: 11;
+        }
+        
+        /* 层次标题 */
+        .layer-title {
+            position: absolute;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-light);
+            text-align: center;
+            width: 100%;
+            z-index: 1;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(245, 166, 35, 0.25);
+            text-shadow: 0 0 10px rgba(245, 166, 35, 0.3);
+        }
+        
+        /* 控制面板 */
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            background: var(--primary-transparent);
+            border: 1px solid var(--primary);
+            color: var(--text-gray);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: rgba(245, 166, 35, 0.2);
+            color: var(--primary-light);
+        }
+    </style>
+</head>
+<body>
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(22, 192, 255, 0.08); border-color: #16C0FF;"></div>
+            <div class="legend-text">服务器</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(255, 107, 107, 0.08); border-color: #FF6B6B;"></div>
+            <div class="legend-text">网络设备</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(78, 205, 196, 0.08); border-color: #4ECDC4;"></div>
+            <div class="legend-text">存储设备</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(255, 209, 102, 0.08); border-color: #FFD166;"></div>
+            <div class="legend-text">安全设备</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: rgba(138, 43, 226, 0.08); border-color: #8A2BE2;"></div>
+            <div class="legend-text">客户端设备</div>
+        </div>
+    </div>
+    
+    <div class="dashboard">
+        <div class="chart-container" id="chart-container">
+            <!-- 层次标题 -->
+            <div class="layer-title" style="top: 20px;">外部连接层</div>
+            <div class="layer-title" style="top: 170px;">网络核心层</div>
+            <div class="layer-title" style="top: 320px;">服务器集群层</div>
+            <div class="layer-title" style="top: 470px;">存储设备层</div>
+            <div class="layer-title" style="top: 620px;">客户端设备层</div>
+            
+            <!-- 节点详情面板 -->
+            <div class="node-detail">
+                <div class="detail-header">
+                    <div class="detail-title">节点详情</div>
+                    <button class="close-detail">&times;</button>
+                </div>
+                <div class="detail-content"></div>
+            </div>
+        </div>
+        
+        <div class="metrics-panel">                
+            <div class="metric-item">
+                <div class="metric-name">网络延迟</div>
+                <div class="metric-value">12ms</div>
+                <div class="metric-trend trend-down">较上周下降 2ms</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">服务器负载</div>
+                <div class="metric-value">65.3%</div>
+                <div class="metric-trend trend-up">负载正常</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">存储可用率</div>
+                <div class="metric-value">82.7%</div>
+                <div class="metric-trend trend-down">空间充足</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">CPU使用率</div>
+                <div class="metric-value">58.4%</div>
+                <div class="metric-trend trend-up">运行正常</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">内存使用率</div>
+                <div class="metric-value">72.1%</div>
+                <div class="metric-trend trend-up">使用率偏高</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">网络带宽使用</div>
+                <div class="metric-value">45.8%</div>
+                <div class="metric-trend trend-down">流量正常</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">系统可用性</div>
+                <div class="metric-value">99.95%</div>
+                <div class="metric-trend trend-up">本月无故障</div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-name">安全状态</div>
+                <div class="metric-value">正常</div>
+                <div class="metric-trend trend-up">无安全威胁</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jsPlumb库 -->
+    <script src="js/jsplumb.min.js"></script>
+    <script>
+        // 初始化jsPlumb实例
+        const jsPlumbInstance = jsPlumb.getInstance({
+            Connector: ["Flowchart", {cornerRadius: 10}],
+            Anchors: ['Right', 'Left', 'Top', 'Bottom'],
+            Endpoint: ["Dot", { radius: 2 }],
+            EndpointStyle: { fill: "#F5A623" },
+            PaintStyle: { 
+                stroke: "#F5A623", 
+                strokeWidth: 1,
+                strokeDasharray: "10 5"
+            },
+            HoverPaintStyle: { stroke: "#FFB84D", strokeWidth: 4 },
+            Container: "chart-container"
+        });
+        
+        const bias = ($('#chart-container').width()-1100-100-150)*0.5;
+        // IT硬件设备架构节点数据 - 保持原有坐标不变
+        const nodes = [
+            // 第一层 - 外部连接
+            { id: "internet", name: "互联网", type: "client", x: bias+100, y: 100, description: "外部网络连接" },
+            { id: "firewall", name: "防火墙", type: "security", x: bias+300, y: 100, description: "网络安全防护" },
+            // 第二层 - 网络核心
+            { id: "router", name: "核心路由器", type: "network", x: bias+300, y: 250, description: "网络流量路由" },
+            { id: "switch", name: "核心交换机", type: "network", x: bias+500, y: 250, description: "网络数据交换" },
+            { id: "load-balancer", name: "负载均衡器", type: "network", x: bias+700, y: 250, description: "流量分发" },
+            // 第三层 - 服务器集群
+            { id: "web-server", name: "Web服务器", type: "server", x: bias+300, y: 400, description: "Web应用服务" },
+            { id: "app-server", name: "应用服务器", type: "server", x: bias+500, y: 400, description: "业务逻辑处理" },
+            { id: "db-server", name: "数据库服务器", type: "server", x: bias+700, y: 400, description: "数据存储与管理" },
+            { id: "backup-server", name: "备份服务器", type: "server", x: bias+900, y: 400, description: "数据备份" },
+            // 第四层 - 存储设备
+            { id: "nas", name: "NAS存储", type: "storage", x: bias+700, y: 550, description: "网络附加存储" },
+            { id: "san", name: "SAN存储", type: "storage", x: bias+900, y: 550, description: "存储区域网络" },
+            // 第五层 - 客户端设备
+            { id: "workstation", name: "工作站", type: "client", x: bias+300, y: 550, description: "用户工作站" },
+            { id: "laptop", name: "笔记本电脑", type: "client", x: bias+500, y: 550, description: "移动办公设备" },
+            { id: "printer", name: "网络打印机", type: "client", x: bias+580, y: 700, description: "共享打印设备" },
+            { id: "voip", name: "VoIP电话", type: "client", x: bias+780, y: 700, description: "网络电话系统" },
+            { id: "camera", name: "监控摄像头", type: "client", x: bias+980, y: 700, description: "安防监控" },
+            // 管理设备
+            { id: "idrac", name: "iDRAC管理", type: "security", x:bias+900, y: 200, description: "远程服务器管理" },
+            { id: "ups", name: "UPS电源", type: "security", x: bias+1100, y: 200, description: "不间断电源" }
+        ];
+        
+        // 定义连接配置数组 - 保留各类型标志色
+        const connectionConfigs = [
+            // 外部到核心网络
+            {from: "internet", to: "firewall", anchors: ["Right", "Left"], color: "#F5A623", width: 2, style: "solid"},
+            {from: "firewall", to: "router", anchors: ["Bottom", "Top"], color: "#F5A623", width: 2, style: "solid"},
+            {from: "router", to: "switch", anchors: ["Right", "Left"], color: "#F5A623", width: 2, style: "solid"},
+            {from: "switch", to: "load-balancer", anchors: ["Right", "Left"], color: "#F5A623", width: 2, style: "solid"},
+            // 负载均衡到服务器
+            {from: "load-balancer", to: "web-server", anchors: ["Bottom", "Top"], color: "#F5A623", width: 2, style: "solid"},
+            {from: "load-balancer", to: "app-server", anchors: ["Bottom", "Top"], color: "#F5A623", width: 2, style: "solid"},
+            // 服务器间连接
+            {from: "web-server", to: "app-server", anchors: ["Right", "Left"], color: "#4ECDC4", width: 2, style: "dashed"},
+            {from: "app-server", to: "db-server", anchors: ["Right", "Left"], color: "#4ECDC4", width: 2, style: "dashed"},
+            {from: "db-server", to: "backup-server", anchors: ["Right", "Left"], color: "#4ECDC4", width: 2, style: "dashed"},
+            // 服务器到存储
+            {from: "db-server", to: "nas", anchors: ["Bottom", "Top"], color: "#FF6B6B", width: 2, style: "solid"},
+            {from: "db-server", to: "san", anchors: ["Bottom", "Top"], color: "#FF6B6B", width: 2, style: "solid"},
+            // 交换机到客户端
+            {from: "switch", to: "workstation", anchors: ["Bottom", "Top"], color: "#8A2BE2", width: 2, style: "solid"},
+            {from: "switch", to: "laptop", anchors: ["Bottom", "Top"], color: "#8A2BE2", width: 2, style: "solid"},
+            {from: "switch", to: "printer", anchors: ["Bottom", "Top"], color: "#8A2BE2", width: 2, style: "solid"},
+            {from: "switch", to: "voip", anchors: ["Bottom", "Top"], color: "#8A2BE2", width: 2, style: "solid"},
+            {from: "switch", to: "camera", anchors: ["Bottom", "Top"], color: "#8A2BE2", width: 2, style: "solid"},
+            // 管理连接
+            {from: "web-server", to: "idrac", anchors: ["Top", "Bottom"], color: "#FFD166", width: 2, style: "dotted"},
+            {from: "app-server", to: "idrac", anchors: ["Top", "Bottom"], color: "#FFD166", width: 2, style: "dotted"},
+            {from: "db-server", to: "idrac", anchors: ["Top", "Bottom"], color: "#FFD166", width: 2, style: "dotted"},
+            {from: "backup-server", to: "idrac", anchors: ["Top", "Bottom"], color: "#FFD166", width: 2, style: "dotted"},
+            // 电源连接
+            {from: "web-server", to: "ups", anchors: ["Bottom", "Bottom"], color: "#FFD166", width: 2, style: "dotted"},
+            {from: "app-server", to: "ups", anchors: ["Bottom", "Bottom"], color: "#FFD166", width: 2, style: "dotted"},
+            {from: "db-server", to: "ups", anchors: ["Bottom", "Bottom"], color: "#FFD166", width: 2, style: "dotted"},
+            {from: "backup-server", to: "ups", anchors: ["Right", "Bottom"], color: "#FFD166", width: 2, style: "dotted"}
+        ];
+        
+        // 存储所有连接对象
+        let connectionObjects = [];
+        let animationsEnabled = true;
+        let blinkingEnabled = false;
+        
+        // 添加节点函数
+        function addNode(node) {
+            const nodeElement = document.createElement("div");
+            nodeElement.id = node.id;
+            nodeElement.className = `node ${node.type}`;
+            nodeElement.innerHTML = `
+                <div class="node-title">${node.name}</div>
+                <div class="node-subtitle">${node.description}</div>
+            `;
+            // 设置位置
+            nodeElement.style.left = `${node.x}px`;
+            nodeElement.style.top = `${node.y}px`;
+            
+            // 添加到容器
+            document.getElementById("chart-container").appendChild(nodeElement);
+            
+            // 使节点可拖拽
+            jsPlumbInstance.draggable(nodeElement, {containment: "parent"});
+            
+            // 双击编辑节点名称
+            nodeElement.addEventListener("dblclick", function() {
+                const currentName = this.querySelector(".node-title").textContent;
+                const newName = prompt("请输入节点名称:", currentName);
+                if (newName !== null && newName.trim() !== "") {
+                    this.querySelector(".node-title").textContent = newName;
+                    
+                    // 更新数据
+                    const nodeData = nodes.find(n => n.id === this.id);
+                    if (nodeData) nodeData.name = newName;
+                }
+            });
+            
+            // 右键查看节点详情
+            nodeElement.addEventListener("contextmenu", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showNodeDetail(this.id);
+            });
+            
+            return nodeElement;
+        }
+        
+        function createSingleConnection(config, index) {
+            const sourceNode = document.getElementById(config.from);
+            const targetNode = document.getElementById(config.to);
+
+            if (!sourceNode || !targetNode) return;
+
+            const conn = {
+                id: `conn-${index}`,
+                source: config.from,
+                target: config.to,
+                color: config.color || "#F5A623",
+                width: config.width || 2,
+                style: config.style || "solid",
+                animation: config.animation || "dash",
+                arrow: config.arrow !== false,
+                anchors: config.anchors
+            };
+
+            const connection = jsPlumbInstance.connect({
+                source: sourceNode,
+                target: targetNode,
+                anchors: conn.anchors,
+                paintStyle: getConnectionStyle(conn),
+                overlays: conn.arrow ? [
+                    ["Custom", { 
+                        create: function(component) {
+                            // 创建自定义箭头
+                            const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            arrow.setAttribute("points", "0,0 10,5 0,10");
+                            arrow.setAttribute("class", "flow-arrow");
+                            arrow.style.fill = conn.color;
+                            return arrow;
+                        },
+                        location: 0.5,
+                        id: "customArrow"
+                    }]
+                ] : []
+            });
+
+            connectionObjects.push({
+                jsPlumbConnection: connection,
+                metadata: conn
+            });
+
+            applyConnectionAnimation(connection, conn.animation);
+        }
+
+        // 获取连接线样式
+        function getConnectionStyle(conn) {
+            let dashstyle = "";
+            if (conn.style === "dashed") {
+                dashstyle = "5 5";
+            } else if (conn.style === "dotted") {
+                dashstyle = "2 2";
+            }
+            
+            return {
+                stroke: conn.color,
+                strokeWidth: conn.width,
+                strokeDasharray: dashstyle
+            };
+        }
+        
+        // 应用连接线动画
+        function applyConnectionAnimation(connection, animationType) {
+            const connector = connection.connector.canvas;
+            if (!connector) return;
+            
+            // 移除所有动画类
+            connector.classList.remove("animated-connector", "pulse");
+            
+            if (animationType === "dash") {
+                connector.classList.add("animated-connector");
+            } else if (animationType === "pulse") {
+                connector.classList.add("pulse");
+            }
+        }
+        
+        // 显示节点详情
+        function showNodeDetail(nodeId) {
+            const node = nodes.find(n => n.id === nodeId);
+            if (!node) return;
+            
+            const detailPanel = document.querySelector(".node-detail");
+            const detailContent = detailPanel.querySelector(".detail-content");
+            
+            detailContent.innerHTML = `
+                <div class="detail-item">
+                    <span class="detail-label">节点ID:</span>
+                    <span class="detail-value">${node.id}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">节点名称:</span>
+                    <span class="detail-value">${node.name}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">设备类型:</span>
+                    <span class="detail-value">${getNodeTypeName(node.type)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">设备描述:</span>
+                    <span class="detail-value">${node.description}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">位置坐标:</span>
+                    <span class="detail-value">(${node.x}, ${node.y})</span>
+                </div>
+            `;
+            
+            // 显示面板
+            detailPanel.classList.add("active");
+        }
+
+        // 获取节点类型名称
+        function getNodeTypeName(type) {
+            const typeNames = {
+                "server": "服务器",
+                "network": "网络设备",
+                "storage": "存储设备",
+                "security": "安全设备",
+                "client": "客户端设备"
+            };
+            return typeNames[type] || "其他";
+        }
+                
+        // 切换动画
+        function toggleAnimations() {
+            animationsEnabled = !animationsEnabled;
+            
+            connectionObjects.forEach(conn => {
+                const connector = conn.jsPlumbConnection.connector.canvas;
+                if (connector) {
+                    if (animationsEnabled) {
+                        applyConnectionAnimation(conn.jsPlumbConnection, conn.metadata.animation);
+                    } else {
+                        connector.classList.remove("animated-connector", "pulse");
+                    }
+                }
+            });
+        }
+        
+        // 切换闪烁
+        function toggleBlinking() {
+            blinkingEnabled = !blinkingEnabled;
+            const nodes = document.querySelectorAll('.node');
+            
+            nodes.forEach(node => {
+                if (blinkingEnabled) {
+                    node.classList.add('blink');
+                } else {
+                    node.classList.remove('blink');
+                }
+            });
+        }
+        
+        // 重置节点位置
+        function resetPositions() {
+            nodes.forEach(node => {
+                const nodeElement = document.getElementById(node.id);
+                if (nodeElement) {
+                    nodeElement.style.left = `${node.x}px`;
+                    nodeElement.style.top = `${node.y}px`;
+                    jsPlumbInstance.revalidate(nodeElement);
+                }
+            });
+        }
+        
+        // 关闭详情面板
+        document.querySelector(".close-detail").addEventListener("click", function() {
+            document.querySelector(".node-detail").classList.remove("active");
+        });
+        
+        // 点击空白处关闭详情面板
+        document.addEventListener("click", function(e) {
+            if (!e.target.closest('.node-detail') && !e.target.closest('.node')) {
+                document.querySelector(".node-detail").classList.remove("active");
+            }
+        });
+        
+        // 初始化架构图
+        function initializeChart() {
+            nodes.forEach(node => {addNode(node);});
+            setTimeout(() => {               
+              for (let i1=0;i1<connectionConfigs.length;i1++){
+                createSingleConnection(connectionConfigs[i1], i1);
+              }
+            }, 100);
+        }
+        
+        // 页面加载完成后初始化
+        window.onload = function(){
+            initializeChart();
+        };
+    </script>
+</body>
+</html>

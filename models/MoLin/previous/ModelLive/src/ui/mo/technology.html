@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=yes">
+  <title>摹林科技 | 中小量化私募AI技术伙伴 · 量化·AI·系统</title>
+  <!-- 引入现代字体：Inter & 等宽字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <style>
+    /* ========== 全局滚动条样式（深色科技风，与页面主色调#0b2b4f呼应） ========== */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+      background-color: #F7FAFF;
+    }
+    ::-webkit-scrollbar-track {
+      background: #eef2f8;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #9aafc4;
+      border-radius: 10px;
+      transition: background 0.2s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #0b2b4f;
+    }
+    ::-webkit-scrollbar-corner {
+      background-color: #F7FAFF;
+    }
+    /* Firefox 滚动条 */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #9aafc4 #eef2f8;
+    }
+
+    /* ========== 下拉框统一样式（深色科技商务风，与页面协调） ========== */
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: #ffffff;
+      border: 1px solid #d6e2f0;
+      border-radius: 40px;
+      padding: 10px 32px 10px 18px;
+      font-size: 0.9rem;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: #0b2b4f;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230b2b4f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      background-size: 14px;
+    }
+    select:hover {
+      border-color: #0b2b4f;
+      background-color: #f8fafd;
+    }
+    select:focus {
+      outline: none;
+      border-color: #0b2b4f;
+      box-shadow: 0 0 0 2px rgba(11,43,79,0.1);
+    }
+    select option {
+      background-color: #ffffff;
+      color: #0b2b4f;
+      padding: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background-color: #fafbfc;
+      color: #0a1e2f;
+      line-height: 1.5;
+      scroll-behavior: smooth;
+      font-weight: 450;
+      letter-spacing: -0.01em;
+    }
+
+    /* 现代科技感渐变背景，柔和干净 */
+    .internal-badge {
+      background: rgba(10, 25, 45, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(74, 144, 226, 0.25);
+      color: #c3e0ff;
+      text-align: center;
+      padding: 10px 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 36px;
+    }
+
+    /* 按钮系统：更具现代感 */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #0b2b4f;
+      color: white;
+      font-weight: 600;
+      padding: 14px 34px;
+      border-radius: 40px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      border: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+      font-size: 0.98rem;
+      letter-spacing: 0.2px;
+      box-shadow: 0 10px 20px -8px rgba(11,43,79,0.25);
+      background: linear-gradient(135deg, #0b2b4f 0%, #123c69 100%);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0f3560 0%, #1b4f82 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 18px 28px -10px rgba(11,43,79,0.35);
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      background: transparent;
+      border: 1.5px solid #cbdae9;
+      color: #0b2b4f;
+      font-weight: 600;
+      padding: 12px 28px;
+      border-radius: 40px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(4px);
+    }
+
+    .btn-outline:hover {
+      border-color: #0b2b4f;
+      background: rgba(11,43,79,0.04);
+      color: #0b2b4f;
+      transform: translateY(-1px);
+    }
+
+    .navbar {
+      padding: 18px 0;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .logo h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      background: linear-gradient(130deg, #0A2B44 0%, #1F6392 80%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.4px;
+    }
+    .logo span {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #456b8c;
+      display: block;
+      letter-spacing: 0.2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #1e3349;
+      font-weight: 520;
+      transition: all 0.2s;
+      font-size: 0.98rem;
+      position: relative;
+    }
+
+    .nav-links a:hover {
+      color: #0b2b4f;
+    }
+
+    .nav-links a:not(.btn-outline)::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #0b2b4f;
+      transition: width 0.25s;
+    }
+    .nav-links a:not(.btn-outline):hover::after {
+      width: 100%;
+    }
+
+    .hero {
+      padding: 70px 0 60px;
+      background: #fbfdff;
+      background-image: radial-gradient(circle at 10% 30%, rgba(230, 240, 255, 0.5), transparent 50%);
+    }
+
+    .hero-grid {
+      display: flex;
+      align-items: center;
+      gap: 64px;
+      flex-wrap: wrap;
+    }
+
+    .hero-content {
+      flex: 1;
+    }
+
+    .hero-badge {
+      background: #edf3fa;
+      color: #0b2b4f;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 22px;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 28px;
+      border: 1px solid #d6e2f0;
+    }
+
+    .hero-content h1 {
+      font-size: 3.5rem;
+      font-weight: 750;
+      line-height: 1.18;
+      margin-bottom: 22px;
+      color: #071a2b;
+      letter-spacing: -0.025em;
+    }
+
+    .hero-highlight {
+      color: #0f3c5f;
+      background: linear-gradient(120deg, rgba(15,60,95,0.08) 0%, rgba(15,60,95,0) 90%);
+      padding: 0 6px;
+      display: inline-block;
+      font-weight: 800;
+    }
+
+    .hero-desc {
+      font-size: 1.15rem;
+      color: #2c4053;
+      margin-bottom: 36px;
+      max-width: 550px;
+      line-height: 1.5;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+      margin-top: 28px;
+    }
+    .stat-item p:first-child {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #0b2b4f;
+      letter-spacing: -0.5px;
+    }
+    .stat-item p:last-child {
+      font-size: 0.9rem;
+      font-weight: 520;
+      color: #4f657c;
+    }
+
+    .hero-visual {
+      flex: 1;
+      background: rgba(11,43,79,0.02);
+      border-radius: 48px;
+      padding: 34px 24px;
+      text-align: center;
+      border: 1px solid rgba(11,43,79,0.12);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 25px 35px -14px rgba(0,0,0,0.04);
+    }
+    .code-snippet {
+      background: #0b1a2b;
+      padding: 22px 18px;
+      border-radius: 28px;
+      text-align: left;
+      color: #cddff5;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      box-shadow: 0 12px 22px rgba(0,0,0,0.15);
+    }
+
+    .services-section {
+      padding: 90px 0 80px;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.4px;
+      color: #0a1e2f;
+    }
+    .section-sub {
+      text-align: center;
+      color: #3f5268;
+      max-width: 720px;
+      margin: 0 auto 60px auto;
+      font-size: 1.1rem;
+      font-weight: 450;
+    }
+    .cards-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 34px;
+      justify-content: center;
+    }
+    .card {
+      background: white;
+      border-radius: 32px;
+      padding: 34px 28px;
+      box-shadow: 0 10px 24px -10px rgba(0,0,0,0.04);
+      border: 1px solid #eef2f8;
+      transition: all 0.3s ease;
+      flex: 1;
+      min-width: 280px;
+      background: #ffffff;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: #bdd3ec;
+      box-shadow: 0 26px 38px -16px rgba(11,43,79,0.1);
+    }
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 22px;
+    }
+    .card h3 {
+      font-size: 1.7rem;
+      margin-bottom: 14px;
+      font-weight: 650;
+      color: #0c2238;
+    }
+    .card p {
+      color: #354a60;
+      margin-bottom: 20px;
+    }
+    .card-tag {
+      background: #f0f5fd;
+      padding: 6px 16px;
+      border-radius: 40px;
+      color: #0b2b4f;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    /* 统一三列网格 */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-top: 36px;
+    }
+    .service-item {
+      background: white;
+      border-radius: 26px;
+      padding: 28px 24px;
+      border: 1px solid #ecf1f7;
+      transition: all 0.25s;
+    }
+    .service-item:hover {
+      transform: translateY(-4px);
+      border-color: #b6ceeb;
+      box-shadow: 0 14px 22px -8px rgba(0,0,0,0.05);
+    }
+    .service-emoji {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .ai-highlight {
+      border-left: 4px solid #1f6392;
+      background: #f9fcff;
+    }
+
+    .tech-approach {
+      background: #f7faff;
+      padding: 85px 0;
+    }
+    .two-columns {
+      display: flex;
+      gap: 64px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .tech-desc h2 {
+      font-size: 2.2rem;
+      margin-bottom: 28px;
+      font-weight: 700;
+    }
+    .check-list li {
+      margin-bottom: 22px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 1rem;
+    }
+    .check-icon {
+      color: #1f6392;
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    .cta {
+      background: linear-gradient(125deg, #0a1c30, #123c5c);
+      color: white;
+      padding: 70px 0;
+      text-align: center;
+      border-radius: 48px;
+      margin: 50px auto 70px;
+    }
+    .cta h2 {
+      font-size: 2.3rem;
+      margin-bottom: 18px;
+      font-weight: 700;
+    }
+    .btn-white {
+      background: white;
+      color: #0b2b4f;
+      margin-top: 28px;
+      display: inline-block;
+      font-weight: 600;
+      padding: 14px 34px;
+      border-radius: 40px;
+      text-decoration: none;
+    }
+
+    footer {
+      background: #fafcff;
+      padding: 50px 0 30px;
+      border-top: 1px solid #e7edf5;
+    }
+    .footer-flex {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 36px;
+    }
+    @media (max-width: 1050px) {
+      .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 760px) {
+      .container {
+        padding: 0 22px;
+      }
+      .hero-content h1 {
+        font-size: 2.6rem;
+      }
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    hr {
+      margin: 24px 0;
+      border: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #cbdae9, transparent);
+    }
+
+    /* 模态框样式（用于演示下拉框） */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 32px;
+      padding: 2rem;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 20px 35px rgba(0,0,0,0.1);
+    }
+    .modal-content h3 {
+      color: #0b2b4f;
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+    }
+    .modal-content p {
+      color: #4f657c;
+      font-size: 0.85rem;
+      margin-bottom: 1.2rem;
+    }
+    .modal-content select {
+      width: 100%;
+      margin: 0.8rem 0 1.2rem;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+    .modal-buttons button {
+      padding: 0.5rem 1.2rem;
+      background: transparent;
+      border: 1px solid #cbdae9;
+      border-radius: 40px;
+      color: #0b2b4f;
+      cursor: pointer;
+      transition: 0.2s;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    .modal-buttons button:first-child {
+      background: #0b2b4f;
+      border-color: #0b2b4f;
+      color: white;
+    }
+    .modal-buttons button:first-child:hover {
+      background: #123c69;
+    }
+    .modal-buttons button:last-child:hover {
+      border-color: #0b2b4f;
+      background: rgba(11,43,79,0.04);
+    }
+  </style>
+</head>
+<body>
+<div class="internal-badge">
+  <span>🔷</span> 摹林科技 · 私募技术伙伴 | 量化基建 × AI 整合系统 × 数字人投研团队 <span>🔷</span>
+</div>
+
+<nav class="navbar">
+  <div class="container nav-flex">
+    <div class="logo">
+      <h1>摹林科技<span>Quant & AI</span></h1>
+    </div>
+    <div class="nav-links">
+      <a href="#">首页</a>
+      <a href="#services">核心技术</a>
+      <a href="#ai-solutions">AI增强</a>
+      <a href="#approach">优势</a>
+      <a href="#contact">联系</a>
+      <a href="#" class="btn-outline" id="openContactNav">预约交流 →</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span>⚡</span> 新一代量化技术栈 · 融合生成式AI
+        </div>
+        <h1>让量化团队专注<span class="hero-highlight">策略与AI进化</span></h1>
+        <p class="hero-desc">为中小量化私募提供数据平台、研究环境、生产系统，以及AI整合系统、知识管理与数字人投研团队，加速策略迭代，显著降低IT与投研人效成本。</p>
+        <div class="hero-stats">
+          <div class="stat-item"><p>12+</p><p>私募落地案例</p></div>
+          <div class="stat-item"><p>&lt;1ms</p><p>交易链路优化</p></div>
+          <div class="stat-item"><p>100%</p><p>源码交付·透明可控</p></div>
+        </div>
+        <div style="margin-top: 36px;">
+          <a href="#" class="btn-primary" id="heroContactBtn">获取AI量化方案 →</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div style="font-size: 2.8rem; margin-bottom: 18px;">🧠⚙️📈</div>
+        <div class="code-snippet">
+          <span style="color:#7ab7ef;">// 摹林 · 量化智能基座</span><br>
+          quantAIPlatform = {<br>
+          &nbsp;&nbsp; data: 多源清洗/向量知识库<br>
+          &nbsp;&nbsp; research: AI因子/LLM研究员<br>
+          &nbsp;&nbsp; production: 实盘交易+实时风控<br>
+          &nbsp;&nbsp; ai_ecosystem: 数字人团队/知识管理<br>
+          }<br>
+          <span style="color:#a3d0ff;">> 从传统量化到AI原生研究体系</span>
+        </div>
+        <p style="margin-top: 20px; font-weight: 500; color: #2c3e50;">✓ 数据基建  ✓ 研究平台  ✓ 生产交易  ✓ AI整合系统</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="services-section" id="services">
+    <div class="container">
+      <h2 class="section-title">为中小私募打造完整技术闭环</h2>
+      <p class="section-sub">从数据底座到智能化投研，一站式解决基础设施与AI转型问题</p>
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon">🗄️⚡</div>
+          <h3>数据平台建设</h3>
+          <p>多源行情（Level2/高频/逐笔）、数据清洗对齐、历史数据库构建，为策略研发提供高可靠数据底座。</p>
+          <div class="card-tag">Tick/Bar/另类数据</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔬📐</div>
+          <h3>研究环境搭建</h3>
+          <p>JupyterHub集群、因子投研平台、回测引擎定制，支持多人协作与任务调度，提速因子挖掘。</p>
+          <div class="card-tag">并行回测框架</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚡🛡️</div>
+          <h3>生产系统开发</h3>
+          <p>低延时交易通道、算法执行、多账户管理、实时风控与运维监控，保证实盘稳定高效运行。</p>
+          <div class="card-tag">毫秒级交易链路</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 演示下拉框 - AI服务方案选择（深色协调风格） -->
+  <div class="container" style="display: flex; justify-content: flex-end; margin-top: -20px; margin-bottom: 20px;">
+    <select id="aiServiceSelect" style="width: auto; min-width: 240px;">
+      <option value="full">全栈AI量化方案 · 推荐</option>
+      <option value="knowledge">知识管理优先 · RAG+向量库</option>
+      <option value="digital">数字人团队 · 投研助理定制</option>
+      <option value="llm_gateway">LLM统一网关 · 私有化部署</option>
+    </select>
+  </div>
+
+  <section class="services-section" id="ai-solutions" style="padding-top: 10px;">
+    <div class="container">
+      <h2 class="section-title">🤖 AI整合系统 · 知识管理 · 数字人团队</h2>
+      <p class="section-sub">将生成式AI、知识工程与量化投研深度融合，构建“超级投研大脑”与24小时在线的数字员工矩阵</p>
+      <div class="services-grid">
+        <div class="service-item ai-highlight">
+          <span class="service-emoji">🧠</span>
+          <h3>AI整合系统</h3>
+          <p>LLM统一接入与微调平台，融合投研数据、因子库，提供自然语言查询因子、代码生成、研报摘要。</p>
+          <div class="card-tag">GPT/Claude/DeepSeek网关</div>
+        </div>
+        <div class="service-item ai-highlight">
+          <span class="service-emoji">📚</span>
+          <h3>AI强化知识管理</h3>
+          <p>量化知识中台：自动抓取研报、论文，结合RAG构建私有知识库，支持语义搜索、因子挖掘思路推荐。</p>
+          <div class="card-tag">知识图谱 × 向量检索</div>
+        </div>
+        <div class="service-item ai-highlight">
+          <span class="service-emoji">👥</span>
+          <h3>投资研究数字人</h3>
+          <p>定制化投研数字人（因子分析师、研报解读师），多角色协同，7x24小时监控市场异动，自动生成信号。</p>
+          <div class="card-tag">私有化部署数字分身</div>
+        </div>
+        <div class="service-item">
+          <span class="service-emoji">🔄</span>
+          <h3>AI因子挖掘流水线</h3>
+          <p>结合遗传规划与LLM合成因子，自动化探索alpha信号，提供可解释报告，缩短因子迭代周期。</p>
+        </div>
+        <div class="service-item">
+          <span class="service-emoji">🧪</span>
+          <h3>大模型投研Copilot</h3>
+          <p>Jupyter环境内嵌AI编程助手，策略代码补全、回测诊断，降低复杂逻辑编写门槛。</p>
+        </div>
+        <div class="service-item">
+          <span class="service-emoji">📈</span>
+          <h3>智能投决会议助理</h3>
+          <p>数字人自动整理会议纪要，追踪决策事项，关联回测记录与归因分析，生成投资备忘录。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tech-approach" id="approach">
+    <div class="container two-columns">
+      <div class="tech-desc">
+        <h2>中小量化私募的核心痛点与AI新挑战，我们一并解决</h2>
+        <ul class="check-list">
+          <li><span class="check-icon">✓</span> <strong>数据杂乱无章</strong> —— 统一清洗、对齐，构建标准化因子库与研报知识抽取</li>
+          <li><span class="check-icon">✓</span> <strong>研究效率低下</strong> —— 专业研究平台 + AI整合系统与数字人助手</li>
+          <li><span class="check-icon">✓</span> <strong>实盘运维成本高</strong> —— 交易接口封装 + 监控告警 + 数字人日常报告</li>
+          <li><span class="check-icon">✓</span> <strong>技术团队人手不足</strong> —— “外延技术团队”+数字助理，扩大投研产能</li>
+          <li><span class="check-icon">✓</span> <strong>知识管理缺失</strong> —— AI知识管理系统沉淀投研逻辑，数字人传承经验</li>
+        </ul>
+      </div>
+      <div style="flex:1; background: #eaf1fb; border-radius: 36px; padding: 42px 28px; text-align:center;">
+        <div style="font-size: 2.8rem;">🤝🤖</div>
+        <h3 style="margin: 22px 0 12px; font-size: 1.8rem; font-weight: 700;">AI原生陪跑式服务</h3>
+        <p style="font-size: 1rem; color: #1a3147;">从基础架构到AI整合系统、数字人团队搭建，提供长期陪伴式技术支撑。</p>
+        <div style="background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border-radius: 40px; padding: 14px; margin-top: 26px;">
+          <span style="font-weight: 700;">源码交付 · 私有化AI部署 · 数字资产自有可控</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="services-section">
+    <div class="container">
+      <h2 class="section-title">完整技术服务清单 · 含AI增强模块</h2>
+      <p class="section-sub">灵活组合，伴随量化团队从0到1，迈向智能化投研新时代</p>
+      <div class="services-grid">
+        <div class="service-item"><span class="service-emoji">📀</span><h3>数据清洗与对齐</h3><p>Level2/高频/基本面清洗，标准分钟/Tick数据库。</p></div>
+        <div class="service-item"><span class="service-emoji">🖥️</span><h3>研究平台搭建</h3><p>JupyterHub + Dask集群，内置因子表达式引擎。</p></div>
+        <div class="service-item"><span class="service-emoji">⚙️</span><h3>因子挖掘系统</h3><p>遗传规划+深度学习因子合成，自动化流水线。</p></div>
+        <div class="service-item"><span class="service-emoji">🧠</span><h3>AI整合系统</h3><p>私有化LLM Gateway，投研对话、因子解释、智能摘要。</p></div>
+        <div class="service-item"><span class="service-emoji">📚</span><h3>AI知识管理平台</h3><p>量化知识库+RAG检索，自动跟踪研报，语义问答。</p></div>
+        <div class="service-item"><span class="service-emoji">👥</span><h3>数字人投研团队</h3><p>定制数字分析师、风控、策略助理，7x24小时协同。</p></div>
+        <div class="service-item"><span class="service-emoji">📈</span><h3>回测引擎定制</h3><p>高精度模拟撮合，复杂滑点模型。</p></div>
+        <div class="service-item"><span class="service-emoji">🔌</span><h3>交易接口封装</h3><p>CTP/XTP/MATIC统一封装，稳定交易通道。</p></div>
+        <div class="service-item"><span class="service-emoji">📡</span><h3>实盘风控系统</h3><p>实时资金持仓风控，事前事后双重检查。</p></div>
+        <div class="service-item"><span class="service-emoji">📊</span><h3>绩效归因分析</h3><p>Brinson/多因子归因，每日自动业绩报告。</p></div>
+        <div class="service-item"><span class="service-emoji">🕒</span><h3>运维监控体系</h3><p>Prometheus+Grafana，延时报警，日志审计。</p></div>
+        <div class="service-item"><span class="service-emoji">✨</span><h3>数字人会议助理</h3><p>投研会议摘要，因子验证任务自动化。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container" style="margin: 20px auto;">
+    <div style="background: #f2f6fd; border-radius: 48px; padding: 52px 32px; text-align: center; border: 1px solid rgba(11,43,79,0.1);">
+      <div style="font-size: 2.8rem;">🏗️🔒🤖</div>
+      <h3 style="font-size: 1.9rem; margin-bottom: 16px; font-weight: 700;">摹林科技 · AI时代量化新基建者</h3>
+      <div style="display: flex; justify-content: center; gap: 38px; flex-wrap: wrap; margin: 28px 0 18px; font-weight: 500;">
+        <div>✓ 专注量化私募技术场景</div>
+        <div>✓ 战略研发+AI原生思维</div>
+        <div>✓ 源码交付 · 无黑盒</div>
+        <div>✓ 独家数字人投研团队方案</div>
+      </div>
+      <p style="max-width: 680px; margin: 18px auto 0;">团队拥有量化系统开发、策略与大模型应用复合背景，深刻理解中小私募“人少事多”的现状，致力成为您最信赖的技术外脑与AI转型伙伴。</p>
+    </div>
+  </div>
+
+  <div class="container" id="contact">
+    <div class="cta">
+      <h2>让AI与技术重新定义量化竞争力</h2>
+      <p style="font-size: 1.1rem; opacity: 0.9;">免费架构咨询 + AI转型规划，为您的团队定制量化+AI融合方案</p>
+      <a href="#" class="btn-white" id="openContactCta">立即预约AI量化交流 →</a>
+      <div style="margin-top: 32px; font-size: 0.9rem; opacity: 0.8;">
+        📞 400-668-TECH &nbsp;|&nbsp; ✉️ ai@zhirong-tech.com &nbsp;|&nbsp; 数字人团队演示预约
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="footer-flex">
+      <div>
+        <h3 style="margin-bottom: 8px; font-size: 1.5rem; font-weight: 700;">摹林科技</h3>
+        <p>专注中小量化私募技术基础设施<br>数据 | 研究 | 生产 | AI整合系统 · 数字人团队</p>
+      </div>
+      <div>
+        <p><strong>技术方案</strong></p>
+        <p>数据平台建设</p>
+        <p>研究环境搭建</p>
+        <p>生产系统开发</p>
+        <p>AI整合与知识管理</p>
+        <p>数字人投研团队</p>
+      </div>
+      <div>
+        <p><strong>联系我们</strong></p>
+        <p>北京·朝阳量化科创中心</p>
+        <p>contact@zhirong-tech.com</p>
+        <p>AI专线: ai@zhirong-tech.com</p>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 44px; color: #5a6f84; font-size: 0.9rem;">
+      <p>© 2025 摹林科技 | 中小量化私募技术服务伙伴 · 全面拥抱AI技术基座</p>
+    </div>
+  </div>
+</footer>
+
+<!-- 演示模态框（包含下拉框，展示协调样式） -->
+<div id="contactModal" class="modal">
+  <div class="modal-content">
+    <h3><i class="fas fa-robot" style="margin-right: 8px;"></i> AI量化方案咨询</h3>
+    <p>请选择您的团队规模与AI转型需求，专属顾问将为您定制方案</p>
+    <select id="teamTypeSelect">
+      <option value="startup">初创团队 · 基础基建+AI起步</option>
+      <option value="growing">成长团队 · 完整投研平台+AI整合</option>
+      <option value="scale">规模化私募 · 数字人团队+全栈AI</option>
+      <option value="digital">数字人专项 · 投研数字员工定制</option>
+    </select>
+    <div class="modal-buttons">
+      <button id="modalConfirm">提交咨询</button>
+      <button id="modalClose">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // 模态框逻辑
+    const modal = document.getElementById('contactModal');
+    const openBtnCta = document.getElementById('openContactCta');
+    const openBtnNav = document.getElementById('openContactNav');
+    const heroBtn = document.getElementById('heroContactBtn');
+    const closeSpan = document.getElementById('modalClose');
+    const modalConfirm = document.getElementById('modalConfirm');
+
+    function openModal(e) {
+      if(e) e.preventDefault();
+      if(modal) modal.style.display = 'flex';
+    }
+    function closeModal() {
+      if(modal) modal.style.display = 'none';
+    }
+    if(openBtnCta) openBtnCta.addEventListener('click', openModal);
+    if(openBtnNav) openBtnNav.addEventListener('click', openModal);
+    if(heroBtn) heroBtn.addEventListener('click', openModal);
+    if(closeSpan) closeSpan.addEventListener('click', closeModal);
+    if(modal) {
+      window.addEventListener('click', (e) => {
+        if(e.target === modal) closeModal();
+      });
+    }
+    if(modalConfirm && modal) {
+      modalConfirm.addEventListener('click', () => {
+        const selectVal = document.getElementById('teamTypeSelect');
+        const selectedText = selectVal.options[selectVal.selectedIndex]?.text || '';
+        alert(`✅ 咨询已提交！摹林科技顾问将为您提供「${selectedText}」AI量化方案。`);
+        closeModal();
+        if(selectVal) selectVal.selectedIndex = 0;
+      });
+    }
+
+    // 演示下拉框交互 - AI服务方案选择
+    const aiSelect = document.getElementById('aiServiceSelect');
+    if (aiSelect) {
+      aiSelect.addEventListener('change', (e) => {
+        const mode = e.target.options[e.target.selectedIndex]?.text;
+        const toast = document.createElement('div');
+        toast.innerText = `🤖 AI服务方案切换: ${mode}`;
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.left = '20px';
+        toast.style.backgroundColor = '#0b2b4f';
+        toast.style.color = '#c3e0ff';
+        toast.style.padding = '0.5rem 1.2rem';
+        toast.style.fontSize = '0.8rem';
+        toast.style.borderRadius = '40px';
+        toast.style.fontFamily = "'Inter', sans-serif";
+        toast.style.zIndex = '999';
+        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transition = 'opacity 0.3s';
+          setTimeout(() => toast.remove(), 350);
+        }, 2000);
+      });
+    }
+  })();
+</script>
+</body>
+</html>

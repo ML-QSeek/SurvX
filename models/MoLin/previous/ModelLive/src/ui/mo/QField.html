@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QFIELD · Q场 | 智能体场域配置规范</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #16C0FF;
+            --primary-dark: #0EA8E0;
+            --primary-light: #4AD2FF;
+            --primary-transparent: rgba(22, 192, 255, 0.1);
+            --bg-primary: #101010;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #FFFFFF;
+            --text-secondary: #4AD2FF;
+            --text-tertiary: #808080;
+            --border-color: #333333;
+        }
+
+        ::-webkit-scrollbar { width: 8px; background: #101010; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: #16C0FF; }
+        * { scrollbar-width: thin; scrollbar-color: #333 #1a1a1a; }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--primary-transparent) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-transparent) 1px, transparent 1px);
+            background-size: 42px 42px;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .poster {
+            max-width: 1180px;
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.2s ease;
+        }
+        .poster:hover {
+            border-color: var(--primary);
+            box-shadow: 0 28px 56px -14px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--primary-transparent);
+        }
+
+        .top-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--bg-secondary), var(--primary), var(--primary-light), var(--primary), var(--bg-secondary));
+            width: 100%;
+        }
+
+        .content { padding: 2.4rem 2.8rem 2.8rem; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+        .logo h1 .en { color: var(--primary); font-weight: 800; }
+        .logo h1 .cn { font-size: 1.6rem; font-weight: 500; color: var(--text-tertiary); letter-spacing: 1px; margin-left: 0.25rem; }
+
+        .subtitle {
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            font-weight: 400;
+            margin-top: 0.2rem;
+        }
+        .subtitle i { color: var(--primary-light); font-style: normal; }
+
+        .pill {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pill i { font-size: 0.75rem; }
+
+        .hero { margin: 1.5rem 0 2rem; }
+        .hero .eyebrow {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.4rem 0.8rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        .hero-title .prefix { font-size: 2.8rem; font-weight: 600; color: var(--text-primary); }
+        .hero-title .strong { font-size: 2.8rem; font-weight: 700; color: var(--primary-light); border-bottom: 2px solid var(--primary); display: inline-block; }
+        .hero-title .suffix { font-size: 2.8rem; font-weight: 600; color: var(--text-primary); }
+
+        .hero .desc {
+            font-size: 1rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+            max-width: 85%;
+            border-left: 2px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        @media (max-width: 780px) {
+            .hero-title .prefix, .hero-title .strong, .hero-title .suffix { font-size: 1.8rem; }
+            .hero .desc { max-width: 100%; }
+        }
+        @media (max-width: 550px) {
+            .hero-title { flex-direction: column; gap: 0.2rem; }
+            .hero-title .prefix, .hero-title .strong, .hero-title .suffix { font-size: 1.6rem; }
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1.2rem;
+            margin: 2rem 0;
+        }
+        .feature {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--primary);
+            border-right: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 1rem;
+            transition: 0.2s;
+        }
+        .feature i { font-size: 1.5rem; color: var(--primary); margin-bottom: 0.7rem; display: inline-block; }
+        .feature h4 { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.4rem; font-family: 'JetBrains Mono', monospace; }
+        .feature p { font-size: 0.8rem; color: #b0b0b0; line-height: 1.4; }
+
+        .code-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            margin: 1.5rem 0;
+            transition: 0.2s;
+        }
+        .code-block:hover { border-color: var(--primary); }
+        .code-header {
+            background: var(--bg-tertiary);
+            padding: 0.7rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #cccccc;
+            padding: 1.2rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: var(--bg-primary);
+            margin: 0;
+            line-height: 1.5;
+        }
+        .code-keyword { color: var(--primary-light); }
+        .code-string { color: #00CC66; }
+        .code-comment { color: var(--text-tertiary); font-style: italic; }
+
+        .cloud-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 1.3rem 1.8rem;
+            margin: 1.5rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cloud-left { flex: 2; }
+        .cloud-left h4 { color: var(--primary-light); font-weight: 600; font-size: 1rem; margin-bottom: 0.3rem; }
+        .cloud-left p { color: #b0b0b0; font-size: 0.85rem; }
+        .tech-tags { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 0.7rem; }
+        .tech-tags span {
+            background: var(--primary-transparent);
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+        .cloud-icons { flex: 1; display: flex; gap: 1rem; justify-content: flex-end; font-size: 1.6rem; color: var(--primary); }
+
+        .layers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin: 1.5rem 0;
+        }
+        .layer-col {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1rem 1.2rem;
+        }
+        .layer-col h4 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 0.6rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.4rem;
+        }
+        .layer-col ul {
+            list-style: none;
+            font-size: 0.75rem;
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+        .layer-col ul li::before {
+            content: "▸ ";
+            color: var(--primary);
+        }
+        .layer-col .badge {
+            display: inline-block;
+            font-size: 0.55rem;
+            font-weight: 600;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 0.1rem 0.5rem;
+            margin-left: 0.4rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* 架构示意：Field + 解释器 + EGO */
+        .arch-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem 1.8rem;
+            margin: 1.5rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.8rem 1.5rem;
+        }
+        .arch-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+        }
+        .arch-item .label {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            letter-spacing: 0.5px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .arch-item .box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+        }
+        .arch-item .box .highlight { color: var(--primary-light); }
+        .arch-arrow {
+            font-size: 1.2rem;
+            color: var(--primary);
+            opacity: 0.5;
+        }
+
+        .footer-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .tech-badge { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+        .tech-badge span {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.6rem;
+            border: 1px solid var(--border-color);
+        }
+        .tech-badge .accent { color: var(--primary-light); border-color: var(--primary); }
+        .cta-button {
+            background: transparent;
+            border: 1px solid var(--primary);
+            padding: 0.6rem 1.8rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        .cta-button:hover { background: var(--primary-transparent); border-color: var(--primary-light); color: var(--primary-light); }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            letter-spacing: 0.3px;
+        }
+
+        @media (max-width: 800px) {
+            .content { padding: 1.5rem; }
+            .cloud-icons { justify-content: flex-start; margin-top: 1rem; }
+            .cloud-block { flex-direction: column; align-items: flex-start; }
+            .logo h1 { font-size: 2rem; }
+            .logo h1 .cn { font-size: 1.2rem; }
+            .layers-grid { grid-template-columns: 1fr; }
+            .arch-block { flex-direction: column; gap: 0.5rem; }
+            .arch-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+<div class="poster">
+    <div class="top-line"></div>
+    <div class="content">
+
+        <div class="header">
+            <div class="logo">
+                <h1>
+                    <span class="en">QFIELD</span>
+                    <span class="cn">· Q场</span>
+                </h1>
+                <div class="subtitle">⚡ <i>Multi-Field · EGO · 解释器驱动</i> | 配置场域 · 驱动智能体</div>
+            </div>
+            <div class="pill">
+                <i class="fas fa-cubes"></i> Multi-Field 场域网络
+            </div>
+        </div>
+
+        <div class="hero">
+            <div class="eyebrow">QFIELD · AI 原生智能体配置规范</div>
+            <div class="hero-title">
+                <span class="prefix">配置</span>
+                <span class="strong">场域</span>
+                <span class="suffix">· 驱动</span>
+                <span class="strong">EGO</span>
+            </div>
+            <div class="desc">声明式配置 · 约束优先 · 结构即验证 · 解释器运行时 · 降低认知与沟通成本</div>
+        </div>
+
+        <!-- 四张核心概念卡片 -->
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-layer-group"></i>
+                <h4>Field · 五层场域</h4>
+                <p>S-结构层 · C-计算层 · R-关系层 · O-约束层 · F-特征层 — EGO 的运行环境</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-robot"></i>
+                <h4>EGO · 七层智能体</h4>
+                <p>S-C-R-O-F-G-符号层 — 完整的智能体蓝图：是什么、怕什么、要什么、跟谁通信</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-gear"></i>
+                <h4>解释器 · 运行时引擎</h4>
+                <p>读取配置 → 实例化 → tick 驱动 → 约束检查 → 符号通信 → 状态演化</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-network-wired"></i>
+                <h4>Multi-Field · 复合场域</h4>
+                <p>Field 可嵌套、可组合、可演化。一个 EGO 同时存在于多个 Field 的交集中</p>
+            </div>
+        </div>
+
+        <!-- 架构示意：Field ↔ 解释器 ↔ EGO -->
+        <div class="arch-block">
+            <div class="arch-item">
+                <span class="label">五层配置</span>
+                <div class="box"><span class="highlight">Field</span> · 场域</div>
+            </div>
+            <span class="arch-arrow"><i class="fas fa-arrow-right"></i></span>
+            <div class="arch-item">
+                <span class="label">读取 · 驱动</span>
+                <div class="box"><span class="highlight">解释器</span> · 运行时</div>
+            </div>
+            <span class="arch-arrow"><i class="fas fa-arrow-right"></i></span>
+            <div class="arch-item">
+                <span class="label">七层配置</span>
+                <div class="box"><span class="highlight">EGO</span> · 智能体</div>
+            </div>
+            <span class="arch-arrow"><i class="fas fa-arrow-left"></i></span>
+            <div class="arch-item">
+                <span class="label">符号层通信</span>
+                <div class="box"><span class="highlight">Multi-Field</span> · 复合</div>
+            </div>
+        </div>
+
+        <!-- 七层/五层结构对照 -->
+        <div class="layers-grid">
+            <div class="layer-col">
+                <h4>EGO · 七层结构 <span class="badge">智能体</span></h4>
+                <ul>
+                    <li><strong style="color:var(--primary)">S</strong> 结构层 — 由什么组成</li>
+                    <li><strong style="color:var(--primary)">C</strong> 计算层 — 内部怎么联动</li>
+                    <li><strong style="color:var(--primary)">R</strong> 关系层 — 跟谁有关系</li>
+                    <li><strong style="color:var(--primary)">O</strong> 约束层 — 什么会终止它</li>
+                    <li><strong style="color:var(--primary)">F</strong> 特征层 — 当前状态是什么</li>
+                    <li><strong style="color:var(--primary)">G</strong> 目标层 — 想往哪走</li>
+                    <li><strong style="color:var(--primary)">符号层</strong> — 怎么被认知和通信</li>
+                </ul>
+            </div>
+            <div class="layer-col">
+                <h4>Field · 五层结构 <span class="badge">场域</span></h4>
+                <ul>
+                    <li><strong style="color:var(--primary-light)">S</strong> 结构层 — 由什么组成</li>
+                    <li><strong style="color:var(--primary-light)">C</strong> 计算层 — 内部怎么联动</li>
+                    <li><strong style="color:var(--primary-light)">R</strong> 关系层 — 内部要素之间有何关联</li>
+                    <li><strong style="color:var(--primary-light)">O</strong> 约束层 — 边界在哪里</li>
+                    <li><strong style="color:var(--primary-light)">F</strong> 特征层 — 当前状态是什么</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 代码示例 -->
+        <div class="code-block">
+            <div class="code-header">
+                <span>⚙️ QFIELD 配置示例 · YAML 声明式</span>
+                <span style="color:var(--primary-light);">v0.1 · 规范草案</span>
+            </div>
+            <pre>
+<span class="code-comment"># EGO 七层配置示例</span>
+<span style="color:var(--primary)">ego</span>:
+  id: <span class="code-string">"example_agent"</span>
+  structure: [<span class="code-string">"模块A"</span>, <span class="code-string">"模块B"</span>]
+  compute: <span class="code-string">"输入 → 处理 → 输出"</span>
+  relations: [<span class="code-string">"与Field A关联"</span>, <span class="code-string">"依赖Field B"</span>]
+  constraints: <span class="code-string">"边界条件定义"</span>
+  features: { <span class="code-string">"状态1"</span>: <span class="code-string">"值"</span> }
+  goals: [<span class="code-string">"目标1"</span>, <span class="code-string">"目标2"</span>]
+  symbol: { name: <span class="code-string">"example"</span>, interface: <span class="code-string">"protocol"</span> }
+
+<span class="code-comment"># Field 五层配置示例</span>
+<span style="color:var(--primary)">field</span>:
+  id: <span class="code-string">"example_field"</span>
+  structure: [<span class="code-string">"组件X"</span>, <span class="code-string">"组件Y"</span>]
+  compute: <span class="code-string">"演化规则"</span>
+  relations: [<span class="code-string">"内部连接"</span>]
+  constraints: <span class="code-string">"物理边界"</span>
+  features: { <span class="code-string">"环境参数"</span>: <span class="code-string">"值"</span> }
+
+<span class="code-comment"># 解释器驱动</span>
+<span style="color:var(--primary)">interpreter</span>:
+  tick: <span class="code-string">"动态"</span>
+  mode: <span class="code-string">"声明式执行"</span>
+  validation: <span class="code-string">"约束检查 · 结构验证"</span>
+            </pre>
+        </div>
+
+        <!-- 设计原则 -->
+        <div class="cloud-block">
+            <div class="cloud-left">
+                <h4><i class="fas fa-shield-halved" style="margin-right:0.4rem;"></i> 核心设计原则</h4>
+                <p>约束优先 · 声明式配置 · 核心不依赖大模型 · 用户始终是最终确认者 · 结构即验证</p>
+                <div class="tech-tags">
+                    <span>🧠 认知成本优先</span>
+                    <span>🔗 Multi-Field</span>
+                    <span>📋 YAML 配置</span>
+                    <span>⚙️ 解释器驱动</span>
+                    <span>🔍 结构验证</span>
+                </div>
+            </div>
+            <div class="cloud-icons">
+                <i class="fas fa-cubes"></i>
+                <i class="fas fa-arrows-spin"></i>
+                <i class="fas fa-diagram-project"></i>
+                <i class="fas fa-microchip"></i>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <div class="tech-badge">
+                <span>⚡ Multi-Field 场域网络</span>
+                <span>🧠 EGO 智能体</span>
+                <span>⚙️ 解释器引擎</span>
+                <span class="accent">七层 · 五层</span>
+                <span><i class="fas fa-code"></i> 声明式配置</span>
+            </div>
+            <button class="cta-button" id="specBtn"><i class="fas fa-file-lines"></i> 阅读规范草案</button>
+        </div>
+
+        <div class="footer-note">
+            * QFIELD · Q场 智能体场域配置规范 | AGPL 3.0 · 早期积累阶段 | 从 SurvX 剥离，独立演进
+        </div>
+    </div>
+    <div class="top-line" style="background: var(--border-color); height: 1px;"></div>
+</div>
+
+<script>
+    document.getElementById('specBtn')?.addEventListener('click', function() {
+        const toast = document.createElement('div');
+        toast.innerHTML = '📄 QFIELD 规范草案 · 七层结构 + 五层场域 + 解释器 + Multi-Field 复合场域';
+        toast.style.position = 'fixed';
+        toast.style.bottom = '30px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.backgroundColor = '#1a1a1a';
+        toast.style.color = '#4AD2FF';
+        toast.style.padding = '0.8rem 1.6rem';
+        toast.style.fontSize = '0.85rem';
+        toast.style.fontWeight = '500';
+        toast.style.border = '1px solid #16C0FF';
+        toast.style.fontFamily = "'Inter', sans-serif";
+        toast.style.zIndex = '1000';
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.35s';
+            setTimeout(() => toast.remove(), 400);
+        }, 2800);
+    });
+</script>
+</body>
+</html>

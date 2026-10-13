@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Q FORGE · AI工程治理框架 | 弹性治理与工程锻造准则</title>
+  <!-- 引入字体与图标库，与α24+ / β9- 保持完全一致的视觉基因 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ========== 全局滚动条样式（深色科技风，与页面背景协调） ========== */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+      background-color: #0B0B0B;
+    }
+    ::-webkit-scrollbar-track {
+      background: #141414;
+      border-radius: 0px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2C2C2C;
+      border-radius: 0px;
+      transition: background 0.2s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #16C0FF;
+    }
+    ::-webkit-scrollbar-corner {
+      background-color: #0B0B0B;
+    }
+    /* Firefox 滚动条 */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #2C2C2C #141414;
+    }
+
+    /* ========== 下拉框统一样式（深色科技商务风） ========== */
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 0px;
+      padding: 10px 32px 10px 14px;
+      font-size: 0.85rem;
+      font-family: 'Inter', 'JetBrains Mono', system-ui, sans-serif;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316C0FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 14px;
+    }
+    select:hover {
+      border-color: var(--primary);
+      background-color: #252525;
+    }
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(22, 192, 255, 0.1);
+    }
+    select option {
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      padding: 8px;
+    }
+
+    /* 模态框内下拉框样式保持一致 */
+    .modal-select {
+      width: 100%;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* 沿用您品牌主色调，保持统一 */
+      --primary: #16C0FF;
+      --primary-dark: #0EA8E0;
+      --primary-light: #4AD2FF;
+      --primary-soft: rgba(22, 192, 255, 0.08);
+      --primary-border: rgba(22, 192, 255, 0.25);
+      --bg-primary: #0B0B0B;
+      --bg-secondary: #141414;
+      --bg-tertiary: #1E1E1E;
+      --text-primary: #FFFFFF;
+      --text-secondary: #4AD2FF;
+      --text-tertiary: #888888;
+      --text-muted: #6A6A6A;
+      --border-color: #2C2C2C;
+      --success-color: #00CC66;
+      --forge-orange: #FF8C42;
+      --forge-amber: #FFC016;
+      --card-hover-bg: #252525;
+    }
+
+    body {
+      background: var(--bg-primary);
+      font-family: 'Inter', 'JetBrains Mono', system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+      position: relative;
+    }
+
+    /* 经典网格背景，增强科技感 */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(22, 192, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(22, 192, 255, 0.03) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .poster {
+      max-width: 1240px;
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.9);
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .poster:hover {
+      border-color: var(--primary);
+      box-shadow: 0 34px 60px -20px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(22, 192, 255, 0.15);
+    }
+
+    .top-line {
+      height: 3px;
+      background: linear-gradient(90deg, var(--bg-secondary), var(--primary), var(--primary-light), var(--primary), var(--bg-secondary));
+      width: 100%;
+    }
+
+    .content {
+      padding: 2.6rem 3rem 3rem;
+      position: relative;
+    }
+
+    /* 头部区域 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 2.2rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo h1 {
+      font-size: 3.2rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1.5px;
+      color: var(--text-primary);
+      margin-bottom: 0.1rem;
+      line-height: 1.1;
+    }
+
+    .logo h1 .en-name {
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .logo h1 .chinese-name {
+      font-size: 1.7rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      letter-spacing: 1px;
+      margin-left: 0.3rem;
+      font-family: 'Inter', 'JetBrains Mono', sans-serif;
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      letter-spacing: 1.2px;
+      font-weight: 400;
+      margin-top: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .subtitle i {
+      color: var(--primary-light);
+      font-style: normal;
+    }
+
+    .badge-group {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+    }
+
+    .pill {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      padding: 0.35rem 1.2rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--primary-light);
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill.accent {
+      border-color: var(--primary-border);
+      color: var(--primary);
+    }
+
+    /* 英雄区域 */
+    .hero {
+      margin: 1.8rem 0 2.2rem;
+    }
+
+    .hero .eyebrow {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.3rem 0.8rem;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .hero-title .title-prefix {
+      font-size: 2.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .hero-title .title-strong {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--primary-light);
+      border-bottom: 2px solid var(--primary);
+      display: inline-block;
+    }
+
+    .hero-title .title-suffix {
+      font-size: 2.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .hero .desc {
+      font-size: 1rem;
+      color: #b0b0b0;
+      margin-top: 0.6rem;
+      max-width: 80%;
+      border-left: 3px solid var(--primary);
+      padding-left: 1.2rem;
+      font-weight: 400;
+    }
+
+    /* 上部预防机制卡片 */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 2rem 0 1rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+
+    .section-label i {
+      font-size: 1rem;
+    }
+
+    .forge-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.9rem;
+      margin: 1rem 0 1.8rem;
+    }
+
+    .forge-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      padding: 1.2rem 0.8rem;
+      transition: all 0.2s ease;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .forge-card:hover {
+      border-color: var(--primary);
+      background: var(--card-hover-bg);
+      transform: translateY(-2px);
+    }
+
+    .forge-letter {
+      font-size: 2rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--primary);
+      margin-bottom: 0.2rem;
+    }
+
+    .forge-card h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0.3rem 0 0.3rem;
+    }
+
+    .forge-card .eng {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .forge-card p {
+      font-size: 0.7rem;
+      color: #aaa;
+      line-height: 1.3;
+      margin-top: 0.4rem;
+    }
+
+    /* 下部治理 G.O.V. */
+    .gov-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .gov-card {
+      background: var(--bg-tertiary);
+      border-left: 3px solid var(--forge-orange);
+      border-right: 1px solid var(--border-color);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.2rem 1rem;
+      transition: 0.2s;
+    }
+
+    .gov-card:hover {
+      border-left-color: var(--primary);
+      background: var(--card-hover-bg);
+    }
+
+    .gov-card .gov-letter {
+      font-size: 1.8rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--forge-orange);
+      margin-bottom: 0.3rem;
+    }
+
+    .gov-card h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+    }
+
+    .gov-card .sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .gov-card p {
+      font-size: 0.75rem;
+      color: #b0b0b0;
+      line-height: 1.4;
+      margin-top: 0.6rem;
+    }
+
+    /* 底部关系说明 */
+    .architecture-link {
+      background: rgba(22, 192, 255, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 1rem 1.8rem;
+      margin: 1.8rem 0 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+    }
+
+    .arch-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .arch-item i {
+      color: var(--primary);
+      font-size: 0.9rem;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 1.8rem;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.4px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.6rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* 模态框样式（用于演示下拉框） */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 2rem;
+      max-width: 450px;
+      width: 90%;
+    }
+    .modal-content h3 {
+      color: var(--primary-light);
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+    }
+    .modal-content p {
+      color: var(--text-tertiary);
+      font-size: 0.85rem;
+      margin-bottom: 1.2rem;
+    }
+    .modal-content select {
+      width: 100%;
+      margin: 0.8rem 0 1.2rem;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+    .modal-buttons button {
+      padding: 0.5rem 1.2rem;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: 0.2s;
+      font-family: inherit;
+    }
+    .modal-buttons button:first-child {
+      border-color: var(--primary);
+      color: var(--primary-light);
+    }
+    .modal-buttons button:first-child:hover {
+      background: rgba(22, 192, 255, 0.1);
+    }
+    .modal-buttons button:last-child:hover {
+      border-color: var(--primary);
+    }
+
+    /* 响应式适配 */
+    @media (max-width: 900px) {
+      .forge-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .gov-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero .desc {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .content {
+        padding: 1.5rem;
+      }
+      .logo h1 {
+        font-size: 2.2rem;
+      }
+      .hero-title .title-prefix,
+      .hero-title .title-strong,
+      .hero-title .title-suffix {
+        font-size: 1.8rem;
+      }
+      .forge-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="poster">
+    <div class="top-line"></div>
+    <div class="content">
+      
+      <!-- 头部 -->
+      <div class="header">
+        <div class="logo">
+          <h1>
+            <span class="en-name">Q FORGE</span>
+            <span class="chinese-name"> · 工程锻造准则</span>
+          </h1>
+          <div class="subtitle">
+            <i class="fas fa-hammer"></i> <span>AI时代的弹性治理与工程纪律 · 预防+治理双循环框架</span>
+          </div>
+        </div>
+        <div class="badge-group">
+          <div class="pill accent">
+            <i class="fas fa-shield-alt"></i> 上部预防 · F.O.R.G.E.
+          </div>
+          <div class="pill">
+            <i class="fas fa-syringe"></i> 下部治理 · G.O.V.
+          </div>
+        </div>
+      </div>
+
+      <!-- 英雄描述 -->
+      <div class="hero">
+        <div class="eyebrow">AI 工程治理 · 量化基础设施</div>
+        <div class="hero-title">
+          <span class="title-prefix">AI写代码，</span>
+          <span class="title-strong">人定规则</span>
+          <span class="title-suffix">· 千锤百炼，方能成型</span>
+        </div>
+        <div class="desc">
+          构建可信AI底座：从心搏代码区到技术债地图，让每一行AI生成的代码都可追溯、可理解、可掌控。
+        </div>
+      </div>
+
+      <!-- 演示下拉框 - 治理策略选择（深色协调风格） -->
+      <div style="display: flex; justify-content: flex-end; margin: 0 0 1rem 0;">
+        <select id="govStrategySelect" style="width: auto; min-width: 220px;">
+          <option value="full">全链路治理 · 推荐模式</option>
+          <option value="prevent">上部预防优先 · F.O.R.G.E.</option>
+          <option value="govern">下部治理优先 · G.O.V.</option>
+          <option value="audit">审计只读模式 · 风险扫描</option>
+        </select>
+      </div>
+
+      <!-- 上部预防 F.O.R.G.E. -->
+      <div class="section-label">
+        <i class="fas fa-arrow-up"></i> 上部 · 预防机制 (面向未来，防止新债)
+      </div>
+      <div class="forge-grid">
+        <div class="forge-card">
+          <div class="forge-letter">F</div>
+          <h4>Fortify</h4>
+          <div class="eng">设防</div>
+          <p>划定心搏代码区<br>架构宪法不可逾越</p>
+        </div>
+        <div class="forge-card">
+          <div class="forge-letter">O</div>
+          <h4>Observe</h4>
+          <div class="eng">存证</div>
+          <p>决策存证五要素<br>AI脑回路强制显性化</p>
+        </div>
+        <div class="forge-card">
+          <div class="forge-letter">R</div>
+          <h4>Refine</h4>
+          <div class="eng">提炼</div>
+          <p>定期代码考古<br>确保人对系统的理解权</p>
+        </div>
+        <div class="forge-card">
+          <div class="forge-letter">G</div>
+          <h4>Gather</h4>
+          <div class="eng">沉淀</div>
+          <p>术语词典·知识库<br>长期核心资产积累</p>
+        </div>
+        <div class="forge-card">
+          <div class="forge-letter">E</div>
+          <h4>Enforce</h4>
+          <div class="eng">施行</div>
+          <p>CI检查·每月审计<br>纪律固化为日常流程</p>
+        </div>
+      </div>
+
+      <!-- 下部治理 G.O.V. -->
+      <div class="section-label">
+        <i class="fas fa-arrow-down"></i> 下部 · 治理机制 (面向过去，清理旧债)
+      </div>
+      <div class="gov-grid">
+        <div class="gov-card">
+          <div class="gov-letter">G</div>
+          <h4>Gauge · 探明</h4>
+          <div class="sub">技术债地图</div>
+          <p>AI自动扫描代码库，生成🔴黑洞🟠臃肿🟣命名混乱🔵范式负担分级地图，让风险可视化。</p>
+        </div>
+        <div class="gov-card">
+          <div class="gov-letter">O</div>
+          <h4>Outline · 绘制</h4>
+          <div class="sub">模块档案重建</div>
+          <p>逆向工程生成数据流、依赖网、风险标注。在完全理解前，禁止对高风险模块做功能性修改。</p>
+        </div>
+        <div class="gov-card">
+          <div class="gov-letter">V</div>
+          <h4>Verify & Vault</h4>
+          <div class="sub">验证与入库</div>
+          <p>微创手术式重构：合并手术、重命名手术、破范手术。治理完成即纳入F.O.R.G.E.预防管控。</p>
+        </div>
+      </div>
+
+      <!-- 底座关联说明 -->
+      <div class="architecture-link">
+        <div class="arch-item">
+          <i class="fas fa-layer-group"></i>
+          <span><strong style="color:var(--text-primary);">Q FORGE</strong> 是AI底座第三层(约束与智慧层)的工程化落地</span>
+        </div>
+        <div class="arch-item">
+          <i class="fas fa-link"></i>
+          <span>对接 <span style="color:var(--primary-light);">β9- 知识底座</span> 与 <span style="color:var(--primary-light);">α24+ Agent</span></span>
+        </div>
+        <div class="arch-item">
+          <i class="fas fa-check-circle" style="color:var(--success-color);"></i>
+          <span>治理的终点永远是预防</span>
+        </div>
+      </div>
+
+      <!-- 底部声明 -->
+      <div class="footer-note">
+        <i class="fas fa-microchip"></i> Q FORGE · AI工程治理框架 | 上部预防 · 下部治理 | AI是烈火，锤子在匠人手里
+      </div>
+    </div>
+    <div class="top-line" style="background: var(--border-color); height: 1px;"></div>
+  </div>
+
+  <!-- 演示模态框（包含下拉框，展示协调样式） -->
+  <div id="contactModal" class="modal">
+    <div class="modal-content">
+      <h3><i class="fas fa-hammer"></i> Q FORGE 治理咨询</h3>
+      <p>请选择您的团队规模与治理诉求，架构师将为您定制工程治理方案</p>
+      <select id="teamSizeSelect">
+        <option value="startup">初创团队 · 建立预防基线</option>
+        <option value="growing">成长团队 · 存量债务清理</option>
+        <option value="enterprise">企业级 · 全链路治理体系</option>
+        <option value="audit_only">审计评估 · 技术债扫描</option>
+      </select>
+      <div class="modal-buttons">
+        <button id="modalConfirm">提交咨询</button>
+        <button id="modalClose">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 轻量交互脚本，保留动态边框光效 + 下拉框交互 -->
+  <script>
+    (function() {
+      const poster = document.querySelector('.poster');
+      if (!poster) return;
+      poster.addEventListener('mousemove', (e) => {
+        const rect = poster.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const intensity = 0.08 + (Math.abs(x - 0.5) * 0.18);
+        poster.style.borderColor = `rgba(22, 192, 255, ${0.35 + intensity * 0.4})`;
+        poster.style.boxShadow = `0 30px 50px -20px rgba(0,0,0,0.9), 0 0 0 1px rgba(22, 192, 255, ${0.08 + intensity * 0.2})`;
+      });
+      poster.addEventListener('mouseleave', () => {
+        poster.style.borderColor = '#2C2C2C';
+        poster.style.boxShadow = '0 30px 50px -20px rgba(0, 0, 0, 0.9)';
+      });
+
+      // 演示下拉框交互
+      const govSelect = document.getElementById('govStrategySelect');
+      if (govSelect) {
+        govSelect.addEventListener('change', (e) => {
+          const mode = e.target.options[e.target.selectedIndex]?.text;
+          const toast = document.createElement('div');
+          toast.innerText = `🔨 治理策略切换: ${mode}`;
+          toast.style.position = 'fixed';
+          toast.style.bottom = '20px';
+          toast.style.left = '20px';
+          toast.style.backgroundColor = '#141414';
+          toast.style.color = '#4AD2FF';
+          toast.style.padding = '0.4rem 1rem';
+          toast.style.fontSize = '0.7rem';
+          toast.style.border = '1px solid #16C0FF';
+          toast.style.zIndex = '999';
+          toast.style.fontFamily = "'Inter', sans-serif";
+          document.body.appendChild(toast);
+          setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s';
+            setTimeout(() => toast.remove(), 350);
+          }, 1800);
+        });
+      }
+
+      // 模态框逻辑
+      const modal = document.getElementById('contactModal');
+      const modalConfirm = document.getElementById('modalConfirm');
+      const modalClose = document.getElementById('modalClose');
+
+      if (modalConfirm && modalClose && modal) {
+        // 可选触发方式：保持页面简洁，不自动打开模态框
+        modalConfirm.addEventListener('click', () => {
+          const selectVal = document.getElementById('teamSizeSelect');
+          const selectedText = selectVal.options[selectVal.selectedIndex]?.text || '';
+          alert(`✅ 咨询已提交！Q FORGE架构师将为您提供「${selectedText}」治理方案。`);
+          modal.style.display = 'none';
+          if (selectVal) selectVal.selectedIndex = 0;
+        });
+        modalClose.addEventListener('click', () => {
+          modal.style.display = 'none';
+        });
+        window.addEventListener('click', (e) => {
+          if (e.target === modal) modal.style.display = 'none';
+        });
+      }
+
+      // 页面加载时确保模态框不可见
+      if (modal) modal.style.display = 'none';
+    })();
+  </script>
+</body>
+</html>

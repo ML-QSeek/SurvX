@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统监控面板</title>
+    <link rel="stylesheet" href="./css/all.min.css">
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <style>
+        :root {
+            --primary: #F5A623;
+            --primary-dark: #E09515;
+            --primary-light: #FFB84D;
+            --primary-transparent: rgba(245, 166, 35, 0.1);
+            --primary-glow: rgba(245, 166, 35, 0.35);
+            --bg-primary: #0B0B0B;
+            --bg-secondary: #151515;
+            --bg-tertiary: #202020;
+            --bg-transparent: rgba(18, 18, 20, 0.8);
+            --text-primary: #FFFFFF;
+            --text-secondary: #FFD89C;
+            --text-gray: #D0D0D0;
+            --text-muted: #808080;
+            --border-color: rgba(245, 166, 35, 0.3);
+            --error-color: #FF6B6B;
+            --success-color: #06D6A0;
+            --warning-color: #FFD166;
+            --storage-color: #4ECDC4;
+            --client-color: #8A2BE2;
+            --compute-blue: #16C0FF;
+            --redis-red: #FF6B6B;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            font-weight: 300;
+            font-size: 13px;
+            line-height: 1.4em;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            position: relative;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(245, 166, 35, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(245, 166, 35, 0.04) 0%, transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        ::-webkit-scrollbar {  
+            width: 0px;  
+            height: 0px;  
+            background-color: var(--bg-primary);  
+        }
+        
+        /* 状态概览栏 */
+        .status-bar {
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(245, 166, 35, 0.25);
+            background: rgba(18, 18, 18, 0.96);
+            backdrop-filter: blur(12px);
+            flex-shrink: 0;
+            padding: 0 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 0 18px rgba(245, 166, 35, 0.08);
+        }
+        
+        .status-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .status-normal {
+            background-color: var(--success-color);
+            box-shadow: 0 0 10px var(--success-color);
+        }
+        
+        .status-warning {
+            background-color: var(--warning-color);
+            box-shadow: 0 0 10px var(--warning-color);
+        }
+        
+        .status-error {
+            background-color: var(--error-color);
+            box-shadow: 0 0 10px var(--error-color);
+        }
+        
+        .status-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .status-label {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+        
+        .status-count {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .time-info {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+        
+        .dashboard {
+            display: flex;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            transform-origin: center;
+            transition: transform 0.3s;
+            overflow-y: auto !important;
+            background: var(--bg-transparent);
+        }
+        
+        .metrics-panel {
+            width: 300px;
+            padding: 15px;
+            border-left: 1px solid rgba(245, 166, 35, 0.25);
+            overflow-y: auto !important;
+            background: var(--bg-transparent);
+        }
+        
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(245, 166, 35, 0.25);
+        }
+        
+        .metric-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: var(--primary-transparent);
+            border-left: 2px solid var(--primary);
+            border-radius: 4px;
+        }
+        
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .metric-name {
+            font-weight: 600;
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+        
+        .metric-status {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--primary-transparent);
+            color: var(--primary-light);
+        }
+        
+        .metric-status.error {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--error-color);
+        }
+        
+        .metric-status.warning {
+            background: rgba(255, 209, 102, 0.1);
+            color: var(--warning-color);
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            text-shadow: 0 0 8px rgba(245, 166, 35, 0.3);
+            margin-bottom: 5px;
+        }
+        
+        .metric-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s;
+        }
+        
+        .progress-normal {
+            background: linear-gradient(90deg, var(--success-color), var(--primary));
+        }
+        
+        .progress-warning {
+            background: linear-gradient(90deg, var(--warning-color), #FF9E64);
+        }
+        
+        .progress-error {
+            background: linear-gradient(90deg, var(--error-color), #FF4757);
+        }
+        
+        .metric-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+        
+        .node {
+            position: absolute;
+            width: 180px;
+            height: 100px;
+            color: var(--text-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            z-index: 10;
+            user-select: none;
+            padding: 12px;
+            flex-direction: column;
+            border: 1px solid var(--primary);
+            background: rgba(18, 18, 20, 0.9);
+            transition: all 0.3s;
+        }
+        
+        .node:hover {
+            transform: translateY(-5px);
+            z-index: 100;
+            border-color: var(--primary-light);
+            box-shadow: 0 10px 25px rgba(245, 166, 35, 0.4);
+        }
+        
+        /* 节点类型专用样式 - 保留各类型标志色 */
+        .node.compute {
+            border-color: var(--compute-blue);
+            background: rgba(22, 192, 255, 0.08);
+        }
+        
+        .node.redis {
+            border-color: var(--redis-red);
+            background: rgba(255, 107, 107, 0.08);
+        }
+        
+        .node.mysql {
+            border-color: var(--storage-color);
+            background: rgba(78, 205, 196, 0.08);
+        }
+        
+        .node.apache {
+            border-color: var(--warning-color);
+            background: rgba(255, 209, 102, 0.08);
+        }
+        
+        .node.nodejs {
+            border-color: var(--warning-color);
+            background: rgba(255, 209, 102, 0.08);
+        }
+        
+        .node.crawler {
+            border-color: var(--warning-color);
+            background: rgba(255, 209, 102, 0.08);
+        }
+        
+        .node.flask {
+            border-color: var(--warning-color);
+            background: rgba(255, 209, 102, 0.08);
+        }
+        
+        .node.q-investment {
+            border-color: var(--success-color);
+            background: rgba(6, 214, 160, 0.08);
+        }
+        
+        .node.client {
+            border-color: var(--client-color);
+            background: rgba(138, 43, 226, 0.08);
+        }
+        
+        .node.api-user {
+            border-color: var(--client-color);
+            background: rgba(138, 43, 226, 0.08);
+        }
+        
+        /* 关键节点样式 */
+        .node.critical {
+            border-width: 2px;
+            border-color: gold;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        
+        /* 闪烁动画关键帧 */
+        @keyframes blink {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.6); }
+            100% { filter: brightness(1); }
+        }
+        
+        .node.blink {
+            animation: blink 1.5s infinite;
+        }
+        
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .node-title {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-primary);
+        }
+        
+        .node-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .node-subtitle {
+            font-size: 12px;
+            font-weight: normal;
+            opacity: 0.85;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            max-height: 24px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+            width: 100%;
+        }
+        
+        .node-metrics {
+            width: 100%;
+        }
+        
+        .metric-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        
+        .metric-label {
+            width: 40px;
+            font-size: 11px;
+            color: var(--text-gray);
+        }
+        
+        .metric-bar-value {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 8px;
+        }
+        
+        .metric-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+        
+        .metric-percent {
+            font-size: 11px;
+            width: 30px;
+            text-align: right;
+            color: var(--text-primary);
+        }
+        
+        .jtk-connector {
+            z-index: 5;
+            stroke: var(--primary);
+            stroke-width: 2;
+        }
+        
+        .jtk-endpoint {
+            z-index: 6;
+            fill: var(--primary);
+        }
+        
+        .jtk-hover {
+            z-index: 7;
+        }
+        
+        /* 连接线动画 */
+        .animated-connector {
+            stroke-dasharray: 10 5;
+            animation: dash 1s linear infinite;
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -15;
+            }
+        }
+        
+        /* 脉冲效果 */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                r: 4;
+                opacity: 1;
+            }
+            50% {
+                r: 6;
+                opacity: 0.7;
+            }
+            100% {
+                r: 4;
+                opacity: 1;
+            }
+        }
+        
+        /* 节点详情面板 */
+        .node-detail {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 350px;
+            background: rgba(18, 18, 20, 0.96);
+            padding: 10px;
+            z-index: 1000;
+            border: 1px solid var(--primary);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 25px rgba(245, 166, 35, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .node-detail.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(245, 166, 35, 0.25);
+        }
+        
+        .detail-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-light);
+            text-shadow: 0 0 10px rgba(245, 166, 35, 0.3);
+        }
+        
+        .close-detail {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-detail:hover {
+            background: rgba(255, 68, 68, 0.15);
+            color: var(--error-color);
+        }
+        
+        .detail-content {
+            line-height: 1.7;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+            display: block;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        
+        .detail-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .detail-metric {
+            text-align: center;
+            padding: 10px;
+            background: var(--primary-transparent);
+            border-radius: 4px;
+        }
+        
+        .metric-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+        
+        .metric-unit {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+        
+        /* 控制面板 */
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            background: var(--primary-transparent);
+            border: 1px solid var(--primary);
+            color: var(--text-gray);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: rgba(245, 166, 35, 0.2);
+            color: var(--primary-light);
+        }
+        
+        /* 时间显示 */
+        .current-time {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            background: rgba(18, 18, 20, 0.9);
+            border: 1px solid var(--primary);
+            color: var(--text-gray);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态概览栏 -->
+    <div class="status-bar">
+        <div class="status-title"></div>
+        <div class="status-indicators">
+            <div class="status-item">
+                <div class="status-dot status-normal"></div>
+                <div class="status-text">
+                    <div class="status-label">正常</div>
+                    <div class="status-count" id="normal-count">0</div>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="status-dot status-warning"></div>
+                <div class="status-text">
+                    <div class="status-label">警告</div>
+                    <div class="status-count" id="warning-count">0</div>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="status-dot status-error"></div>
+                <div class="status-text">
+                    <div class="status-label">故障</div>
+                    <div class="status-count" id="error-count">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="time-info" id="current-time">--:--:--</div>
+    </div>
+    
+    <div class="dashboard">
+        <div class="chart-container" id="chart-container">
+            
+            <!-- 节点详情面板 -->
+            <div class="node-detail">
+                <div class="detail-header">
+                    <div class="detail-title">服务详情</div>
+                    <button class="close-detail">&times;</button>
+                </div>
+                <div class="detail-content"></div>
+            </div>
+        </div>
+        
+        <div class="metrics-panel">
+            <div class="panel-title">系统指标</div>
+            
+            <div class="metric-item">
+                <div class="metric-header">
+                    <div class="metric-name">CPU使用率</div>
+                    <div class="metric-status">正常</div>
+                </div>
+                <div class="metric-value" id="cpu-usage">0%</div>
+                <div class="metric-progress">
+                    <div class="progress-fill progress-normal" id="cpu-progress" style="width: 0%"></div>
+                </div>
+                <div class="metric-details">
+                    <span>峰值: <span id="cpu-peak">0%</span></span>
+                    <span>平均: <span id="cpu-avg">0%</span></span>
+                </div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-header">
+                    <div class="metric-name">内存使用率</div>
+                    <div class="metric-status">正常</div>
+                </div>
+                <div class="metric-value" id="memory-usage">0%</div>
+                <div class="metric-progress">
+                    <div class="progress-fill progress-normal" id="memory-progress" style="width: 0%"></div>
+                </div>
+                <div class="metric-details">
+                    <span>总量: <span id="memory-total">0 GB</span></span>
+                    <span>已用: <span id="memory-used">0 GB</span></span>
+                </div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-header">
+                    <div class="metric-name">网络带宽</div>
+                    <div class="metric-status">正常</div>
+                </div>
+                <div class="metric-value" id="network-usage">0%</div>
+                <div class="metric-progress">
+                    <div class="progress-fill progress-normal" id="network-progress" style="width: 0%"></div>
+                </div>
+                <div class="metric-details">
+                    <span>入站: <span id="network-in">0 Mbps</span></span>
+                    <span>出站: <span id="network-out">0 Mbps</span></span>
+                </div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-header">
+                    <div class="metric-name">磁盘使用率</div>
+                    <div class="metric-status">正常</div>
+                </div>
+                <div class="metric-value" id="disk-usage">0%</div>
+                <div class="metric-progress">
+                    <div class="progress-fill progress-normal" id="disk-progress" style="width: 0%"></div>
+                </div>
+                <div class="metric-details">
+                    <span>总量: <span id="disk-total">0 TB</span></span>
+                    <span>可用: <span id="disk-available">0 TB</span></span>
+                </div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-header">
+                    <div class="metric-name">活跃连接数</div>
+                    <div class="metric-status">正常</div>
+                </div>
+                <div class="metric-value" id="connections-count">0</div>
+                <div class="metric-progress">
+                    <div class="progress-fill progress-normal" id="connections-progress" style="width: 0%"></div>
+                </div>
+                <div class="metric-details">
+                    <span>TCP: <span id="tcp-connections">0</span></span>
+                    <span>HTTP: <span id="http-connections">0</span></span>
+                </div>
+            </div>
+            
+            <div class="metric-item">
+                <div class="metric-header">
+                    <div class="metric-name">系统可用性</div>
+                    <div class="metric-status">正常</div>
+                </div>
+                <div class="metric-value" id="availability-rate">100%</div>
+                <div class="metric-progress">
+                    <div class="progress-fill progress-normal" id="availability-progress" style="width: 100%"></div>
+                </div>
+                <div class="metric-details">
+                    <span>本月: <span id="availability-month">100%</span></span>
+                    <span>本年: <span id="availability-year">100%</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入jsPlumb库 -->
+    <script src="js/jsplumb.min.js"></script>
+    <script>
+        // 初始化jsPlumb实例
+        const jsPlumbInstance = jsPlumb.getInstance({
+            Connector: ["Flowchart", {cornerRadius: 10}],
+            Anchors: ['Right', 'Left', 'Top', 'Bottom'],
+            Endpoint: ["Dot", { radius: 2 }],
+            EndpointStyle: { fill: "#F5A623" },
+            PaintStyle: { 
+                stroke: "#F5A623", 
+                strokeWidth: 1,
+                strokeDasharray: "10 5"
+            },
+            HoverPaintStyle: { stroke: "#FFB84D", strokeWidth: 4 },
+            Container: "chart-container"
+        });
+
+
+				const bias = ($('#chart-container').width()-1100-200-180)*0.5;
+        // 服务节点数据
+        const services = [
+            // 计算中心 - 高性能计算服务器
+            { 
+                id: "hpc-1", 
+                name: "HPC集群", 
+                type: "compute", 
+                x: bias+200, 
+                y: 100, 
+                description: "高性能计算集群",
+                status: "normal",
+                cpu: 65,
+                memory: 70,
+                network: 45,
+                connections: 20
+            },
+            
+            // 数据中心 - 数据库和存储
+            { 
+                id: "redis-1", 
+                name: "Redis缓存", 
+                type: "redis", 
+                x: bias+200, 
+                y: 400, 
+                description: "内存数据存储",
+                status: "normal",
+                cpu: 25,
+                memory: 40,
+                network: 15,
+                connections: 120
+            },
+            { 
+                id: "mysql-1", 
+                name: "MySQL数据库", 
+                type: "mysql", 
+                x: bias+200, 
+                y: 550, 
+                description: "关系型数据库",
+                status: "normal",
+                cpu: 35,
+                memory: 60,
+                network: 20,
+                connections: 85
+            },
+            
+            // 服务中心 - 应用服务
+            { 
+                id: "apache-1", 
+                name: "Apache服务器", 
+                type: "apache", 
+                x: bias+500, 
+                y: 100, 
+                description: "Web服务",
+                status: "normal",
+                cpu: 45,
+                memory: 55,
+                network: 65,
+                connections: 200
+            },
+            { 
+                id: "nodejs-1", 
+                name: "Node.js应用", 
+                type: "nodejs", 
+                x: bias+500, 
+                y: 250, 
+                description: "JavaScript运行时",
+                status: "normal",
+                cpu: 30,
+                memory: 45,
+                network: 40,
+                connections: 150
+            },
+            { 
+                id: "crawler-1", 
+                name: "数据爬虫", 
+                type: "crawler", 
+                x: bias+500, 
+                y: 550, 
+                description: "数据采集服务",
+                status: "warning",
+                cpu: 75,
+                memory: 65,
+                network: 80,
+                connections: 50
+            },
+            { 
+                id: "flask-1", 
+                name: "Flask API", 
+                type: "flask", 
+                x: bias+500, 
+                y: 400, 
+                description: "Python Web框架",
+                status: "normal",
+                cpu: 40,
+                memory: 35,
+                network: 55,
+                connections: 90
+            },
+            
+            // 应用中心 - Q的投资笔记系统
+            { 
+                id: "q-investment-1", 
+                name: "Q的投资笔记", 
+                type: "q-investment", 
+                x: bias+800, 
+                y: 250, 
+                description: "自研投资分析系统",
+                status: "normal",
+                cpu: 50,
+                memory: 45,
+                network: 60,
+                connections: 80
+            },
+            
+            // 客户端
+            { 
+                id: "client-1", 
+                name: "Web客户端", 
+                type: "client", 
+                x: bias+1100, 
+                y: 100, 
+                description: "用户浏览器",
+                status: "normal",
+                cpu: 10,
+                memory: 15,
+                network: 25,
+                connections: 5
+            },
+            { 
+                id: "api-user-1", 
+                name: "API用户", 
+                type: "api-user", 
+                x: bias+1100, 
+                y: 250, 
+                description: "第三方API调用",
+                status: "normal",
+                cpu: 5,
+                memory: 8,
+                network: 35,
+                connections: 3
+            }
+        ];
+        
+        // 连接配置 - 保留各类型标志色
+        const connectionConfigs = [
+            // 计算中心到服务中心
+            {from: "hpc-1", to: "flask-1", anchors: ["Right", "Left"], color: "#F5A623", width: 2, style: "solid"},
+            {from: "hpc-1", to: "nodejs-1", anchors: ["Right", "Left"], color: "#F5A623", width: 2, style: "solid"},
+            // 数据中心到服务中心
+            {from: "redis-1", to: "flask-1", anchors: ["Right", "Left"], color: "#FF6B6B", width: 2, style: "solid"},
+            {from: "mysql-1", to: "flask-1", anchors: ["Right", "Left"], color: "#4ECDC4", width: 2, style: "solid"},
+            {from: "mysql-1", to: "crawler-1", anchors: ["Right", "Left"], color: "#06D6A0", width: 2, style: "dashed"},
+            // 服务中心到应用中心
+            {from: "apache-1", to: "q-investment-1", anchors: ["Right", "Left"], color: "#FFD166", width: 2, style: "solid"},
+            {from: "nodejs-1", to: "q-investment-1", anchors: ["Right", "Left"], color: "#FFD166", width: 2, style: "solid"},
+            {from: "flask-1", to: "q-investment-1", anchors: ["Right", "Left"], color: "#FFD166", width: 2, style: "solid"},
+            
+            // 应用中心到客户端
+            {from: "q-investment-1", to: "client-1", anchors: ["Right", "Left"], color: "#06D6A0", width: 2, style: "solid"},
+            {from: "q-investment-1", to: "api-user-1", anchors: ["Right", "Left"], color: "#06D6A0", width: 2, style: "solid"},
+            
+            // 服务中心内部连接
+            {from: "apache-1", to: "nodejs-1", anchors: ["Bottom", "Top"], color: "#FFD166", width: 2, style: "solid"},
+            {from: "nodejs-1", to: "flask-1", anchors: ["Bottom", "Top"], color: "#FFD166", width: 2, style: "solid"},
+            {from: "flask-1", to: "crawler-1", anchors: ["Bottom", "Top"], color: "#FFD166", width: 2, style: "solid"}
+        ];
+        
+        // 存储所有连接对象
+        let connectionObjects = [];
+        let animationsEnabled = true;
+        let loadSimulationInterval = null;
+        let isSimulating = false;
+        
+        // 添加节点函数
+        function addNode(service) {
+            const nodeElement = document.createElement("div");
+            nodeElement.id = service.id;
+            nodeElement.className = `node ${service.type}`;
+            
+            // 根据状态设置状态指示器类
+            let statusClass = "status-normal";
+            if (service.status === "warning") statusClass = "status-warning";
+            if (service.status === "error") statusClass = "status-error";
+            
+            nodeElement.innerHTML = `
+                <div class="node-header">
+                    <div class="node-title">${service.name}</div>
+                    <div class="node-status ${statusClass}"></div>
+                </div>
+                <div class="node-subtitle">${service.description}</div>
+                <div class="node-metrics">
+                    <div class="metric-bar">
+                        <div class="metric-label">CPU</div>
+                        <div class="metric-bar-value">
+                            <div class="metric-fill" style="width: ${service.cpu}%; background: ${service.cpu > 80 ? '#FF6B6B' : service.cpu > 60 ? '#FFD166' : '#4ECDC4'}"></div>
+                        </div>
+                        <div class="metric-percent">${service.cpu}%</div>
+                    </div>
+                    <div class="metric-bar">
+                        <div class="metric-label">内存</div>
+                        <div class="metric-bar-value">
+                            <div class="metric-fill" style="width: ${service.memory}%; background: ${service.memory > 80 ? '#FF6B6B' : service.memory > 60 ? '#FFD166' : '#4ECDC4'}"></div>
+                        </div>
+                        <div class="metric-percent">${service.memory}%</div>
+                    </div>
+                    <div class="metric-bar">
+                        <div class="metric-label">网络</div>
+                        <div class="metric-bar-value">
+                            <div class="metric-fill" style="width: ${service.network}%; background: ${service.network > 80 ? '#FF6B6B' : service.network > 60 ? '#FFD166' : '#4ECDC4'}"></div>
+                        </div>
+                        <div class="metric-percent">${service.network}%</div>
+                    </div>
+                </div>
+            `;
+            
+            // 设置位置
+            nodeElement.style.left = `${service.x}px`;
+            nodeElement.style.top = `${service.y}px`;
+            
+            // 添加到容器
+            document.getElementById("chart-container").appendChild(nodeElement);
+            
+            // 使节点可拖拽
+            jsPlumbInstance.draggable(nodeElement, {containment: "parent"});
+            
+            // 双击编辑节点名称
+            nodeElement.addEventListener("dblclick", function() {
+                const currentName = this.querySelector(".node-title").textContent;
+                const newName = prompt("请输入服务名称:", currentName);
+                if (newName !== null && newName.trim() !== "") {
+                    this.querySelector(".node-title").textContent = newName;
+                    
+                    // 更新数据
+                    const serviceData = services.find(s => s.id === this.id);
+                    if (serviceData) serviceData.name = newName;
+                }
+            });
+            
+            // 右键查看服务详情
+            nodeElement.addEventListener("contextmenu", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showServiceDetail(this.id);
+            });
+            
+            return nodeElement;
+        }
+        
+        // 创建连接
+        function createSingleConnection(config, index) {
+            const sourceNode = document.getElementById(config.from);
+            const targetNode = document.getElementById(config.to);
+
+            if (!sourceNode || !targetNode) return;
+
+            const connection = jsPlumbInstance.connect({
+                source: sourceNode,
+                target: targetNode,
+                anchors: config.anchors,
+                paintStyle: {
+                    stroke: config.color,
+                    strokeWidth: config.width,
+                    strokeDasharray: config.style === "dashed" ? "5 5" : 
+                                    config.style === "dotted" ? "2 2" : ""
+                }
+            });
+
+            connectionObjects.push(connection);
+            
+            // 应用连接线动画
+            if (animationsEnabled) {
+                const connector = connection.connector.canvas;
+                if (connector) {
+                    connector.classList.add("animated-connector");
+                }
+            }
+        }
+        
+        // 显示服务详情
+        function showServiceDetail(serviceId) {
+            const service = services.find(s => s.id === serviceId);
+            if (!service) return;
+            
+            const detailPanel = document.querySelector(".node-detail");
+            const detailContent = detailPanel.querySelector(".detail-content");
+            
+            // 状态文本
+            let statusText = "正常";
+            if (service.status === "warning") statusText = "警告";
+            if (service.status === "error") statusText = "故障";
+            
+            detailContent.innerHTML = `
+                <div class="detail-item">
+                    <span class="detail-label">服务ID:</span>
+                    <span class="detail-value">${service.id}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">服务名称:</span>
+                    <span class="detail-value">${service.name}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">服务类型:</span>
+                    <span class="detail-value">${getServiceTypeName(service.type)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">服务描述:</span>
+                    <span class="detail-value">${service.description}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">运行状态:</span>
+                    <span class="detail-value">${statusText}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">位置坐标:</span>
+                    <span class="detail-value">(${service.x}, ${service.y})</span>
+                </div>
+                <div class="detail-metrics">
+                    <div class="detail-metric">
+                        <div class="metric-number">${service.cpu}%</div>
+                        <div class="metric-unit">CPU使用率</div>
+                    </div>
+                    <div class="detail-metric">
+                        <div class="metric-number">${service.memory}%</div>
+                        <div class="metric-unit">内存使用率</div>
+                    </div>
+                    <div class="detail-metric">
+                        <div class="metric-number">${service.network}%</div>
+                        <div class="metric-unit">网络使用率</div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">活跃连接数:</span>
+                    <span class="detail-value">${service.connections}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">操作:</span>
+                    <div class="detail-value">
+                        <button class="btn" onclick="restartService('${service.id}')">重启服务</button>
+                        <button class="btn" onclick="toggleServiceStatus('${service.id}')">切换状态</button>
+                    </div>
+                </div>
+            `;
+            
+            // 显示面板
+            detailPanel.classList.add("active");
+        }
+
+        // 获取服务类型名称
+        function getServiceTypeName(type) {
+            const typeNames = {
+                "compute": "高性能计算",
+                "redis": "Redis缓存",
+                "mysql": "MySQL数据库",
+                "apache": "Apache服务器",
+                "nodejs": "Node.js应用",
+                "crawler": "数据爬虫",
+                "flask": "Flask API",
+                "q-investment": "投资分析系统",
+                "client": "Web客户端",
+                "api-user": "API用户"
+            };
+            return typeNames[type] || "其他服务";
+        }
+        
+        // 重启服务
+        function restartService(serviceId) {
+            const service = services.find(s => s.id === serviceId);
+            if (service) {
+                service.status = "normal";
+                service.cpu = 10;
+                service.memory = 20;
+                service.network = 15;
+                
+                updateServiceNode(serviceId);
+                updateStatusOverview();
+                updateSystemMetrics();
+            }
+        }
+        
+        // 切换服务状态
+        function toggleServiceStatus(serviceId) {
+            const service = services.find(s => s.id === serviceId);
+            if (service) {
+                if (service.status === "normal") {
+                    service.status = "warning";
+                } else if (service.status === "warning") {
+                    service.status = "error";
+                } else {
+                    service.status = "normal";
+                }
+                
+                updateServiceNode(serviceId);
+                updateStatusOverview();
+            }
+        }
+        
+        // 更新服务节点显示
+        function updateServiceNode(serviceId) {
+            const service = services.find(s => s.id === serviceId);
+            if (!service) return;
+            
+            const nodeElement = document.getElementById(serviceId);
+            if (!nodeElement) return;
+            
+            // 更新状态指示器
+            let statusClass = "status-normal";
+            if (service.status === "warning") statusClass = "status-warning";
+            if (service.status === "error") statusClass = "status-error";
+            
+            const statusIndicator = nodeElement.querySelector(".node-status");
+            statusIndicator.className = `node-status ${statusClass}`;
+            
+            // 更新资源使用率
+            const cpuFill = nodeElement.querySelector(".metric-bar:nth-child(1) .metric-fill");
+            const memoryFill = nodeElement.querySelector(".metric-bar:nth-child(2) .metric-fill");
+            const networkFill = nodeElement.querySelector(".metric-bar:nth-child(3) .metric-fill");
+            const cpuPercent = nodeElement.querySelector(".metric-bar:nth-child(1) .metric-percent");
+            const memoryPercent = nodeElement.querySelector(".metric-bar:nth-child(2) .metric-percent");
+            const networkPercent = nodeElement.querySelector(".metric-bar:nth-child(3) .metric-percent");
+            
+            cpuFill.style.width = `${service.cpu}%`;
+            cpuFill.style.background = service.cpu > 80 ? '#FF6B6B' : service.cpu > 60 ? '#FFD166' : '#4ECDC4';
+            memoryFill.style.width = `${service.memory}%`;
+            memoryFill.style.background = service.memory > 80 ? '#FF6B6B' : service.memory > 60 ? '#FFD166' : '#4ECDC4';
+            networkFill.style.width = `${service.network}%`;
+            networkFill.style.background = service.network > 80 ? '#FF6B6B' : service.network > 60 ? '#FFD166' : '#4ECDC4';
+            cpuPercent.textContent = `${service.cpu}%`;
+            memoryPercent.textContent = `${service.memory}%`;
+            networkPercent.textContent = `${service.network}%`;
+        }
+        
+        // 更新状态概览
+        function updateStatusOverview() {
+            const normalCount = services.filter(s => s.status === "normal").length;
+            const warningCount = services.filter(s => s.status === "warning").length;
+            const errorCount = services.filter(s => s.status === "error").length;
+            
+            document.getElementById("normal-count").textContent = normalCount;
+            document.getElementById("warning-count").textContent = warningCount;
+            document.getElementById("error-count").textContent = errorCount;
+        }
+        
+        // 更新系统指标
+        function updateSystemMetrics() {
+            let totalCpu = 0;
+            let totalMemory = 0;
+            let totalNetwork = 0;
+            let totalConnections = 0;
+            
+            services.forEach(service => {
+                totalCpu += service.cpu;
+                totalMemory += service.memory;
+                totalNetwork += service.network;
+                totalConnections += service.connections;
+            });
+            
+            const avgCpu = Math.round(totalCpu / services.length);
+            const avgMemory = Math.round(totalMemory / services.length);
+            const avgNetwork = Math.round(totalNetwork / services.length);
+            
+            // 更新指标显示
+            document.getElementById("cpu-usage").textContent = `${avgCpu}%`;
+            document.getElementById("cpu-progress").style.width = `${avgCpu}%`;
+            document.getElementById("cpu-progress").className = `progress-fill ${avgCpu > 80 ? 'progress-error' : avgCpu > 60 ? 'progress-warning' : 'progress-normal'}`;
+            document.getElementById("cpu-peak").textContent = `${Math.max(...services.map(s => s.cpu))}%`;
+            document.getElementById("cpu-avg").textContent = `${avgCpu}%`;
+            
+            document.getElementById("memory-usage").textContent = `${avgMemory}%`;
+            document.getElementById("memory-progress").style.width = `${avgMemory}%`;
+            document.getElementById("memory-progress").className = `progress-fill ${avgMemory > 80 ? 'progress-error' : avgMemory > 60 ? 'progress-warning' : 'progress-normal'}`;
+            document.getElementById("memory-total").textContent = `${Math.round(services.length * 8)} GB`;
+            document.getElementById("memory-used").textContent = `${Math.round(services.length * 8 * avgMemory / 100)} GB`;
+            
+            document.getElementById("network-usage").textContent = `${avgNetwork}%`;
+            document.getElementById("network-progress").style.width = `${avgNetwork}%`;
+            document.getElementById("network-progress").className = `progress-fill ${avgNetwork > 80 ? 'progress-error' : avgNetwork > 60 ? 'progress-warning' : 'progress-normal'}`;
+            document.getElementById("network-in").textContent = `${Math.round(avgNetwork * 10)} Mbps`;
+            document.getElementById("network-out").textContent = `${Math.round(avgNetwork * 8)} Mbps`;
+            
+            document.getElementById("connections-count").textContent = totalConnections;
+            document.getElementById("connections-progress").style.width = `${Math.min(100, totalConnections / 10)}%`;
+            document.getElementById("connections-progress").className = `progress-fill ${totalConnections > 800 ? 'progress-error' : totalConnections > 500 ? 'progress-warning' : 'progress-normal'}`;
+            document.getElementById("tcp-connections").textContent = Math.round(totalConnections * 0.7);
+            document.getElementById("http-connections").textContent = Math.round(totalConnections * 0.3);
+        }
+        
+        // 模拟负载
+        function simulateLoad() {
+            isSimulating = !isSimulating;
+            const simulateBtn = document.getElementById("simulate-load");
+            
+            if (isSimulating) {
+                simulateBtn.textContent = "停止模拟";
+                loadSimulationInterval = setInterval(() => {
+                    services.forEach(service => {
+                        // 正常服务有较小波动
+                        if (service.status === "normal") {
+                            service.cpu = Math.min(100, Math.max(5, service.cpu + (Math.random() * 10 - 5)));
+                            service.memory = Math.min(100, Math.max(10, service.memory + (Math.random() * 8 - 4)));
+                            service.network = Math.min(100, Math.max(5, service.network + (Math.random() * 12 - 6)));
+                            service.connections = Math.max(0, service.connections + Math.floor(Math.random() * 10 - 3));
+                        }
+                        // 警告服务有较大波动
+                        else if (service.status === "warning") {
+                            service.cpu = Math.min(100, Math.max(20, service.cpu + (Math.random() * 20 - 10)));
+                            service.memory = Math.min(100, Math.max(25, service.memory + (Math.random() * 15 - 7)));
+                            service.network = Math.min(100, Math.max(15, service.network + (Math.random() * 18 - 9)));
+                            service.connections = Math.max(0, service.connections + Math.floor(Math.random() * 15 - 5));
+                        }
+                        // 故障服务资源使用率很高
+                        else if (service.status === "error") {
+                            service.cpu = Math.min(100, Math.max(80, service.cpu + (Math.random() * 10 - 5)));
+                            service.memory = Math.min(100, Math.max(85, service.memory + (Math.random() * 8 - 4)));
+                            service.network = Math.min(100, Math.max(5, service.network + (Math.random() * 5 - 2)));
+                            service.connections = Math.max(0, service.connections - Math.floor(Math.random() * 5));
+                        }
+                        
+                        updateServiceNode(service.id);
+                    });
+                    
+                    updateStatusOverview();
+                    updateSystemMetrics();
+                }, 2000);
+            } else {
+                simulateBtn.textContent = "模拟负载";
+                clearInterval(loadSimulationInterval);
+            }
+        }
+        
+        // 重置节点
+        function resetNodes() {
+            services.forEach(service => {
+                service.status = "normal";
+                service.cpu = 20 + Math.random() * 30;
+                service.memory = 30 + Math.random() * 40;
+                service.network = 10 + Math.random() * 20;
+                service.connections = Math.floor(10 + Math.random() * 100);
+                
+                updateServiceNode(service.id);
+            });
+            
+            updateStatusOverview();
+            updateSystemMetrics();
+        }
+        
+        // 切换动画
+        function toggleAnimations() {
+            animationsEnabled = !animationsEnabled;
+            const toggleBtn = document.getElementById("toggle-animations");
+            
+            connectionObjects.forEach(conn => {
+                const connector = conn.connector.canvas;
+                if (connector) {
+                    if (animationsEnabled) {
+                        connector.classList.add("animated-connector");
+                    } else {
+                        connector.classList.remove("animated-connector");
+                    }
+                }
+            });
+            
+            toggleBtn.textContent = animationsEnabled ? "禁用动画" : "启用动画";
+        }
+        
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-CN');
+            document.getElementById("current-time").textContent = timeString;
+        }
+        
+        // 关闭详情面板
+        document.querySelector(".close-detail").addEventListener("click", function() {
+            document.querySelector(".node-detail").classList.remove("active");
+        });
+        
+        // 点击空白处关闭详情面板
+        document.addEventListener("click", function(e) {
+            if (!e.target.closest('.node-detail') && !e.target.closest('.node')) {
+                document.querySelector(".node-detail").classList.remove("active");
+            }
+        });
+        
+        // 初始化监控图
+        function initializeChart() {
+            // 添加所有服务节点
+            services.forEach(service => {
+                addNode(service);
+            });
+            
+            // 创建连接
+            setTimeout(() => {
+                connectionConfigs.forEach((config, index) => {
+                    createSingleConnection(config, index);
+                });
+            }, 100);
+            
+            // 初始状态概览
+            updateStatusOverview();
+            updateSystemMetrics();
+            updateTime();
+            
+            // 更新时间
+            setInterval(updateTime, 1000);
+            
+        }
+        
+        // 页面加载完成后初始化
+        window.onload = initializeChart;
+    </script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+my_webview_app/
+├── src/
+│   ├── app/                      # Web应用核心
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   ├── window_manager.py
+│   │   ├── web_bridge.py
+│   │   └── config.py
+│   │
+│   ├── backend/                  # Python业务后端
+│   │   ├── __init__.py
+│   │   ├── services/            # 业务服务
+│   │   │   ├── __init__.py
+│   │   │   ├── data_service.py       # 数据服务
+│   │   │   ├── api_service.py        # API服务
+│   │   │   ├── task_service.py       # 任务调度
+│   │   │   ├── message_service.py    # 新增：消息服务
+│   │   │   └── notification_service.py # 新增：通知服务
+│   │   │
+│   │   ├── trading/              # 交易核心模块
+│   │   │   ├── __init__.py
+│   │   │   ├── engine.py         # 交易引擎
+│   │   │   ├── strategy.py       # 策略管理
+│   │   │   ├── portfolio.py      # 投资组合管理
+│   │   │   ├── risk.py           # 风险管理
+│   │   │   ├── order.py          # 订单管理
+│   │   │   └── position.py       # 持仓管理
+│   │   │
+│   │   ├── algorithms/           # 算法模块
+│   │   │   ├── __init__.py
+│   │   │   ├── basic_processing.py
+│   │   │   ├── indicators.py     # 技术指标计算
+│   │   │   ├── signal.py         # 信号生成
+│   │   │   ├── backtest.py       # 回测引擎
+│   │   │   └── optimization.py   # 参数优化
+│   │   │
+│   │   ├── interfaces/           # 接口目录（核心）
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py           # 接口基类
+│   │   │   ├── brokers/          # 券商接口
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── ctpbee.py     # CTP接口
+│   │   │   │   ├── futu.py       # 富途接口
+│   │   │   │   ├── xtp.py        # XTP接口
+│   │   │   │   ├── oes.py        # OES接口
+│   │   │   │   └── ib.py         # Interactive Brokers
+│   │   │   ├── datafeeds/        # 数据源接口
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── tushare.py    # Tushare
+│   │   │   │   ├── akshare.py    # AKShare
+│   │   │   │   ├── rqdata.py     # RiceQuant
+│   │   │   │   ├── joinquant.py  # JoinQuant
+│   │   │   │   ├── baostock.py   # 聚宽
+│   │   │   │   └── yfinance.py   # Yahoo Finance
+│   │   │   ├── market/           # 行情接口
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── ctp_market.py  # CTP行情
+│   │   │   │   ├── futu_market.py # 富途行情
+│   │   │   │   └── websocket.py   # WebSocket行情
+│   │   │   └── adapters/         # 适配器
+│   │   │       ├── __init__.py
+│   │   │       ├── trade_adapter.py  # 交易适配器
+│   │   │       └── data_adapter.py   # 数据适配器
+│   │   │
+│   │   ├── data/                 # 新增：数据处理目录（核心）
+│   │   │   ├── __init__.py
+│   │   │   ├── managers/         # 数据管理器
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── base_manager.py      # 基础管理器
+│   │   │   │   ├── tick_manager.py      # Tick数据管理
+│   │   │   │   ├── bar_manager.py       # K线数据管理
+│   │   │   │   ├── order_manager.py     # 订单数据管理
+│   │   │   │   └── portfolio_manager.py # 组合数据管理
+│   │   │   ├── processors/       # 数据处理器
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── data_cleaner.py      # 数据清洗
+│   │   │   │   ├── data_validator.py    # 数据验证
+│   │   │   │   ├── data_transformer.py  # 数据转换
+│   │   │   │   ├── realtime_processor.py # 实时处理
+│   │   │   │   └── historical_processor.py # 历史处理
+│   │   │   ├── models/           # 数据模型
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── tick.py       # Tick数据模型
+│   │   │   │   ├── bar.py        # K线数据模型
+│   │   │   │   ├── order.py      # 订单数据模型
+│   │   │   │   ├── trade.py      # 成交数据模型
+│   │   │   │   └── account.py    # 账户数据模型
+│   │   │   ├── storage/          # 数据存储
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── database.py   # 数据库操作
+│   │   │   │   ├── cache.py      # 缓存管理
+│   │   │   │   ├── file_storage.py # 文件存储
+│   │   │   │   └── timeseries_db.py # 时序数据库
+│   │   │   └── pipelines/        # 数据处理管道
+│   │   │       ├── __init__.py
+│   │   │       ├── realtime_pipeline.py   # 实时数据管道
+│   │   │       └── historical_pipeline.py # 历史数据管道
+│   │   │
+│   │   └── market/               # 新增：市场模块
+│   │       ├── __init__.py
+│   │       ├── market_data.py    # 市场数据
+│   │       ├── instrument.py     # 标的物信息
+│   │       ├── exchange.py       # 交易所信息
+│   │       └── calendar.py       # 交易日历
+│   │
+│   ├── ui/                      # 前端
+│   │   ├── index.html
+│   │   ├── dashboard.html       # 新增：仪表盘
+│   │   ├── trading.html         # 新增：交易页面
+│   │   ├── analysis.html        # 新增：分析页面
+│   │   ├── css/
+│   │   │   ├── main.css
+│   │   │   ├── trading.css      # 新增：交易页面样式
+│   │   │   └── themes/
+│   │   │       ├── dark.css
+│   │   │       └── trading.css  # 新增：交易主题
+│   │   ├── js/
+│   │   │   ├── app.js
+│   │   │   ├── api.js
+│   │   │   ├── utils.js
+│   │   │   ├── trading.js       # 新增：交易逻辑
+│   │   │   ├── charting.js      # 新增：图表组件
+│   │   │   ├── realtime.js      # 新增：实时数据
+│   │   │   └── dashboard.js     # 新增：仪表盘
+│   │   └── assets/
+│   │       ├── images/
+│   │       │   └── logo.png
+│   │       └── templates/       # 新增：模板文件
+│   │           ├── order_form.html
+│   │           └── position_table.html
+│   │
+│   ├── utils/                  # 工具模块
+│   │   ├── __init__.py
+│   │   ├── logger.py
+│   │   ├── validators.py
+│   │   ├── time_utils.py       # 新增：时间工具
+│   │   ├── math_utils.py       # 新增：数学工具
+│   │   ├── file_utils.py       # 新增：文件工具
+│   │   └── security.py         # 新增：安全工具
+│   │
+│   └── api/                   # Web API接口
+│       ├── __init__.py
+│       ├── routes.py
+│       ├── trading_api.py      # 新增：交易API
+│       ├── data_api.py         # 新增：数据API
+│       └── websocket_api.py    # 新增：WebSocket API
+│
+├── rust_backend/              # Rust计算引擎
+│   ├── Cargo.toml
+│   ├── pyproject.toml
+│   └── src/
+│       ├── lib.rs
+│       ├── compute/           # 数值计算
+│       │   ├── mod.rs
+│       │   ├── numeric.rs
+│       │   ├── statistics.rs
+│       │   ├── indicators.rs   # 新增：技术指标计算
+│       │   └── optimization.rs # 新增：优化算法
+│       ├── bridge/            # Python接口
+│       │   ├── mod.rs
+│       │   └── pyo3_api.rs
+│       ├── data/              # 新增：Rust数据处理
+│       │   ├── mod.rs
+│       │   ├── tick_processor.rs  # Tick处理
+│       │   └── bar_processor.rs   # K线处理
+│       └── utils/             # Rust工具
+│           ├── mod.rs
+│           ├── error.rs
+│           └── time.rs        # 新增：时间处理
+│
+├── scripts/                  # 脚本
+│   ├── build_app.py
+│   ├── package_windows.py
+│   ├── dev.py
+│   ├── data_collector.py    # 新增：数据收集脚本
+│   ├── backtest_runner.py   # 新增：回测运行脚本
+│   └── deploy.py            # 新增：部署脚本
+│
+├── tests/                   # 测试
+│   ├── test_basic.py
+│   ├── test_rust_integration.py
+│   ├── test_trading.py      # 新增：交易测试
+│   ├── test_interfaces.py   # 新增：接口测试
+│   ├── test_data.py         # 新增：数据测试
+│   └── fixtures/
+│       ├── sample_data.csv
+│       ├── test_tick_data.csv  # 新增：测试Tick数据
+│       └── test_config.json    # 新增：测试配置
+│
+├── configs/                 # 配置文件
+│   ├── config.yaml
+│   ├── secrets.yaml
+│   ├── trading.yaml        # 新增：交易配置
+│   ├── data_sources.yaml   # 新增：数据源配置
+│   └── strategies.yaml     # 新增：策略配置
+│
+├── data/                   # 数据目录
+│   ├── inputs/
+│   │   ├── historical/     # 历史数据
+│   │   │   ├── daily/      # 日线数据
+│   │   │   ├── minute/     # 分钟数据
+│   │   │   └── tick/       # Tick数据
+│   │   └── realtime/       # 实时数据
+│   ├── outputs/
+│   │   ├── backtest/       # 回测结果
+│   │   ├── reports/        # 报告
+│   │   └── signals/        # 信号输出
+│   ├── logs/
+│   │   ├── app/
+│   │   ├── trading/        # 交易日志
+│   │   └── data/           # 数据日志
+│   └── cache/              # 新增：缓存目录
+│       ├── market_data/
+│       └── indicators/
+│
+├── resources/              # 资源文件
+│   └── icons/
+│       ├── app.ico
+│       └── favicon.ico
+│
+├── .env.example
+├── .env
+├── requirements.txt
+├── pyproject.toml
+├── README.md
+├── LICENSE
+├── .gitignore
+└── Makefile

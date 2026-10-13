@@ -1,0 +1,320 @@
+	<!DOCTYPE html>
+		<html lang="zh-CN">
+		<head>
+		<meta	http-equiv="Content-Type"	content="text/html;	charset=utf-8">
+		<link	type="text/css"	rel="stylesheet"	href="./css/smartMenu.css"/>
+		<script	type="text/javascript"	src="./js/jquery.min.js"></script>
+		<!--
+		<script	type="text/javascript"	src="js/echarts.min.js"></script>
+		<script	type="text/javascript"	src="js/echarts-gl.min.js"></script>
+		<script	type="text/javascript"	src="js/mqcharts.js"></script>
+		-->
+		<script	type="text/javascript"	src="./js/jquery-smartMenu.js"></script>
+	
+		<style type="text/css">
+			html,body
+			{
+				font-family:Open Sans,Arial,sans-serif;
+				font-weight:400;
+				font-size:14px;
+				line-height:1.3em;
+				width:100%;
+				height:100%;
+				color:#16C0FF;
+				background:#101010;
+				margin:0;
+				padding:0;
+				overflow-x:auto;
+			}
+			.ul0
+			{
+				width:420px;
+				padding:0;
+				margin:0;
+				height:30px;
+				box-sizing:border-box;
+			}
+			.ul0	li
+			{
+				float:left;
+				list-style-type:none;
+				width:80px;
+				height:30px;
+				line-height:30px;
+				padding:3px	0	3px	0;
+				margin-left:3px;
+				text-align:center;
+				cursor:pointer;
+				color:#16C0FF;
+				box-sizing:border-box;
+			}
+			
+			#mq1
+			{
+				min-width:100%;
+				width:auto;
+				position:absolute;
+				top:30px;
+				bottom:0px;
+				border-top:1px	#101010	solid;
+				box-sizing:border-box;
+			}
+			#wrap
+			{
+    		display: flex;
+			}
+			.madiv
+			{
+				background:#101010;
+				width:80px;
+				height:80px;
+				margin:0.5px;
+				padding:0px;
+				border:solid 0.5px #16C0FF;
+				}
+			.hmadiv
+			{
+				background:#101010;
+				width:80px;
+				height:20px;
+				margin:0.5px;
+				padding:0px;
+				border:solid 0.5px #16C0FF;
+        line-height: 20px;/*让黄色div中的文字内容垂直居中*/
+        text-align: center;/*让文字水平居中*/
+				}
+				
+			.lmadiv
+			{
+				background:#101010;
+				width:20px;
+				height:80px;
+				margin:0.5px;
+				padding:0px;
+				border:solid 0.5px #16C0FF;
+        line-height: 80px;/*让黄色div中的文字内容垂直居中*/
+        text-align: center;/*让文字水平居中*/
+				}
+			.hlmadiv
+			{
+				background:#101010;
+				width:20px;
+				height:20px;
+				margin:0.5px;
+				padding:0px;
+				border:solid 0.5px #16C0FF;
+        line-height: 80px;/*让黄色div中的文字内容垂直居中*/
+        text-align: center;/*让文字水平居中*/
+				}
+				#note
+				{
+					
+					background:#101010;
+					width:100px;
+					height:30px;
+					border:solid 0.5px #16C0FF
+					display:none;
+					z-index: 999999;
+        	line-height: 30px;/*让黄色div中的文字内容垂直居中*/
+        	text-align: center;/*让文字水平居中*/
+					position: absolute;
+					}
+				.dashb
+				{
+					background:#FFFFFF;
+					width:400px;
+					height:300px;
+					border:solid 0.5px #F0F8FF;
+					display:block;
+					z-index: 999999;
+        	line-height: 30px;/*让黄色div中的文字内容垂直居中*/
+        	text-align: center;/*让文字水平居中*/
+					position: fixed;
+					top:50%;
+					left:50%;
+					transform: translate(-50%, -50%);
+					}
+				.dashbt
+				{
+					width:100%;
+					height:30px;
+        	text-align: center;/*让文字水平居中*/
+        	line-height: 30px;/*让黄色div中的文字内容垂直居中*/
+					}
+				.shut
+					{
+						float:right;
+						}
+		</style>
+	
+	</head>
+	<body>
+		<div  id="mq_top">
+			<ul class ="ul0">
+				<li id="1D" class="layer">1日</li>
+				<li id="10D" class="layer">10个自然日</li>
+				<li id="M" class="layer">1个自然月</li>
+				<li id="a" class="G">图形a</li>
+				<li id="b" class="G">图形b</li>
+				</ul>
+        <div style="position:absolute;top:3px;right:5px;background:transparent; margin:0;">
+        <input type="text" id="key"  value="">
+        <a id="submit" class="act" style="cursor:pointer;"><i></i>搜索</a>
+        </div>
+		</div>
+		<div id="note"></div>
+		<div  id="mq1" style="background-color: #101010;overflow-y:auto;"></div>
+<script	type="text/javascript">
+	
+	//server
+		var MServer = "http://10.10.98.51/test/sys/";
+	//屏蔽右键事件
+	document.oncontextmenu=function(){return	false;}
+	function oncontextmenu(){//自定义右键上下文
+		var objTrans={text:"放大原图",func:function(){
+		var tevar =$(this).attr("name");
+		if($("#tt"+tevar).length>0){alert("此图已存在！");}
+		else{
+		$("#mq1").append("<div class='dashb' id='tt"+tevar+"'><div class='dashbt'>"+tevar+"<img class='shut' src='./assets/images/Close2.png'></div><div class='dashbb'><img style='width:100%;height:100%;' src='"+MServer+"qq/channel/ma/"+tevar+".png' onerror=src='./assets/images/default.png' alt='' ></div></div>");
+		var x = $("#tt"+tevar).position().top+Math.random()*50;
+		var y=$("#tt"+tevar).position().left+Math.random()*50;
+		$("#tt"+tevar).css({top:x, left:y})
+		divmove("tt"+tevar,"tt"+tevar);
+		}
+		}
+		};
+		var other={text:"另一图表",func:function(){
+		var tevar0 =$(this).attr("name");	
+		if(tevar0.indexOf("a")!=-1 && tevar0.indexOf("10D")!=-1 ){ tevar = tevar0.replace("a","b").replace("10D_","10D");}
+		else if(tevar0.indexOf("b")!=-1 &&  tevar0.indexOf("10D")!=-1){tevar = tevar0.replace("b","a").replace("10D","10D_");}
+		else if(tevar0.indexOf("a")!=-1){ tevar = tevar0.replace("a","b");}
+		else if (tevar0.indexOf("b")!=-1){tevar = tevar0.replace("b","a");}
+		if($("#bb"+tevar).length>0){alert("此图已存在！");}
+		else{
+		$("#mq1").append("<div class='dashb' id = 'bb"+tevar+"'><div class='dashbt'>"+tevar+"<img class='shut' src='./assets/images/Close2.png'></div><div class='dashbb'><img style='width:100%;height:100%;' src='"+MServer+"qq/channel/ma/"+tevar+".png' onerror=src='./assets/images/default.png' alt='' ></div></div>");		
+		var x = $("#bb"+tevar).position().top+Math.random()*50;
+		var y=$("#bb"+tevar).position().left+Math.random()*50;
+		$("#bb"+tevar).css({top:x, left:y})
+		divmove("bb"+tevar,"bb"+tevar);
+		}
+		}
+		};
+		var mailMenuData = [[objTrans,other]];
+		$(".pic").smartMenu(mailMenuData, {
+			name: "mail",
+			beforeShow: function() {		
+			$.smartMenu.remove();
+			}
+		});
+		}
+	var x0 =1;
+	var x1 =10;
+	var y0 =2;
+	var y1 =10;
+	var h0 =1;
+	var ter="1D";
+	var ler="a";
+	function show(n0,n1,m0,m1,x0,ite,lte){
+		
+		$("#mq1").html("");
+		var txt0 ="<div id='wrap'><div class='hlmadiv'></div>";
+		for (var t=m0;t<=m1;t+=x0){
+			txt0+="<div class='hmadiv'>"+t+"</div>";
+			}
+		txt0+="</div>";
+		$("#mq1").append(txt0);
+
+		for (var n=n0;n<=n1;n+=x0){ 
+			var txt ="<div id='wrap'><div class='lmadiv'>"+n+"</div>";
+    	for(var m=m0;m<=m1;m+=x0){
+    		if (n<m){
+    			if (ite=="10D" && lte=="a"){
+    				txt+="<div class='madiv'><image name="+ite+"_"+n+"_"+m+lte+"1 class='pic' id="+n+"/"+m+" src='"+MServer+"qq/channel/ma/"+ite+"_"+n+"_"+m+lte+"1.png' style='width:100%;height:100%;'  onerror=src='./assets/images/default.png' alt='' ></div>";
+    				}
+    				else{
+    					txt+="<div class='madiv'><image name="+ite+n+"_"+m+lte+"1 class='pic' id="+n+"/"+m+" src='"+MServer+"qq/channel/ma/"+ite+n+"_"+m+lte+"1.png' style='width:100%;height:100%;' onerror=src='./assets/images/default.png' alt='没算'></div>";
+    					}
+    		    }
+    		else{
+    				txt+="<div class='madiv' style='background:#101010;'></div>";
+    			}
+    		}
+    	txt+="</div>";
+    	$("#mq1").append(txt);
+		}
+		oncontextmenu();
+	}
+	
+	$(document).off('click',"#submit").on('click',"#submit", function(){
+			//alert($layer)
+			var sTxt=$("#key").val();
+			if(sTxt==''){
+				alert("请输入查询周期，格式：#,#,#,#");
+				}
+			else if(sTxt!=''){
+				btxt = sTxt.split(",");
+				x0= Number(btxt[0]);
+				x1=	Number(btxt[1]);
+				y0=	Number(btxt[2]);
+				y1=	Number(btxt[3]);
+				h0=	Number(btxt[4]);
+				show(x0,x1,y0,y1,h0,ter,ler);
+			}
+		});
+	$(document).off('click',".G").on('click',".G", function(){
+			$(".G").css({"background":"transparent","color":"#16C0FF"});
+			$(this).css({"background":"rgba(20,177,235,0.7)","color":"#ffffff"});
+			ler=$(this).attr("id")
+			show(x0,x1,y0,y1,h0,ter,ler);
+		})
+	
+	$(document).off('click',".layer").on('click',".layer", function(){
+			$(".layer").css({"background":"transparent","color":"#16C0FF"});
+			$(this).css({"background":"rgba(20,177,235,0.7)","color":"#ffffff"});
+			ter=$(this).attr("id")
+			show(x0,x1,y0,y1,h0,ter,ler);
+		})
+
+	$(document).on('click mouseout','.pic',function(e){
+ 		if(event.type == "click"){
+        if ($("#note").is(":hidden")) {
+               $("#note").show();
+               $("#note").css("left", e.pageX + 1);
+               $("#note").css("top", e.pageY + 10);
+               $("#note").html("参数："+$(this).attr("id"))
+         } else {$("#note").hide();}
+ 		}else if(event.type == "mouseout"){
+  		$("#note").hide();
+ 		}
+		})
+	$(document).on("click",".shut",function(){
+		$(this).parent().parent().remove();
+		})
+		
+//模块拖拽	
+function divmove(DivId1,DivId2){	
+	var	_move=false;//移动标记
+	var	_x,_y;//鼠标离控件左上角的相对位置
+	$('#'+DivId1).click(function(){
+		}).mousedown(function(e){
+			_move=true;
+			_x=e.pageX-parseInt($('#'+DivId2).css("left"));
+			_y=e.pageY-parseInt($('#'+DivId2).css("top"));
+			//$("#WQ3302_TSHK").fadeTo(20, 0.5);//点击后开始拖动并透明显示
+			});
+			$(document).mousemove(function(e){
+				if(_move){
+					var	x=e.pageX-_x;//移动时根据鼠标位置计算控件左上角的绝对位置
+					var	y=e.pageY-_y;
+					$('#'+DivId2).css({top:y,left:x});//控件新位置
+					}
+					}).mouseup(function(){
+						_move=false;
+						//$("#WQ3302_TSHK").fadeTo("fast", 1);//松开鼠标后停止移动并恢复成不透明
+						});
+}
+	$(document).ready(function (){$("#1D").click()});
+	</script>
+	</body>	
+</html>
+
