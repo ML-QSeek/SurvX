@@ -549,22 +549,100 @@ INSERT INTO _relation (id0, id1, value, idx, version) VALUES
 ---
 
 ## 2.5 状态（_state）
+
 ### 总体介绍
 状态表存储当前 tick 窗口的全量变量，是引擎实时计算的唯一数据源。tick 结束后数据归档分流，窗口刷新重置。属于核心运行块。
 状态表是引擎运行时内存中的表，由引擎自动维护，不经过人工声明，因此不分 hoc / dbfs 形态。
 
-**字段**
-- `_tick`：特殊 key，记录当前 tick
-- 路径 key：与 Matter / Energy 中的 key 一致
-- value：当前 tick 的值
-
-### 特殊设定
+### 状态表划分
 - 一个实例**支持存在多个 Ego 主体**，**多个 Ego 对应多套独立状态表**
 - 问题本体 + 其所属 Ego 共用一张状态表
 - Env 单独一张状态表
+- **Field 状态表**：每个 Field 一张，各自独立
+- **Env 状态表**：一张，内部按 Field 区分
+
+### 字段
+每张状态表是一个字典，固定包含以下字段：
+
+| 字段 | 类型 | 含义 |
+|------|------|------|
+| `_tick` | TEXT | 特殊 key，记录当前 tick，格式 `YYYYMMDDHHMMSS` |
+| `_ratio` | DICT | 本 tick 要执行的变动，key 为 Ratio 路径，value 为变动表达式 |
+| `_info` | DICT | 本实体**发出**的信息（决策、请求等） |
+| `_feedback` | DICT | 本实体**收到**的反馈（执行结果等） |
+| `_observe` | DICT | 本实体**收到**的可观测信息 |
+
+**`_ratio`**
+- 预加载时**搜索全表的 Ratio 规则**（`_parameter`、`_relation` 等表中 `id1` 为 `Ratio` 的记录），加载进状态表。
+- 每 tick 按 `_ratio` 里的规则执行变动。
+- 没有变动时为空字典 `{}`。
+
+**`_info` / `_feedback`**
+- 两者是**消息通道**，同 key 内容在两张状态表间传递。
+- 个体 `_info` → 环境 `_feedback`（个体发决策，环境收请求）。
+- 环境 `_info` → 个体 `_feedback`（环境发执行反馈，个体收）。
+- 为将来多进程 / WebSocket 通信预留：现在字典间传，将来进程间传，消息结构不变。
+
+**`_observe`**
+- 环境 → 个体的可观测信息。
+- 按观测通道分（如 `sound` / `see` / `smell` / `touch` / `taste`），用数值模拟。
+- Field 收到后按自身感知能力解读，模拟视觉、听觉、嗅觉等。
+- 具体通道和结构按项目定义。
+
+### Env 状态表的特殊设定
+Env 状态表是**一张**，但 `_info` / `_feedback` / `_observe` 内部**按 Field 区分**：
+
+```python
+_state["[SensorSim]Island"] = {
+    "_tick": "...",
+    "_ratio": {},
+    "_info": {
+        "SensorSim": {...},      # 发给 SensorSim 的
+        "OtherField": {...},     # 发给 OtherField 的
+    },
+    "_feedback": {
+        "SensorSim": {...},      # 收到 SensorSim 的
+        "OtherField": {...},     # 收到 OtherField 的
+    },
+    "_observe": {
+        "SensorSim": {...},      # SensorSim 能观测到的
+        "OtherField": {...},     # OtherField 能观测到的
+    },
+}
+```
+
+### Field 间通讯规则
+- **Field 之间不允许直接通讯。**
+- 所有交互（吃、看、听等）统一经过 Env，由 Env 判定。
+- 原因：符合可观测域（Field 不是全知）、符合多进程准备（星型拓扑，Env 为中枢）、统一判定可控。
+
+### 状态表示例
+
+```python
+_state = {
+    "SensorSim": {
+        "_tick": "20261021...",
+        "_ratio": {
+            "param_48-Ratio": "q:```val - 1```",    # 体力流失
+        },
+        "_info": {},
+        "_feedback": {},
+        "_observe": {},
+    },
+    "[SensorSim]Island": {
+        "_tick": "20261021...",
+        "_ratio": {},
+        "_info": {},
+        "_feedback": {},
+        "_observe": {},
+    },
+}
+```
 
 ### 强制约定
-无
+- 状态表由引擎维护，不人工声明。
+- 每个 tick 窗口刷新重置，tick 结束后归档分流。
+- Field 间不直接通讯，统一经过 Env。
 
 ---
 
